@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wirtshaus Wallachen Authentisch</title>
+    <style>
+        body { font-family: sans-serif; background: #1e392a; color: white; text-align: center; padding: 10px; margin: 0; }
+        #status-board { background: rgba(0,0,0,0.6); padding: 12px; margin-bottom: 10px; color: #f1c40f; font-weight: bold; border-radius: 4px; font-size: 16px; }
+        button { background: #e67e22; color: white; border: 2px solid #fff; padding: 12px 18px; font-size: 15px; font-weight: bold; border-radius: 8px; margin: 4px; text-transform: uppercase; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #b35300; }
+        .hidden { display: none !important; }
+        
+        #game-table { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .row-ki { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .ki-box { background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; text-align: center; min-width: 120px; border: 1px solid #444; }
+        .ki-box strong { color: #f1c40f; font-size: 16px; }
+        
+        #current-stich { display: flex; justify-content: center; gap: 12px; min-height: 115px; align-items: center; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px; }
+        .cards-container { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-top: 5px; min-height: 110px; }
+        
+        #human-info-bar { background: rgba(0,0,0,0.4); padding: 6px; border-radius: 4px; margin-top: 10px; font-weight: bold; font-size: 14px; }
+        #human-info-bar strong { color: #27ae60; font-size: 16px; }
+
+        .card { width: 66px; height: 102px; background: white; color: black; border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between; padding: 5px; box-shadow: 0 3px 6px rgba(0,0,0,0.4); box-sizing: border-box; font-weight: bold; position: relative; }
+        .eichel { border-top: 6px solid #784b28; } 
+        .gras { border-top: 6px solid #27ae60; }
+        .herz { border-top: 6px solid #c0392b; } 
+        .schellen { border-top: 6px solid #f1c40f; }
+        
+        .card-suit-center { width: 30px; height: 30px; margin: auto; display: flex; align-items: center; justify-content: center; }
+        .card-suit-center svg { width: 100%; height: 100%; display: block; }
+        .card-label { font-size: 13px; font-weight: bold; font-family: Arial, sans-serif; }
+        .card-label.bottom { text-align: right; }
+        
+        #mobile-log { background: rgba(0,0,0,0.7); text-align: left; padding: 8px; font-family: monospace; font-size: 11px; max-height: 110px; overflow-y: auto; border-radius: 6px; border: 1px solid #444; margin-top: 12px; color: #57ff57; }
+    </style>
+</head>
+<body>
+
+    <div id="status-board">WIRTSHAUS WALLACHEN</div>
+    <button id="start-btn" onclick="initGame()">Spiel starten</button>
+    <div id="bidding-buttons" class="hidden"></div>
+    <div id="trump-buttons" class="hidden">
+        <button onclick="chooseTrump('Eichel')">Eichel</button>
+        <button onclick="chooseTrump('Gras')">Gras</button>
+        <button onclick="chooseTrump('Herz')">Herz</button>
+        <button onclick="chooseTrump('Schellen')">Schellen</button>
+    </div>
+
+    <div id="game-table">
+        <div class="row-ki">
+            <div id="ki1-info" class="ki-box">Gegner Links<br>Stiche: <strong>0</strong></div> 
+            <div id="ki2-info" class="ki-box">Gegner Rechts<br>Stiche: <strong>0</strong></div>
+        </div>
+        <div id="current-stich"></div>
+    </div>
+
+    <div id="human-info-bar">Deine Handkarten — Erzielte Stiche: <strong id="human-stiche-count">0</strong></div>
+    <div id="cards-human" class="cards-container"></div>
+    
+    <div id="mobile-log">Spielprotokoll wartet auf Start...</div>
+
+    <script>
+        const FARBEN = [{n:'Eichel',c:'eichel'}, {n:'Gras',c:'gras'}, {n:'Herz',c:'herz'}, {n:'Schellen',c:'schellen'}];
+        const WERTE = ['7', '8', '9', '10', 'Unter', 'Ober', 'König', 'Ass'];
+        let deck = [], spieler = { human: [], ki1: [], ki2: [], wallach: [] };
+        let aktuellesSpiel = 'weiter', spielerWerSpielt = null, phase = 'start', trumpfFarbe = null;
+        let hoechstesGebot = 4, werBietetGerade = 'human', passeListe = [];
+        let aktuellerStich = [], amZug = 'human', sticheZaehler = { human: 0, ki1: 0, ki2: 0 };
+
+        function getBayerischesSymbolSVG(farbeName) {
+            if (farbeName === 'Eichel') return `<svg viewBox="0 0 100 100"><path d="M50,15 C65,15 75,30 75,55 C75,75 62,85 50,85 C38,85 25,75 25,55 C25,30 35,15 50,15 Z" fill="#784b28"/><path d="M50,10 L50,20 M35,20 C40,28 60,28 65,20 C60,12 40,12 35,20 Z" fill="#4d3018" stroke="#4d3018" stroke-width="3"/></svg>`;
+            if (farbeName === 'Gras') return `<svg viewBox="0 0 100 100"><path d="M50,80 C50,50 25,40 20,25 C35,25 45,45 50,70 C55,45 65,25 80,25 C75,40 50,50 50,80 Z" fill="#27ae60"/><path d="M50,85 L50,55" stroke="#1e6b37" stroke-width="4"/></svg>`;
+            if (farbeName === 'Herz') return `<svg viewBox="0 0 100 100"><path d="M50,30 C50,10 20,10 20,35 C20,60 50,85 50,85 C50,85 80,60 80,35 C80,10 50,10 50,30 Z" fill="#c0392b"/></svg>`;
+            if (farbeName === 'Schellen') return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#f1c40f" stroke="#d4ac0d" stroke-width="3"/><circle cx="50" cy="50" r="26" fill="none" stroke="#9a7d0a" stroke-width="1.5" stroke-dasharray="4,4"/><path d="M25,55 L75,55 M50,55 L50,82" stroke="#4d3018" stroke-width="3"/><circle cx="50" cy="72" r="5" fill="#4d3018"/></svg>`;
+            return '';
+        }
+
+        function logDebug(txt) {
+            let log = document.getElementById('mobile-log');
+            if(log) { log.innerHTML += txt + "<br>"; log.scrollTop = log.scrollHeight; }
+        }
+
+        function initGame() {
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('trump-buttons').classList.add('hidden');
+            document.getElementById('bidding-buttons').classList.add('hidden');
+            document.getElementById('mobile-log').innerHTML = "=== SPIEL GESTARTET ===<br>";
+            
+            deck = [];
+            FARBEN.forEach(f => WERTE.forEach(w => deck.push({ w: w, f: f.n, c: f.c })));
+            deck.sort(() => Math.random() - 0.5);
+            
+            spieler.human = deck.slice(0, 10); spieler.ki1 = deck.slice(10, 20); spieler.ki2 = deck.slice(20, 30); spieler.wallach = deck.slice(30, 32);
+            sticheZaehler = { human: 0, ki1: 0, ki2: 0 }; aktuellerStich = []; hoechstesGebot = 4; passeListe = []; spielerWerSpielt = null; werBietetGerade = 'human';
+            
+            sortCards(spieler.human);
+            renderTable(); phase = 'reizen'; schalteReizAblauf();
+        }
+
+        function sortCards(hand) {
+            const fOrder = {'Eichel':0, 'Gras':1, 'Herz':2, 'Schellen':3};
+            const wOrder = {'Ass':0, 'König':1, 'Ober':2, 'Unter':3, '10':4, '9':5, '8':6, '7':7};
+            hand.sort((a,b) => fOrder[a.f] !== fOrder[b.f] ? fOrder[a.f] - fOrder[b.f] : wOrder[a.w] - wOrder[b.w]);
+        }
+
+        function renderTable() {
+            document.getElementById('ki1-info').innerHTML = `Gegner Links (${spieler.ki1.length} K.)<br>Stiche: <strong>${sticheZaehler.ki1}</strong>`;
+            document.getElementById('ki2-info').innerHTML = `Gegner Rechts (${spieler.ki2.length} K.)<br>Stiche: <strong>${sticheZaehler.ki2}</strong>`;
+            document.getElementById('human-stiche-count').innerHTML = sticheZaehler.human;
+            
+            const hDiv = document.getElementById('cards-human'); hDiv.innerHTML = '';
+            spieler.human.forEach((k, i) => {
+                let el = document.createElement('div'); el.className = `card ${k.c}`;
+                el.innerHTML = `
+                    <div class="card-label">${k.w}</div>
+                    <div class="card-suit-center">${getBayerischesSymbolSVG(k.f)}</div>
+                    <div class="card-label bottom">${k.w}</div>
+                `;
+                el.onclick = () => cardClicked(i); hDiv.appendChild(el);
+            });
+            
+            const sDiv = document.getElementById('current-stich'); sDiv.innerHTML = '';
+            aktuellerStich.forEach(s => {
+                let name = s.spieler === 'human' ? 'Du' : (s.spieler==='ki1'?'L':'R');
+                sDiv.innerHTML += `
+                    <div style="margin:0 5px; text-align:center; font-size:11px;">
+                        ${name}
+                        <div class="card ${s.karte.c}">
+                            <div class="card-label">${s.karte.w}</div>
+                            <div class="card-suit-center">${getBayerischesSymbolSVG(s.karte.f)}</div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function schalteReizAblauf() {
+            if (passeListe.length === 3 || (passeListe.length === 2 && spielerWerSpielt !== null)) { beendeReizen(); return; }
+            if (passeListe.includes(werBietetGerade)) { wechsleReizBieter(); return; }
+            let pnl = document.getElementById('bidding-buttons'); let board = document.getElementById('status-board');
+            if (werBietetGerade === 'human') {
+                if (spielerWerSpielt === null) {
+                    board.innerHTML = "Mit 5 Stichen eröffnen?";
+                    pnl.innerHTML = `<button onclick="humanReizAktion('eroeffnen')">Ich spiele!</button><button onclick="humanReizAktion('passen')">Passen</button>`;
+                } else {
+                    board.innerHTML = `Gebot steht bei ${hoechstesGebot}. Erhöhen?`;
+                    pnl.innerHTML = `<button onclick="humanReizAktion('erhoehen')">Biete ${hoechstesGebot+1}</button><button onclick="humanReizAktion('passen')">Passen</button>`;
+                }
+                pnl.classList.remove('hidden');
+            } else {
+                pnl.classList.add('hidden'); board.innerHTML = `Gegner ${werBietetGerade==='ki1'?'Links':'Rechts'} überlegt...`;
+                setTimeout(() => {
+                    let hand = werBietetGerade === 'ki1' ? spieler.ki1 : spieler.ki2;
+                    let kritische = hand.filter(k => (k.w === 'König' && k.f === 'Herz') || (k.w === '7' && k.f === 'Schellen') || (k.w === '7' && k.f === 'Eichel')).length;
+                    let asse = hand.filter(k => k.w === 'Ass').length;
+                    
+                    let kiMaxGebot = 4;
+                    if (kritische >= 2 || (kritische === 1 && asse >= 2)) kiMaxGebot = 7;
+                    else if (kritische === 1 || asse >= 3) kiMaxGebot = 6;
+                    else if (asse >= 1) kiMaxGebot = 5;
+
+                    let naechstesGebot = spielerWerSpielt === null ? 5 : hoechstesGebot + 1;
+
+                    if (naechstesGebot <= kiMaxGebot && hoechstesGebot < 8) { 
+                        hoechstesGebot = naechstesGebot;
+                        spielerWerSpielt = werBietetGerade;
+                        logDebug(`Gegner ${werBietetGerade==='ki1'?'Links':'Rechts'} bietet ${hoechstesGebot} Stiche.`);
+                    } else { 
+                        logDebug(`Gegner ${werBietetGerade==='ki1'?'Links':'Rechts'} passt.`);
+                        passeListe.push(werBietetGerade); 
+                    }
+                    wechsleReizBieter();
+                }, 800);
+            }
+        }
+
+        function humanReizAktion(akt) {
+            if (akt === 'eroeffnen') { hoechstesGebot = 5; spielerWerSpielt = 'human'; logDebug("Du eröffnest mit 5 Stichen."); }
+            else if (akt === 'erhoehen') { hoechstesGebot++; spielerWerSpielt = 'human'; logDebug(`Du erhöhst auf ${hoechstesGebot} Stiche.`); }
+            else { logDebug("Du passt."); passeListe.push('human'); }
+            wechsleReizBieter();
+        }
+
+        function wechsleReizBieter() {
+            werBietetGerade = werBietetGerade === 'human' ? 'ki1' : (werBietetGerade === 'ki1' ? 'ki2' : 'human');
+            schalteReizAblauf();
+        }
+
+        function beendeReizen() {
+            document.getElementById('bidding-buttons').classList.add('hidden');
+            if (spielerWerSpielt === null) {
+                aktuellesSpiel = 'weiter'; trumpfFarbe = 'Gras'; phase = 'spielen'; amZug = 'human';
+                logDebug("Alle passen. Ramsch startet! Trumpf: Gras.");
+                renderTable(); updateSpielZielAnzeige(); return;
+            }
+            logDebug(`-> Reizen beendet. Solospieler: ${spielerWerSpielt==='human'?'DU':'GEGNER ' + spielerWerSpielt.toUpperCase()}`);
+            if (spielerWerSpielt === 'human') {
+                phase = 'druecken'; spieler.human = spieler.human.concat(spieler.wallach); spieler.wallach = [];
+                sortCards(spieler.human); renderTable(); document.getElementById('status-board').innerHTML = "Du hast das Spiel! Drücke 2 Karten weg.";
+            } else {
+                let kiHand = spielerWerSpielt === 'ki1' ? spieler.ki1 : spieler.ki2;
+                kiHand = kiHand.concat(spieler.wallach); spieler.wallach = kiHand.splice(0,2);
+                aktuellesSpiel = 'spiel'; trumpfFarbe = 'Eichel'; phase = 'spielen'; amZug = spielerWerSpielt;
+                renderTable(); updateSpielZielAnzeige(); setTimeout(kiZug, 1000);
+            }
+        }
+
+        function oeffneSpielTypWahl() {
+            let pnl = document.getElementById('bidding-buttons'); document.getElementById('status-board').innerHTML = "Wähle dein Spiel:";
+            pnl.innerHTML = `
+                <button onclick="waehleSpieltyp('spiel')">Normales Spiel</button>
+                <button onclick="waehleSpieltyp('bettel')">Bettel</button>
+                <button onclick="waehleSpieltyp('mord')">Mord</button>`;
+            pnl.classList.remove('hidden');
+        }
+
+        function waehleSpieltyp(typ) {
+            document.getElementById('bidding-buttons').classList.add('hidden'); aktuellesSpiel = typ;
+            if (typ === 'spiel' || typ === 'mord') { 
+                document.getElementById('status-board').innerHTML = "Wähle Trumpf:"; 
+                document.getElementById('trump-buttons').classList.remove('hidden'); 
+            } else { 
+                trumpfFarbe = null; phase = 'spielen'; amZug = spielerWerSpielt;
+                updateSpielZielAnzeige(); renderTable(); 
+            }
+        }
+
+        function chooseTrump(f) { document.getElementById('trump-buttons').classList.add('hidden'); trumpfFarbe = f; phase = 'spielen'; amZug = spielerWerSpielt; updateSpielZielAnzeige(); renderTable(); if(amZug !== 'human') setTimeout(kiZug, 800); }
+        
+        function updateSpielZielAnzeige() { 
+            let name = spielerWerSpielt === 'human' ? 'DU' : (spielerWerSpielt === 'ki1' ? 'GEGNER LINKS' : 'GEGNER RECHTS');
+            let txt = "";
+            if (aktuellesSpiel === 'weiter') txt = `RAMSCH — Ziel: Wenigste Stiche! Trumpf: Gras`;
+            else if (aktuellesSpiel === 'bettel') txt = `BETTEL [von ${name}] — Ziel: Exakt 0 Stiche!`;
+            else if (aktuellesSpiel === 'mord') txt = `MORD [von ${name}] — Ziel: Alle 10 Stiche! | Trumpf: ${trumpfFarbe}`;
+            else txt = `SOLO-SPIEL [von ${name}] — Ziel: Mindestens ${hoechstesGebot} Stiche! | Trumpf: ${trumpfFarbe}`;
+            document.getElementById('status-board').innerHTML = txt; 
+        }
+
+        function zeigeHandyWarnung(msg) {
+            let board = document.getElementById('status-board');
+            board.innerHTML = `<div style="background:#d35400; padding:2px; color:white; border-radius:4px;">⚠️ ${msg}</div>`;
+            setTimeout(() => { updateSpielZielAnzeige(); }, 2000);
+        }
+
+        function istKarteTrumpfOderKritisch(k) {
+            if (aktuellesSpiel === 'bettel') return false;
+            if (k.w === 'König' && k.f === 'Herz') return true;
+            if (k.w === '7' && k.f === 'Schellen') return true;
+            if (k.w === '7' && k.f === 'Eichel') return true;
+            return (trumpfFarbe && k.f === trumpfFarbe);
+        }
+
+        // Hilfsfunktion: Prüft, ob eine Karte eine ECHTE Farbe bedient (und ignoriert Kritische, die als Trumpf zählen)
+        function istEchteFarbe(karte, farbeName) {
+            if (karte.f !== farbeName) return false;
+            // Im Wallachen zählen Herz-König, Schellen-7 und Eichel-7 als Trumpf, NICHT als ihre Ursprungsfarbe!
+            if (aktuellesSpiel !== 'bettel') {
+                if (karte.w === 'König' && karte.f === 'Herz') return false;
+                if (karte.w === '7' && karte.f === 'Schellen') return false;
+                if (karte.w === '7' && karte.f === 'Eichel') return false;
+            }
+            return true;
+        }
+
+        // KORREKTUR: Farbzwang entkoppelt vom Trumpfstatus der Kritischen Karten!
+        function cardClicked(idx) {
+            if (phase === 'druecken') {
+                spieler.wallach.push(spieler.human.splice(idx, 1)[0]); renderTable();
+                if (spieler.human.length === 10) oeffneSpielTypWahl(); return;
+            }
+            
+            if (phase === 'spielen' && amZug === 'human' && aktuellerStich.length < 3) {
+                let gewaehlteKarte = spieler.human[idx];
+
+                if (aktuellerStich.length > 0) {
+                    let ersteKarteImStich = aktuellerStich[0].karte;
+                    let ersteIstTrumpf = istKarteTrumpfOderKritisch(ersteKarteImStich);
+
+                    if (ersteIstTrumpf) {
+                        let hatTrumpf = spieler.human.some(k => istKarteTrumpfOderKritisch(k));
+                        if (hatTrumpf && !istKarteTrumpfOderKritisch(gewaehlteKarte)) {
+                            zeigeHandyWarnung("Trumpfpflicht! Du musst einen Trumpf oder Kritischen legen.");
+                            return;
+                        }
+                    } else {
+                        // KORREKTUR: Es wird explizit geprüft, ob du noch "echte" Herzkarten (ohne den Herz-König) hast!
+                        let hatFarbe = spieler.human.some(k => istEchteFarbe(k, ersteKarteImStich.f));
+                        if (hatFarbe && !istEchteFarbe(gewaehlteKarte, ersteKarteImStich.f)) {
+                            zeigeHandyWarnung(`Farbe bedienen! Du musst ${ersteKarteImStich.f} legen.`);
+                            return;
+                        }
+
+                        if (aktuellesSpiel === 'bettel' && hatFarbe) {
+                            let hoechsteImStich = 0;
+                            aktuellerStich.forEach(s => {
+                                if (s.karte.f === ersteKarteImStich.f) {
+                                    let st = getKartenStaerke(s.karte);
+                                    if (st > hoechsteImStich) hoechsteImStich = st;
+                                }
+                            });
+                            
+                            let kannUeberstechen = spieler.human.some(k => istEchteFarbe(k, ersteKarteImStich.f) && getKartenStaerke(k) > hoechsteImStich);
+                            if (kannUeberstechen && getKartenStaerke(gewaehlteKarte) <= hoechsteImStich) {
+                                zeigeHandyWarnung("Stichzwang! Im Bettel musst du überstechen!");
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                let k = spieler.human.splice(idx, 1)[0]; 
+                aktuellerStich.push({ spieler: 'human', karte: k }); 
+                renderTable();
+                
+                if (aktuellerStich.length === 3) setTimeout(werteStichAus, 1000); 
+                else { amZug = 'ki1'; setTimeout(kiZug, 600); }
+            }
+        }
+
+        function kiZug() {
+            if (phase !== 'spielen' || aktuellerStich.length >= 3) return;
+            let hand = amZug === 'ki1' ? spieler.ki1 : spieler.ki2; 
+            if (!hand || hand.length === 0) return;
+
+            let gewaehlterIdx = 0;
+
+            if (aktuellerStich.length > 0) {
+                let ersteKarte = aktuellerStich[0].karte;
+                let ersteIstTrumpf = istKarteTrumpfOderKritisch(ersteKarte);
+
+                if (ersteIstTrumpf) {
+                    let tIdx = hand.findIndex(k => istKarteTrumpfOderKritisch(k));
+                    if (tIdx !== -1) gewaehlterIdx = tIdx;
+                } else {
+                    // KI nutzt jetzt ebenfalls die korrekte Farberkennung
+                    let fIdx = hand.findIndex(k => istEchteFarbe(k, ersteKarte.f));
+                    if (fIdx !== -1) {
+                        gewaehlterIdx = fIdx;
+                        
+                        if (aktuellesSpiel === 'bettel') {
+                            let maxS = 0;
+                            aktuellerStich.forEach(s => { if(s.karte.f === ersteKarte.f) { let st = getKartenStaerke(s.karte); if(st > maxS) maxS = st; } });
+                            let ueberIdx = hand.findIndex(k => istEchteFarbe(k, ersteKarte.f) && getKartenStaerke(k) > maxS);
+                            if (ueberIdx !== -1) gewaehlterIdx = ueberIdx;
+                        }
+                    }
+                }
+            }
+
+            let k = hand.splice(gewaehlterIdx, 1)[0]; 
+            aktuellerStich.push({ spieler: amZug, karte: k }); 
+            renderTable();
+            
+            if (aktuellerStich.length === 3) setTimeout(werteStichAus, 1000); 
+            else { amZug = amZug === 'ki1' ? 'ki2' : 'human'; if (amZug !== 'human') setTimeout(kiZug, 600); }
+        }
+
+        function getKartenStaerke(karte) {
+            const reihenfolge = {'7':1, '8':2, '9':3, '10':4, 'Unter':5, 'Ober':6, 'König':7, 'Ass':8};
+            if (aktuellesSpiel === 'bettel') return reihenfolge[karte.w] || 1;
+            
+            if (karte.w === 'König' && karte.f === 'Herz') return 500;   
+            if (karte.w === '7' && karte.f === 'Schellen') return 400;   
+            if (karte.w === '7' && karte.f === 'Eichel') return 300;     
+            
+            let s = reihenfolge[karte.w] || 1;
+            if (trumpfFarbe && karte.f === trumpfFarbe) s += 100;        
+            return s;
+        }
+
+        function werteStichAus() {
+            let ersteKarte = aktuellerStich[0].karte;
+            let gewinnerStich = aktuellerStich[0];
+            let hoechsteStaerke = getKartenStaerke(ersteKarte);
+
+            let debugText = `Stich von ${aktuellerStich[0].spieler}: ${ersteKarte.f} ${ersteKarte.w}`;
+
+            for (let i = 1; i < aktuellerStich.length; i++) {
+                let testStich = aktuellerStich[i];
+                let testKarte = testStich.karte;
+                let testStaerke = getKartenStaerke(testKarte);
+                let sticht = false;
+
+                if (aktuellesSpiel === 'bettel') {
+                    if (testKarte.f === ersteKarte.f && testStaerke > hoechsteStaerke) sticht = true;
+                } else {
+                    let testIstTrumpf = istKarteTrumpfOderKritisch(testKarte);
+                    let gewinnerIstTrumpf = istKarteTrumpfOderKritisch(gewinnerStich.karte);
+                    if (testIstTrumpf) {
+                        if (!gewinnerIstTrumpf || testStaerke > hoechsteStaerke) sticht = true;
+                    } else if (!gewinnerIstTrumpf && testKarte.f === ersteKarte.f) {
+                        if (testStaerke > hoechsteStaerke) sticht = true;
+                    }
+                }
+
+                if (sticht) { hoechsteStaerke = testStaerke; gewinnerStich = testStich; }
+                debugText += ` | ${testStich.spieler}: ${testKarte.f} ${testKarte.w}`;
+            }
+
+            const gewinnerName = gewinnerStich.spieler;
+            sticheZaehler[gewinnerName]++;
+            amZug = gewinnerName; 
+            
+            logDebug(`${debugText} -> <strong>Gewinner: ${gewinnerName==='human'?'Du':gewinnerName.toUpperCase()}</strong>`);
+            
+            aktuellerStich = [];
+            renderTable();
+
+            let spielVorzeitigBeendet = false;
+            if (aktuellesSpiel === 'bettel') {
+                if (sticheZaehler[spielerWerSpielt] > 0) spielVorzeitigBeendet = true;
+            } else if (aktuellesSpiel === 'mord') {
+                if (sticheZaehler.human > 0 && spielerWerSpielt !== 'human') spielVorzeitigBeendet = true;
+                if (sticheZaehler.ki1 > 0 && spielerWerSpielt !== 'ki1') spielVorzeitigBeendet = true;
+                if (sticheZaehler.ki2 > 0 && spielerWerSpielt !== 'ki2') spielVorzeitigBeendet = true;
+            }
+
+            if (spieler.human.length === 0 || spielVorzeitigBeendet) {
+                let duHastGewonnen = false;
+                if (aktuellesSpiel === 'weiter') {
+                    let minStiche = Math.min(sticheZaehler.human, sticheZaehler.ki1, sticheZaehler.ki2);
+                    duHastGewonnen = (sticheZaehler.human === minStiche);
+                } else if (aktuellesSpiel === 'bettel') {
+                    if (spielerWerSpielt === 'human') duHastGewonnen = (sticheZaehler.human === 0);
+                    else duHastGewonnen = (sticheZaehler[spielerWerSpielt] > 0);
+                } else if (aktuellesSpiel === 'mord') {
+                    if (spielerWerSpielt === 'human') duHastGewonnen = (sticheZaehler.human === 10);
+                    else duHastGewonnen = (sticheZaehler[spielerWerSpielt] < 10);
+                } else {
+                    if (spielerWerSpielt === 'human') duHastGewonnen = (sticheZaehler.human >= hoechstesGebot);
+                    else duHastGewonnen = (sticheZaehler[spielerWerSpielt] < hoechstesGebot);
+                }
+
+                let boxColor = duHastGewonnen ? "#27ae60" : "#c0392b";
+                let winText = duHastGewonnen ? "GEWONNEN!" : "VERLOREN!";
+                
+                document.getElementById('status-board').innerHTML = `Spiel vorbei: ${winText} (Du: ${sticheZaehler.human} | L: ${sticheZaehler.ki1} | R: ${sticheZaehler.ki2})`;
+                document.getElementById('start-btn').innerText = "Nächste Runde";
+                document.getElementById('start-btn').classList.remove('hidden'); 
+                phase = 'start';
+            } else { 
+                if (amZug !== 'human') setTimeout(kiZug, 800); 
+            }
+        }
+    </script>
+</body>
+</html>
