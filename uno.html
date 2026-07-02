@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO Kartenspiel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a472a;
+            color: white;
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #f1c40f;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .info-box {
+            background: #34495e;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 2px solid #f1c40f;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .info-box label {
+            display: block;
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+
+        .info-box span {
+            display: block;
+            font-size: 1.5rem;
+            color: #f1c40f;
+            font-weight: bold;
+        }
+
+        .game-board {
+            background: #0d3b1f;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 3px solid #f1c40f;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-center {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .pile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pile-label {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            text-transform: uppercase;
+        }
+
+        .card {
+            width: 80px;
+            height: 120px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: 3px solid rgba(0,0,0,0.3);
+            user-select: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover:not(.disabled) {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card.red { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .card.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .card.yellow { background: linear-gradient(135deg, #f1c40f, #d4af37); color: #2c3e50; }
+        .card.green { background: linear-gradient(135deg, #27ae60, #229954); }
+        .card.wild { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+
+        .discard-pile {
+            position: relative;
+            width: 120px;
+            height: 160px;
+        }
+
+        .draw-pile {
+            width: 80px;
+            height: 120px;
+            background: #1c2833;
+            border: 3px dashed #f1c40f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+
+        .draw-pile:hover {
+            transform: scale(1.05);
+        }
+
+        .player-section {
+            margin-top: 20px;
+        }
+
+        .player-hand {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 150px;
+            align-items: flex-end;
+        }
+
+        .player-card {
+            width: 70px;
+            height: 110px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .player-card:hover {
+            transform: translateY(-15px);
+        }
+
+        .player-card.selectable:hover {
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+        }
+
+        .player-card.hidden {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            border: 2px solid #7f8c8d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #95a5a6;
+        }
+
+        .opponent-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        .opponent-info h3 {
+            color: #f1c40f;
+            margin-bottom: 10px;
+        }
+
+        .opponent-hand {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .opponent-card {
+            width: 50px;
+            height: 80px;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            border: 2px solid #7f8c8d;
+            border-radius: 6px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #f1c40f;
+            color: #2c3e50;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #f39c12;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .color-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .color-btn {
+            width: 50px;
+            height: 50px;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-red { background: #e74c3c; }
+        .color-blue { background: #3498db; }
+        .color-yellow { background: #f1c40f; }
+        .color-green { background: #27ae60; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2c3e50;
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #f1c40f;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .modal-content h2 {
+            color: #f1c40f;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .message {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .message.warning {
+            background: #e67e22;
+            color: white;
+        }
+
+        .message.success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .message.info {
+            background: #3498db;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .card {
+                width: 60px;
+                height: 90px;
+                font-size: 1.2rem;
+            }
+
+            .player-card {
+                width: 55px;
+                height: 85px;
+            }
+
+            .game-board {
+                padding: 15px;
+            }
+
+            .game-center {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎴 UNO</h1>
+            <p>Klassisches Kartenspiel</p>
+        </header>
+
+        <div class="game-info">
+            <div class="info-box">
+                <label>Dein Blatt:</label>
+                <span id="playerCards">7</span>
+            </div>
+            <div class="info-box">
+                <label>Gegner:</label>
+                <span id="opponentCards">7</span>
+            </div>
+            <div class="info-box">
+                <label>Am Zug:</label>
+                <span id="currentPlayer">Du</span>
+            </div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="game-board">
+            <div class="opponent-info">
+                <h3>🤖 Gegner</h3>
+                <div class="opponent-hand" id="opponentHand"></div>
+            </div>
+
+            <div class="game-center">
+                <div class="pile">
+                    <div class="pile-label">Nachziehen</div>
+                    <div class="draw-pile" id="drawPile" onclick="drawCard()">📚</div>
+                </div>
+
+                <div class="pile">
+                    <div class="pile-label">Ablage</div>
+                    <div class="discard-pile" id="discardPile"></div>
+                </div>
+            </div>
+
+            <div class="player-section">
+                <h3 style="margin-bottom: 10px; color: #f1c40f;">Dein Blatt:</h3>
+                <div class="player-hand" id="playerHand"></div>
+            </div>
+
+            <div class="controls">
+                <button onclick="callUno()" id="unoBtn">🎉 UNO!</button>
+                <button onclick="passGame()">Passen</button>
+                <button onclick="resetGame()">Neues Spiel</button>
+                <button onclick="goBack()">Zurück</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="colorModal">
+        <div class="modal-content">
+            <h2>Wähle eine Farbe</h2>
+            <div class="color-selector">
+                <div class="color-btn color-red" onclick="selectColor('red')"></div>
+                <div class="color-btn color-blue" onclick="selectColor('blue')"></div>
+                <div class="color-btn color-yellow" onclick="selectColor('yellow')"></div>
+                <div class="color-btn color-green" onclick="selectColor('green')"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">Spiel vorbei!</h2>
+            <p id="gameOverMessage">Du hast gewonnen!</p>
+            <div class="controls">
+                <button onclick="resetGame()">Neues Spiel</button>
+                <button onclick="goBack()">Zurück</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const COLORS = ['red', 'blue', 'yellow', 'green'];
+        const NUMBERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        const ACTIONS = ['skip', 'reverse', 'draw2'];
+
+        let gameState = {
+            playerHand: [],
+            opponentHand: [],
+            deck: [],
+            discardPile: [],
+            currentColor: null,
+            currentNumber: null,
+            currentPlayer: 'player', // 'player' or 'opponent'
+            canPlay: true,
+            gameOver: false,
+            selectedWildColor: null
+        };
+
+        function createDeck() {
+            const deck = [];
+            
+            // Regular cards (2 of each in each color)
+            for (let color of COLORS) {
+                for (let number of NUMBERS) {
+                    deck.push({ color, number, type: 'number' });
+                    if (number !== '0') {
+                        deck.push({ color, number, type: 'number' });
+                    }
+                }
+                for (let action of ACTIONS) {
+                    deck.push({ color, action, type: 'action' });
+                    deck.push({ color, action, type: 'action' });
+                }
+            }
+
+            // Wild cards
+            for (let i = 0; i < 4; i++) {
+                deck.push({ color: 'wild', type: 'wild' });
+                deck.push({ color: 'wild', type: 'draw4' });
+            }
+
+            return shuffle(deck);
+        }
+
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initGame() {
+            gameState.deck = createDeck();
+            gameState.playerHand = [];
+            gameState.opponentHand = [];
+            gameState.discardPile = [];
+            gameState.currentPlayer = 'player';
+            gameState.gameOver = false;
+            gameState.canPlay = true;
+
+            for (let i = 0; i < 7; i++) {
+                gameState.playerHand.push(gameState.deck.pop());
+                gameState.opponentHand.push(gameState.deck.pop());
+            }
+
+            let firstCard = gameState.deck.pop();
+            while (firstCard.type === 'wild' || firstCard.type === 'draw4') {
+                gameState.deck.push(firstCard);
+                firstCard = gameState.deck.pop();
+            }
+
+            gameState.discardPile.push(firstCard);
+            updateCurrentCard();
+            render();
+        }
+
+        function updateCurrentCard() {
+            const card = gameState.discardPile[gameState.discardPile.length - 1];
+            if (card.type === 'number') {
+                gameState.currentColor = card.color;
+                gameState.currentNumber = card.number;
+            } else if (card.type === 'action') {
+                gameState.currentColor = card.color;
+            } else if (card.type === 'wild') {
+                gameState.currentColor = gameState.selectedWildColor || 'wild';
+            } else if (card.type === 'draw4') {
+                gameState.currentColor = gameState.selectedWildColor || 'wild';
+            }
+        }
+
+        function canPlayCard(card) {
+            if (card.type === 'wild' || card.type === 'draw4') return true;
+            if (card.color === gameState.currentColor) return true;
+            if (card.type === 'number' && card.number === gameState.currentNumber) return true;
+            if (card.type === 'action') {
+                const lastCard = gameState.discardPile[gameState.discardPile.length - 1];
+                if (lastCard.type === 'action' && card.action === lastCard.action) return true;
+            }
+            return false;
+        }
+
+        function playCard(index) {
+            if (!gameState.canPlay || gameState.currentPlayer !== 'player') return;
+
+            const card = gameState.playerHand[index];
+            if (!canPlayCard(card)) {
+                showMessage('⚠️ Diese Karte kannst du nicht spielen!', 'warning');
+                return;
+            }
+
+            gameState.playerHand.splice(index, 1);
+            gameState.discardPile.push(card);
+            gameState.selectedWildColor = null;
+
+            if (card.type === 'wild' || card.type === 'draw4') {
+                showColorModal();
+                return;
+            }
+
+            handleCardPlayed(card);
+        }
+
+        function handleCardPlayed(card) {
+            if (card.type === 'action') {
+                switch (card.action) {
+                    case 'skip':
+                        gameState.currentPlayer = 'opponent';
+                        gameState.currentPlayer = 'player';
+                        break;
+                    case 'reverse':
+                        gameState.currentPlayer = gameState.currentPlayer === 'player' ? 'opponent' : 'player';
+                        break;
+                    case 'draw2':
+                        drawCardsForOpponent(2);
+                        gameState.currentPlayer = 'player';
+                        break;
+                }
+            }
+
+            if (card.type === 'draw4') {
+                drawCardsForOpponent(4);
+            }
+
+            updateCurrentCard();
+
+            if (gameState.playerHand.length === 0) {
+                endGame('player');
+                return;
+            }
+
+            gameState.currentPlayer = 'opponent';
+            gameState.canPlay = false;
+            setTimeout(opponentTurn, 1000);
+        }
+
+        function drawCard() {
+            if (!gameState.canPlay || gameState.currentPlayer !== 'player') return;
+            if (gameState.deck.length === 0) {
+                if (gameState.discardPile.length > 1) {
+                    let lastCard = gameState.discardPile.pop();
+                    gameState.deck = shuffle(gameState.discardPile);
+                    gameState.discardPile = [lastCard];
+                } else {
+                    showMessage('❌ Keine Karten mehr!', 'warning');
+                    return;
+                }
+            }
+
+            gameState.playerHand.push(gameState.deck.pop());
+            gameState.currentPlayer = 'opponent';
+            gameState.canPlay = false;
+            setTimeout(opponentTurn, 1000);
+            render();
+        }
+
+        function drawCardsForOpponent(count) {
+            for (let i = 0; i < count; i++) {
+                if (gameState.deck.length === 0) {
+                    if (gameState.discardPile.length > 1) {
+                        let lastCard = gameState.discardPile.pop();
+                        gameState.deck = shuffle(gameState.discardPile);
+                        gameState.discardPile = [lastCard];
+                    }
+                }
+                if (gameState.deck.length > 0) {
+                    gameState.opponentHand.push(gameState.deck.pop());
+                }
+            }
+        }
+
+        function opponentTurn() {
+            if (gameState.gameOver) return;
+
+            const playableCards = gameState.opponentHand
+                .map((card, index) => ({ card, index }))
+                .filter(({ card }) => canPlayCard(card));
+
+            if (playableCards.length === 0) {
+                if (gameState.deck.length === 0 && gameState.discardPile.length > 1) {
+                    let lastCard = gameState.discardPile.pop();
+                    gameState.deck = shuffle(gameState.discardPile);
+                    gameState.discardPile = [lastCard];
+                }
+
+                if (gameState.deck.length > 0) {
+                    gameState.opponentHand.push(gameState.deck.pop());
+                    gameState.currentPlayer = 'player';
+                    gameState.canPlay = true;
+                    render();
+                    return;
+                }
+            }
+
+            const cardToPlay = playableCards[Math.floor(Math.random() * playableCards.length)];
+            const card = cardToPlay.card;
+
+            gameState.opponentHand.splice(cardToPlay.index, 1);
+            gameState.discardPile.push(card);
+
+            if (card.type === 'wild' || card.type === 'draw4') {
+                gameState.selectedWildColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+                gameState.currentColor = gameState.selectedWildColor;
+            }
+
+            if (card.type === 'draw4') {
+                for (let i = 0; i < 4; i++) {
+                    if (gameState.deck.length === 0 && gameState.discardPile.length > 1) {
+                        let lastCard = gameState.discardPile.pop();
+                        gameState.deck = shuffle(gameState.discardPile);
+                        gameState.discardPile = [lastCard];
+                    }
+                    if (gameState.deck.length > 0) {
+                        gameState.playerHand.push(gameState.deck.pop());
+                    }
+                }
+            }
+
+            if (gameState.opponentHand.length === 0) {
+                endGame('opponent');
+                return;
+            }
+
+            updateCurrentCard();
+            gameState.currentPlayer = 'player';
+            gameState.canPlay = true;
+            render();
+        }
+
+        function drawCardsForPlayer(count) {
+            for (let i = 0; i < count; i++) {
+                if (gameState.deck.length === 0) {
+                    if (gameState.discardPile.length > 1) {
+                        let lastCard = gameState.discardPile.pop();
+                        gameState.deck = shuffle(gameState.discardPile);
+                        gameState.discardPile = [lastCard];
+                    }
+                }
+                if (gameState.deck.length > 0) {
+                    gameState.playerHand.push(gameState.deck.pop());
+                }
+            }
+        }
+
+        function callUno() {
+            if (gameState.playerHand.length === 1) {
+                showMessage('🎉 UNO! Noch eine Karte!', 'success');
+            } else {
+                showMessage('⚠️ Du kannst nur UNO rufen, wenn du noch eine Karte hast!', 'warning');
+            }
+        }
+
+        function passGame() {
+            if (gameState.currentPlayer === 'player' && gameState.canPlay) {
+                gameState.currentPlayer = 'opponent';
+                gameState.canPlay = false;
+                setTimeout(opponentTurn, 1000);
+            }
+        }
+
+        function selectColor(color) {
+            gameState.selectedWildColor = color;
+            gameState.currentColor = color;
+            document.getElementById('colorModal').classList.remove('active');
+            
+            const card = gameState.discardPile[gameState.discardPile.length - 1];
+            if (card.type === 'draw4') {
+                drawCardsForOpponent(4);
+            }
+
+            if (gameState.playerHand.length === 0) {
+                endGame('player');
+                return;
+            }
+
+            gameState.currentPlayer = 'opponent';
+            gameState.canPlay = false;
+            setTimeout(opponentTurn, 1000);
+            render();
+        }
+
+        function showColorModal() {
+            document.getElementById('colorModal').classList.add('active');
+        }
+
+        function endGame(winner) {
+            gameState.gameOver = true;
+            const title = document.getElementById('gameOverTitle');
+            const message = document.getElementById('gameOverMessage');
+
+            if (winner === 'player') {
+                title.textContent = '🎉 Du hast gewonnen!';
+                message.textContent = 'Glückwunsch! Du hast das Spiel gewonnen!';
+            } else {
+                title.textContent = '😢 Du hast verloren!';
+                message.textContent = 'Der Gegner hat das Spiel gewonnen. Viel Glück beim nächsten Mal!';
+            }
+
+            document.getElementById('gameOverModal').classList.add('active');
+        }
+
+        function resetGame() {
+            document.getElementById('gameOverModal').classList.remove('active');
+            document.getElementById('colorModal').classList.remove('active');
+            initGame();
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            setTimeout(() => {
+                msg.textContent = '';
+                msg.className = 'message';
+            }, 3000);
+        }
+
+        function getCardClass(card) {
+            if (card.type === 'wild' || card.type === 'draw4') return 'wild';
+            return card.color;
+        }
+
+        function getCardDisplay(card) {
+            if (card.type === 'number') return card.number;
+            if (card.type === 'action') {
+                switch (card.action) {
+                    case 'skip': return '⏭️';
+                    case 'reverse': return '🔄';
+                    case 'draw2': return '+2';
+                }
+            }
+            if (card.type === 'wild') return '🌈';
+            if (card.type === 'draw4') return '+4';
+            return '';
+        }
+
+        function render() {
+            // Player hand
+            const playerHandDiv = document.getElementById('playerHand');
+            playerHandDiv.innerHTML = '';
+            gameState.playerHand.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = `card player-card ${getCardClass(card)}`;
+                if (canPlayCard(card)) {
+                    cardEl.classList.add('selectable');
+                } else {
+                    cardEl.classList.add('disabled');
+                }
+                cardEl.textContent = getCardDisplay(card);
+                cardEl.onclick = () => playCard(index);
+                playerHandDiv.appendChild(cardEl);
+            });
+
+            // Opponent hand
+            const opponentHandDiv = document.getElementById('opponentHand');
+            opponentHandDiv.innerHTML = '';
+            gameState.opponentHand.forEach(() => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'opponent-card';
+                opponentHandDiv.appendChild(cardEl);
+            });
+
+            // Discard pile
+            const discardDiv = document.getElementById('discardPile');
+            discardDiv.innerHTML = '';
+            if (gameState.discardPile.length > 0) {
+                const topCard = gameState.discardPile[gameState.discardPile.length - 1];
+                const cardEl = document.createElement('div');
+                cardEl.className = `card ${getCardClass(topCard)}`;
+                cardEl.textContent = getCardDisplay(topCard);
+                discardDiv.appendChild(cardEl);
+            }
+
+            // Update info
+            document.getElementById('playerCards').textContent = gameState.playerHand.length;
+            document.getElementById('opponentCards').textContent = gameState.opponentHand.length;
+            document.getElementById('currentPlayer').textContent = gameState.currentPlayer === 'player' ? 'Du' : 'Gegner';
+
+            // Update UNO button
+            const unoBtn = document.getElementById('unoBtn');
+            if (gameState.playerHand.length === 1) {
+                unoBtn.style.background = '#e74c3c';
+            } else {
+                unoBtn.style.background = '';
+            }
+        }
+
+        // Initialize game on page load
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
