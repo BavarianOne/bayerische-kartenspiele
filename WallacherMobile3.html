@@ -4,36 +4,207 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wirtshaus Wallachen Authentisch</title>
+    <!-- Include Outfit Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #1e392a; color: white; text-align: center; padding: 10px; margin: 0; }
-        #status-board { background: rgba(0,0,0,0.6); padding: 12px; margin-bottom: 10px; color: #f1c40f; font-weight: bold; border-radius: 4px; font-size: 16px; }
-        button { background: #e67e22; color: white; border: 2px solid #fff; padding: 12px 18px; font-size: 15px; font-weight: bold; border-radius: 8px; margin: 4px; text-transform: uppercase; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #b35300; }
+        :root {
+            --table-green: radial-gradient(circle, #1a4d2e 0%, #0f301b 100%);
+            --card-bg: #fffdf6;
+            --text-dark: #1c1c1c;
+            --text-light: #f5f6fa;
+            --gold: #f1c40f;
+            --gold-dark: #c29d0b;
+            --accent-orange: #d35400;
+        }
+
+        body { 
+            font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--table-green); 
+            color: var(--text-light); 
+            text-align: center; 
+            padding: 10px; 
+            margin: 0; 
+            min-height: 100vh;
+        }
+        
+        #status-board { 
+            background: rgba(0,0,0,0.6); 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            color: var(--gold); 
+            font-weight: bold; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            border-bottom: 2px solid var(--gold);
+        }
+        
+        button { 
+            background: linear-gradient(to bottom, #f39c12, #d35400); 
+            color: white; 
+            border: 2px solid #fff; 
+            padding: 12px 18px; 
+            font-size: 15px; 
+            font-weight: bold; 
+            border-radius: 10px; 
+            margin: 4px; 
+            text-transform: uppercase; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        button:active { 
+            transform: translateY(2px); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+        }
         .hidden { display: none !important; }
         
-        #game-table { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
-        .row-ki { display: flex; justify-content: space-between; margin-bottom: 12px; }
-        .ki-box { background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; text-align: center; min-width: 120px; border: 1px solid #444; }
-        .ki-box strong { color: #f1c40f; font-size: 16px; }
+        #game-table { 
+            background: rgba(255,255,255,0.08); 
+            border-radius: 12px; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+        .row-ki { display: flex; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
+        .ki-box { 
+            background: rgba(0,0,0,0.5); 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            text-align: center; 
+            min-width: 110px; 
+            flex: 1;
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+        .ki-box strong { color: var(--gold); font-size: 16px; }
         
-        #current-stich { display: flex; justify-content: center; gap: 12px; min-height: 115px; align-items: center; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px; }
-        .cards-container { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-top: 5px; min-height: 110px; }
+        #current-stich { 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            min-height: 125px; 
+            align-items: center; 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 10px; 
+            padding: 10px; 
+        }
         
-        #human-info-bar { background: rgba(0,0,0,0.4); padding: 6px; border-radius: 4px; margin-top: 10px; font-weight: bold; font-size: 14px; }
-        #human-info-bar strong { color: #27ae60; font-size: 16px; }
+        #human-info-bar { 
+            background: rgba(0,0,0,0.4); 
+            padding: 8px; 
+            border-radius: 6px; 
+            margin-top: 10px; 
+            font-weight: bold; 
+            font-size: 14px; 
+        }
+        #human-info-bar strong { color: #2ecc71; font-size: 16px; }
 
-        .card { width: 66px; height: 102px; background: white; color: black; border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between; padding: 5px; box-shadow: 0 3px 6px rgba(0,0,0,0.4); box-sizing: border-box; font-weight: bold; position: relative; }
-        .eichel { border-top: 6px solid #784b28; } 
-        .gras { border-top: 6px solid #27ae60; }
-        .herz { border-top: 6px solid #c0392b; } 
-        .schellen { border-top: 6px solid #f1c40f; }
+        /* Smartphone-optimized Overlapping Scroll for Hand Cards */
+        #cards-human { 
+            display: flex; 
+            justify-content: flex-start; 
+            overflow-x: auto; 
+            padding: 15px 20px 25px 20px; 
+            gap: 0; 
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            box-sizing: border-box;
+            min-height: 140px;
+        }
+        #cards-human::-webkit-scrollbar {
+            display: none;
+        }
+
+        .card { 
+            width: 68px; 
+            height: 104px; 
+            background: var(--card-bg); 
+            color: var(--text-dark); 
+            border-radius: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            padding: 6px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4); 
+            box-sizing: border-box; 
+            font-weight: bold; 
+            position: relative; 
+            border: 2px solid #d4ac0d;
+            outline: 1.5px solid rgba(93, 64, 55, 0.25);
+            outline-offset: -4px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #cards-human .card {
+            margin-right: -24px;
+            flex-shrink: 0;
+        }
+        #cards-human .card:last-child {
+            margin-right: 0;
+        }
+        #cards-human .card:hover, #cards-human .card:active {
+            transform: translateY(-16px) scale(1.05);
+            z-index: 10;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+        }
+
+        .card-suit-top {
+            font-size: 0.85rem;
+            line-height: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-suit-bottom {
+            font-size: 0.85rem;
+            line-height: 1;
+            text-align: right;
+            transform: rotate(180deg);
+        }
         
-        .card-suit-center { width: 30px; height: 30px; margin: auto; display: flex; align-items: center; justify-content: center; }
-        .card-suit-center svg { width: 100%; height: 100%; display: block; }
-        .card-label { font-size: 13px; font-weight: bold; font-family: Arial, sans-serif; }
-        .card-label.bottom { text-align: right; }
+        .card-rank { 
+            font-size: 1.1rem; 
+            font-weight: 900; 
+            text-align: center; 
+            margin: auto 0; 
+            letter-spacing: -0.5px;
+        }
+
+        .suit-Eichel, .eichel { color: #5d4037; }
+        .suit-Gras, .gras { color: #2e7d32; }
+        .suit-Herz, .herz { color: #c62828; }
+        .suit-Schellen, .schellen { color: #f57c00; }
+
+        .card-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent-orange);
+            color: white;
+            border-radius: 8px;
+            padding: 1px 4px;
+            font-size: 0.55rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border: 1px solid white;
+            z-index: 5;
+        }
         
-        #mobile-log { background: rgba(0,0,0,0.7); text-align: left; padding: 8px; font-family: monospace; font-size: 11px; max-height: 110px; overflow-y: auto; border-radius: 6px; border: 1px solid #444; margin-top: 12px; color: #57ff57; }
+        #mobile-log { 
+            background: rgba(0,0,0,0.7); 
+            text-align: left; 
+            padding: 10px; 
+            font-family: monospace; 
+            font-size: 11px; 
+            max-height: 110px; 
+            overflow-y: auto; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            margin-top: 12px; 
+            color: #57ff57; 
+        }
     </style>
 </head>
 <body>
@@ -69,11 +240,58 @@
         let hoechstesGebot = 4, werBietetGerade = 'human', passeListe = [];
         let aktuellerStich = [], amZug = 'human', sticheZaehler = { human: 0, ki1: 0, ki2: 0 };
 
+        // Premium suit mappings and helper functions
+        const SUIT_EMOJIS = {
+            'Eichel': '🌰',
+            'Gras': '🌿',
+            'Herz': '♥',
+            'Schellen': '🔔'
+        };
+
+        function getCardBadgeHTML(card) {
+            if (card.w === 'König' && card.f === 'Herz') return '<span class="card-badge">MAX</span>';
+            if (card.w === '7' && card.f === 'Schellen') return '<span class="card-badge">BELLE</span>';
+            if (card.w === '7' && card.f === 'Eichel') return '<span class="card-badge">SPITZ</span>';
+            return '';
+        }
+
+        function getRankDisplayCorner(rank) {
+            if (rank === 'Ass') return 'S';
+            if (rank === 'König') return 'K';
+            if (rank === 'Ober') return 'O';
+            if (rank === 'Unter') return 'U';
+            return rank;
+        }
+
+        function getRankDisplayCenter(rank) {
+            if (rank === 'Ass') return 'Sau';
+            if (rank === 'König') return 'Kini';
+            return rank;
+        }
+
+        function getCardHTML(card) {
+            const badge = getCardBadgeHTML(card);
+            const emoji = SUIT_EMOJIS[card.f] || '';
+            const rankCorner = getRankDisplayCorner(card.w);
+            const rankCenter = getRankDisplayCenter(card.w);
+            return `
+                ${badge}
+                <div class="card-suit-top suit-${card.f}">
+                    <span>${rankCorner}</span>
+                    <span>${emoji}</span>
+                </div>
+                <div class="card-rank">${rankCenter}</div>
+                <div class="card-suit-bottom suit-${card.f}">
+                    <span>${emoji}</span>
+                </div>
+            `;
+        }
+
         function getBayerischesSymbolSVG(farbeName) {
-            if (farbeName === 'Eichel') return `<svg viewBox="0 0 100 100"><path d="M50,15 C65,15 75,30 75,55 C75,75 62,85 50,85 C38,85 25,75 25,55 C25,30 35,15 50,15 Z" fill="#784b28"/><path d="M50,10 L50,20 M35,20 C40,28 60,28 65,20 C60,12 40,12 35,20 Z" fill="#4d3018" stroke="#4d3018" stroke-width="3"/></svg>`;
-            if (farbeName === 'Gras') return `<svg viewBox="0 0 100 100"><path d="M50,80 C50,50 25,40 20,25 C35,25 45,45 50,70 C55,45 65,25 80,25 C75,40 50,50 50,80 Z" fill="#27ae60"/><path d="M50,85 L50,55" stroke="#1e6b37" stroke-width="4"/></svg>`;
-            if (farbeName === 'Herz') return `<svg viewBox="0 0 100 100"><path d="M50,30 C50,10 20,10 20,35 C20,60 50,85 50,85 C50,85 80,60 80,35 C80,10 50,10 50,30 Z" fill="#c0392b"/></svg>`;
-            if (farbeName === 'Schellen') return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#f1c40f" stroke="#d4ac0d" stroke-width="3"/><circle cx="50" cy="50" r="26" fill="none" stroke="#9a7d0a" stroke-width="1.5" stroke-dasharray="4,4"/><path d="M25,55 L75,55 M50,55 L50,82" stroke="#4d3018" stroke-width="3"/><circle cx="50" cy="72" r="5" fill="#4d3018"/></svg>`;
+            if (farbeName === 'Eichel') return `<svg viewBox="0 0 100 100"><path d="M50,15 C65,15 75,30 75,55 C75,75 62,85 50,85 C38,85 25,75 25,55 C25,30 35,15 50,15 Z" fill="#5d4037"/><path d="M50,10 L50,20 M35,20 C40,28 60,28 65,20 C60,12 40,12 35,20 Z" fill="#3e2723" stroke="#3e2723" stroke-width="3"/></svg>`;
+            if (farbeName === 'Gras') return `<svg viewBox="0 0 100 100"><path d="M50,80 C50,50 25,40 20,25 C35,25 45,45 50,70 C55,45 65,25 80,25 C75,40 50,50 50,80 Z" fill="#2e7d32"/><path d="M50,85 L50,55" stroke="#1b5e20" stroke-width="4"/></svg>`;
+            if (farbeName === 'Herz') return `<svg viewBox="0 0 100 100"><path d="M50,30 C50,10 20,10 20,35 C20,60 50,85 50,85 C50,85 80,60 80,35 C80,10 50,10 50,30 Z" fill="#c62828"/></svg>`;
+            if (farbeName === 'Schellen') return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#f57c00" stroke="#e65100" stroke-width="3"/><circle cx="50" cy="50" r="26" fill="none" stroke="#e65100" stroke-width="1.5" stroke-dasharray="4,4"/><path d="M25,55 L75,55 M50,55 L50,82" stroke="#5d4037" stroke-width="3"/><circle cx="50" cy="72" r="5" fill="#5d4037"/></svg>`;
             return '';
         }
 
@@ -113,11 +331,7 @@
             const hDiv = document.getElementById('cards-human'); hDiv.innerHTML = '';
             spieler.human.forEach((k, i) => {
                 let el = document.createElement('div'); el.className = `card ${k.c}`;
-                el.innerHTML = `
-                    <div class="card-label">${k.w}</div>
-                    <div class="card-suit-center">${getBayerischesSymbolSVG(k.f)}</div>
-                    <div class="card-label bottom">${k.w}</div>
-                `;
+                el.innerHTML = getCardHTML(k);
                 el.onclick = () => cardClicked(i); hDiv.appendChild(el);
             });
             
@@ -128,8 +342,7 @@
                     <div style="margin:0 5px; text-align:center; font-size:11px;">
                         ${name}
                         <div class="card ${s.karte.c}">
-                            <div class="card-label">${s.karte.w}</div>
-                            <div class="card-suit-center">${getBayerischesSymbolSVG(s.karte.f)}</div>
+                            ${getCardHTML(s.karte)}
                         </div>
                     </div>`;
             });
