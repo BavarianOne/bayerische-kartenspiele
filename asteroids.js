@@ -5,6 +5,8 @@ const livesEl = document.getElementById('lives');
 const bestEl = document.getElementById('best');
 const powerEl = document.getElementById('power');
 const shieldEl = document.getElementById('shield');
+const bombsEl = document.getElementById('bombs');
+const megaBombBtn = document.getElementById('megaBombBtn');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const overlayEl = document.getElementById('overlay');
@@ -23,6 +25,7 @@ let particles = [];
 let powerUps = [];
 let boss = null;
 let paused = false;
+let megaBombs = 0;
 let bestScore = Number(localStorage.getItem('asteroidsBest') || 0);
 
 // Audio (created on first user gesture)
@@ -81,6 +84,8 @@ function updateHud(){
   bestEl.textContent = 'Best: ' + bestScore;
   powerEl.textContent = 'Power: ' + ship.firePower;
   shieldEl.textContent = 'Shield: ' + (ship.shield > 0 ? 'On (' + Math.ceil(ship.shield/60) + ')' : 'Off');
+  bombsEl.textContent = 'Bombs: ' + megaBombs;
+  if(megaBombBtn) megaBombBtn.disabled = !running || megaBombs <= 0 || paused;
 }
 
 function showOverlay(title, text, buttonLabel){
@@ -93,7 +98,7 @@ function showOverlay(title, text, buttonLabel){
 function hideOverlay(){ overlayEl.classList.remove('active'); }
 
 function reset(){
-  ship=createShip(); bullets=[]; asteroids=[]; keys={}; score=0; lives=3; running=false; respawnTimer=0; particles=[]; powerUps=[]; boss=null; paused=false;
+  ship=createShip(); bullets=[]; asteroids=[]; keys={}; score=0; lives=3; running=false; respawnTimer=0; particles=[]; powerUps=[]; boss=null; paused=false; megaBombs=0;
   startBtn.textContent = 'Start';
   pauseBtn.textContent = 'Pause';
   updateHud();
@@ -149,9 +154,30 @@ function playExplosion(vol=0.6){
 
 startBtn.onclick = ()=>{ startGame(); }
 overlayBtn.onclick = ()=>{ startGame(); }
-pauseBtn.onclick = ()=>{ if(running){ paused=!paused; pauseBtn.textContent = paused ? 'Resume' : 'Pause'; } }
+pauseBtn.onclick = ()=>{ if(running){ paused=!paused; pauseBtn.textContent = paused ? 'Resume' : 'Pause'; updateHud(); } }
+megaBombBtn.onclick = ()=>{ triggerMegaBomb(); }
 
-addEventListener('keydown', e=>{ if(e.code==='Space') e.preventDefault(); keys[e.code]=true; })
+function triggerMegaBomb(){
+  if(!running || paused || megaBombs <= 0) return;
+  megaBombs--;
+  const bombX = ship.x;
+  const bombY = ship.y;
+  asteroids.forEach(a=>{ explodeAsteroid(a); });
+  asteroids = [];
+  bullets = [];
+  powerUps = [];
+  boss = null;
+  for(let i=0;i<40;i++){
+    const ang = Math.random()*Math.PI*2;
+    const spd = Math.random()*5 + 2;
+    particles.push({x:bombX, y:bombY, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd, life:70+Math.random()*25, size:Math.random()*4 + 2, color:'#ffcf4d'});
+  }
+  if(!audioCtx) ensureAudio(); playExplosion(1.0);
+  spawnAsteroids(2);
+  updateHud();
+}
+
+addEventListener('keydown', e=>{ if(e.code==='Space') e.preventDefault(); if(e.code==='KeyB' && !e.repeat) triggerMegaBomb(); keys[e.code]=true; })
 addEventListener('keyup', e=>{ keys[e.code]=false; })
 
 // allow audio start on click of start button
@@ -162,8 +188,8 @@ function bindTouchControls(){
   const buttons = document.querySelectorAll('.tc-btn');
   buttons.forEach(btn=>{
     const key = btn.dataset.key;
-    const down = (e)=>{ e.preventDefault(); keys[key]=true; btn.classList.add('active'); if(!audioCtx) ensureAudio(); };
-    const up = (e)=>{ if(e) e.preventDefault(); keys[key]=false; btn.classList.remove('active'); };
+    const down = (e)=>{ e.preventDefault(); if(key === 'KeyB'){ triggerMegaBomb(); btn.classList.add('active'); setTimeout(()=>btn.classList.remove('active'), 120); return; } keys[key]=true; btn.classList.add('active'); if(!audioCtx) ensureAudio(); };
+    const up = (e)=>{ if(e) e.preventDefault(); if(key !== 'KeyB') keys[key]=false; btn.classList.remove('active'); };
     btn.addEventListener('pointerdown', down);
     btn.addEventListener('pointerup', up);
     btn.addEventListener('pointercancel', up);
@@ -215,6 +241,11 @@ function maybeSpawnBoss(){
   if(!boss && score > 0 && score % 1000 < 20 && score > 500){
     boss = {x:W/2, y:-80, r:48, vx:1.2, vy:1.0, hp:12, color:'#ff4d6d'};
   }
+}
+
+function maybeAwardMegaBombs(previousScore, newScore){
+  const gained = Math.floor(newScore / 1000) - Math.floor(previousScore / 1000);
+  if(gained > 0){ megaBombs += gained; }
 }
 
 function update(){
@@ -291,7 +322,9 @@ function update(){
       if(dist(a, bullets[j]) < a.r){
         bullets.splice(j,1);
         const pts = Math.floor(100 - a.r);
+        const previousScore = score;
         score += a.scoreValue;
+        maybeAwardMegaBombs(previousScore, score);
         if(score > bestScore){ bestScore = score; localStorage.setItem('asteroidsBest', bestScore); }
         updateHud();
         // explosion + split
