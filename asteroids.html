@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Asteroids — HTML Canvas</title>
+  <link rel="stylesheet" href="asteroids.css">
+</head>
+<body>
+  <div id="hud">
+    <div id="score">Score: 0</div>
+    <div id="lives">Lives: 3</div>
+    <button id="startBtn">Start</button>
+  </div>
+  <div id="touch-left" class="touch-side" aria-hidden="false">
+    <button class="tc-btn big" data-key="ArrowUp" aria-label="Thrust">▲</button>
+  </div>
+  <div id="touch-right" class="touch-side" aria-hidden="false">
+    <div class="horz-group">
+      <button class="tc-btn" data-key="ArrowLeft" aria-label="Left">◀</button>
+      <button class="tc-btn" data-key="ArrowRight" aria-label="Right">▶</button>
+    </div>
+    <button class="tc-btn fire" data-key="Space" aria-label="Fire">●</button>
+  </div>
+  <canvas id="game"></canvas>
+  <script src="asteroids.js" defer></script>
+</body>
+</html>
