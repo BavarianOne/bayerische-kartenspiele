@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple schach</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="schach.css">
+</head>
+<body>
+
+    <p><a href="index.html" class="back-link">← Zurück zur Startseite</a></p>
+    <h1>Schach gegen die KI</h1>
+    
+    <!-- Einstellungen vor dem Spiel -->
+    <div class="setup-container">
+        <label for="colorSelect">Deine Farbe:</label>
+        <select id="colorSelect">
+            <option value="w">Weiß</option>
+            <option value="b">Schwarz</option>
+        </select>
+
+        <label for="depthSelect">Schwierigkeit:</label>
+        <select id="depthSelect">
+            <option value="1">Leicht</option>
+            <option value="2" selected>Mittel</option>
+            <option value="3">Schwer</option>
+        </select>
+
+        <button id="startBtn">Spiel starten</button>
+    </div>
+
+    <!-- Das Schachbrett -->
+    <div id="board"></div>
+
+    <div class="status-container">
+        Status: <span id="status">Wähle Einstellungen und klicke Start</span>
+    </div>
+
+    <!-- JQuery, Chess.js und Chessboard.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    
+    <script src="schach.js"></script>
+</body>
+</html>
