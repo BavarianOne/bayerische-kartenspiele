@@ -72,3 +72,16 @@ button {
 button:hover {
     background-color: #219653;
 }
+/* --- EIGENE BRETTFARBEN --- */
+
+/* Helle Felder */
+.white-1e1d7 {
+    background-color: #f0d9b5 !important; /* Klassisches Creme-Weiß */
+    color: #b58863; /* Farbe der Koordinaten-Buchstaben auf hellen Feldern */
+}
+
+/* Dunkle Felder */
+.black-3c85d {
+    background-color: #b58863 !important; /* Klassisches Holz-Braun */
+    color: #f0d9b5; /* Farbe der Koordinaten-Buchstaben auf dunklen Feldern */
+}
