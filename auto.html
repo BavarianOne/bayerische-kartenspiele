@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dynamisches 2D Rennspiel</title>
+    <link rel="stylesheet" href="auto.css">
+</head>
+<body>
+
+    <p><a href="index.html" class="back-link">← Zurück zur Startseite</a></p>
+    <h1>Dynamisches Rennspiel</h1>
+    
+    <div class="dashboard">
+        <button id="startBtn">Neues Rennen</button>
+        <div class="stat">Position: <span id="pos">-</span></div>
+        <div class="stat">Runde: <span id="lap">0/3</span></div>
+        <div class="stat">Zeit: <span id="time">00:00.0</span></div>
+    </div>
+
+    <div class="game-container">
+        <div class="mobile-controls left-controls">
+            <button id="btnLeft">◀</button>
+            <button id="btnRight">▶</button>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div class="mobile-controls right-controls">
+            <button id="btnUp">GAS</button>
+            <button id="btnDown">BREMSE</button>
+        </div>
+    </div>
+
+    <div class="controls-info">
+        PC: <strong>Pfeiltasten</strong> | Mobil: <strong>Touch-Buttons</strong> links und rechts. Rasen bremst ab!
+    </div>
+
+    <script src="auto.js"></script>
+</body>
+</html>
