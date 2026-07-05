@@ -9,6 +9,9 @@ const bombsEl = document.getElementById('bombs');
 const megaBombBtn = document.getElementById('megaBombBtn');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
+const backBtn = document.getElementById('backBtn');
+const sideBtn = document.getElementById('sideBtn');
+const rocketBtn = document.getElementById('rocketBtn');
 const overlayEl = document.getElementById('overlay');
 const overlayTitleEl = document.getElementById('overlayTitle');
 const overlayTextEl = document.getElementById('overlayText');
@@ -27,6 +30,8 @@ let boss = null;
 let paused = false;
 let megaBombs = 0;
 let bestScore = Number(localStorage.getItem('asteroidsBest') || 0);
+let collectedSpecials = { back:false, side:false, rocket:false };
+let specialTimers = { back:0, side:0, rocket:0 };
 
 // Audio (created on first user gesture)
 let audioCtx = null, masterGain = null, thrustGain = null, thrustOsc = null;
@@ -86,6 +91,9 @@ function updateHud(){
   shieldEl.textContent = 'Shield: ' + (ship.shield > 0 ? 'On (' + Math.ceil(ship.shield/60) + ')' : 'Off');
   bombsEl.textContent = 'Bombs: ' + megaBombs;
   if(megaBombBtn) megaBombBtn.disabled = !running || megaBombs <= 0 || paused;
+  if(backBtn){ backBtn.disabled = !collectedSpecials.back; backBtn.classList.toggle('active', specialTimers.back > 0); }
+  if(sideBtn){ sideBtn.disabled = !collectedSpecials.side; sideBtn.classList.toggle('active', specialTimers.side > 0); }
+  if(rocketBtn){ rocketBtn.disabled = !collectedSpecials.rocket; rocketBtn.classList.toggle('active', specialTimers.rocket > 0); }
 }
 
 function showOverlay(title, text, buttonLabel){
@@ -95,10 +103,18 @@ function showOverlay(title, text, buttonLabel){
   overlayEl.classList.add('active');
 }
 
+function updateSpecialButtons(){
+  if(backBtn){ backBtn.disabled = !collectedSpecials.back; backBtn.classList.toggle('active', specialTimers.back > 0); }
+  if(sideBtn){ sideBtn.disabled = !collectedSpecials.side; sideBtn.classList.toggle('active', specialTimers.side > 0); }
+  if(rocketBtn){ rocketBtn.disabled = !collectedSpecials.rocket; rocketBtn.classList.toggle('active', specialTimers.rocket > 0); }
+}
+
 function hideOverlay(){ overlayEl.classList.remove('active'); }
 
 function reset(){
   ship=createShip(); bullets=[]; asteroids=[]; keys={}; score=0; lives=3; running=false; respawnTimer=0; particles=[]; powerUps=[]; boss=null; paused=false; megaBombs=0;
+  collectedSpecials = { back:false, side:false, rocket:false };
+  specialTimers = { back:0, side:0, rocket:0 };
   startBtn.textContent = 'Start';
   pauseBtn.textContent = 'Pause';
   updateHud();
@@ -156,6 +172,9 @@ startBtn.onclick = ()=>{ startGame(); }
 overlayBtn.onclick = ()=>{ startGame(); }
 pauseBtn.onclick = ()=>{ if(running){ paused=!paused; pauseBtn.textContent = paused ? 'Resume' : 'Pause'; updateHud(); } }
 megaBombBtn.onclick = ()=>{ triggerMegaBomb(); }
+if(backBtn) backBtn.onclick = ()=>{ activateSpecial('back'); }
+if(sideBtn) sideBtn.onclick = ()=>{ activateSpecial('side'); }
+if(rocketBtn) rocketBtn.onclick = ()=>{ activateSpecial('rocket'); }
 
 function triggerMegaBomb(){
   if(!running || paused || megaBombs <= 0) return;
@@ -177,7 +196,7 @@ function triggerMegaBomb(){
   updateHud();
 }
 
-addEventListener('keydown', e=>{ if(e.code==='Space') e.preventDefault(); if(e.code==='KeyB' && !e.repeat) triggerMegaBomb(); keys[e.code]=true; })
+addEventListener('keydown', e=>{ if(e.code==='Space') e.preventDefault(); if(e.code==='KeyB' && !e.repeat) triggerMegaBomb(); if(e.code==='KeyQ' && !e.repeat) activateSpecial('back'); if(e.code==='KeyW' && !e.repeat) activateSpecial('side'); if(e.code==='KeyE' && !e.repeat) activateSpecial('rocket'); keys[e.code]=true; })
 addEventListener('keyup', e=>{ keys[e.code]=false; })
 
 // allow audio start on click of start button
@@ -230,11 +249,38 @@ function explodeAsteroid(a){
   playExplosion(Math.min(1, a.r/70));
 }
 
-function maybeSpawnPowerUp(){
-  if(Math.random() < 0.004 && powerUps.length < 2){
-    const type = Math.random() < 0.5 ? 'fire' : 'shield';
-    powerUps.push({x:rand(30, W-30), y:rand(30, H-30), r:10, vx:rand(-0.6,0.6), vy:rand(-0.6,0.6), life:600, color:type==='fire'?'#00e5ff':'#7CFF7C', type});
+function spawnPowerUp(x,y,type){
+  const colors = { back:'#ff7a59', side:'#5de6ff', rocket:'#ffcf4d', shield:'#7cff7c', fire:'#00e5ff' };
+  powerUps.push({x,y,r:10,vx:rand(-0.6,0.6),vy:rand(-0.6,0.6),life:600,color:colors[type]||'#fff',type});
+}
+
+function dropPowerUpFromAsteroid(a){
+  if(Math.random() < 0.55 && powerUps.length < 3){
+    const pool = ['back','side','rocket','shield'];
+    const type = pool[Math.floor(Math.random()*pool.length)];
+    spawnPowerUp(a.x, a.y, type);
   }
+}
+
+function activateSpecial(type){
+  if(!running || paused || !collectedSpecials[type] || specialTimers[type] > 0) return;
+  if(type === 'back'){
+    specialTimers.back = 70;
+    const angles = [ship.angle + Math.PI, ship.angle + Math.PI + 0.22, ship.angle + Math.PI - 0.22];
+    angles.forEach(angle => {
+      bullets.push({x:ship.x+Math.cos(angle)*ship.r, y:ship.y+Math.sin(angle)*ship.r, vx:ship.vx+Math.cos(angle)*7, vy:ship.vy+Math.sin(angle)*7, life:90, kind:'back'});
+    });
+  } else if(type === 'side'){
+    specialTimers.side = 70;
+    const angles = [ship.angle - Math.PI/2, ship.angle + Math.PI/2];
+    angles.forEach(angle => {
+      bullets.push({x:ship.x+Math.cos(angle)*ship.r, y:ship.y+Math.sin(angle)*ship.r, vx:ship.vx+Math.cos(angle)*7, vy:ship.vy+Math.sin(angle)*7, life:90, kind:'side'});
+    });
+  } else if(type === 'rocket'){
+    specialTimers.rocket = 70;
+    bullets.push({x:ship.x+Math.cos(ship.angle)*ship.r, y:ship.y+Math.sin(ship.angle)*ship.r, vx:ship.vx+Math.cos(ship.angle)*9, vy:ship.vy+Math.sin(ship.angle)*9, life:220, kind:'rocket'});
+  }
+  updateHud();
 }
 
 function maybeSpawnBoss(){
@@ -297,7 +343,8 @@ function update(){
     const p = powerUps[i];
     if(dist(ship, p) < ship.r + p.r){
       if(p.type === 'fire'){ ship.firePower = Math.min(3, ship.firePower + 1); }
-      else { ship.shield = 240; }
+      else if(p.type === 'shield'){ ship.shield = 240; }
+      else { collectedSpecials[p.type] = true; }
       updateHud();
       powerUps.splice(i, 1);
       break;
@@ -330,6 +377,7 @@ function update(){
         // explosion + split
         explodeAsteroid(a);
         splitAsteroid(a);
+        dropPowerUpFromAsteroid(a);
         asteroids.splice(i,1);
         break;
       }
@@ -350,7 +398,9 @@ function update(){
             showOverlay('Game Over', 'You scored ' + score + ' points.', 'Play Again');
           }
         }
-        explodeAsteroid(asteroids[i]); asteroids.splice(i,1);
+        explodeAsteroid(asteroids[i]);
+        dropPowerUpFromAsteroid(asteroids[i]);
+        asteroids.splice(i,1);
         if(!audioCtx) ensureAudio(); playExplosion(1.0);
         updateHud();
         break;
@@ -372,10 +422,11 @@ function update(){
   } else { ship.invulnerable--; }
 
   if(ship.shield > 0) ship.shield--;
+  Object.keys(specialTimers).forEach(type => { if(specialTimers[type] > 0) specialTimers[type]--; });
+  updateSpecialButtons();
 
   // ensure some asteroids and increase difficulty over time
   if(asteroids.length < getAsteroidTargetCount()) spawnAsteroids(1);
-  maybeSpawnPowerUp();
   maybeSpawnBoss();
 
   // update particles
@@ -458,13 +509,34 @@ function drawAsteroid(a){
   ctx.restore();
 }
 
+function updateSpecialButtons(){
+  if(backBtn){ backBtn.disabled = !collectedSpecials.back; backBtn.classList.toggle('active', specialTimers.back > 0); }
+  if(sideBtn){ sideBtn.disabled = !collectedSpecials.side; sideBtn.classList.toggle('active', specialTimers.side > 0); }
+  if(rocketBtn){ rocketBtn.disabled = !collectedSpecials.rocket; rocketBtn.classList.toggle('active', specialTimers.rocket > 0); }
+}
+
 function draw(){
   ctx.clearRect(0,0,W,H);
   // asteroids
   asteroids.forEach(a=> drawAsteroid(a));
 
   // bullets
-  ctx.fillStyle='#ff8'; bullets.forEach(b=>{ ctx.fillRect(b.x-2,b.y-2,4,4); });
+  bullets.forEach(b=>{
+    if(b.kind === 'rocket'){
+      ctx.fillStyle = '#ff8';
+      ctx.fillRect(b.x-4,b.y-4,8,8);
+      ctx.fillStyle = '#ff4d4d';
+      ctx.fillRect(b.x-2,b.y-2,4,4);
+    } else if(b.kind === 'side'){
+      ctx.fillStyle = '#5de6ff';
+      ctx.fillRect(b.x-2,b.y-2,4,4);
+    } else if(b.kind === 'back'){
+      ctx.fillStyle = '#ff7a59';
+      ctx.fillRect(b.x-2,b.y-2,4,4);
+    } else {
+      ctx.fillStyle='#ff8'; ctx.fillRect(b.x-2,b.y-2,4,4);
+    }
+  });
 
   // boss
   if(boss){
@@ -506,5 +578,5 @@ function loop(){ update(); draw(); requestAnimationFrame(loop); }
 // initialize
 reset();
 updateHud();
-showOverlay('Shooter', 'Rotate, thrust, and shoot the asteroids before they hit you.', 'Start Game');
+showOverlay('Shooter', 'Rotate, thrust, and shoot the asteroids before they hit you. Destroy rocks to collect Backshot, Side Guns, or Rocket upgrades.', 'Start Game');
 requestAnimationFrame(loop);
