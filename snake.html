@@ -15,62 +15,66 @@
         body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-color: #1a1a2e;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 8px 0;
         }
         #gameContainer {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
+            max-width: 450px;
         }
         #scoreBoard {
             color: #fff;
-            font-size: 20px;
-            margin-bottom: 5px;
+            font-size: 16px;
+            margin-bottom: 1px;
             text-align: center;
             text-shadow: 0 0 10px rgba(78, 204, 163, 0.5);
         }
         #highScore {
             color: #ffd700;
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 12px;
+            margin-bottom: 0;
         }
         #levelDisplay {
             color: #4ecca3;
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-size: 11px;
+            margin-bottom: 0;
         }
         canvas {
             border: 2px solid #4a4a6a;
             background-color: #16213e;
             max-width: 90vw;
-            max-height: 50vh;
+            max-height: 45vh;
             box-shadow: 0 0 20px rgba(78, 204, 163, 0.2);
         }
         #controls {
             display: grid;
-            grid-template-columns: 80px 80px 80px;
-            grid-template-rows: 80px 80px 80px;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 10px;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px 60px;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px;
             background: rgba(74, 74, 106, 0.3);
-            border-radius: 20px;
+            border-radius: 16px;
         }
         .control-btn {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             background-color: #4a4a6a;
             border: 2px solid #6a6a8a;
-            border-radius: 16px;
+            border-radius: 12px;
             color: #fff;
-            font-size: 32px;
+            font-size: 26px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -92,9 +96,9 @@
         #btnRight { grid-column: 3; grid-row: 2; }
         #btnDown { grid-column: 2; grid-row: 3; }
         #startBtn {
-            margin-top: 15px;
-            padding: 12px 40px;
-            font-size: 18px;
+            margin-top: 8px;
+            padding: 10px 36px;
+            font-size: 16px;
             background-color: #e94560;
             color: #fff;
             border: none;
@@ -111,24 +115,26 @@
             transform: translateY(0);
         }
         #difficultySelect {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
+            margin-top: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
             background-color: #4a4a6a;
             color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             outline: none;
+            max-width: 80%;
+            text-align: center;
         }
         #difficultySelect option {
             background-color: #4a4a6a;
         }
         #powerUpIndicator {
             color: #ffd700;
-            font-size: 14px;
-            margin-top: 5px;
-            min-height: 20px;
+            font-size: 12px;
+            margin-top: 1px;
+            min-height: 16px;
             text-align: center;
         }
         @media (min-width: 768px) {
