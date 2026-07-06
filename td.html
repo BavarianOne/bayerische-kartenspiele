@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medieval Defense 3D</title>
+  <link rel="stylesheet" href="td.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="topBar">
+    <div class="stat"><span class="icon">🪙</span><span id="gold">300</span></div>
+    <div class="stat"><span class="icon">❤️</span><span id="lives">20</span></div>
+    <div class="stat"><span class="icon">🌊</span><span id="wave">1</span></div>
+    <div class="stat"><span class="icon">📊</span><span id="score">0</span></div>
+  </div>
+
+  <div id="buildPanel"></div>
+
+  <div id="towerInfo">
+    <h3 id="tiName">Tower</h3>
+    <p><span id="tiKills">0</span> kills | <span id="tiDmg">0</span> dmg</p>
+    <button id="upgradeBtn">Upgrade (<span id="uCost">100</span>g)</button>
+    <button id="sellBtn">Sell (<span id="sCost">25</span>g)</button>
+  </div>
+
+  <div id="startOverlay" class="overlay show">
+    <div class="card">
+      <h1>🏰 Medieval Defense</h1>
+      <p>Defend your castle from the incoming hordes. Place towers strategically along the path to survive as many waves as you can. Good luck!</p>
+      <button class="btn" id="startBtn">Play</button>
+    </div>
+  </div>
+
+  <div id="gameOver" class="overlay">
+    <div class="card">
+      <h2>Game Over</h2>
+      <p>You survived <strong id="goWaves">0</strong> waves.<br>Score: <strong id="goScore">0</strong></p>
+      <button class="btn" id="restartBtn">Restart</button>
+    </div>
+  </div>
+
+  <script src="three.min.js"></script>
+  <script src="td.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+body {margin:0;overflow:hidden;background:#111;font-family:'Segoe UI',sans-serif;user-select:none;touch-action:manipulation;}
+#game {display:block;width:100vw;height:100vh;}
+.overlay {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  display:none; justify-content:center; align-items:center;
+  background:rgba(0,0,0,0.84); z-index:100;
+}
+.overlay.show {display:flex;}
+.card {
+  background:linear-gradient(145deg,#2c3e50,#1a252f);
+  padding:30px 40px; border-radius:16px; text-align:center;
+  max-width:600px; width:90%; box-shadow:0 0 40px rgba(0,0,0,0.3);
+}
+.card h1,h2 {color:#f1c40f; margin:0 0 12px;font-size:32px;text-shadow:0 2px 4px #000;}
+.card p {color:#ddd; font-size:15px; line-height:1.6;}
+.btn {
+  margin-top:16px; background:#2ecc71; border:2px solid #27ae60;
+  padding:14px 40px; font-size:18px; color:#fff; cursor:pointer; border-radius:5px;
+  transition:transform .1s, box-shadow .2s; box-shadow:0 5px 0 #1e8449;
+}
+.btn:active {transform: translateY(3px); box-shadow:0 2px 0 #1e8449;}
+
+#drawControls {
+  position:absolute; top:20px; left:20px; z-index:200; display:none;
+}
+#drawControls .btn {
+  margin:0 5px; padding:8px 16px; font-size:14px; background:#f39c12; border:2px solid #e67e22;
+}
+.is-drawing #game-cursor { pointers-events: none;}
+#buildPanel {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%); z-index:110;
+  display:flex; gap:6px; background:rgba(0,0,0,0.7); padding:4px; border-radius:10px;
+}
+.tower-btn {
+  display:flex; flex-direction:column; align-items:center; pointer-events:auto;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07);
+  color:#fff; padding: 3px; width:60px; cursor:pointer; border-radius:5px; font-size:10px;
+}
+
+
+
+.tower-btn:hover, .tower-btn.over { border-color: #ffd700; background: rgba(255,255,255,0.12); }
+
+#topBar {
+  position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  display:flex; gap:18px; background:rgba(0,0,0,0.4); padding:6px 18px; border-radius:5px;
+  font-size:14px; color:#fff; pointer-events:none;
+}
+.stat {display:flex; align-items:center;}
+.icon {margin-right:6px; font-size:22px;}
+.stat span:last-child {font-weight:700; min-width:30px; text-align:center;}
+#towerInfo {
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  background:rgba(0,0,0,0.7); padding:14px; width:220px; border-radius:10px; display:none; z-index:120;
+}
+#towerInfo h3 {margin:0 0 8px; color:#f1c40f; font-size:18px;}
+#towerInfo p {margin:0 0 12px; font-size:14px; color:#fff;}
+#towerInfo button {width:100%; margin:4px 0; padding:8px; color:#fff; background:rgba(255,255,255,0.12); border:0; border-radius:5px; cursor:pointer;}
+#towerInfo button:hover {background:rgba(255,255,255,0.4);}
+#upgradeBtn {background:rgba(241,196,15,0.25);}
+#sellBtn {background:rgba(231,76,60,0.25);}
+@media (max-width: 640px) {
+  #topBar {font-size:12px; padding:4px 8px; gap:8px;}
+  .stat span:last-child {min-width:20px;}
+  .card {padding:20px 16px;}
+  .card h1 {font-size:24px;}
+  .btn {padding:12px 30px; font-size:16px;}
+  .tower-info {width:160px; padding:12px 8px;}
+  .tower-info h3 {font-size:16px;}
+}
