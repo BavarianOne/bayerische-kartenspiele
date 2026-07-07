@@ -8,23 +8,6 @@ let scene, camera, renderer, raycaster, mouse;
 let clock, lastTime = 0;
 const rad = Math.PI / 180;
 
-/* ── debug ── */
-const dbgEl = document.getElementById('debug');
-let dbgLines = [];
-function dbg(msg) {
-  const t = new Date().toLocaleTimeString();
-  dbgLines.push(`[${t}] ${msg}`);
-  if (dbgLines.length > 50) dbgLines.shift();
-  dbgEl.textContent = dbgLines.join('\n');
-  console.log(msg);
-}
-
-window.addEventListener('error', function(e) {
-  dbg('GLOBAL ERROR: ' + e.message);
-  return true;
-});
-
-dbg('Script loading, THREE=' + (typeof THREE !== 'undefined' ? 'OK v' + THREE.REVISION : 'UNDEFINED'));
 
 
 /* ╔════════════════════════════════════════════════════════════════════════════════════════╗
@@ -111,7 +94,6 @@ function play(type) {
    ║  THREE.JS SETUP                                                                        ║
    ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
 function initRenderer() {
-  dbg('initRenderer() start');
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x87ceeb);
   scene.fog = new THREE.Fog(0x87ceeb, 80, 200);
@@ -127,21 +109,16 @@ function initRenderer() {
     const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
     if (gl) {
       webglSupported = true;
-      // Release the test context immediately
       const ext = gl.getExtension('WEBGL_lose_context');
       if (ext) ext.loseContext();
     }
   } catch(e) {
-    dbg('WebGL detection threw: ' + e.message);
     webglSupported = false;
   }
-  dbg('WebGL supported: ' + webglSupported);
 
   if (!webglSupported) {
-    dbg('WebGL not supported by this browser!');
     document.getElementById('startOverlay').innerHTML =
-      '<div class="card"><h1 style="color:#e74c3c;">⚠️ WebGL Not Available</h1><p>Your browser does not support WebGL, which is required for 3D rendering.<br>Please try a different browser or enable hardware acceleration.</p>' +
-      '<p style="color:#aaa;font-size:12px;">(If using Chrome/Edge, try opening in Firefox, or enable WebGL in chrome://flags)<br>If opening from a local file, try serving via a local web server instead.</p></div>';
+      '<div class="card"><h1 style="color:#e74c3c;">⚠️ WebGL Not Available</h1><p>Your browser does not support WebGL, which is required for 3D rendering.<br>Please try a different browser or enable hardware acceleration.</p></div>';
     return;
   }
 
@@ -151,20 +128,18 @@ function initRenderer() {
   /* Approach 1: Basic THREE renderer */
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    dbg('Approach 1 (basic) - context: ' + (renderer.getContext() ? 'OK' : 'NULL'));
     if (renderer.getContext()) created = true;
   } catch(e) {
-    dbg('Approach 1 failed: ' + e.message);
+    /* fall through */
   }
 
   /* Approach 2: With preserveDrawingBuffer */
   if (!created) {
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: false, preserveDrawingBuffer: true, alpha: false });
-      dbg('Approach 2 (preserveBuf) - context: ' + (renderer.getContext() ? 'OK' : 'NULL'));
       if (renderer.getContext()) created = true;
     } catch(e) {
-      dbg('Approach 2 failed: ' + e.message);
+      /* fall through */
     }
   }
 
@@ -175,19 +150,15 @@ function initRenderer() {
                  canvas.getContext('webgl', { alpha: false, antialias: true, stencil: false }) ||
                  canvas.getContext('experimental-webgl', { alpha: false, antialias: true, stencil: false });
       if (gl) {
-        dbg('Manually created GL context: OK');
         renderer = new THREE.WebGLRenderer({ canvas, context: gl, antialias: true });
         created = true;
-      } else {
-        dbg('Could not create GL context manually either');
       }
     } catch(e) {
-      dbg('Approach 3 failed: ' + e.message);
+      /* fall through */
     }
   }
 
   if (!created) {
-    dbg('All WebGL creation approaches failed - showing error');
     document.getElementById('startOverlay').innerHTML =
       '<div class="card"><h1 style="color:#e74c3c;">⚠️ Cannot Start 3D Renderer</h1><p>WebGL is reported as supported but the renderer failed to initialize.<br>Try opening this page in a different browser or from a local web server.</p></div>';
     return;
@@ -220,8 +191,6 @@ function initRenderer() {
   addEventListeners();
   buildWorld();
   setupInterface();
-  dbg('initRenderer() done - renderer:' + (renderer ? 'OK' : 'FAIL'));
-  dbg('scene children: ' + scene.children.length);
 }
 
 /* ╔════════════════════════════════════════════════════════════════════════════════════════╗
@@ -926,9 +895,8 @@ initRenderer();
 if (renderer) {
   try {
     renderer.render(scene, camera);
-    dbg('Initial render completed');
   } catch(e) {
-    dbg('Initial render failed: ' + e.message);
+    /* ignore */
   }
 }
 
