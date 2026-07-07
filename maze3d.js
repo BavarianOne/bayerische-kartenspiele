@@ -1,4 +1,4 @@
-const SZ = 20, W = 10, H = 5, CL = '#444861', CF = '#7a7a7a', CW = '#6b4c35', CD = '#8a3323', CK = '#2e8b57', CT = 'gold', CE = 'red', CP = 'purple', CO = 'blue', CS = 'white';
+const SZ = 20, W = 10, H = 5, CL = '#7a7a9a', CF = '#9a9a9a', CW = '#a08a7a', CD = '#8a3323', CK = '#2e8b57', CT = 'gold', CE = 'red', CP = 'purple', CO = 'blue', CS = 'white';
 let s, e, c, p, i = 0, tm = 0, sc = 0, kc = 0, tk = 0, lv = 1, ms = 10 + Date.now() % 5 * 2, l = 3, go = false, wi = false, ks = {}, mx = 0, my = 0, pr = true, fu = false, renderLoopId;
 let scene, camera, renderer, walls, maze = [], itm = [], doors = [], keys = [], ens = [], traps = [], orbs = [], part = [], gr, wc = 0, hc = 0;
 
@@ -15,9 +15,9 @@ function IM() {
   renderer.shadowMap.enabled = true;
   gr = new THREE.Group();
   scene.add(gr);
-  const al = new THREE.AmbientLight(0x404040, 0.6);
+  const al = new THREE.AmbientLight(0x404040, 0.8);
   scene.add(al);
-  const dl = new THREE.DirectionalLight(0xffffff, 0.5);
+  const dl = new THREE.DirectionalLight(0xffffff, 0.7);
   dl.position.set(50, 100, 50);
   dl.castShadow = true;
   scene.add(dl);
@@ -27,6 +27,8 @@ function IM() {
     camera.updateProjectionMatrix();
     renderer.setSize(a.clientWidth, a.clientHeight);
   });
+  
+  // Keyboard controls
   ae(document, 'keydown', z => {
     const a = z.key.toLowerCase();
     ks[a] = true;
@@ -43,17 +45,64 @@ function IM() {
     if (a === 'arrowleft') ks.a = false;
     if (a === 'arrowright') ks.d = false;
   });
+  
+  // Mouse look (desktop)
   ae(document, 'mousemove', z => {
     if (!pr) return;
     mx += z.movementX * 0.002;
     my = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, my + z.movementY * 0.002));
   });
+  
+  // Touch controls for movement buttons
+  const touchButtons = { w: gi('w'), a: gi('a'), s: gi('s'), d: gi('d') };
+  Object.entries(touchButtons).forEach(([key, btn]) => {
+    if (!btn) return;
+    const start = (e) => { e.preventDefault(); ks[key] = true; };
+    const end = (e) => { e.preventDefault(); ks[key] = false; };
+    ae(btn, 'touchstart', start);
+    ae(btn, 'touchend', end);
+    ae(btn, 'mousedown', start);
+    ae(btn, 'mouseup', end);
+    ae(btn, 'mouseleave', end);
+  });
+  
+  // Touch look (swipe on canvas)
+  let touchStartX = 0, touchStartY = 0, touchActive = false;
+  ae(g, 'touchstart', (e) => {
+    if (e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchActive = true;
+      // Request pointer lock on first touch
+      if (!pr && document.pointerLockElement !== g) g.requestPointerLock();
+    }
+  }, { passive: false });
+  
+  ae(g, 'touchmove', (e) => {
+    if (!touchActive || e.touches.length !== 1) return;
+    e.preventDefault();
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    mx += dx * 0.003;
+    my = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, my - dy * 0.003));
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: false });
+  
+  ae(g, 'touchend', (e) => {
+    touchActive = false;
+  });
+  
+  // Pointer lock
   ae(document, 'click', () => {
     if (!pr && document.pointerLockElement !== gi('cnv')) gi('cnv').requestPointerLock();
   });
   ae(document, 'pointerlockchange', () => {
     if (!pr) pr = document.pointerLockElement !== gi('cnv');
   });
+  
+  // Prevent context menu on canvas
+  ae(g, 'contextmenu', (e) => e.preventDefault());
 }
 
 function MX(sx, sy) {

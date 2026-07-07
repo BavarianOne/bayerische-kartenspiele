@@ -1,6 +1,40 @@
 <!DOCTYPE html><html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>3D Maze Game</title>
-<style> body{margin:0;overflow:hidden;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif} #intro{display:flex;flex-direction:column;align-items:center} #hud{display:none;justify-content:space-around;font-size:18px;padding:10px;background:#222} canvas{display:block;width:100%;height:100%} #w,#s,#a,#d{position:fixed;width:60px;height:60px;background:#ffffff80;border:2px solid #fff;border-radius:10px;text-align:center;line-height:60px;font-size:24px;font-weight:700;z-index:10000} #w{top:10px;left:70px} #a{top:70px;left:10px} #s{top:70px;left:70px} #d{top:70px;left:130px} #fs{border:none;background:#00ff00;color:#000;padding:10px 20px;font-size:18px;cursor:pointer;border-radius:5px;margin:10px} </style>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>3D Maze Game</title>
+<style>
+  body{margin:0;overflow:hidden;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif;touch-action:none}
+  #intro{display:flex;flex-direction:column;align-items:center}
+  #hud{display:none;justify-content:space-around;font-size:18px;padding:10px;background:#222}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+  #w,#s,#a,#d{
+    position:fixed;
+    width:70px;height:70px;
+    background:rgba(255,255,255,0.2);
+    border:3px solid #fff;
+    border-radius:12px;
+    text-align:center;
+    line-height:70px;
+    font-size:28px;
+    font-weight:700;
+    z-index:10000;
+    color:#fff;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #w:active,#a:active,#s:active,#d:active{background:rgba(255,255,255,0.4)}
+  #w{top:15px;left:80px}
+  #a{top:85px;left:15px}
+  #s{top:85px;left:80px}
+  #d{top:85px;left:145px}
+  #fs{border:none;background:#00ff00;color:#000;padding:10px 20px;font-size:18px;cursor:pointer;border-radius:5px;margin:10px}
+  @media (max-width: 600px) {
+    #w,#s,#a,#d{width:80px;height:80px;font-size:32px;line-height:80px}
+    #w{top:10px;left:90px}
+    #a{top:90px;left:10px}
+    #s{top:90px;left:90px}
+    #d{top:90px;left:170px}
+  }
+</style>
 <script src="three.min.js"></script>
 </head>
 <body>
