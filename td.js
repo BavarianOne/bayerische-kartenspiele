@@ -1,6 +1,6 @@
 const canvas = document.getElementById('game');
 const goldEl = document.getElementById('gold');
-const livesEl = document.getElementById('lives');
+const castleHpEl = document.getElementById('castleHp');
 const waveEl = document.getElementById('wave');
 const scoreEl = document.getElementById('score');
 
@@ -10,16 +10,18 @@ const rad = Math.PI / 180;
 
 
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔══════════════════════════════════════════════════════════════════════════════════════╗
    ║  GAME STATE                                                                            ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 let G = {
-  gold: 0, lives: 0, wave: 1, score: 0,
+  gold: 0, castleHp: 0, wave: 1, score: 0,
   state: 'idle', // 'idle' | 'playing' | 'wave_end' | 'game_over'
   isTowerSelected: false,
   selectedType: null,
   cursorMesh: null,
   castle: null,
+  castleHpBar: null,  // 3D billboard HP bar above castle
+  castleDamageStage: 0, // 0=pristine, 1=light smoke, 2=smoke+fire, 3=heavy damage
   pathPoints: [],
   enemies: [],
   towers: [],
@@ -33,9 +35,9 @@ let G = {
   pathGroup: null,  // group holding path visual meshes
 };
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  COMBAT CONSTANTS                                                                      ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 
 const TOWER_SPECS = {
   Bowman:    { name: 'Bowman',    cost: 50,  damage: 15,  range: 45,  fireRate: 0.8, colour: 0x2ecc71 },
@@ -48,9 +50,9 @@ const TOWER_SPECS = {
 const INITIAL_GOLD = 500;
 const INITIAL_LIVES = 20;
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  UTILITY FUNCTIONS                                                                     ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 let idCounter = 0;
 function uid() { return ++idCounter; }
 
@@ -61,9 +63,9 @@ function rngRange(a, b) { return a + rng() * (b - a); }
 /* ── vector helpers ───────────────────────────── */
 function dist2D(a, b) { return Math.sqrt((b.x - a.x) ** 2 + (b.z - a.z) ** 2); }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  SOUND EFFECTS (simple oscillator, no external assets)                                ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 let AC;
 function ensureAudio() {
   if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -91,9 +93,9 @@ function play(type) {
   osc.start(); osc.stop(AC.currentTime + d.dur);
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  THREE.JS SETUP                                                                        ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function initRenderer() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x87ceeb);
@@ -194,9 +196,9 @@ function initRenderer() {
   setupInterface();
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  WORLD BUILDERS                                                                        ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function buildWorld() {
   /* ── ground ── */
   const groundGeo = new THREE.PlaneGeometry(200, 200);
@@ -238,9 +240,9 @@ function makeCylinder(pos, col, r, h, name) {
   return mesh;
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  PATH SYSTEM — random Catmull-Rom path each game                                    ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 
 /* Generate random control points between start (-100,0,0) and end (0,0,0) */
 function generateRandomControlPoints() {
@@ -351,9 +353,9 @@ function getTotalPathLength() {
   return l;
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  IMPUTE COSINE (PROCEDURAL – no external assets)                                     ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function buildCastle() {
   const castle = new THREE.Group();
 
@@ -401,9 +403,221 @@ function buildCastle() {
   G.castle = castle;
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
+   ║  CASTLE HP BAR & DAMAGE STAGES                                                            ║
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
+function createCastleHpBar() {
+  const barGroup = new THREE.Group();
+  barGroup.position.set(0, 35, 0); // above castle
+
+  /* background bar */
+  const bgGeo = new THREE.PlaneGeometry(20, 2);
+  const bgMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide, depthTest: false });
+  const bg = new THREE.Mesh(bgGeo, bgMat);
+  bg.position.z = 0.1;
+  barGroup.add(bg);
+
+  /* foreground HP bar */
+  const fgGeo = new THREE.PlaneGeometry(20, 2);
+  const fgMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide, depthTest: false });
+  const fg = new THREE.Mesh(fgGeo, fgMat);
+  fg.position.z = 0.2;
+  barGroup.add(fg);
+
+  /* store reference to foreground for updates */
+  barGroup.userData.fg = fg;
+  barGroup.userData.maxWidth = 20;
+
+  scene.add(barGroup);
+  G.castleHpBar = barGroup;
+}
+
+function updateCastleHpBar() {
+  if (!G.castleHpBar) return;
+  const ratio = Math.max(0, G.castleHp / INITIAL_LIVES);
+  const fg = G.castleHpBar.userData.fg;
+  const maxW = G.castleHpBar.userData.maxWidth;
+  fg.scale.x = ratio;
+  fg.position.x = (ratio - 1) * maxW / 2; // anchor left
+
+  /* color gradient: green > yellow > red */
+  if (ratio > 0.5) {
+    fg.material.color.setHex(0x00ff00);
+  } else if (ratio > 0.25) {
+    fg.material.color.setHex(0xffff00);
+  } else {
+    fg.material.color.setHex(0xff0000);
+  }
+}
+
+function updateCastleDamageStage() {
+  if (!G.castle) return;
+  const ratio = G.castleHp / INITIAL_LIVES;
+  let newStage = 0;
+  if (ratio <= 0.25) newStage = 3;
+  else if (ratio <= 0.5) newStage = 2;
+  else if (ratio <= 0.75) newStage = 1;
+  else newStage = 0;
+
+  if (newStage === G.castleDamageStage) return;
+  G.castleDamageStage = newStage;
+
+  /* Clear existing damage effects */
+  clearCastleDamageEffects();
+
+  /* Apply new stage effects */
+  switch (newStage) {
+    case 1: addLightSmoke(); break;
+    case 2: addLightSmoke(); addSmallFires(); break;
+    case 3: addHeavySmoke(); addFires(); addCracks(); removeFlags(); break;
+  }
+}
+
+function clearCastleDamageEffects() {
+  if (!G.castle) return;
+  for (let i = G.castle.children.length - 1; i >= 0; i--) {
+    const child = G.castle.children[i];
+    if (child.userData.isDamageEffect) {
+      G.castle.remove(child);
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) child.material.dispose();
+    }
+  }
+}
+
+function addLightSmoke() {
+  if (!G.castle) return;
+  for (let dx of [-9, 9])
+    for (let dz of [-9, 9]) {
+      const smoke = createSmokeParticle(dx, 22, dz, 0x888888, 0.3, 0.5);
+      smoke.userData.isDamageEffect = true;
+      G.castle.add(smoke);
+    }
+}
+
+function addHeavySmoke() {
+  if (!G.castle) return;
+  for (let dx of [-9, 9])
+    for (let dz of [-9, 9]) {
+      const smoke = createSmokeParticle(dx, 22, dz, 0x444444, 0.6, 1.0);
+      smoke.userData.isDamageEffect = true;
+      G.castle.add(smoke);
+      const smoke2 = createSmokeParticle(dx + rngRange(-2, 2), 15, dz + rngRange(-2, 2), 0x555555, 0.4, 0.8);
+      smoke2.userData.isDamageEffect = true;
+      G.castle.add(smoke2);
+    }
+}
+
+function createSmokeParticle(x, y, z, color, opacity, scale) {
+  const geo = new THREE.SphereGeometry(1.5 * scale, 8, 8);
+  const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  mesh.userData.smoke = true;
+  mesh.userData.baseY = y;
+  mesh.userData.speed = 0.5 + rng() * 0.5;
+  mesh.userData.phase = rng() * Math.PI * 2;
+  return mesh;
+}
+
+function addSmallFires() {
+  if (!G.castle) return;
+  for (let dx of [-9, 9])
+    for (let dz of [-9, 9]) {
+      if (rng() < 0.5) {
+        const fire = createFireParticle(dx + rngRange(-1, 1), 20, dz + rngRange(-1, 1), 0.5);
+        fire.userData.isDamageEffect = true;
+        G.castle.add(fire);
+      }
+    }
+}
+
+function addFires() {
+  if (!G.castle) return;
+  for (let dx of [-9, 9])
+    for (let dz of [-9, 9]) {
+      const fire = createFireParticle(dx + rngRange(-2, 2), 18, dz + rngRange(-2, 2), 1.0);
+      fire.userData.isDamageEffect = true;
+      G.castle.add(fire);
+      if (rng() < 0.5) {
+        const fire2 = createFireParticle(dx + rngRange(-3, 3), 10, dz + rngRange(-3, 3), 0.7);
+        fire2.userData.isDamageEffect = true;
+        G.castle.add(fire2);
+      }
+    }
+}
+
+function createFireParticle(x, y, z, scale) {
+  const geo = new THREE.ConeGeometry(0.5 * scale, 2 * scale, 6);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.8, depthWrite: false });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  mesh.userData.fire = true;
+  mesh.userData.baseY = y;
+  mesh.userData.flickerSpeed = 5 + rng() * 10;
+  mesh.userData.phase = rng() * Math.PI * 2;
+  return mesh;
+}
+
+function addCracks() {
+  if (!G.castle) return;
+  /* Add dark crack lines on castle base */
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = Math.cos(angle) * 10;
+    const z = Math.sin(angle) * 10;
+    const crackGeo = new THREE.PlaneGeometry(0.3, 4 + rng() * 3);
+    const crackMat = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+    const crack = new THREE.Mesh(crackGeo, crackMat);
+    crack.position.set(x, 0.5, z);
+    crack.rotation.y = angle;
+    crack.userData.isDamageEffect = true;
+    G.castle.add(crack);
+  }
+}
+
+function removeFlags() {
+  if (!G.castle) return;
+  for (let i = G.castle.children.length - 1; i >= 0; i--) {
+    const child = G.castle.children[i];
+    if (child.geometry && child.geometry.type === 'PlaneGeometry' && child.material.color.getHex() === 0xff0000) {
+      G.castle.remove(child);
+      child.geometry.dispose();
+      child.material.dispose();
+    }
+    if (child.geometry && child.geometry.type === 'CylinderGeometry' && child.material.color.getHex() === 0x333333 && child.scale.y > 5) {
+      G.castle.remove(child);
+      child.geometry.dispose();
+      child.material.dispose();
+    }
+  }
+}
+
+function updateCastleDamageEffects(dt) {
+  if (!G.castle) return;
+  for (const child of G.castle.children) {
+    if (child.userData.smoke) {
+      child.position.y += child.userData.speed * dt;
+      child.position.x += Math.sin(performance.now() * 0.001 + child.userData.phase) * 0.1 * dt;
+      child.position.z += Math.cos(performance.now() * 0.001 + child.userData.phase) * 0.1 * dt;
+      child.material.opacity = Math.max(0, 0.6 - (child.position.y - child.userData.baseY) * 0.05);
+      if (child.position.y > child.userData.baseY + 10) {
+        child.position.y = child.userData.baseY;
+        child.position.x += rngRange(-1, 1);
+        child.position.z += rngRange(-1, 1);
+      }
+    }
+    if (child.userData.fire) {
+      const flicker = Math.sin(performance.now() * child.userData.flickerSpeed * 0.001 + child.userData.phase) * 0.3 + 0.7;
+      child.scale.y = flicker;
+      child.material.opacity = flicker * 0.8;
+    }
+  }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  CREATE TOWER (BASIC, BEFORE UPGRADES)                                                 ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function createTower(typeKey, x, z) {
   const spec = TOWER_SPECS[typeKey];
 
@@ -459,9 +673,9 @@ function createTower(typeKey, x, z) {
   return towerObj;
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  SPAWN ENEMY                                                                             ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function spawnEnemy(wave) {
   const isBoss = wave % 5 === 0;
   const isElite = wave % 3 === 0;
@@ -498,20 +712,34 @@ function spawnEnemy(wave) {
   scene.add(mesh);
   enemy.mesh = mesh;
 
-  /* health bar */
-  const barGeo = new THREE.PlaneGeometry(geoSize * 2.5, 0.5);
-  const barMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-  const bar = new THREE.Mesh(barGeo, barMat);
-  bar.position.set(0, s + 1, 0);
-  mesh.add(bar);
-  enemy.hpBar = bar;
+  /* health bar - improved with billboard, background, gradient */
+  const barWidth = geoSize * 2.5;
+  const barHeight = 0.5;
+  
+  /* background bar */
+  const bgGeo = new THREE.PlaneGeometry(barWidth, barHeight);
+  const bgMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide, depthTest: false });
+  const bgBar = new THREE.Mesh(bgGeo, bgMat);
+  bgBar.position.set(0, s + 1, 0.1);
+  mesh.add(bgBar);
+  
+  /* foreground HP bar */
+  const fgGeo = new THREE.PlaneGeometry(barWidth, barHeight);
+  const fgMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide, depthTest: false });
+  const fgBar = new THREE.Mesh(fgGeo, fgMat);
+  fgBar.position.set(0, s + 1, 0.2);
+  mesh.add(fgBar);
+  
+  enemy.hpBar = fgBar;
+  enemy.hpBarBg = bgBar;
+  enemy.hpBarMaxWidth = barWidth;
 
   G.enemies.push(enemy);
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  UPDATE LOOP                                                                             ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function gameLoop(now) {
   requestAnimationFrame(gameLoop);
   const dt = (now - lastTime) / 1000;
@@ -537,12 +765,15 @@ function gameLoop(now) {
     updateProjectiles(dt);
     updateParticles(dt);
     updateUI();
+    updateCastleHpBar();
+    updateCastleDamageStage();
+    updateCastleDamageEffects(dt);
 
     if (G.waveEnemiesSpawned >= G.waveEnemyCount && G.enemies.length === 0 && G.state === 'playing') {
       waveComplete();
     }
 
-    if (G.lives <= 0 && G.state !== 'game_over') {
+    if (G.castleHp <= 0 && G.state !== 'game_over') {
       gameOver();
     }
   }
@@ -550,9 +781,9 @@ function gameLoop(now) {
   if (renderer) renderer.render(scene, camera);
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  ENEMY UPDATE                                                                           ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function updateEnemies(dt) {
   const totalLen = getTotalPathLength();
   for (let i = G.enemies.length - 1; i >= 0; i--) {
@@ -578,8 +809,23 @@ function updateEnemies(dt) {
     if (e.effects.burning > 0) e.effects.burning -= dt;
 
     if (e.hpBar) {
-      e.hpBar.scale.x = Math.max(0, e.hp / e.maxHp);
+      const ratio = Math.max(0, e.hp / e.maxHp);
+      e.hpBar.scale.x = ratio;
+      e.hpBar.position.x = (ratio - 1) * e.hpBarMaxWidth / 2;
       e.hpBar.position.y = 2 + (e.effects.frozen > 0 ? 0.1 : 0);
+      
+      /* color gradient: green > yellow > red */
+      if (ratio > 0.5) {
+        e.hpBar.material.color.setHex(0x00ff00);
+      } else if (ratio > 0.25) {
+        e.hpBar.material.color.setHex(0xffff00);
+      } else {
+        e.hpBar.material.color.setHex(0xff0000);
+      }
+      
+      /* billboard to camera */
+      e.hpBar.lookAt(camera.position);
+      if (e.hpBarBg) e.hpBarBg.lookAt(camera.position);
     }
 
     if (e.hp <= 0) {
@@ -605,7 +851,7 @@ function enemyKilled(e, idx) {
 }
 
 function castleHit(e) {
-  G.lives -= 1;
+  G.castleHp -= 1;
   play('hit');
   if (G.castle) {
     G.castle.position.y += 2;
@@ -615,9 +861,9 @@ function castleHit(e) {
   if (idx !== -1) removeEnemy(idx);
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  TOWER LOGIC                                                                            ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function updateTowers(dt, now) {
   for (const tower of G.towers) {
     let target = null, bestDist = Infinity;
@@ -661,9 +907,9 @@ function fireProjectile(tower, target) {
   play('shoot');
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  PROJECTILE UPDATE                                                                       ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function updateProjectiles(dt) {
   for (let i = G.projectiles.length - 1; i >= 0; i--) {
     const p = G.projectiles[i];
@@ -691,9 +937,9 @@ function removeProjectile(idx) {
   G.projectiles.splice(idx, 1);
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  PARTICLES                                                                               ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function spawnDeathParticles(pos, colour) {
   for (let i = 0; i < 8; i++) {
     const pGeo = new THREE.SphereGeometry(0.4, 4, 4);
@@ -736,9 +982,9 @@ function updateParticles(dt) {
   }
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  CURSOR / PLACEMENT                                                                      ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function updateCursor() {
   if (G.isTowerSelected) {
     raycaster.setFromCamera(mouse, camera);
@@ -797,9 +1043,9 @@ function deselectTower() {
   if (G.cursorMesh) { G.cursorMesh.visible = false; }
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  UI                                                                                       ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function setupInterface() {
   const buildPanel = document.getElementById('buildPanel');
   for (const [key, spec] of Object.entries(TOWER_SPECS)) {
@@ -820,14 +1066,14 @@ function selectTower(type) {
 
 function updateUI() {
   goldEl.textContent = G.gold;
-  livesEl.textContent = G.lives;
+  castleHpEl.textContent = G.castleHp;
   waveEl.textContent = G.wave;
   scoreEl.textContent = G.score;
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  STATE & WAVES                                                                           ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function startGame() {
   resetGame();
   G.state = 'playing';
@@ -866,9 +1112,9 @@ function gameOver() {
   document.getElementById('gameOver').classList.add('show');
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  GRASS TEXTURE (PROCEDURAL)                                                               ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function makeGrassTexture() {
   const size = 512;
   const c = document.createElement('canvas');
@@ -887,9 +1133,9 @@ function makeGrassTexture() {
   return tex;
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  EVENT LISTENERS                                                                           ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function addEventListeners() {
   window.addEventListener('resize', () => {
     camera.aspect = innerWidth / innerHeight;
@@ -917,9 +1163,9 @@ function addEventListeners() {
   });
 }
 
-/* ╔════════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  INITIALISATION                                                                              ║
-   ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function resetGame() {
   /* remove all dynamic objects from scene, leaving static world */
   for (const t of G.towers)   { scene.remove(t.mesh); }
@@ -927,11 +1173,19 @@ function resetGame() {
   for (const p of G.projectiles) { if (p.mesh) scene.remove(p.mesh); }
   for (const q of G.particles)   { if (q.mesh) scene.remove(q.mesh); }
 
+  /* Remove old castle HP bar if exists */
+  if (G.castleHpBar) {
+    scene.remove(G.castleHpBar);
+    G.castleHpBar.geometry.dispose();
+    G.castleHpBar.material.dispose();
+    G.castleHpBar = null;
+  }
+
   /* Generate a new random path for this game */
   makePath();
 
   G.gold     = INITIAL_GOLD;
-  G.lives    = INITIAL_LIVES;
+  G.castleHp = INITIAL_LIVES;
   G.wave     = 1;
   G.score    = 0;
   G.state    = 'playing';
@@ -939,6 +1193,10 @@ function resetGame() {
   G.towers   = [];
   G.projectiles = [];
   G.particles   = [];
+  G.castleDamageStage = 0;
+
+  /* Create castle HP bar */
+  createCastleHpBar();
 
   document.getElementById('gameOver').classList.remove('show');
 }
