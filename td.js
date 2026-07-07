@@ -55,7 +55,7 @@ const TOWER_SPECS = {
 
 const INITIAL_GOLD = 500;
 const INITIAL_CASTLE_HP = 500;
-const CASTLE_DAMAGE_PER_ENEMY = 5;
+const CASTLE_DAMAGE_PER_ENEMY = 15;
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  UTILITY FUNCTIONS                                                                     ║
