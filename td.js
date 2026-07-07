@@ -30,6 +30,7 @@ let G = {
   waveEnemyCount: 0,
   waveEnemiesSpawned: 0,
   waveEnemiesKilled: 0,
+  pathGroup: null,  // group holding path visual meshes
 };
 
 /* ╔════════════════════════════════════════════════════════════════════════════════════════╗
@@ -207,6 +208,9 @@ function buildWorld() {
   scene.add(ground);
   ground.userData.isGround = true;
 
+  /* ── path group (cleared and rebuilt each game) ── */
+  G.pathGroup = new THREE.Group();
+  scene.add(G.pathGroup);
   makePath();     // carve the dirt
 
   /* ── grids (for readability) ── */
@@ -235,33 +239,91 @@ function makeCylinder(pos, col, r, h, name) {
 }
 
 /* ╔════════════════════════════════════════════════════════════════════════════════════════╗
-   ║  PATH SYSTEM                                                                            ║
+   ║  PATH SYSTEM — random Catmull-Rom path each game                                    ║
    ╚════════════════════════════════════════════════════════════════════════════════════════╝ */
-function makePath() {
-  G.pathPoints = [
-    new THREE.Vector3(-100, 0,   0),
-    new THREE.Vector3(-80,  0, -20),
-    new THREE.Vector3(-60,  0,  20),
-    new THREE.Vector3(-40,  0, -40),
-    new THREE.Vector3(-20,  0,   20),
-    new THREE.Vector3( 10,  0,   0),
-    new THREE.Vector3(  0,  0,   0),
-  ];
 
-  /* ─Sea── dirt trail along the path ── */
+/* Generate random control points between start (-100,0,0) and end (0,0,0) */
+function generateRandomControlPoints() {
+  const start = new THREE.Vector3(-100, 0, 0);
+  const end   = new THREE.Vector3(0, 0, 0);
+  const numMid = 4 + Math.floor(rng() * 3); // 4-6 intermediate points
+
+  const pts = [start];
+  for (let i = 0; i < numMid; i++) {
+    const t = (i + 1) / (numMid + 1); // 0..1 progress from start to end
+    const x = -100 + t * 100;          // linearly spaced in x from -100 to 0
+    /* Z jitter: up to ±60 but clamped to ±80 to stay on ground */
+    const z = Math.max(-80, Math.min(80, (rng() - 0.5) * 120));
+    pts.push(new THREE.Vector3(x, 0, z));
+  }
+  pts.push(end);
+  return pts;
+}
+
+/* Catmull-Rom interpolation between control points */
+function catmullRomPath(controlPoints, samplesPerSegment = 10) {
+  const result = [];
+  for (let i = 0; i < controlPoints.length - 1; i++) {
+    const p0 = controlPoints[Math.max(0, i - 1)];
+    const p1 = controlPoints[i];
+    const p2 = controlPoints[i + 1];
+    const p3 = controlPoints[Math.min(controlPoints.length - 1, i + 2)];
+
+    for (let s = 0; s < samplesPerSegment; s++) {
+      const t = s / samplesPerSegment;
+      const tt = t * t;
+      const ttt = tt * t;
+
+      const x = 0.5 * (
+        (2 * p1.x) + (-p0.x + p2.x) * t +
+        (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * tt +
+        (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * ttt
+      );
+      const z = 0.5 * (
+        (2 * p1.z) + (-p0.z + p2.z) * t +
+        (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * tt +
+        (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * ttt
+      );
+      result.push(new THREE.Vector3(x, 0, z));
+    }
+  }
+  /* Ensure exact end point */
+  const last = controlPoints[controlPoints.length - 1];
+  result.push(new THREE.Vector3(last.x, 0, last.z));
+  return result;
+}
+
+function makePath() {
+  /* Clear any previous path visuals */
+  if (G.pathGroup) {
+    while (G.pathGroup.children.length > 0) {
+      const child = G.pathGroup.children[0];
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) child.material.dispose();
+      G.pathGroup.remove(child);
+    }
+  }
+
+  /* Generate random control points and smooth Catmull-Rom path */
+  const controlPts = generateRandomControlPoints();
+  const smoothPts = catmullRomPath(controlPts, 10);
+  G.pathPoints = smoothPts;
+
+  /* Build dirt trail strips between consecutive path points */
+  const dirtMat = new THREE.MeshStandardMaterial({ color: 0x6b5838, roughness: 1 });
   for (let i = 0; i < G.pathPoints.length - 1; i++) {
     const a = G.pathPoints[i], b = G.pathPoints[i + 1];
-
     const len = a.distanceTo(b);
+    if (len < 0.01) continue;
     const mid = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5);
-    const geo = new THREE.PlaneGeometry(16, len + 2);
-    const m = new THREE.MeshStandardMaterial({ color: 0x6b5838, roughness: 1 });
-    const strip = new THREE.Mesh(geo, m);
-    strip.position.copy(mid); strip.position.y = 0.02;
+    const geo = new THREE.PlaneGeometry(10, len + 0.5);
+    const strip = new THREE.Mesh(geo, dirtMat);
+    strip.position.copy(mid);
+    strip.position.y = 0.02;
     strip.lookAt(b.x, 0.02, b.z);
     strip.rotateY(Math.PI / 2);
     strip.receiveShadow = true;
-    scene.add(strip);
+    if (G.pathGroup) G.pathGroup.add(strip);
   }
 }
 
@@ -864,6 +926,9 @@ function resetGame() {
   for (const e of G.enemies)  { if (e.mesh) scene.remove(e.mesh); }
   for (const p of G.projectiles) { if (p.mesh) scene.remove(p.mesh); }
   for (const q of G.particles)   { if (q.mesh) scene.remove(q.mesh); }
+
+  /* Generate a new random path for this game */
+  makePath();
 
   G.gold     = INITIAL_GOLD;
   G.lives    = INITIAL_LIVES;
