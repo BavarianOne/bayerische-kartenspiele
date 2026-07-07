@@ -1,9 +1,31 @@
 const SZ = 20, W = 10, H = 5, CL = '#7a7a9a', CF = '#9a9a9a', CW = '#a08a7a', CD = '#8a3323', CK = '#2e8b57', CT = 'gold', CE = 'red', CP = 'purple', CO = 'blue', CS = 'white';
-let s, e, c, p, i = 0, tm = 0, sc = 0, kc = 0, tk = 0, lv = 1, ms = 10 + Date.now() % 5 * 2, l = 3, go = false, wi = false, ks = {}, mx = 0, my = 0, pr = true, fu = false, renderLoopId;
+let s, e, c, p, i = 0, tm = 0, sc = 0, kc = 0, tk = 0, lv = 1, ms = 10 + Date.now() % 5 * 2, l = 3, go = false, wi = false, ks = {}, mx = 0, my = 0, pr = false, fu = false, renderLoopId;
 let scene, camera, renderer, walls, maze = [], itm = [], doors = [], keys = [], ens = [], traps = [], orbs = [], part = [], gr, wc = 0, hc = 0;
+// Mouse look state (simple click-drag, no pointer lock)
+let mouseLookActive = false;
+let mouseLookStartX = 0, mouseLookStartY = 0;
+// usePointerLock is declared later near the pointer lock toggle functionality
 
 function gi(a) { return document.getElementById(a); }
 function ae(t, e, l) { t.addEventListener(e, l); }
+
+// Keyboard controls (desktop) - registered immediately at load
+ae(document, 'keydown', z => {
+  const a = z.key.toLowerCase();
+  ks[a] = true;
+  if (a === 'arrowup') ks.w = true;
+  if (a === 'arrowdown') ks.s = true;
+  if (a === 'arrowleft') ks.a = true;
+  if (a === 'arrowright') ks.d = true;
+});
+ae(document, 'keyup', z => {
+  const a = z.key.toLowerCase();
+  ks[a] = false;
+  if (a === 'arrowup') ks.w = false;
+  if (a === 'arrowdown') ks.s = false;
+  if (a === 'arrowleft') ks.a = false;
+  if (a === 'arrowright') ks.d = false;
+});
 
 function IM() {
   const g = gi('cnv');
@@ -28,81 +50,156 @@ function IM() {
     renderer.setSize(a.clientWidth, a.clientHeight);
   });
   
-  // Keyboard controls
-  ae(document, 'keydown', z => {
-    const a = z.key.toLowerCase();
-    ks[a] = true;
-    if (a === 'arrowup') ks.w = true;
-    if (a === 'arrowdown') ks.s = true;
-    if (a === 'arrowleft') ks.a = true;
-    if (a === 'arrowright') ks.d = true;
-  });
-  ae(document, 'keyup', z => {
-    const a = z.key.toLowerCase();
-    ks[a] = false;
-    if (a === 'arrowup') ks.w = false;
-    if (a === 'arrowdown') ks.s = false;
-    if (a === 'arrowleft') ks.a = false;
-    if (a === 'arrowright') ks.d = false;
-  });
+  // ===== VIRTUAL JOYSTICK (left side) =====
+  const joystickContainer = gi('joystickContainer');
+  const joystickStick = gi('joystickStick');
+  const joystickBase = gi('joystickBase');
+  let joystickActive = false;
+  let joystickPointerId = null;
+  const joystickCenter = { x: 0, y: 0 };
+  const maxJoystickDist = 35; // radius of movement
   
-  // Mouse look (desktop)
-  ae(document, 'mousemove', z => {
-    if (!pr) return;
-    mx += z.movementX * 0.002;
-    my = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, my + z.movementY * 0.002));
-  });
-  
-  // Touch controls for movement buttons
-  const touchButtons = { w: gi('w'), a: gi('a'), s: gi('s'), d: gi('d') };
-  Object.entries(touchButtons).forEach(([key, btn]) => {
-    if (!btn) return;
-    const start = (e) => { e.preventDefault(); ks[key] = true; };
-    const end = (e) => { e.preventDefault(); ks[key] = false; };
-    ae(btn, 'touchstart', start);
-    ae(btn, 'touchend', end);
-    ae(btn, 'mousedown', start);
-    ae(btn, 'mouseup', end);
-    ae(btn, 'mouseleave', end);
-  });
-  
-  // Touch look (swipe on canvas)
-  let touchStartX = 0, touchStartY = 0, touchActive = false;
-  ae(g, 'touchstart', (e) => {
-    if (e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      touchActive = true;
-      // Request pointer lock on first touch
-      if (!pr && document.pointerLockElement !== g) g.requestPointerLock();
+  function updateJoystickPosition(clientX, clientY) {
+    const dx = clientX - joystickCenter.x;
+    const dy = clientY - joystickCenter.y;
+    const dist = Math.hypot(dx, dy);
+    
+    if (dist > maxJoystickDist) {
+      const angle = Math.atan2(dy, dx);
+      joystickStick.style.transform = `translate(-50%, -50%) translate(${Math.cos(angle) * maxJoystickDist}px, ${Math.sin(angle) * maxJoystickDist}px)`;
+      // Normalize input
+      ks.joyX = Math.cos(angle);
+      ks.joyY = Math.sin(angle);
+    } else {
+      joystickStick.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+      // Normalize input (0 to 1)
+      ks.joyX = dx / maxJoystickDist;
+      ks.joyY = dy / maxJoystickDist;
     }
-  }, { passive: false });
+    joystickStick.classList.add('active');
+  }
   
-  ae(g, 'touchmove', (e) => {
-    if (!touchActive || e.touches.length !== 1) return;
+  function resetJoystick() {
+    joystickStick.style.transform = 'translate(-50%, -50%)';
+    joystickStick.classList.remove('active');
+    ks.joyX = 0;
+    ks.joyY = 0;
+  }
+  
+  function getJoystickCenter() {
+    const rect = joystickBase.getBoundingClientRect();
+    joystickCenter.x = rect.left + rect.width / 2;
+    joystickCenter.y = rect.top + rect.height / 2;
+  }
+  
+  // Pointer events for joystick (works for touch, mouse, pen)
+  ae(joystickContainer, 'pointerdown', (e) => {
     e.preventDefault();
-    const dx = e.touches[0].clientX - touchStartX;
-    const dy = e.touches[0].clientY - touchStartY;
-    mx += dx * 0.003;
-    my = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, my - dy * 0.003));
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
+    joystickContainer.setPointerCapture(e.pointerId);
+    joystickPointerId = e.pointerId;
+    joystickActive = true;
+    getJoystickCenter();
+    updateJoystickPosition(e.clientX, e.clientY);
+    joystickContainer.classList.remove('hidden');
   }, { passive: false });
   
-  ae(g, 'touchend', (e) => {
-    touchActive = false;
+  ae(joystickContainer, 'pointermove', (e) => {
+    if (!joystickActive || e.pointerId !== joystickPointerId) return;
+    e.preventDefault();
+    updateJoystickPosition(e.clientX, e.clientY);
+  }, { passive: false });
+  
+  ae(joystickContainer, 'pointerup', (e) => {
+    if (e.pointerId !== joystickPointerId) return;
+    e.preventDefault();
+    joystickActive = false;
+    joystickPointerId = null;
+    joystickContainer.releasePointerCapture(e.pointerId);
+    resetJoystick();
+    // Auto-hide after 3 seconds of inactivity
+    setTimeout(() => {
+      if (!joystickActive) joystickContainer.classList.add('hidden');
+    }, 3000);
+  }, { passive: false });
+  
+  ae(joystickContainer, 'pointerleave', (e) => {
+    if (e.pointerId !== joystickPointerId) return;
+    e.preventDefault();
+    joystickActive = false;
+    joystickPointerId = null;
+    resetJoystick();
+    setTimeout(() => {
+      if (!joystickActive) joystickContainer.classList.add('hidden');
+    }, 3000);
+  }, { passive: false });
+  
+  // Also handle pointercancel
+  ae(joystickContainer, 'pointercancel', (e) => {
+    if (e.pointerId !== joystickPointerId) return;
+    joystickActive = false;
+    joystickPointerId = null;
+    resetJoystick();
+    setTimeout(() => {
+      if (!joystickActive) joystickContainer.classList.add('hidden');
+    }, 3000);
+  }, { passive: false });
+  
+  // Show joystick on any touch/click on left side
+  ae(document, 'pointerdown', (e) => {
+    if (e.clientX < window.innerWidth / 2 && !joystickActive) {
+      joystickContainer.classList.remove('hidden');
+    }
   });
   
-  // Pointer lock
-  ae(document, 'click', () => {
-    if (!pr && document.pointerLockElement !== gi('cnv')) gi('cnv').requestPointerLock();
-  });
-  ae(document, 'pointerlockchange', () => {
-    if (!pr) pr = document.pointerLockElement !== gi('cnv');
+  // ===== MOUSE LOOK - Simple Click & Drag (Desktop) =====
+  // This replaces the complex pointer lock system
+  let mouseLookActive = false;
+  
+  // Mouse events for simple click-drag look (works on desktop without pointer lock)
+  ae(g, 'mousedown', (e) => {
+    // Right click or middle click for looking (left click could be for interaction later)
+    if (e.button === 1 || e.button === 2) { // middle or right mouse button
+      e.preventDefault();
+      mouseLookActive = true;
+      g.style.cursor = 'grabbing';
+      g.focus(); // Ensure keyboard focus
+    }
   });
   
-  // Prevent context menu on canvas
+  ae(g, 'mousemove', (e) => {
+    if (!mouseLookActive) return;
+    e.preventDefault();
+    // Use movementX/Y which works even without pointer lock when mouse is captured
+    mx += e.movementX * 0.002;
+    my = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, my + e.movementY * 0.002));
+  });
+  
+  ae(g, 'mouseup', (e) => {
+    if (e.button === 1 || e.button === 2) {
+      mouseLookActive = false;
+      g.style.cursor = 'grab';
+    }
+  });
+  
+  ae(g, 'mouseleave', () => {
+    mouseLookActive = false;
+    g.style.cursor = 'grab';
+  });
+  
+  // Prevent context menu on canvas (right click)
   ae(g, 'contextmenu', (e) => e.preventDefault());
+  
+  // Optional: Pointer lock for advanced users (activated by button)
+  // This is now optional and not the default
+  ae(document, 'pointerlockchange', () => {
+    pr = document.pointerLockElement === g;
+  });
+  
+  // Initialize joystick as hidden
+  joystickContainer.classList.add('hidden');
+  
+  // Set initial cursor style
+  g.style.cursor = 'grab';
 }
 
 function MX(sx, sy) {
@@ -330,10 +427,25 @@ function movePlayer(dt) {
   const sp = 12 * dt;
   let dx = 0, dz = 0;
   const dir = new THREE.Vector2(Math.sin(camera.rotation.y), Math.cos(camera.rotation.y));
+  
+  // Keyboard controls
   if (ks.w || ks.arrowup) { dx -= dir.x; dz -= dir.y; }
   if (ks.s || ks.arrowdown) { dx += dir.x; dz += dir.y; }
   if (ks.a || ks.arrowleft) { dx -= dir.y; dz += dir.x; }
   if (ks.d || ks.arrowright) { dx += dir.y; dz -= dir.x; }
+  
+  // Virtual joystick controls (joyX = strafe left/right, joyY = forward/backward)
+  // Note: joyY is negative for forward (up on screen), positive for backward
+  if (ks.joyY !== 0) {
+    const forward = -ks.joyY; // negative joyY = up on screen = forward
+    dx -= dir.x * forward;
+    dz -= dir.y * forward;
+  }
+  if (ks.joyX !== 0) {
+    const strafe = ks.joyX; // positive = right
+    dx += dir.y * strafe;
+    dz -= dir.x * strafe;
+  }
   
   if (dx || dz) {
     const len = Math.hypot(dx, dz);
@@ -459,7 +571,57 @@ function startGame() {
   IM();
   initLevel();
   animate();
+  // Focus canvas for keyboard controls
+  gi('cnv').focus();
+  // Show pointer lock button on desktop
+  checkShowPLButton();
 }
+
+// Pointer lock toggle functionality
+let usePointerLock = false;
+const plBtn = gi('plBtn');
+const lookModeEl = gi('lookMode');
+
+function togglePointerLock() {
+  const g = gi('cnv');
+  if (!usePointerLock) {
+    // Enable pointer lock
+    g.requestPointerLock();
+    usePointerLock = true;
+    plBtn.textContent = 'Disable Pointer Lock';
+    plBtn.style.background = '#884400';
+    lookModeEl.textContent = 'Look: Pointer Lock (ESC to exit)';
+  } else {
+    // Disable pointer lock
+    document.exitPointerLock();
+    usePointerLock = false;
+    plBtn.textContent = 'Enable Pointer Lock';
+    plBtn.style.background = '#444';
+    lookModeEl.textContent = 'Look: Click-Drag (Right/Middle Mouse)';
+  }
+}
+
+// Show pointer lock button on desktop
+function checkShowPLButton() {
+  // Show button on non-touch devices or when pointer lock is available
+  if (window.matchMedia('(pointer: fine)').matches) {
+    plBtn.style.display = 'inline-block';
+  }
+}
+
+ae(plBtn, 'click', togglePointerLock);
+
+// Handle pointer lock change
+document.addEventListener('pointerlockchange', () => {
+  pr = document.pointerLockElement === gi('cnv');
+  if (!pr && usePointerLock) {
+    // Pointer lock was lost (user pressed ESC)
+    usePointerLock = false;
+    plBtn.textContent = 'Enable Pointer Lock';
+    plBtn.style.background = '#444';
+    lookModeEl.textContent = 'Look: Click-Drag (Right/Middle Mouse)';
+  }
+});
 
 // Event listeners
 ae(gi('sB'), 'click', startGame);

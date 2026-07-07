@@ -5,34 +5,133 @@
   #intro{display:flex;flex-direction:column;align-items:center}
   #hud{display:none;justify-content:space-around;font-size:18px;padding:10px;background:#222}
   canvas{display:block;width:100%;height:100%;touch-action:none}
-  #w,#s,#a,#d{
-    position:fixed;
-    width:70px;height:70px;
-    background:rgba(255,255,255,0.2);
-    border:3px solid #fff;
-    border-radius:12px;
-    text-align:center;
-    line-height:70px;
-    font-size:28px;
-    font-weight:700;
-    z-index:10000;
-    color:#fff;
-    user-select:none;
-    -webkit-user-select:none;
-    -webkit-tap-highlight-color:transparent;
-  }
-  #w:active,#a:active,#s:active,#d:active{background:rgba(255,255,255,0.4)}
-  #w{top:15px;left:80px}
-  #a{top:85px;left:15px}
-  #s{top:85px;left:80px}
-  #d{top:85px;left:145px}
   #fs{border:none;background:#00ff00;color:#000;padding:10px 20px;font-size:18px;cursor:pointer;border-radius:5px;margin:10px}
-  @media (max-width: 600px) {
-    #w,#s,#a,#d{width:80px;height:80px;font-size:32px;line-height:80px}
-    #w{top:10px;left:90px}
-    #a{top:90px;left:10px}
-    #s{top:90px;left:90px}
-    #d{top:90px;left:170px}
+  
+  /* Virtual Joystick */
+  #joystickContainer {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 120px;
+    height: 120px;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+  #joystickContainer.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #joystickContainer:not(.hidden):active {
+    opacity: 1;
+  }
+  #joystickBase {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 20px rgba(0,212,255,0.3), inset 0 0 20px rgba(0,0,0,0.5);
+  }
+  #joystickStick {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle at 30% 30%, #00d4ff, #0099cc);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    top: 35px;
+    left: 35px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(0,212,255,0.6), inset 0 -5px 10px rgba(0,0,0,0.3);
+    transition: transform 0.05s ease-out;
+    pointer-events: none;
+  }
+  #joystickStick.active {
+    background: radial-gradient(circle at 30% 30%, #00ffff, #00ccff);
+    box-shadow: 0 0 25px rgba(0,212,255,0.9), inset 0 -5px 10px rgba(0,0,0,0.3);
+  }
+  
+  /* Touch look area indicator (subtle) */
+  #touchLookHint {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    border: 2px dashed rgba(255,255,255,0.3);
+    border-radius: 50%;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.5;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  #touchLookHint.hidden {
+    display: none;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: translateY(-50%) scale(1); }
+    50% { opacity: 0.6; transform: translateY(-50%) scale(1.1); }
+  }
+  
+  /* Landscape adjustments */
+  @media (orientation: landscape) and (max-height: 500px) {
+    #joystickContainer {
+      width: 100px;
+      height: 100px;
+      bottom: 10px;
+      left: 10px;
+    }
+    #joystickStick {
+      width: 40px;
+      height: 40px;
+      top: 30px;
+      left: 30px;
+    }
+    #touchLookHint {
+      width: 50px;
+      height: 50px;
+      right: 10px;
+    }
+    #hud { font-size: 14px; padding: 5px; }
+  }
+  
+  /* Portrait mobile */
+  @media (orientation: portrait) and (max-width: 600px) {
+    #joystickContainer {
+      width: 140px;
+      height: 140px;
+      bottom: 30px;
+      left: 30px;
+    }
+    #joystickStick {
+      width: 60px;
+      height: 60px;
+      top: 40px;
+      left: 40px;
+    }
+    #touchLookHint {
+      width: 70px;
+      height: 70px;
+      right: 30px;
+    }
+  }
+  
+  /* Tablet */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    #joystickContainer {
+      width: 150px;
+      height: 150px;
+    }
+    #joystickStick {
+      width: 65px;
+      height: 65px;
+      top: 42.5px;
+      left: 42.5px;
+    }
   }
 </style>
 <script src="three.min.js"></script>
@@ -42,8 +141,8 @@
   <h1>3D Maze Game</h1>
   <ul style="text-align:left;display:inline-block;margin:10px auto">
     <li>Find the gold trophy at the end of the maze</li>
-    <li>Use arrow/WASD to move</li>
-    <li>Mouse to look around</li>
+    <li><strong>Desktop/Laptop:</strong> WASD/Arrow Keys to move, Hold Right/Middle Mouse + Drag to look</li>
+    <li><strong>Mobile/Tablet:</strong> Drag left joystick to move, Swipe right side to look</li>
     <li>Find green keys to open red doors</li>
     <li>Avoid red enemies and purple traps</li>
     <li>Collect blue orbs for +time</li>
@@ -51,9 +150,14 @@
   <button id="sB">Start Game</button>
   <p style="margin:5px 0">Level: <select id="lvl"><option value="1">1 - Beginner</option><option value="2">2 - Easy</option><option value="3">3 - Medium</option><option value="4">4 - Hard</option><option value="5">5 - Expert</option><option value="6">6 - Master</option><option value="7">7 - Insane</option></select></p>
 </div>
-<div id="hud"><div>Level: <span id="lv">1</span></div><div>Keys: <span id="ky">0/0</span></div><div>Time: <span id="tm">0</span> s</div><div>Score: <span id="sc">0</span></div><div>Lives: <span id="li">3</span></div></div>
+<div id="hud"><div>Level: <span id="lv">1</span></div><div>Keys: <span id="ky">0/0</span></div><div>Time: <span id="tm">0</span> s</div><div>Score: <span id="sc">0</span></div><div>Lives: <span id="li">3</span></div><div id="lookMode">Look: Click-Drag (Right/Middle Mouse)</div></div>
 <button id="fs">Full Screen</button>
-<div id="w">W</div><div id="a">A</div><div id="s">S</div><div id="d">D</div>
+<button id="plBtn" style="display:none;margin-left:10px;padding:5px 10px;font-size:14px;background:#444;color:#fff;border:none;border-radius:3px;cursor:pointer;">Enable Pointer Lock</button>
+<div id="joystickContainer">
+  <div id="joystickBase"></div>
+  <div id="joystickStick"></div>
+</div>
+<div id="touchLookHint"></div>
 <canvas id="cnv"></canvas>
 <script src="maze3d.js"></script>
 </body>

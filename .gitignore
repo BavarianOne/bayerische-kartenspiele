@@ -1,0 +1,6 @@
+node_modules/
+package-lock.json
+test_controls.js
+test_movement.js
+three.min.js
+maze3d.js.restore
