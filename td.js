@@ -3,6 +3,12 @@ const goldEl = document.getElementById('gold');
 const castleHpEl = document.getElementById('castleHp');
 const waveEl = document.getElementById('wave');
 const scoreEl = document.getElementById('score');
+const castleHealthInner = document.getElementById('castleHealthBarInner');
+const castleHealthText = document.getElementById('castleHealthText');
+const bossHealthContainer = document.getElementById('bossHealthContainer');
+const bossHealthInner = document.getElementById('bossHealthInner');
+const bossHealthText = document.getElementById('bossHealthText');
+const bossNameEl = document.getElementById('bossName');
 
 let scene, camera, renderer, raycaster, mouse;
 let clock, lastTime = 0;
@@ -48,7 +54,8 @@ const TOWER_SPECS = {
 };
 
 const INITIAL_GOLD = 500;
-const INITIAL_LIVES = 20;
+const INITIAL_CASTLE_HP = 500;
+const CASTLE_DAMAGE_PER_ENEMY = 5;
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  UTILITY FUNCTIONS                                                                     ║
@@ -434,7 +441,7 @@ function createCastleHpBar() {
 
 function updateCastleHpBar() {
   if (!G.castleHpBar) return;
-  const ratio = Math.max(0, G.castleHp / INITIAL_LIVES);
+  const ratio = Math.max(0, G.castleHp / INITIAL_CASTLE_HP);
   const fg = G.castleHpBar.userData.fg;
   const maxW = G.castleHpBar.userData.maxWidth;
   fg.scale.x = ratio;
@@ -452,7 +459,7 @@ function updateCastleHpBar() {
 
 function updateCastleDamageStage() {
   if (!G.castle) return;
-  const ratio = G.castleHp / INITIAL_LIVES;
+  const ratio = G.castleHp / INITIAL_CASTLE_HP;
   let newStage = 0;
   if (ratio <= 0.25) newStage = 3;
   else if (ratio <= 0.5) newStage = 2;
@@ -734,6 +741,22 @@ function spawnEnemy(wave) {
   enemy.hpBarBg = bgBar;
   enemy.hpBarMaxWidth = barWidth;
 
+  /* ── HP text label (canvas texture) ── */
+  const hpCanvas = document.createElement('canvas');
+  hpCanvas.width = 128;
+  hpCanvas.height = 32;
+  const hpCtx = hpCanvas.getContext('2d');
+  const hpTexture = new THREE.CanvasTexture(hpCanvas);
+  const hpSpriteMat = new THREE.SpriteMaterial({ map: hpTexture, depthTest: false, transparent: true });
+  const hpSprite = new THREE.Sprite(hpSpriteMat);
+  hpSprite.position.set(0, s + 2.5, 0);
+  hpSprite.scale.set(barWidth * 0.8, barWidth * 0.2, 1);
+  mesh.add(hpSprite);
+  enemy.hpSprite = hpSprite;
+  enemy.hpCanvas = hpCanvas;
+  enemy.hpCtx = hpCtx;
+  enemy.hpTexture = hpTexture;
+
   G.enemies.push(enemy);
 }
 
@@ -828,6 +851,22 @@ function updateEnemies(dt) {
       if (e.hpBarBg) e.hpBarBg.lookAt(camera.position);
     }
 
+    /* Update HP text label */
+    if (e.hpSprite && e.hpCtx && e.hpTexture) {
+      const ctx = e.hpCtx;
+      const canvas = e.hpCanvas;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 16px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(Math.ceil(e.hp) + ' / ' + e.maxHp, canvas.width / 2, canvas.height / 2);
+      e.hpTexture.needsUpdate = true;
+      e.hpSprite.lookAt(camera.position);
+    }
+
     if (e.hp <= 0) {
       enemyKilled(e, i);
     }
@@ -851,7 +890,7 @@ function enemyKilled(e, idx) {
 }
 
 function castleHit(e) {
-  G.castleHp -= 1;
+  G.castleHp -= CASTLE_DAMAGE_PER_ENEMY;
   play('hit');
   if (G.castle) {
     G.castle.position.y += 2;
@@ -1069,6 +1108,46 @@ function updateUI() {
   castleHpEl.textContent = G.castleHp;
   waveEl.textContent = G.wave;
   scoreEl.textContent = G.score;
+
+  /* Update castle health bar UI */
+  const ratio = Math.max(0, G.castleHp / INITIAL_CASTLE_HP);
+  castleHealthInner.style.width = (ratio * 100) + '%';
+  castleHealthText.textContent = G.castleHp + ' / ' + INITIAL_CASTLE_HP;
+
+  /* Update boss health bar */
+  updateBossHealthBar();
+}
+
+/* ── Boss health bar ── */
+let currentBoss = null; // reference to current boss enemy
+
+function updateBossHealthBar() {
+  /* Check if current boss is still alive */
+  if (currentBoss && (currentBoss._dead || currentBoss.hp <= 0 || !G.enemies.includes(currentBoss))) {
+    currentBoss = null;
+    bossHealthContainer.classList.add('hidden');
+    return;
+  }
+
+  /* Look for a boss enemy if none tracked */
+  if (!currentBoss) {
+    for (const e of G.enemies) {
+      if (e.name === 'Boss' && !e._dead) {
+        currentBoss = e;
+        bossNameEl.textContent = '👹 Boss (Wave ' + G.wave + ')';
+        break;
+      }
+    }
+  }
+
+  if (currentBoss && !currentBoss._dead) {
+    bossHealthContainer.classList.remove('hidden');
+    const ratio = Math.max(0, currentBoss.hp / currentBoss.maxHp);
+    bossHealthInner.style.width = (ratio * 100) + '%';
+    bossHealthText.textContent = Math.ceil(currentBoss.hp) + ' / ' + currentBoss.maxHp;
+  } else {
+    bossHealthContainer.classList.add('hidden');
+  }
 }
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
@@ -1185,7 +1264,7 @@ function resetGame() {
   makePath();
 
   G.gold     = INITIAL_GOLD;
-  G.castleHp = INITIAL_LIVES;
+  G.castleHp = INITIAL_CASTLE_HP;
   G.wave     = 1;
   G.score    = 0;
   G.state    = 'playing';
@@ -1194,6 +1273,7 @@ function resetGame() {
   G.projectiles = [];
   G.particles   = [];
   G.castleDamageStage = 0;
+  currentBoss = null;
 
   /* Create castle HP bar */
   createCastleHpBar();

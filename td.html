@@ -31,9 +31,28 @@
   <!-- Build Panel -->
   <div id="buildPanel"></div>
 
+  <!-- Castle Health Bar (top left) -->
+  <div id="castleHealthContainer">
+    <div id="castleHealthBarOuter">
+      <div id="castleHealthBarInner"></div>
+      <span id="castleHealthText">500 / 500</span>
+    </div>
+  </div>
+
+  <!-- Boss Health Bar (top center, hidden by default) -->
+  <div id="bossHealthContainer" class="hidden">
+    <div id="bossHealthBarOuter">
+      <div id="bossName">👹 Boss</div>
+      <div id="bossHealthBg">
+        <div id="bossHealthInner"></div>
+        <span id="bossHealthText">1000 / 1000</span>
+      </div>
+    </div>
+  </div>
+
   <div id="topBar">
     <div class="stat"><span class="icon">🪙</span><span id="gold">300</span></div>
-    <div class="stat"><span class="icon">❤️</span><span id="lives">20</span></div>
+    <div class="stat"><span class="icon">🏰</span><span id="castleHp">500</span></div>
     <div class="stat"><span class="icon">🌊</span><span id="wave">1</span></div>
     <div class="stat"><span class="icon">📊</span><span id="score">0</span></div>
   </div>

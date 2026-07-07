@@ -20,6 +20,60 @@ body {margin:0;overflow:hidden;background:#111;font-family:'Segoe UI',sans-serif
 }
 .btn:active {transform: translateY(3px); box-shadow:0 2px 0 #1e8449;}
 
+/* ── Castle Health Bar (top-left) ── */
+#castleHealthContainer {
+  position:absolute; top:50px; left:10px; z-index:110;
+  width:180px;
+}
+#castleHealthBarOuter {
+  position:relative; width:100%; height:22px;
+  background:rgba(0,0,0,0.7); border-radius:11px;
+  border:2px solid rgba(255,255,255,0.2); overflow:hidden;
+}
+#castleHealthBarInner {
+  width:100%; height:100%;
+  background:linear-gradient(90deg, #e74c3c, #f1c40f, #2ecc71);
+  border-radius:9px; transition:width 0.3s ease;
+}
+#castleHealthText {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  color:#fff; font-size:12px; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.8);
+  white-space:nowrap; pointer-events:none;
+}
+
+/* ── Boss Health Bar (top-center) ── */
+#bossHealthContainer {
+  position:absolute; top:50px; left:50%; transform:translateX(-50%); z-index:110;
+  width:320px; text-align:center;
+  transition:opacity 0.3s ease;
+}
+#bossHealthContainer.hidden {
+  display:none !important;
+}
+#bossHealthBarOuter {
+  width:100%;
+  background:rgba(0,0,0,0.7); border-radius:10px;
+  border:2px solid rgba(160,0,255,0.5); padding:4px 8px 6px;
+}
+#bossName {
+  color:#bb66ff; font-size:16px; font-weight:700;
+  text-shadow:0 0 8px rgba(160,0,255,0.5); margin-bottom:3px;
+}
+#bossHealthBg {
+  position:relative; width:100%; height:18px;
+  background:rgba(0,0,0,0.5); border-radius:9px; overflow:hidden;
+}
+#bossHealthInner {
+  width:100%; height:100%;
+  background:linear-gradient(90deg, #ff0040, #ff6600, #ffcc00);
+  border-radius:9px; transition:width 0.2s ease;
+}
+#bossHealthText {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  color:#fff; font-size:11px; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.9);
+  white-space:nowrap; pointer-events:none;
+}
+
 #drawControls {
   position:absolute; top:20px; left:20px; z-index:200; display:none;
 }
