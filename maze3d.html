@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>3D Maze Game</title>
+<style> body{margin:0;overflow:hidden;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif} #intro{display:flex;flex-direction:column;align-items:center} #hud{display:none;justify-content:space-around;font-size:18px;padding:10px;background:#222} canvas{display:block;width:100%;height:100%} #w,#s,#a,#d{position:fixed;width:60px;height:60px;background:#ffffff80;border:2px solid #fff;border-radius:10px;text-align:center;line-height:60px;font-size:24px;font-weight:700;z-index:10000} #w{top:10px;left:70px} #a{top:70px;left:10px} #s{top:70px;left:70px} #d{top:70px;left:130px} #fs{border:none;background:#00ff00;color:#000;padding:10px 20px;font-size:18px;cursor:pointer;border-radius:5px;margin:10px} </style>
+<script src="three.min.js"></script>
+</head>
+<body>
+<div id="intro">
+  <h1>3D Maze Game</h1>
+  <ul style="text-align:left;display:inline-block;margin:10px auto">
+    <li>Find the gold trophy at the end of the maze</li>
+    <li>Use arrow/WASD to move</li>
+    <li>Mouse to look around</li>
+    <li>Find green keys to open red doors</li>
+    <li>Avoid red enemies and purple traps</li>
+    <li>Collect blue orbs for +time</li>
+  </ul>
+  <button id="sB">Start Game</button>
+  <p style="margin:5px 0">Level: <select id="lvl"><option value="1">1 - Beginner</option><option value="2">2 - Easy</option><option value="3">3 - Medium</option><option value="4">4 - Hard</option><option value="5">5 - Expert</option><option value="6">6 - Master</option><option value="7">7 - Insane</option></select></p>
+</div>
+<div id="hud"><div>Level: <span id="lv">1</span></div><div>Keys: <span id="ky">0/0</span></div><div>Time: <span id="tm">0</span> s</div><div>Score: <span id="sc">0</span></div><div>Lives: <span id="li">3</span></div></div>
+<button id="fs">Full Screen</button>
+<div id="w">W</div><div id="a">A</div><div id="s">S</div><div id="d">D</div>
+<canvas id="cnv"></canvas>
+<script src="maze3d.js"></script>
+</body>
+</html>
