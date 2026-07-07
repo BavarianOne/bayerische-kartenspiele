@@ -39,6 +39,9 @@ let G = {
   waveEnemiesSpawned: 0,
   waveEnemiesKilled: 0,
   pathGroup: null,  // group holding path visual meshes
+  // Touch handling
+  isDraggingTower: false,
+  touchPosition: null, // {x, y} normalized device coordinates
 };
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
@@ -55,7 +58,7 @@ const TOWER_SPECS = {
 
 const INITIAL_GOLD = 500;
 const INITIAL_CASTLE_HP = 500;
-const CASTLE_DAMAGE_PER_ENEMY = 15;
+const CASTLE_DAMAGE_PER_ENEMY = 100;
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  UTILITY FUNCTIONS                                                                     ║
@@ -1025,8 +1028,12 @@ function updateParticles(dt) {
    ║  CURSOR / PLACEMENT                                                                      ║
    ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
 function updateCursor() {
+  // Determine which pointer position to use (mouse or touch)
+  const useTouch = G.isTowerSelected && G.isDraggingTower && G.touchPosition;
+  const pointer = useTouch ? G.touchPosition : mouse;
+  
   if (G.isTowerSelected) {
-    raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera(pointer, camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
     let hitGround = null;
     for (const hit of intersects) {
@@ -1239,6 +1246,60 @@ function addEventListeners() {
       const { x, z } = hitGround.point;
       tryBuild(x, z);
     }
+  });
+
+  // Touch event handlers for drag-to-place tower placement
+  canvas.addEventListener('touchstart', (e) => {
+    if (!G.isTowerSelected) return;
+    // Prevent page scrolling while placing tower
+    e.preventDefault();
+    const touch = e.touches[0];
+    G.isDraggingTower = true;
+    G.touchPosition = new THREE.Vector2(
+      (touch.clientX / innerWidth) * 2 - 1,
+      -(touch.clientY / innerHeight) * 2 + 1
+    );
+    // Disable page scrolling during drag
+    canvas.style.touchAction = 'none';
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (!G.isTowerSelected || !G.isDraggingTower) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    G.touchPosition = new THREE.Vector2(
+      (touch.clientX / innerWidth) * 2 - 1,
+      -(touch.clientY / innerHeight) * 2 + 1
+    );
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (!G.isTowerSelected || !G.isDraggingTower) return;
+    e.preventDefault();
+    // Try to build at the release position
+    if (G.touchPosition) {
+      raycaster.setFromCamera(G.touchPosition, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      let hitGround = null;
+      for (const hit of intersects) {
+        if (hit.object.userData.isGround) { hitGround = hit; break; }
+      }
+      if (hitGround) {
+        const { x, z } = hitGround.point;
+        tryBuild(x, z);
+      }
+    }
+    G.isDraggingTower = false;
+    G.touchPosition = null;
+    // Re-enable page scrolling
+    canvas.style.touchAction = '';
+  }, { passive: false });
+
+  // Handle touch cancel (e.g., when touch is interrupted)
+  canvas.addEventListener('touchcancel', (e) => {
+    G.isDraggingTower = false;
+    G.touchPosition = null;
+    canvas.style.touchAction = '';
   });
 }
 
