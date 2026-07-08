@@ -22,6 +22,7 @@ const rad = Math.PI / 180;
 let G = {
   gold: 0, castleHp: 0, wave: 1, score: 0,
   state: 'idle', // 'idle' | 'playing' | 'wave_end' | 'game_over'
+  paused: false, // pause state
   isTowerSelected: false,
   selectedType: null,
   cursorMesh: null,
@@ -42,11 +43,12 @@ let G = {
   // Touch handling
   isDraggingTower: false,
   touchPosition: null, // {x, y} normalized device coordinates
+  difficulty: 'medium', // 'easy' | 'medium' | 'hard'
 };
 
-/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
    ║  COMBAT CONSTANTS                                                                      ║
-   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
+   ╚══════════════════════════════════════════════════════════════════════════════════════════╝ */
 
 const TOWER_SPECS = {
   Bowman:    { name: 'Bowman',    cost: 50,  damage: 15,  range: 45,  fireRate: 0.8, colour: 0x2ecc71 },
@@ -54,11 +56,20 @@ const TOWER_SPECS = {
   IceTower:  { name: 'Ice Tower', cost: 100, damage: 5,   range: 50,  fireRate: 0.6, colour: 0x3498db },
   Flame:     { name: 'Flame',     cost: 150, damage: 2,   range: 35,  fireRate: 0.1, colour: 0xe74c3c },
   Sniper:    { name: 'Sniper',    cost: 200, damage: 100, range: 100, fireRate: 2.5, colour: 0x9b59b6 },
-};
+}; 
 
 const INITIAL_GOLD = 500;
 const INITIAL_CASTLE_HP = 500;
 const CASTLE_DAMAGE_PER_ENEMY = 100;
+
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+   ║  DIFFICULTY SETTINGS                                                                      ║
+   ╚══════════════════════════════════════════════════════════════════════════════════════════╝ */
+const DIFFICULTY_SETTINGS = {
+  easy:   { goldMult: 1.5,  castleHpMult: 1.5,  enemyHpMult: 0.7,  enemySpeedMult: 0.8, name: 'Easy' },
+  medium: { goldMult: 1.0,  castleHpMult: 1.0,  enemyHpMult: 1.0,  enemySpeedMult: 1.0, name: 'Medium' },
+  hard:   { goldMult: 0.6,  castleHpMult: 0.6,  enemyHpMult: 1.3,  enemySpeedMult: 1.2, name: 'Hard' },
+};
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  UTILITY FUNCTIONS                                                                     ║
@@ -686,65 +697,163 @@ function createTower(typeKey, x, z) {
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  SPAWN ENEMY                                                                             ║
    ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+   ║  ENEMY TYPE DEFINITIONS                                                                       ║
+   ╚═══════════════════════════════════════════════════════════════════════════════════════════╝ */
+const ENEMY_TYPES = [
+  { name: 'Goblin',       baseHp: 100,  baseSpeed: 8,  baseSize: 2.5,  colour: 0xff6600, geo: 'box',       weight: 10, minWave: 1 },
+  { name: 'Speedy',       baseHp: 60,   baseSpeed: 14, baseSize: 1.8,  colour: 0x00ff00, geo: 'cone',      weight: 8,  minWave: 4 },
+  { name: 'Elite',        baseHp: 200,  baseSpeed: 10, baseSize: 3,    colour: 0xff0000, geo: 'box',       weight: 5,  minWave: 6 },
+  { name: 'Tank',         baseHp: 500,  baseSpeed: 5,  baseSize: 4,    colour: 0xffff00, geo: 'dodecahedron',weight: 4,  minWave: 7 },
+  { name: 'Armored',      baseHp: 300,  baseSpeed: 7,  baseSize: 3,    colour: 0xb87333, geo: 'box',       weight: 4,  minWave: 10, armor: 20 },
+  { name: 'Regenerator',  baseHp: 150,  baseSpeed: 9,  baseSize: 2.5,  colour: 0x00ffff, geo: 'sphere',    weight: 3,  minWave: 12, regen: 5 },
+  { name: 'Shielded',     baseHp: 180,  baseSpeed: 8,  baseSize: 2.8,  colour: 0x9999ff, geo: 'sphere',    weight: 3,  minWave: 15, shield: 100 },
+  { name: 'Splitter',     baseHp: 120,  baseSpeed: 11, baseSize: 2,    colour: 0xff66ff, geo: 'octahedron',weight: 2,  minWave: 18, splits: 2 },
+  { name: 'Phasing',      baseHp: 100,  baseSpeed: 12, baseSize: 2,    colour: 0xff9900, geo: 'tetrahedron',weight: 2,  minWave: 22, phaseChance: 0.15 },
+  { name: 'Boss',         baseHp: 5000, baseSpeed: 4,  baseSize: 5,    colour: 0x6600ff, geo: 'cylinder',  weight: 1,  minWave: 5,  isBoss: true },
+];
+
+function getAvailableEnemyTypes(wave) {
+  return ENEMY_TYPES.filter(t => t.minWave <= wave);
+}
+
+function pickEnemyType(wave) {
+  const available = getAvailableEnemyTypes(wave);
+  // Boss waves
+  if (wave % 5 === 0) {
+    return ENEMY_TYPES.find(t => t.isBoss);
+  }
+  // Weighted random selection
+  const totalWeight = available.reduce((sum, t) => sum + t.weight, 0);
+  let r = Math.random() * totalWeight;
+  for (const t of available) {
+    r -= t.weight;
+    if (r <= 0) return t;
+  }
+  return available[0];
+}
+
+function calcEnemyStats(type, wave) {
+  const hpMult = 1 + wave * 0.15;
+  const speedMult = 1 + wave * 0.02;
+  
+  // Apply difficulty multipliers
+  const diff = DIFFICULTY_SETTINGS[G.difficulty] || DIFFICULTY_SETTINGS.medium;
+  const enemyHpMult = diff.enemyHpMult;
+  const enemySpeedMult = diff.enemySpeedMult;
+  
+  const hp = Math.min(5000, Math.floor(type.baseHp * hpMult * enemyHpMult));
+  const speed = Math.min(20, type.baseSpeed * speedMult * enemySpeedMult);
+  return { hp, speed, size: type.baseSize };
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+   ║  SPAWN ENEMY                                                                             ║
+   ╚═══════════════════════════════════════════════════════════════════════════════════════════╝ */
 function spawnEnemy(wave) {
-  const isBoss = wave % 5 === 0;
-  const isElite = wave % 3 === 0;
-
-  const hpMult = 1 + wave * 0.15 + (isBoss ? 4 : 0) + (isElite ? 1 : 0);
-  const speedMult = 1 + wave * 0.03 + (isBoss ? -0.4 : 0) + (isElite ? 0.15 : 0);
-  const hp = Math.min(5000, Math.floor(100 * hpMult));
-  const spd = Math.min(15, 10 + speedMult);
-
-  let col = 0xff6600, s = 2.5, name = 'Goblin', geoType = 'box';
-  if (isBoss)          { col = 0x6600ff; s = 5;  name = 'Boss';     geoType = 'cylinder'; }
-  else if (wave % 4 === 0) { col = 0x00ff00; s = 1.8; name = 'Speedy';  geoType = 'cone'; }
-  else if (isElite)    { col = 0xff0000; s = 3;  name = 'Elite';     geoType = 'box'; }
-  else if (wave % 7 === 0){col = 0xffff00; s = 4; name = 'Tank';      geoType = 'dodecahedron'; }
+  const type = pickEnemyType(wave);
+  const { hp, speed, size } = calcEnemyStats(type, wave);
 
   const enemy = {
-    hp, maxHp: hp, speed: spd, t: 0, name, colour: col, id: uid(),
-    effects: { frozen: 0, burning: 0 },
+    hp, maxHp: hp, speed, t: 0, name: type.name, colour: type.colour, id: uid(),
+    typeName: type.name,
+    effects: { frozen: 0, burning: 0, shielded: 0, phased: 0 },
     mesh: null, _dead: false,
+    // Special properties
+    armor: type.armor || 0,
+    regen: type.regen || 0,
+    shield: type.shield || 0,
+    maxShield: type.shield || 0,
+    splits: type.splits || 0,
+    hasSplit: false,
+    phaseChance: type.phaseChance || 0,
+    isPhased: false,
+    isBoss: type.isBoss || false,
+    isSplitter: type.splits > 0,
+    splitCount: type.splits || 0,
   };
 
-  const geoSize = s * 1.5;
+  const geoSize = size * 1.5;
   let geo;
-  switch (geoType) {
+  switch (type.geo) {
     case 'cone':         geo = new THREE.ConeGeometry(geoSize, geoSize * 2, 8); break;
     case 'cylinder':     geo = new THREE.CylinderGeometry(geoSize, geoSize, geoSize * 2, 12); break;
     case 'dodecahedron': geo = new THREE.DodecahedronGeometry(geoSize, 0); break;
+    case 'sphere':       geo = new THREE.SphereGeometry(geoSize, 16, 16); break;
+    case 'octahedron':   geo = new THREE.OctahedronGeometry(geoSize, 0); break;
+    case 'tetrahedron':  geo = new THREE.TetrahedronGeometry(geoSize, 0); break;
     default:             geo = new THREE.BoxGeometry(geoSize * 2, geoSize * 2, geoSize * 2);
   }
 
-  const mat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.8, metalness: 0.1 });
+  // Enhanced material with special effects
+  let mat;
+  if (type.name === 'Armored') {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.3, metalness: 0.9 });
+  } else if (type.name === 'Shielded') {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.8 });
+  } else if (type.name === 'Phasing') {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.5, metalness: 0.3, transparent: true, opacity: 0.7 });
+  } else if (type.name === 'Regenerator') {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.4, metalness: 0.2, emissive: 0x004444, emissiveIntensity: 0.3 });
+  } else if (type.name === 'Splitter') {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.6, metalness: 0.3 });
+  } else if (type.name === 'Tank') {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.5, metalness: 0.4 });
+  } else if (type.isBoss) {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.3, metalness: 0.7, emissive: 0x330066, emissiveIntensity: 0.5 });
+  } else {
+    mat = new THREE.MeshStandardMaterial({ color: type.colour, roughness: 0.8, metalness: 0.1 });
+  }
+
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true;  mesh.receiveShadow = true;
   scene.add(mesh);
   enemy.mesh = mesh;
 
-  /* health bar - improved with billboard, background, gradient */
+  /* Shield visual for Shielded enemies */
+  if (type.shield > 0) {
+    const shieldGeo = new THREE.SphereGeometry(geoSize * 1.3, 16, 16);
+    const shieldMat = new THREE.MeshBasicMaterial({ 
+      color: 0x00ffff, transparent: true, opacity: 0.3, 
+      side: THREE.BackSide, depthWrite: false 
+    });
+    const shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+    mesh.add(shieldMesh);
+    enemy.shieldMesh = shieldMesh;
+  }
+
+  /* health bar */
   const barWidth = geoSize * 2.5;
   const barHeight = 0.5;
   
-  /* background bar */
   const bgGeo = new THREE.PlaneGeometry(barWidth, barHeight);
   const bgMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide, depthTest: false });
   const bgBar = new THREE.Mesh(bgGeo, bgMat);
-  bgBar.position.set(0, s + 1, 0.1);
+  bgBar.position.set(0, size + 1, 0.1);
   mesh.add(bgBar);
   
-  /* foreground HP bar */
   const fgGeo = new THREE.PlaneGeometry(barWidth, barHeight);
   const fgMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide, depthTest: false });
   const fgBar = new THREE.Mesh(fgGeo, fgMat);
-  fgBar.position.set(0, s + 1, 0.2);
+  fgBar.position.set(0, size + 1, 0.2);
   mesh.add(fgBar);
   
   enemy.hpBar = fgBar;
   enemy.hpBarBg = bgBar;
   enemy.hpBarMaxWidth = barWidth;
 
-  /* ── HP text label (canvas texture) ── */
+  /* Shield bar for Shielded enemies */
+  if (type.shield > 0) {
+    const shieldBarGeo = new THREE.PlaneGeometry(barWidth, 0.3);
+    const shieldBarMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, side: THREE.DoubleSide, depthTest: false, transparent: true, opacity: 0.8 });
+    const shieldBar = new THREE.Mesh(shieldBarGeo, shieldBarMat);
+    shieldBar.position.set(0, size + 1.6, 0.15);
+    mesh.add(shieldBar);
+    enemy.shieldBar = shieldBar;
+    enemy.shieldBarMaxWidth = barWidth;
+  }
+
+  /* HP text label */
   const hpCanvas = document.createElement('canvas');
   hpCanvas.width = 128;
   hpCanvas.height = 32;
@@ -752,7 +861,7 @@ function spawnEnemy(wave) {
   const hpTexture = new THREE.CanvasTexture(hpCanvas);
   const hpSpriteMat = new THREE.SpriteMaterial({ map: hpTexture, depthTest: false, transparent: true });
   const hpSprite = new THREE.Sprite(hpSpriteMat);
-  hpSprite.position.set(0, s + 2.5, 0);
+  hpSprite.position.set(0, size + 2.5, 0);
   hpSprite.scale.set(barWidth * 0.8, barWidth * 0.2, 1);
   mesh.add(hpSprite);
   enemy.hpSprite = hpSprite;
@@ -776,7 +885,7 @@ function gameLoop(now) {
     updateCursor();
   }
 
-  if (G.state === 'playing' || G.state === 'wave_end') {
+  if (!G.paused && (G.state === 'playing' || G.state === 'wave_end')) {
     if (G.state === 'playing') {
       if (now >= G.nextSpawnTime && G.waveEnemiesSpawned < G.waveEnemyCount) {
         spawnEnemy(G.wave);
@@ -802,9 +911,33 @@ function gameLoop(now) {
     if (G.castleHp <= 0 && G.state !== 'game_over') {
       gameOver();
     }
+  } else if (G.paused && G.state === 'playing') {
+    /* When paused, still update UI but skip game logic */
+    updateUI();
+    updateCastleHpBar();
+    updateCastleDamageStage();
   }
 
   if (renderer) renderer.render(scene, camera);
+}
+
+/* Pause/Resume functions */
+function togglePause() {
+  if (G.state !== 'playing' && G.state !== 'wave_end') return;
+  G.paused = !G.paused;
+  const pauseBtn = document.getElementById('pauseBtn');
+  const pauseOverlay = document.getElementById('pauseOverlay');
+  if (G.paused) {
+    pauseBtn.textContent = '▶';
+    pauseBtn.title = 'Resume (P/Esc)';
+    document.getElementById('pauseOverlay').classList.add('show');
+  } else {
+    pauseBtn.textContent = '⏸';
+    pauseBtn.title = 'Pause (P/Esc)';
+    document.getElementById('pauseOverlay').classList.remove('show');
+    /* Reset lastTime to avoid large dt jump after unpausing */
+    lastTime = performance.now();
+  }
 }
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
@@ -817,8 +950,47 @@ function updateEnemies(dt) {
     if (e._dead) continue;
 
     let moveSpeed = e.speed;
+    
+    // Handle special effects
     if (e.effects.frozen > 0) moveSpeed *= 0.5;
-    if (e.effects.burning > 0) e.hp -= 5 * dt;
+    if (e.effects.burning > 0) {
+      e.hp -= 10 * dt; // Increased burning damage
+      spawnDamageNumber(e.mesh.position.clone(), Math.ceil(10 * dt), 0xff6600);
+    }
+    
+    // Regeneration for Regenerator enemies
+    if (e.regen > 0 && e.hp > 0 && e.hp < e.maxHp && e.effects.burning <= 0) {
+      e.hp = Math.min(e.maxHp, e.hp + e.regen * dt);
+      spawnDamageNumber(e.mesh.position.clone(), '+' + Math.ceil(e.regen * dt), 0x00ff00);
+    }
+
+    // Phasing effect - randomly phase out
+    if (e.phaseChance > 0 && !e.isPhased && Math.random() < e.phaseChance * dt) {
+      e.isPhased = true;
+      e.effects.phased = 3.0; // Phase duration
+      if (e.mesh.material) {
+        e.mesh.material.opacity = 0.3;
+      }
+    }
+    if (e.isPhased) {
+      e.effects.phased -= dt;
+      if (e.effects.phased <= 0) {
+        e.isPhased = false;
+        if (e.mesh.material) {
+          e.mesh.material.opacity = 0.7;
+        }
+      }
+    }
+
+    // Shield regeneration for Shielded enemies
+    if (e.shield < e.maxShield && e.shield > 0 && e.effects.burning <= 0) {
+      e.shield = Math.min(e.maxShield, e.shield + 5 * dt);
+      if (e.shieldBar) {
+        const ratio = e.shield / e.maxShield;
+        e.shieldBar.scale.x = ratio;
+        e.shieldBar.position.x = (ratio - 1) * e.shieldBarMaxWidth / 2;
+      }
+    }
 
     e.t += (moveSpeed / totalLen) * dt;
     if (e.t >= 1) {
@@ -833,6 +1005,7 @@ function updateEnemies(dt) {
 
     if (e.effects.frozen > 0) e.effects.frozen -= dt;
     if (e.effects.burning > 0) e.effects.burning -= dt;
+    if (e.effects.shielded > 0) e.effects.shielded -= dt;
 
     if (e.hpBar) {
       const ratio = Math.max(0, e.hp / e.maxHp);
@@ -854,6 +1027,11 @@ function updateEnemies(dt) {
       if (e.hpBarBg) e.hpBarBg.lookAt(camera.position);
     }
 
+    // Update shield bar
+    if (e.shieldBar) {
+      e.shieldBar.lookAt(camera.position);
+    }
+
     /* Update HP text label */
     if (e.hpSprite && e.hpCtx && e.hpTexture) {
       const ctx = e.hpCtx;
@@ -865,7 +1043,12 @@ function updateEnemies(dt) {
       ctx.font = 'bold 16px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(Math.ceil(e.hp) + ' / ' + e.maxHp, canvas.width / 2, canvas.height / 2);
+      
+      let hpText = Math.ceil(e.hp) + ' / ' + e.maxHp;
+      if (e.shield > 0) {
+        hpText += ' [S:' + Math.ceil(e.shield) + ']';
+      }
+      ctx.fillText(hpText, canvas.width / 2, canvas.height / 2);
       e.hpTexture.needsUpdate = true;
       e.hpSprite.lookAt(camera.position);
     }
@@ -889,7 +1072,59 @@ function enemyKilled(e, idx) {
   play('hit');
   G.gold += 10 + (G.wave * 2);
   G.score += 100 * G.wave;
+  
+  // Handle Splitter enemies - split into smaller enemies
+  if (e.isSplitter && e.splitCount > 0) {
+    splitEnemy(e, e.splitCount);
+  }
+  
   removeEnemy(idx);
+}
+
+function splitEnemy(parent, count) {
+  const pos = parent.mesh.position.clone();
+  const splitTypes = [
+    { type: 'Fast', color: 0x00ff00, hp: 30 + G.wave * 3, speed: 20, reward: 5 },
+    { type: 'Swarm', color: 0x88ff88, hp: 20 + G.wave * 2, speed: 25, reward: 3 }
+  ];
+  
+  for (let i = 0; i < count; i++) {
+    const splitType = splitTypes[Math.floor(Math.random() * splitTypes.length)];
+    
+    const geometry = new THREE.ConeGeometry(0.5, 1.5, 6);
+    const material = new THREE.MeshStandardMaterial({ color: splitType.color });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(pos);
+    mesh.rotation.x = -Math.PI / 2;
+    scene.add(mesh);
+    
+    const enemy = {
+      mesh,
+      hp: splitType.hp,
+      maxHp: splitType.hp,
+      speed: splitType.speed,
+      t: parent.t, // Start at same path position
+      colour: splitType.color,
+      type: splitType.type,
+      effects: { frozen: 0, burning: 0 },
+      isSplitter: false,
+      reward: splitType.reward,
+      hpBar: null,
+      hpBarBg: null,
+      hpBarMaxWidth: 1.2,
+      hpSprite: null,
+      hpCtx: null,
+      hpTexture: null,
+      hpCanvas: null
+    };
+    
+    addHpBar(enemy);
+    
+    // Add split effect
+    spawnDeathParticles(pos.clone(), splitType.color);
+    
+    G.enemies.push(enemy);
+  }
 }
 
 function castleHit(e) {
@@ -952,6 +1187,50 @@ function fireProjectile(tower, target) {
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
    ║  PROJECTILE UPDATE                                                                       ║
    ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
+function applyDamage(enemy, damage, projType) {
+  // Handle Phased enemies - chance to dodge
+  if (enemy.isPhased && Math.random() < 0.5) {
+    spawnDamageNumber(enemy.mesh.position.clone(), 'MISS', 0x8888ff);
+    return false; // Damage dodged
+  }
+  
+  // Handle Shielded enemies
+  if (enemy.shield > 0) {
+    enemy.shield -= damage;
+    if (enemy.shield < 0) {
+      // Remaining damage goes to HP
+      enemy.hp += enemy.shield; // shield is negative here
+      enemy.shield = 0;
+    }
+    // Update shield bar
+    if (enemy.shieldBar) {
+      const ratio = Math.max(0, enemy.shield / enemy.maxShield);
+      enemy.shieldBar.scale.x = ratio;
+      enemy.shieldBar.position.x = (ratio - 1) * enemy.shieldBarMaxWidth / 2;
+      enemy.shieldBar.lookAt(camera.position);
+    }
+    spawnDamageNumber(enemy.mesh.position.clone(), Math.ceil(damage), 0x00ffff);
+    return true;
+  }
+  
+  // Handle Armored enemies - reduce damage by armor value
+  let actualDamage = damage;
+  if (enemy.armor > 0) {
+    actualDamage = Math.max(1, damage - enemy.armor);
+    spawnDamageNumber(enemy.mesh.position.clone(), Math.ceil(actualDamage) + ' (-' + enemy.armor + ')', 0xffaa00);
+  } else {
+    spawnDamageNumber(enemy.mesh.position.clone(), Math.ceil(damage), 0xff0000);
+  }
+  
+  enemy.hp -= actualDamage;
+  
+  // Apply tower effects
+  if (projType === 'IceTower') enemy.effects.frozen = Math.max(enemy.effects.frozen, 2.0);
+  if (projType === 'Flame') enemy.effects.burning = Math.max(enemy.effects.burning, 3.0);
+  
+  return true;
+}
+
 function updateProjectiles(dt) {
   for (let i = G.projectiles.length - 1; i >= 0; i--) {
     const p = G.projectiles[i];
@@ -962,9 +1241,7 @@ function updateProjectiles(dt) {
     const dist = dir.length();
 
     if (dist < 2.0) {
-      p.target.hp -= p.damage;
-      if (p.target.type === 'IceTower') p.target.effects.frozen = 2.0;
-      if (p.target.type === 'Flame') p.target.effects.burning = 3.0;
+      applyDamage(p.target, p.damage, p.type);
       p.dead = true;
     }
 
@@ -1022,6 +1299,90 @@ function updateParticles(dt) {
       G.particles.splice(i, 1);
     }
   }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
+   ║  DAMAGE NUMBERS & HP BARS                                                               ║
+   ╚═══════════════════════════════════════════════════════════════════════════════════════╝ */
+function spawnDamageNumber(position, text, color) {
+  // Create canvas for damage number
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.font = 'bold 36px Arial';
+  ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 4;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const textStr = text.toString();
+  ctx.strokeText(textStr, 64, 32);
+  ctx.fillText(textStr, 64, 32);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(spriteMaterial);
+  sprite.position.copy(position);
+  sprite.position.y += 3;
+  sprite.scale.set(4, 2, 1);
+  scene.add(sprite);
+
+  // Animate damage number
+  let life = 1.0;
+  const animate = () => {
+    life -= 0.02;
+    if (life <= 0) {
+      scene.remove(sprite);
+      sprite.material.map.dispose();
+      sprite.material.dispose();
+      return;
+    }
+    sprite.position.y += 0.05;
+    sprite.material.opacity = life;
+    sprite.material.needsUpdate = true;
+    requestAnimationFrame(animate);
+  };
+  animate();
+}
+
+function addHpBar(enemy) {
+  // Create canvas for HP bar
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  
+  const drawBar = (ratio) => {
+    ctx.clearRect(0, 0, 128, 32);
+    // Background
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(0, 0, 128, 32);
+    // HP bar
+    ctx.fillStyle = ratio > 0.5 ? '#00ff00' : (ratio > 0.25 ? '#ffff00' : '#ff0000');
+    ctx.fillRect(0, 0, 128 * ratio, 32);
+    // Border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, 128, 32);
+  };
+  
+  drawBar(enemy.hp / enemy.maxHp);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(material);
+  sprite.position.copy(enemy.mesh.position);
+  sprite.position.y += 4;
+  sprite.scale.set(2.5, 0.6, 1);
+  scene.add(sprite);
+
+  enemy.hpSprite = sprite;
+  enemy.hpCtx = ctx;
+  enemy.hpTexture = texture;
+  enemy.hpCanvas = canvas;
 }
 
 /* ╔═══════════════════════════════════════════════════════════════════════════════════════╗
@@ -1117,9 +1478,12 @@ function updateUI() {
   scoreEl.textContent = G.score;
 
   /* Update castle health bar UI */
-  const ratio = Math.max(0, G.castleHp / INITIAL_CASTLE_HP);
+  // Calculate max castle HP based on difficulty
+  const diff = DIFFICULTY_SETTINGS[G.difficulty] || DIFFICULTY_SETTINGS.medium;
+  const maxCastleHp = Math.floor(INITIAL_CASTLE_HP * diff.castleHpMult);
+  const ratio = maxCastleHp > 0 ? Math.max(0, G.castleHp / maxCastleHp) : 0;
   castleHealthInner.style.width = (ratio * 100) + '%';
-  castleHealthText.textContent = G.castleHp + ' / ' + INITIAL_CASTLE_HP;
+  castleHealthText.textContent = G.castleHp + ' / ' + maxCastleHp;
 
   /* Update boss health bar */
   updateBossHealthBar();
@@ -1168,7 +1532,12 @@ function startGame() {
 }
 
 function calcWaveCount(wave) {
-  return 5 + (wave * 2);
+  // Base count + linear scaling + exponential scaling after wave 20
+  const base = 5 + wave * 2;
+  if (wave > 20) {
+    return Math.floor(base + Math.pow(wave - 20, 1.3) * 1.5);
+  }
+  return base;
 }
 
 function initWave() {
@@ -1176,7 +1545,59 @@ function initWave() {
   G.waveEnemiesSpawned = 0;
   G.waveEnemiesKilled = 0;
   G.nextSpawnTime = performance.now();
-  G.spawnInterval = Math.max(0.3, 1.5 - (G.wave * 0.05));
+  
+  // Enhanced spawn interval scaling - faster spawns at higher waves
+  // Base: 1.5s, decreases by 0.05 per wave, min 0.25s
+  // After wave 30, extra 0.01 per wave
+  const baseInterval = 1.5 - (G.wave * 0.05);
+  const extraFast = G.wave > 30 ? (G.wave - 30) * 0.01 : 0;
+  G.spawnInterval = Math.max(0.25, baseInterval - extraFast);
+  
+  // Update difficulty indicator in UI
+  updateDifficultyIndicator();
+}
+
+function updateDifficultyIndicator() {
+  const difficultyText = document.getElementById('difficultyText');
+  const difficultyBar = document.getElementById('difficultyBar');
+  const difficultyBarFill = difficultyBar ? difficultyBar.querySelector('div') : null;
+  
+  if (difficultyText && difficultyBarFill) {
+    const wave = G.wave;
+    const diff = DIFFICULTY_SETTINGS[G.difficulty] || DIFFICULTY_SETTINGS.medium;
+    const diffName = diff.name;
+    
+    // Determine difficulty tier based on wave
+    let tier = 'Normal';
+    let barColor = '#4ade80'; // green
+    let barWidth = Math.min(100, (wave / 50) * 100);
+    
+    if (wave > 40) {
+      tier = 'IMPOSSIBLE';
+      barColor = '#ff0000';
+    } else if (wave > 30) {
+      tier = 'NIGHTMARE';
+      barColor = '#ff00ff';
+    } else if (wave > 20) {
+      tier = 'EXTREME';
+      barColor = '#ff6600';
+    } else if (wave > 15) {
+      tier = 'HARD';
+      barColor = '#ffaa00';
+    } else if (wave > 10) {
+      tier = 'CHALLENGING';
+      barColor = '#ffff00';
+    } else if (wave > 5) {
+      tier = 'EASY';
+      barColor = '#88ff88';
+    }
+    
+    // Show both game difficulty setting and wave tier
+    difficultyText.textContent = `${diffName} | Wave ${wave} - ${tier}`;
+    difficultyBarFill.style.width = barWidth + '%';
+    difficultyBarFill.style.background = barColor;
+    difficultyBarFill.style.boxShadow = `0 0 10px ${barColor}`;
+  }
 }
 
 function waveComplete() {
@@ -1324,8 +1745,11 @@ function resetGame() {
   /* Generate a new random path for this game */
   makePath();
 
-  G.gold     = INITIAL_GOLD;
-  G.castleHp = INITIAL_CASTLE_HP;
+  // Apply difficulty settings
+  const diff = DIFFICULTY_SETTINGS[G.difficulty] || DIFFICULTY_SETTINGS.medium;
+  
+  G.gold     = Math.floor(INITIAL_GOLD * diff.goldMult);
+  G.castleHp = Math.floor(INITIAL_CASTLE_HP * diff.castleHpMult);
   G.wave     = 1;
   G.score    = 0;
   G.state    = 'playing';
@@ -1340,16 +1764,39 @@ function resetGame() {
   createCastleHpBar();
 
   document.getElementById('gameOver').classList.remove('show');
+  
+  // Update difficulty indicator in UI
+  updateDifficultyIndicator();
 }
 
 /* event listeners for UI */
 document.getElementById('startBtn').addEventListener('click', () => {
+  const difficultySelect = document.getElementById('difficultySelect');
+  G.difficulty = difficultySelect.value;
   document.getElementById('startOverlay').classList.remove('show');
   startGame();
 });
 document.getElementById('restartBtn').addEventListener('click', () => {
   document.getElementById('gameOver').classList.remove('show');
   startGame();
+});
+
+/* Pause button and resume button */
+document.getElementById('pauseBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  togglePause();
+});
+document.getElementById('resumeBtn').addEventListener('click', () => {
+  togglePause();
+});
+
+/* Keyboard shortcuts for pause */
+window.addEventListener('keydown', (e) => {
+  if ((e.key === 'Escape' || e.key === 'p' || e.key === 'P') && 
+      (G.state === 'playing' || G.state === 'wave_end')) {
+    e.preventDefault();
+    togglePause();
+  }
 });
 
 /* start renderer, wait for Play button */

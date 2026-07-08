@@ -103,6 +103,39 @@ body {margin:0;overflow:hidden;background:#111;font-family:'Segoe UI',sans-serif
 .stat {display:flex; align-items:center;}
 .icon {margin-right:6px; font-size:22px;}
 .stat span:last-child {font-weight:700; min-width:30px; text-align:center;}
+
+/* Pause Button */
+.pause-btn {
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.2);
+  color:#fff;
+  font-size:20px;
+  width:40px;
+  height:40px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.pause-btn:hover {
+  background:rgba(241,196,15,0.3);
+  border-color:#f1c40f;
+  transform:scale(1.05);
+}
+.pause-btn:active {
+  transform:scale(0.95);
+}
+
+#pauseStat { pointer-events: auto !important; }
+
+/* Pause Overlay */
+#pauseOverlay .card {
+  background:linear-gradient(145deg,#2c3e50,#1a252f);
+}
+#pauseOverlay h1 { color:#f1c40f; }
+#pauseOverlay .btn { margin-top:20px; }
 #towerInfo {
   position:absolute; right:10px; top:50%; transform:translateY(-50%);
   background:rgba(0,0,0,0.7); padding:14px; width:220px; border-radius:10px; display:none; z-index:120;
@@ -113,6 +146,25 @@ body {margin:0;overflow:hidden;background:#111;font-family:'Segoe UI',sans-serif
 #towerInfo button:hover {background:rgba(255,255,255,0.4);}
 #upgradeBtn {background:rgba(241,196,15,0.25);}
 #sellBtn {background:rgba(231,76,60,0.25);}
+/* Difficulty Indicator */
+#difficultyIndicator {
+  position:absolute; top:70px; left:50%; transform:translateX(-50%);
+  z-index:100; display:flex; flex-direction:column; align-items:center;
+  gap:4px; pointer-events:none;
+  font-size:14px; font-weight:700; color:#f1c40f;
+  text-shadow:0 2px 4px rgba(0,0,0,0.8);
+}
+#difficultyBar {
+  width:160px; height:8px;
+  background:rgba(0,0,0,0.6); border-radius:4px;
+  border:1px solid rgba(255,255,255,0.1); overflow:hidden;
+}
+#difficultyBar > div {
+  width:0%; height:100%;
+  background:linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c, #8e44ad);
+  border-radius:4px; transition:width 0.5s ease;
+}
+
 @media (max-width: 640px) {
   #topBar {font-size:12px; padding:4px 8px; gap:8px;}
   .stat span:last-child {min-width:20px;}
@@ -121,4 +173,6 @@ body {margin:0;overflow:hidden;background:#111;font-family:'Segoe UI',sans-serif
   .btn {padding:12px 30px; font-size:16px;}
   .tower-info {width:160px; padding:12px 8px;}
   .tower-info h3 {font-size:16px;}
+  #difficultyIndicator {font-size:12px; top:65px;}
+  #difficultyBar {width:120px; height:6px;}
 }

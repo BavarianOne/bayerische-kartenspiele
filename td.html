@@ -15,6 +15,11 @@
     <div class="card">
       <h1>🏰 Medieval Defense</h1>
       <p>Defend your castle against waves of enemies!<br>Place towers strategically along the path to stop them.</p>
+      <select id="difficultySelect">
+        <option value="easy">Easy (🟢)</option>
+        <option value="medium" selected>Medium (🟡)</option>
+        <option value="hard">Hard (🔴)</option>
+      </select>
       <button id="startBtn" class="btn">▶ Start Game</button>
     </div>
   </div>
@@ -55,7 +60,25 @@
     <div class="stat"><span class="icon">🏰</span><span id="castleHp">500</span></div>
     <div class="stat"><span class="icon">🌊</span><span id="wave">1</span></div>
     <div class="stat"><span class="icon">📊</span><span id="score">0</span></div>
+    <div class="stat" id="pauseStat" style="pointer-events:auto;">
+      <button id="pauseBtn" class="pause-btn" title="Pause (P/Esc)">⏸</button>
+    </div>
   </div>
+
+  <!-- Difficulty Indicator -->
+  <div id="difficultyIndicator" class="difficulty-indicator">
+    <span id="difficultyText">Wave 1</span>
+    <div id="difficultyBar"><div></div></div>
+  </div>
+
+  <!-- Pause Overlay -->
+      <div id="pauseOverlay" class="overlay">
+        <div class="card">
+          <h1>⏸ Paused</h1>
+          <p>Game is paused. Press button or P/Esc to resume.</p>
+          <button id="resumeBtn" class="btn">▶ Resume</button>
+        </div>
+      </div>
 
   <script src="td.js"></script>
 </body>
