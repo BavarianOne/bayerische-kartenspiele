@@ -286,6 +286,15 @@ const SFX = {
   },
 };
 
+// ============ SUPPRESS CDN CORS ERRORS ============
+// The "Script error." messages come from the THREE.js CDN and are harmless.
+const _origOnError = window.onerror;
+window.onerror = function(msg, url, line, col, err) {
+  if (msg === 'Script error.' || msg === 'Script error') return true;
+  if (_origOnError) return _origOnError(msg, url, line, col, err);
+  return false;
+};
+
 // ============ GAME STATE ============
 let scene, camera, renderer, composer, bloomPass, filmPass;
 let player, playerGroup;
@@ -2662,8 +2671,10 @@ function updatePlayer(dt) {
   let boostPressed = false;
   
   // Keyboard
-  if (keys['w'] || keys['arrowup']) thrustInput = 1;
-  if (keys['s'] || keys['arrowdown']) thrustInput = -1;
+  if (keys['w']) thrustInput = 1;
+  if (keys['s']) thrustInput = -1;
+  if (keys['arrowup']) pitchInput = 1;      // Pitch up (looping)
+  if (keys['arrowdown']) pitchInput = -1;    // Pitch down
   if (keys['a'] || keys['arrowleft']) yawInput = -1;  // Turn left
   if (keys['d'] || keys['arrowright']) yawInput = 1;   // Turn right
   if (keys['q']) yawInput = -1;   // Also turn left
