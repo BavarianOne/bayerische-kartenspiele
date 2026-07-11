@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Neon Tangram - Cyber Puzzle</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --neon-cyan: #00ffff; --neon-pink: #ff00ff; --neon-green: #39ff14;
+            --neon-orange: #ff6600; --neon-blue: #0080ff; --neon-yellow: #ffff00;
+            --bg-dark: #05050a; --bg-card: #0d0d14; --text-primary: #e0e0ff;
+            --text-dim: #555588;
+        }
+        body {
+            font-family: 'Orbitron', 'Rajdhani', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #game-container { width: 100vw; height: 100vh; position: relative; }
+        canvas { display: block; }
+        
+        .ui-panel {
+            position: absolute;
+            background: rgba(13, 13, 20, 0.95);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            pointer-events: auto;
+        }
+        #top-panel { top: 16px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 280px; }
+        .game-title { font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5); letter-spacing: 2px; }
+        .level-info { display: flex; align-items: center; gap: 16px; font-size: 0.85rem; }
+        .stat { display: flex; align-items: center; gap: 6px; }
+        .stat-label { color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+        #level-selector { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+        .level-btn { padding: 6px 12px; background: transparent; border: 1px solid var(--neon-cyan); border-radius: 6px; color: var(--neon-cyan); font-family: inherit; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .level-btn:hover { background: rgba(0, 255, 255, 0.15); box-shadow: 0 0 12px rgba(0, 255, 255, 0.4); }
+        .level-btn.active { background: var(--neon-cyan); color: var(--bg-dark); box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); }
+        .level-btn.locked { opacity: 0.3; border-color: var(--text-dim); color: var(--text-dim); cursor: not-allowed; }
+        #bottom-panel { bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 280px; }
+        .action-btn { padding: 10px 24px; background: linear-gradient(135deg, var(--bg-card), #1a1a2e); border: 1px solid var(--neon-pink); border-radius: 8px; color: var(--neon-pink); font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+        .action-btn:hover { background: rgba(255, 0, 255, 0.15); box-shadow: 0 0 15px rgba(255, 0, 255, 0.4); transform: translateY(-1px); }
+        .action-btn:active { transform: translateY(0); }
+        .action-btn.secondary { border-color: var(--neon-orange); color: var(--neon-orange); }
+        .action-btn.secondary:hover { box-shadow: 0 0 15px rgba(255, 102, 0, 0.4); }
+        .hint-text { color: var(--text-dim); font-size: 0.7rem; text-align: center; line-height: 1.4; }
+        #side-panel { right: 16px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; }
+        .control-hint { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; padding: 6px 10px; background: rgba(0, 0, 0, 0.3); border-radius: 6px; border-left: 3px solid var(--neon-cyan); }
+        .control-hint.touch { border-left-color: var(--neon-pink); }
+        .control-key { font-family: 'Orbitron', monospace; font-size: 0.65rem; color: var(--neon-cyan); font-weight: 700; }
+        .control-desc { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(8px); }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-card); border: 2px solid var(--neon-cyan); border-radius: 16px; padding: 32px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), inset 0 0 40px rgba(0, 255, 255, 0.05); animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .modal-text { color: var(--text-dim); margin-bottom: 20px; line-height: 1.5; font-size: 0.9rem; }
+        .modal-btn { padding: 12px 28px; background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue)); border: none; border-radius: 8px; color: var(--bg-dark); font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.6); }
+        
+        #celebration { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 150; }
+        .particle { position: absolute; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; animation: particleBurst 1.2s ease-out forwards; }
+        @keyframes particleBurst { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; } }
+        
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; transition: opacity 0.5s, visibility 0.5s; }
+        #loading-screen.hidden { opacity: 0; visibility: hidden; }
+        .loader { width: 50px; height: 50px; border: 3px solid var(--text-dim); border-top-color: var(--neon-cyan); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: var(--neon-cyan); font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase; }
+        
+        .silhouette-preview { width: 80px; height: 80px; border: 1px solid var(--neon-pink); border-radius: 8px; background: rgba(255, 0, 255, 0.05); margin: 0 auto 12px; position: relative; overflow: hidden; }
+        .silhouette-preview canvas { width: 100%; height: 100%; display: block; }
+        
+        @media (max-width: 768px) { .game-title { font-size: 1rem; } #top-panel, #bottom-panel { min-width: 220px; padding: 10px; } #side-panel { display: none; } .level-btn { padding: 5px 10px; font-size: 0.65rem; } .action-btn { padding: 8px 16px; font-size: 0.75rem; } }
+        @media (max-width: 480px) { .game-title { font-size: 0.9rem; } .stat-value { font-size: 0.9rem; } .modal-content { padding: 20px; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="loading-screen"><div class="loader"></div><div class="loading-text">Initializing Neon Core...</div></div>
+    <div id="game-container"><div id="canvas-container"></div>
+        <div class="ui-panel" id="top-panel"><div class="game-title">NEON TANGRAM</div><div class="level-info"><div class="stat"><span class="stat-label">Pattern</span><span class="stat-value" id="level-display">1</span></div><div class="stat"><span class="stat-label">Moves</span><span class="stat-value" id="moves-display">0</span></div><div class="stat"><span class="stat-label">Time</span><span class="stat-value" id="time-display">00:00</span></div></div><div id="level-selector"></div></div>
+        <div class="ui-panel" id="bottom-panel"><button class="action-btn" id="reset-btn"><span>🔄</span> RESET</button><button class="action-btn secondary" id="hint-btn"><span>💡</span> SHOW TARGET</button><div class="hint-text" id="hint-text">Drag pieces • Click to rotate 45° • Match the pink silhouette</div></div>
+        <div class="ui-panel" id="side-panel"><div class="control-hint"><span class="control-key">DRAG</span><span class="control-desc">Move Piece</span></div><div class="control-hint"><span class="control-key">CLICK</span><span class="control-desc">Rotate 45°</span></div><div class="control-hint"><span class="control-key">RIGHT CLICK</span><span class="control-desc">Rotate -45°</span></div><div class="control-hint touch"><span class="control-key">1 FINGER DRAG</span><span class="control-desc">Move Piece</span></div><div class="control-hint touch"><span class="control-key">DOUBLE TAP</span><span class="control-desc">Rotate 45°</span></div><div class="control-hint touch"><span class="control-key">TWO FINGER ROTATE</span><span class="control-desc">Rotate Piece</span></div></div>
+    </div>
+    <div class="modal" id="level-complete-modal"><div class="modal-content"><div class="modal-title">PATTERN SOLVED</div><div class="modal-text" id="level-complete-text"></div><button class="modal-btn" id="next-level-btn">NEXT PATTERN</button></div></div>
+    <div class="modal" id="game-complete-modal"><div class="modal-content"><div class="modal-title" style="background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">MASTER ARCHITECT</div><div class="modal-text" id="game-complete-text"></div><button class="modal-btn" id="restart-game-btn">PLAY AGAIN</button></div></div>
+    <div id="celebration"></div>
+    <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
+    <script type="module">
+        import * as THREE from 'three';
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            boardSize: 8,        // Tangram square is 8x8 units
+            pieceThickness: 0.3,
+            neonColors: [0x00ffff, 0xff00ff, 0x39ff14, 0xff6600, 0x0080ff, 0xffff00, 0xff0080],
+            snapDistance: 0.6,
+            rotationStep: Math.PI / 4, // 45 degrees
+            cameraPadding: 1.5,
+            levels: [
+                { name: "INITIATE", shape: "square", desc: "Classic square formation" },
+                { name: "OPERATIVE", shape: "cat", desc: "Feline silhouette" },
+                { name: "SPECIALIST", shape: "bird", desc: "Bird in flight" },
+                { name: "EXPERT", shape: "boat", desc: "Sailing vessel" },
+                { name: "MASTER", shape: "dragon", desc: "Mythical serpent" },
+                { name: "ARCHITECT", shape: "human", desc: "Human figure" },
+                { name: "NEURAL", shape: "candle", desc: "Burning light" },
+                { name: "OMNISCIENT", shape: "mountain", desc: "Peak formation" }
+            ]
+        };
+        // Tangram piece definitions (7 pieces) - coordinates relative to 8x8 square
+        // Standard tangram: 5 triangles (2 large, 1 medium, 2 small), 1 square, 1 parallelogram
+        const TANGRAM_PIECES = [
+            // Large triangle 1 (4x4 half-square)
+            { id: 0, type: 'triangle', size: 'large', vertices: [[0,0],[4,0],[0,4]], color: 0 },
+            // Large triangle 2
+            { id: 1, type: 'triangle', size: 'large', vertices: [[4,4],[8,4],[4,8]], color: 1 },
+            // Medium triangle (2√2 x 2√2 half-square) - actually 2x2 rotated
+            { id: 2, type: 'triangle', size: 'medium', vertices: [[4,0],[6,2],[4,4]], color: 2 },
+            // Small triangle 1
+            { id: 3, type: 'triangle', size: 'small', vertices: [[6,2],[8,0],[8,4]], color: 3 },
+            // Small triangle 2
+            { id: 4, type: 'triangle', size: 'small', vertices: [[6,6],[8,8],[4,8]], color: 4 },
+            // Square (2x2)
+            { id: 5, type: 'square', size: 'small', vertices: [[4,4],[6,4],[6,6],[4,6]], color: 5 },
+            // Parallelogram (2x4 slanted)
+            { id: 6, type: 'parallelogram', size: 'medium', vertices: [[2,4],[4,2],[6,4],[4,6]], color: 6 }
+        ];
+        // Target silhouettes - defined as polygons in 8x8 space
+        const SILHOUETTES = {
+            square: { vertices: [[0,0],[8,0],[8,8],[0,8]], center: [4,4] },
+            cat: { vertices: [[2,1],[3,0],[5,0],[6,1],[7,2],[7,4],[6,5],[5,6],[3,6],[2,5],[1,4],[1,2]], center: [4,3] },
+            bird: { vertices: [[1,4],[2,2],[4,1],[6,2],[7,4],[6,6],[4,7],[2,6]], center: [4,4] },
+            boat: { vertices: [[1,5],[2,3],[3,2],[5,2],[6,3],[7,5],[6,7],[2,7]], center: [4,4] },
+            dragon: { vertices: [[1,3],[2,1],[4,0],[6,1],[7,3],[6,5],[7,7],[5,6],[3,7],[2,5]], center: [4,4] },
+            human: { vertices: [[3,0],[5,0],[5,2],[7,2],[7,4],[5,4],[5,6],[3,6],[3,4],[1,4],[1,2],[3,2]], center: [4,3] },
+            candle: { vertices: [[3,0],[5,0],[5,1],[4,1],[4,6],[5,6],[5,7],[3,7]], center: [4,3.5] },
+            mountain: { vertices: [[0,5],[2,2],[4,4],[6,1],[8,5]], center: [4,3] }
+        };
+        // ============================================
+        // GLOBAL STATE
+        // ============================================
+        let scene, camera, renderer;
+        let pieces = [];
+        let silhouetteMesh = null;
+        let currentLevel = 0;
+        let moves = 0;
+        let startTime = Date.now();
+        let timerInterval = null;
+        let selectedPiece = null;
+        let isDragging = false;
+        let dragOffset = new THREE.Vector2();
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let touchStart = null;
+        let lastTouchTime = 0;
+        let touchCount = 0;
+        let initialTouchAngle = 0;
+        let initialPieceRotation = 0;
+        let isTouchDevice = 'ontouchstart' in window;
+        let audioContext = null;
+        let unlockedLevels = 1;
+        let gameCompleted = false;
+        let hintVisible = false;
+        // ============================================
+        // AUDIO SYSTEM
+        // ============================================
+        function initAudio() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } if (audioContext.state === 'suspended') audioContext.resume(); }
+        function playTone(freq, dur, type='sine', vol=0.1) { if (!audioContext) return; const o=audioContext.createOscillator(), g=audioContext.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(audioContext.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime+dur); o.stop(audioContext.currentTime+dur); }
+        function playSelect() { playTone(880, 0.08, 'square', 0.06); }
+        function playMove() { playTone(440, 0.06, 'sine', 0.05); }
+        function playSnap() { playTone(660, 0.12, 'triangle', 0.08); playTone(1320, 0.08, 'sine', 0.04); }
+        function playComplete() { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.15,'sine',0.08),i*60)); }
+        function playLevelUp() { [262,330,392,523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,0.12,'square',0.06),i*50)); }
+        function playError() { playTone(180, 0.15, 'sawtooth', 0.06); }
+        // ============================================
+        // GEOMETRY HELPERS
+        // ============================================
+        function createPieceShape(vertices) {
+            const shape = new THREE.Shape();
+            shape.moveTo(vertices[0][0], vertices[0][1]);
+            for (let i = 1; i < vertices.length; i++) shape.lineTo(vertices[i][0], vertices[i][1]);
+            shape.closePath();
+            return shape;
+        }
+        function createExtrudedGeometry(shape, depth) {
+            const geom = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 3 });
+            geom.center();
+            return geom;
+        }
+        function createNeonMaterial(color, emissiveIntensity = 0.6) {
+            return new THREE.MeshPhysicalMaterial({
+                color, metalness: 0.2, roughness: 0.15, transmission: 0.2,
+                thickness: 0.5, clearcoat: 1, clearcoatRoughness: 0.1,
+                emissive: new THREE.Color(color).multiplyScalar(0.4),
+                emissiveIntensity, side: THREE.DoubleSide
+            });
+        }
+        function createWireMaterial(color) {
+            return new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: 0.5, depthWrite: false });
+        }
+        function createOutlineMaterial(color) {
+            return new THREE.MeshBasicMaterial({ color, side: THREE.BackSide, transparent: true, opacity: 0.15, depthWrite: false });
+        }
+        function createSilhouetteMaterial() {
+            return new THREE.MeshBasicMaterial({
+                color: 0xff00ff, transparent: true, opacity: 0.25,
+                side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending
+            });
+        }
+        function createSilhouetteWireMaterial() {
+            return new THREE.MeshBasicMaterial({
+                color: 0xff00ff, wireframe: true, transparent: true, opacity: 0.8,
+                depthWrite: false, blending: THREE.AdditiveBlending
+            });
+        }
+        // ============================================
+        // PIECE CREATION
+        // ============================================
+        function createPiece(pieceDef, colorIndex) {
+            const group = new THREE.Group();
+            group.userData = { ...pieceDef, colorIndex, isPlaced: false, originalPosition: null, targetRotation: 0 };
+            const color = CONFIG.neonColors[colorIndex % CONFIG.neonColors.length];
+            const shape = createPieceShape(pieceDef.vertices);
+            const geom = createExtrudedGeometry(shape, CONFIG.pieceThickness);
+            const material = createNeonMaterial(color);
+            const wireMaterial = createWireMaterial(color);
+            const mesh = new THREE.Mesh(geom, material);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            const wire = new THREE.Mesh(geom, wireMaterial);
+            wire.scale.multiplyScalar(1.01);
+            const outlineGeom = createExtrudedGeometry(shape, CONFIG.pieceThickness + 0.08);
+            const outline = new THREE.Mesh(outlineGeom, createOutlineMaterial(color));
+            group.add(mesh, wire, outline);
+            // Store vertices for hit testing
+            group.userData.vertices2D = pieceDef.vertices.map(v => new THREE.Vector2(v[0], v[1]));
+            return group;
+        }
+        function createSilhouette(shapeName) {
+            const sil = SILHOUETTES[shapeName];
+            const shape = createPieceShape(sil.vertices);
+            const geom = new THREE.ExtrudeGeometry(shape, { depth: 0.01, bevelEnabled: false });
+            geom.center();
+            const group = new THREE.Group();
+            const fill = new THREE.Mesh(geom, createSilhouetteMaterial());
+            const wire = new THREE.Mesh(geom, createSilhouetteWireMaterial());
+            wire.scale.multiplyScalar(1.02);
+            group.add(fill, wire);
+            group.userData = { shapeName, center: new THREE.Vector2(...sil.center) };
+            return group;
+        }
+        // ============================================
+        // SCENE SETUP
+        // ============================================
+        function init() {
+            initAudio();
+            createScene();
+            createLights();
+            createLevel(currentLevel);
+            setupEventListeners();
+            animate();
+            startTimer();
+            hideLoading();
+        }
+        function createScene() {
+            const container = document.getElementById('canvas-container');
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.3;
+            container.appendChild(renderer.domElement);
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x05050a);
+            scene.fog = new THREE.FogExp2(0x05050a, 0.015);
+            // Orthographic camera for 2D look
+            const aspect = window.innerWidth / window.innerHeight;
+            const viewSize = CONFIG.boardSize / 2 + CONFIG.cameraPadding;
+            camera = new THREE.OrthographicCamera(
+                -viewSize * aspect, viewSize * aspect,
+                viewSize, -viewSize, 0.1, 100
+            );
+            camera.position.set(0, 0, 10);
+            camera.lookAt(0, 0, 0);
+            // Grid floor
+            const gridHelper = new THREE.GridHelper(CONFIG.boardSize, 32, 0x00ffff, 0x1a1a2e);
+            gridHelper.material.opacity = 0.2;
+            gridHelper.material.transparent = true;
+            gridHelper.position.z = -0.5;
+            scene.add(gridHelper);
+            // Glow rings
+            for (let i = 1; i <= 3; i++) {
+                const ringGeo = new THREE.RingGeometry(i * 2.5 - 0.1, i * 2.5 + 0.1, 64);
+                const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, side: THREE.DoubleSide, transparent: true, opacity: 0.04 * (4 - i) });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.position.z = -0.4;
+                ring.rotation.x = -Math.PI / 2;
+                scene.add(ring);
+            }
+            // Ambient particles
+            createAmbientParticles();
+        }
+        function createAmbientParticles() {
+            const count = 150;
+            const geom = new THREE.BufferGeometry();
+            const pos = new Float32Array(count * 3);
+            const cols = new Float32Array(count * 3);
+            const sizes = new Float32Array(count);
+            for (let i = 0; i < count; i++) {
+                pos[i*3] = (Math.random()-0.5)*20;
+                pos[i*3+1] = (Math.random()-0.5)*20;
+                pos[i*3+2] = (Math.random()-0.5)*5;
+                const c = new THREE.Color(CONFIG.neonColors[Math.floor(Math.random()*CONFIG.neonColors.length)]);
+                cols[i*3]=c.r; cols[i*3+1]=c.g; cols[i*3+2]=c.b;
+                sizes[i] = Math.random()*1.5+0.3;
+            }
+            geom.setAttribute('position', new THREE.BufferAttribute(pos,3));
+            geom.setAttribute('color', new THREE.BufferAttribute(cols,3));
+            geom.setAttribute('size', new THREE.BufferAttribute(sizes,1));
+            const mat = new THREE.PointsMaterial({ size:1, vertexColors:true, transparent:true, opacity:0.5, sizeAttenuation:true, depthWrite:false, blending:THREE.AdditiveBlending });
+            const particles = new THREE.Points(geom, mat);
+            particles.userData = { type: 'ambient', originalPos: pos.slice() };
+            scene.add(particles);
+        }
+        function createLights() {
+            const amb = new THREE.AmbientLight(0x222244, 0.6);
+            scene.add(amb);
+            const main = new THREE.DirectionalLight(0xffffff, 1);
+            main.position.set(5, 10, 8);
+            main.castShadow = true;
+            main.shadow.mapSize.set(2048, 2048);
+            main.shadow.camera.near = 0.5; main.shadow.camera.far = 30;
+            main.shadow.camera.left = -12; main.shadow.camera.right = 12;
+            main.shadow.camera.top = 12; main.shadow.camera.bottom = -12;
+            main.shadow.bias = -0.001;
+            scene.add(main);
+            // Accent lights
+            [0x00ffff, 0xff00ff, 0x39ff14].forEach((c,i)=>{
+                const l = new THREE.PointLight(c, 0.8, 15, 2);
+                const a = (i/3)*Math.PI*2;
+                l.position.set(Math.cos(a)*10, 5, Math.sin(a)*10);
+                l.userData = { angle: a, radius: 10, speed: 0.15+i*0.1 };
+                scene.add(l);
+            });
+        }
+        // ============================================
+        // LEVEL MANAGEMENT
+        // ============================================
+        function createLevel(levelIndex) {
+            // Clear existing
+            pieces.forEach(p => { scene.remove(p); p.traverse(c=>{ if(c.geometry) c.geometry.dispose(); if(c.material) c.material.dispose(); }); });
+            pieces = [];
+            if (silhouetteMesh) { scene.remove(silhouetteMesh); silhouetteMesh.traverse(c=>{ if(c.geometry) c.geometry.dispose(); if(c.material) c.material.dispose(); }); }
+            selectedPiece = null;
+            moves = 0;
+            startTime = Date.now();
+            updateUI();
+            const level = CONFIG.levels[levelIndex];
+            // Create silhouette
+            silhouetteMesh = createSilhouette(level.shape);
+            silhouetteMesh.position.z = -0.2;
+            silhouetteMesh.userData.pulsePhase = 0;
+            scene.add(silhouetteMesh);
+            // Create pieces at random positions around board
+            TANGRAM_PIECES.forEach((def, i) => {
+                const piece = createPiece(def, def.color);
+                // Random spawn position outside board
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 7 + Math.random() * 3;
+                piece.position.set(Math.cos(angle)*dist, Math.sin(angle)*dist, 0);
+                piece.rotation.z = Math.random() * Math.PI * 2;
+                piece.userData.originalPosition = piece.position.clone();
+                piece.userData.pieceIndex = i;
+                pieces.push(piece);
+                scene.add(piece);
+            });
+            // Animate pieces flying in
+            pieces.forEach((p, i) => {
+                p.scale.setScalar(0.1);
+                setTimeout(() => {
+                    new TWEEN.Tween(p.scale).to({ x:1, y:1, z:1 }, 500).easing(TWEEN.Easing.Back.Out).start();
+                    new TWEEN.Tween(p.position).to({ x: p.userData.originalPosition.x, y: p.userData.originalPosition.y }, 600).easing(TWEEN.Easing.Cubic.Out).start();
+                }, i * 80);
+            });
+            updateLevelSelector();
+        }
+        function updateLevelSelector() {
+            const container = document.getElementById('level-selector');
+            container.innerHTML = '';
+            CONFIG.levels.forEach((level, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'level-btn' + (i === currentLevel ? ' active' : '') + (i >= unlockedLevels ? ' locked' : '');
+                btn.textContent = level.name;
+                btn.disabled = i >= unlockedLevels;
+                btn.onclick = () => { if (i < unlockedLevels) { currentLevel = i; createLevel(currentLevel); } };
+                container.appendChild(btn);
+            });
+        }
+        function checkWin() {
+            // Check if all pieces are placed correctly within silhouette
+            let allPlaced = true;
+            pieces.forEach(piece => {
+                if (!piece.userData.isPlaced) {
+                    // Check if piece is inside silhouette bounds
+                    const pos = piece.position;
+                    const rot = piece.rotation.z;
+                    // Simple check: distance to board center
+                    const dist = Math.sqrt(pos.x*pos.x + pos.y*pos.y);
+                    if (dist < 4.5 && Math.abs(normalizeAngle(rot) % (Math.PI/2)) < 0.15) {
+                        // Snap to grid
+                        snapPieceToGrid(piece);
+                        piece.userData.isPlaced = true;
+                        playSnap();
+                        createSnapParticles(piece.position.x, piece.position.y);
+                    } else {
+                        allPlaced = false;
+                    }
+                }
+            });
+            if (allPlaced && pieces.every(p => p.userData.isPlaced)) {
+                levelComplete();
+            }
+        }
+        function snapPieceToGrid(piece) {
+            // Snap to nearest valid position
+            piece.position.x = Math.round(piece.position.x);
+            piece.position.y = Math.round(piece.position.y);
+            piece.rotation.z = Math.round(piece.rotation.z / (Math.PI/4)) * (Math.PI/4);
+            piece.userData.targetRotation = piece.rotation.z;
+        }
+        function createSnapParticles(x, y) {
+            const colors = ['#00ffff','#ff00ff','#39ff14','#ff6600','#ffff00'];
+            for (let i = 0; i < 12; i++) {
+                const geom = new THREE.SphereGeometry(0.08, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random()*colors.length)], transparent: true, opacity: 1, blending: THREE.AdditiveBlending });
+                const p = new THREE.Mesh(geom, mat);
+                p.position.set(x, y, 0.5);
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 0.5 + Math.random() * 0.5;
+                p.userData = { vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1 };
+                scene.add(p);
+                animateParticle(p);
+            }
+        }
+        function animateParticle(p) {
+            const step = () => {
+                p.position.x += p.userData.vx * 0.02;
+                p.position.y += p.userData.vy * 0.02;
+                p.userData.life -= 0.02;
+                p.material.opacity = p.userData.life;
+                p.scale.multiplyScalar(0.98);
+                if (p.userData.life > 0) requestAnimationFrame(step);
+                else { scene.remove(p); p.geometry.dispose(); p.material.dispose(); }
+            };
+            requestAnimationFrame(step);
+        }
+        function levelComplete() {
+            if (timerInterval) clearInterval(timerInterval);
+            const mins = Math.floor((Date.now()-startTime)/60000).toString().padStart(2,'0');
+            const secs = Math.floor(((Date.now()-startTime)%60000)/1000).toString().padStart(2,'0');
+            if (currentLevel < CONFIG.levels.length - 1) {
+                document.getElementById('level-complete-text').innerHTML = `Pattern ${currentLevel+1} Complete!<br><br>Time: ${mins}:${secs}<br>Moves: ${moves}<br><br>Next: ${CONFIG.levels[currentLevel+1].name}`;
+                document.getElementById('level-complete-modal').classList.add('active');
+                unlockedLevels = Math.max(unlockedLevels, currentLevel + 2);
+                playLevelUp();
+                createCelebration();
+            } else {
+                document.getElementById('game-complete-text').innerHTML = `All patterns mastered!<br><br>Total Time: ${mins}:${secs}<br>Total Moves: ${moves}<br><br>Rank: NEURAL ARCHITECT`;
+                document.getElementById('game-complete-modal').classList.add('active');
+                gameCompleted = true;
+                playComplete();
+                createCelebration();
+            }
+        }
+        function createCelebration() {
+            const container = document.getElementById('celebration');
+            const colors = ['#00ffff','#ff00ff','#39ff14','#ff6600','#ffff00','#0080ff'];
+            for (let i = 0; i < 40; i++) {
+                const el = document.createElement('div');
+                el.className = 'particle';
+                const c = colors[Math.floor(Math.random()*colors.length)];
+                el.style.background = c; el.style.boxShadow = `0 0 8px ${c}`;
+                const ang = Math.random()*Math.PI*2, dist = 100+Math.random()*200;
+                el.style.setProperty('--tx', `${Math.cos(ang)*dist}px`);
+                el.style.setProperty('--ty', `${Math.sin(ang)*dist}px`);
+                el.style.left = '50%'; el.style.top = '50%';
+                el.style.animationDelay = `${Math.random()*0.3}s`;
+                container.appendChild(el);
+                setTimeout(()=>el.remove(), 1200);
+            }
+        }
+        function nextLevel() {
+            document.getElementById('level-complete-modal').classList.remove('active');
+            currentLevel++;
+            createLevel(currentLevel);
+            startTimer();
+        }
+        function restartGame() {
+            document.getElementById('game-complete-modal').classList.remove('active');
+            currentLevel = 0; unlockedLevels = 1; gameCompleted = false;
+            createLevel(currentLevel);
+            startTimer();
+        }
+        function resetLevel() { playSelect(); createLevel(currentLevel); }
+        function toggleHint() {
+            hintVisible = !hintVisible;
+            const btn = document.getElementById('hint-btn');
+            if (hintVisible) {
+                btn.textContent = 'HIDE TARGET';
+                btn.style.borderColor = '#39ff14'; btn.style.color = '#39ff14';
+                if (silhouetteMesh) silhouetteMesh.traverse(c=>{ if(c.material && c.material.transparent) c.material.opacity = 0.5; });
+            } else {
+                btn.innerHTML = '<span>💡</span> SHOW TARGET';
+                btn.style.borderColor = '#ff6600'; btn.style.color = '#ff6600';
+                if (silhouetteMesh) silhouetteMesh.traverse(c=>{ if(c.material && c.material.transparent) c.material.opacity = 0.25; });
+            }
+        }
+        // ============================================
+        // INPUT HANDLING
+        // ============================================
+        function setupEventListeners() {
+            window.addEventListener('resize', onResize);
+            renderer.domElement.addEventListener('pointerdown', onPointerDown);
+            renderer.domElement.addEventListener('pointermove', onPointerMove);
+            renderer.domElement.addEventListener('pointerup', onPointerUp);
+            renderer.domElement.addEventListener('pointerleave', onPointerUp);
+            renderer.domElement.addEventListener('contextmenu', e=>e.preventDefault());
+            renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
+            document.getElementById('reset-btn').addEventListener('click', resetLevel);
+            document.getElementById('hint-btn').addEventListener('click', toggleHint);
+            document.getElementById('next-level-btn').addEventListener('click', nextLevel);
+            document.getElementById('restart-game-btn').addEventListener('click', restartGame);
+            // Touch rotation gesture
+            renderer.domElement.addEventListener('touchstart', e => { touchCount = e.touches.length; if (touchCount === 2 && selectedPiece) { initialTouchAngle = Math.atan2(e.touches[1].clientY - e.touches[0].clientY, e.touches[1].clientX - e.touches[0].clientX); initialPieceRotation = selectedPiece.rotation.z; } });
+            renderer.domElement.addEventListener('touchmove', e => { if (touchCount === 2 && selectedPiece && e.touches.length === 2) { const ang = Math.atan2(e.touches[1].clientY - e.touches[0].clientY, e.touches[1].clientX - e.touches[0].clientX); const delta = ang - initialTouchAngle; selectedPiece.rotation.z = initialPieceRotation + delta; } }, { passive: true });
+        }
+        function getMousePos(event) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            const clientX = event.clientX || (event.touches && event.touches[0].clientX);
+            const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+        }
+        function onPointerDown(event) {
+            initAudio();
+            getMousePos(event);
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(pieces, true);
+            if (intersects.length > 0) {
+                let piece = intersects[0].object;
+                while (piece.parent && !pieces.includes(piece)) piece = piece.parent;
+                if (pieces.includes(piece)) {
+                    if (!piece.userData.isPlaced) {
+                        selectedPiece = piece;
+                        isDragging = true;
+                        piece.userData.dragStart = piece.position.clone();
+                        // Bring to front
+                        scene.remove(piece); scene.add(piece);
+                        playSelect();
+                        // Double-tap / double-click rotation
+                        const now = Date.now();
+                        if (now - lastTouchTime < 300) {
+                            rotatePiece(piece, CONFIG.rotationStep);
+                        }
+                        lastTouchTime = now;
+                    }
+                }
+            }
+        }
+        function onPointerMove(event) {
+            if (!isDragging || !selectedPiece) return;
+            getMousePos(event);
+            raycaster.setFromCamera(mouse, camera);
+            // Intersect with ground plane (z=0)
+            const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+            const intersect = new THREE.Vector3();
+            raycaster.ray.intersectPlane(plane, intersect);
+            selectedPiece.position.set(intersect.x, intersect.y, 0);
+        }
+        function onPointerUp() {
+            if (isDragging && selectedPiece) {
+                checkSnap(selectedPiece);
+                isDragging = false;
+                selectedPiece = null;
+            }
+        }
+        function onWheel(event) {
+            event.preventDefault();
+            const scale = event.deltaY > 0 ? 1.1 : 0.9;
+            camera.left *= scale; camera.right *= scale; camera.top *= scale; camera.bottom *= scale;
+            camera.updateProjectionMatrix();
+        }
+        function rotatePiece(piece, angle) {
+            const targetRot = piece.rotation.z + angle;
+            const duration = 200;
+            const start = Date.now();
+            const startRot = piece.rotation.z;
+            function animate() {
+                const elapsed = Date.now() - start;
+                const prog = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - prog, 3);
+                piece.rotation.z = startRot + (targetRot - startRot) * eased;
+                if (prog < 1) requestAnimationFrame(animate);
+                else { piece.rotation.z = targetRot; checkSnap(piece); }
+            }
+            animate();
+            playMove();
+            moves++; updateUI();
+        }
+        function checkSnap(piece) {
+            // Check if piece fits in silhouette
+            const pos = piece.position;
+            const rot = normalizeAngle(piece.rotation.z);
+            // Quantize rotation to 45°
+            const quantizedRot = Math.round(rot / CONFIG.rotationStep) * CONFIG.rotationStep;
+            piece.rotation.z = quantizedRot;
+            // Check distance to valid positions
+            // For simplicity, check if roughly in board center area
+            const dist = Math.sqrt(pos.x*pos.x + pos.y*pos.y);
+            if (dist < 4.5 && Math.abs(normalizeAngle(quantizedRot) % (Math.PI/2)) < 0.2) {
+                snapPieceToGrid(piece);
+                piece.userData.isPlaced = true;
+                playSnap();
+                createSnapParticles(pos.x, pos.y);
+                checkWin();
+            }
+        }
+        function normalizeAngle(a) { while (a <= -Math.PI) a += 2*Math.PI; while (a > Math.PI) a -= 2*Math.PI; return a; }
+        // ============================================
+        // UI & TIMER
+        // ============================================
+        function updateUI() {
+            document.getElementById('level-display').textContent = currentLevel + 1;
+            document.getElementById('moves-display').textContent = moves;
+        }
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const m = Math.floor(elapsed/60000).toString().padStart(2,'0');
+                const s = Math.floor((elapsed%60000)/1000).toString().padStart(2,'0');
+                document.getElementById('time-display').textContent = `${m}:${s}`;
+            }, 500);
+        }
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            const viewSize = CONFIG.boardSize / 2 + CONFIG.cameraPadding;
+            camera.left = -viewSize * camera.aspect;
+            camera.right = viewSize * camera.aspect;
+            camera.top = viewSize;
+            camera.bottom = -viewSize;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        function hideLoading() {
+            const loading = document.getElementById('loading-screen');
+            loading.classList.add('hidden');
+            setTimeout(() => loading.style.display = 'none', 500);
+        }
+        // ============================================
+        // ANIMATION LOOP
+        // ============================================
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
+            // Update TWEEN
+            if (typeof TWEEN !== 'undefined') TWEEN.update();
+            // Animate ambient particles
+            scene.traverse(obj => {
+                if (obj.userData.type === 'ambient') {
+                    const pos = obj.geometry.attributes.position.array;
+                    const orig = obj.userData.originalPos;
+                    for (let i = 0; i < pos.length; i += 3) {
+                        pos[i+1] = orig[i+1] + Math.sin(time*0.5 + i)*0.3;
+                        pos[i] = orig[i] + Math.cos(time*0.3 + i)*0.2;
+                    }
+                    obj.geometry.attributes.position.needsUpdate = true;
+                    obj.rotation.z += 0.00005;
+                }
+                // Accent lights
+                if (obj.isPointLight && obj.userData.angle !== undefined) {
+                    obj.userData.angle += obj.userData.speed * 0.01;
+                    obj.position.x = Math.cos(obj.userData.angle) * obj.userData.radius;
+                    obj.position.z = Math.sin(obj.userData.angle) * obj.userData.radius;
+                    obj.position.y = 5 + Math.sin(time * obj.userData.speed + obj.userData.angle) * 2;
+                }
+            });
+            // Pulse silhouette
+            if (silhouetteMesh) {
+                silhouetteMesh.userData.pulsePhase += 0.015;
+                const pulse = Math.sin(silhouetteMesh.userData.pulsePhase) * 0.08 + 0.92;
+                silhouetteMesh.scale.setScalar(pulse);
+                silhouetteMesh.traverse(c => {
+                    if (c.material && c.material.transparent) c.material.opacity = 0.2 + Math.sin(silhouetteMesh.userData.pulsePhase) * 0.05;
+                });
+            }
+            // Float unplaced pieces slightly
+            pieces.forEach(p => {
+                if (!p.userData.isPlaced) {
+                    p.position.z = Math.sin(time*2 + p.userData.pieceIndex) * 0.05;
+                }
+            });
+            renderer.render(scene, camera);
+        }
+        // Load TWEEN for animations
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.umd.js';
+        script.onload = init;
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
