@@ -1090,40 +1090,24 @@
 
         // Check who wins the trick
         // returns 'player' or 'opponent'
+        // WATTEN REGEL: Kein Farbzwang, kein Stichzwang! Nur Kartenstärke zählt.
         function evaluateTrickWinner() {
             const pStr = getCardStrength(playerPlayedCard);
             const oStr = getCardStrength(opponentPlayedCard);
 
             logAction(`Du: ${playerPlayedCard.rank} ${SUIT_EMOJIS[playerPlayedCard.suit]} vs. Gegner: ${opponentPlayedCard.rank} ${SUIT_EMOJIS[opponentPlayedCard.suit]}`);
 
-            // If one card is higher in strength
+            // Pure strength comparison - no suit following required in Watten!
             if (pStr !== oStr) {
-                // If they are different Schläge of different suits (both 600), they have equal strength.
-                // Otherwise, the higher strength wins.
+                // If both are equal-value Schläge (600) but different suits, first played wins
                 if (pStr === 600 && oStr === 600) {
-                    // Equal Schläge (neither is the Trumpf Schlag since that is 700). First played card wins.
                     return trickStarter;
                 }
                 
-                // If both are non-trump cards of different suits:
-                // Only the led suit counts (or beats it).
-                if (pStr < 200 && oStr < 200) {
-                    const ledSuit = trickStarter === 'player' ? playerPlayedCard.suit : opponentPlayedCard.suit;
-                    if (playerPlayedCard.suit === ledSuit && opponentPlayedCard.suit !== ledSuit) {
-                        return 'player';
-                    }
-                    if (opponentPlayedCard.suit === ledSuit && playerPlayedCard.suit !== ledSuit) {
-                        return 'opponent';
-                    }
-                    // If both are of the led suit, higher rank wins
-                    return pStr > oStr ? 'player' : 'opponent';
-                }
-
                 return pStr > oStr ? 'player' : 'opponent';
             }
 
-            // Exactly equal strength (e.g. playing non-trump of same rank but different suits where neither is led)
-            // First played wins.
+            // Exactly equal strength - first played wins
             return trickStarter;
         }
 
@@ -1245,7 +1229,7 @@
 
             if (trickStarter === 'opponent') {
                 // AI is leading. Play a strong card or test the player.
-                // Let's sort to pick a moderately strong card or the highest.
+                // Sort by strength descending
                 opponentHand.sort((a,b) => getCardStrength(b) - getCardStrength(a));
                 // 30% chance to play highest, 70% chance to lead with second highest to bleed out player.
                 if (opponentHand.length > 1 && Math.random() > 0.3) {
@@ -1255,9 +1239,10 @@
                 }
             } else {
                 // AI is responding. Needs to beat playerPlayedCard.
+                // WATTEN REGEL: Kein Farbzwang, kein Stichzwang! Jede Karte kann gespielt werden.
                 const pStrength = getCardStrength(playerPlayedCard);
                 
-                // Find all cards in AI hand that beat player's card
+                // Find all cards in AI hand that beat player's card (pure strength comparison)
                 let winningCards = [];
                 opponentHand.forEach((card, idx) => {
                     const oStrength = getCardStrength(card);
@@ -1268,12 +1253,8 @@
                         return; // cannot beat it
                     }
 
-                    // Special case: Non-trump led. If AI plays non-trump of different suit, it cannot beat it.
-                    if (pStrength < 200 && oStrength < 200) {
-                        if (card.suit === playerPlayedCard.suit && oStrength > pStrength) {
-                            winningCards.push({ card: card, idx: idx, strength: oStrength });
-                        }
-                    } else if (oStrength > pStrength) {
+                    // Pure strength comparison - no suit following required!
+                    if (oStrength > pStrength) {
                         winningCards.push({ card: card, idx: idx, strength: oStrength });
                     }
                 });

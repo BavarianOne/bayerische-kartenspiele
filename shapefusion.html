@@ -3,27 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Shape Fusion - Neon 3D Puzzle</title>
+    <title>Neon Shape Fusion - 3D Puzzle</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --neon-cyan: #00ffff;
-            --neon-pink: #ff00ff;
-            --neon-green: #39ff14;
-            --neon-orange: #ff6600;
-            --neon-blue: #0080ff;
-            --neon-yellow: #ffff00;
-            --bg-dark: #0a0a12;
-            --bg-card: #12121f;
-            --text-primary: #e0e0ff;
-            --text-dim: #666699;
+            --neon-cyan: #00ffff; --neon-pink: #ff00ff; --neon-green: #39ff14;
+            --neon-orange: #ff6600; --neon-blue: #0080ff; --neon-yellow: #ffff00;
+            --bg-dark: #05050a; --bg-card: #0d0d14; --text-primary: #e0e0ff;
+            --text-dim: #555588;
         }
-
         body {
             font-family: 'Orbitron', 'Rajdhani', sans-serif;
             background: var(--bg-dark);
@@ -32,909 +20,226 @@
             touch-action: none;
             -webkit-tap-highlight-color: transparent;
         }
-
-        #game-container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        canvas {
-            display: block;
-        }
-
-        /* UI Overlay */
+        #game-container { width: 100vw; height: 100vh; position: relative; }
+        canvas { display: block; }
+        
         .ui-panel {
             position: absolute;
-            background: rgba(18, 18, 31, 0.95);
+            background: rgba(13, 13, 20, 0.95);
             border: 1px solid var(--neon-cyan);
             border-radius: 12px;
             padding: 16px;
-            box-shadow: 
-                0 0 20px rgba(0, 255, 255, 0.3),
-                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             z-index: 100;
             pointer-events: auto;
         }
-
-        #top-panel {
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            min-width: 280px;
-        }
-
-        .game-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-            letter-spacing: 2px;
-        }
-
-        .level-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            font-size: 0.9rem;
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stat-label {
-            color: var(--text-dim);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-value {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--neon-green);
-            text-shadow: 0 0 10px var(--neon-green);
-        }
-
-        #level-selector {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 8px;
-        }
-
-        .level-btn {
-            padding: 8px 16px;
-            background: transparent;
-            border: 1px solid var(--neon-cyan);
-            border-radius: 8px;
-            color: var(--neon-cyan);
-            font-family: inherit;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .level-btn:hover {
-            background: rgba(0, 255, 255, 0.15);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-        }
-
-        .level-btn.active {
-            background: var(--neon-cyan);
-            color: var(--bg-dark);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-        }
-
-        .level-btn.locked {
-            opacity: 0.3;
-            border-color: var(--text-dim);
-            color: var(--text-dim);
-            cursor: not-allowed;
-        }
-
-        #bottom-panel {
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            min-width: 280px;
-        }
-
-        .action-btn {
-            padding: 12px 28px;
-            background: linear-gradient(135deg, var(--bg-card), #1a1a2e);
-            border: 1px solid var(--neon-pink);
-            border-radius: 8px;
-            color: var(--neon-pink);
-            font-family: inherit;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .action-btn:hover {
-            background: rgba(255, 0, 255, 0.15);
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .action-btn:active {
-            transform: translateY(0);
-        }
-
-        .action-btn.secondary {
-            border-color: var(--neon-orange);
-            color: var(--neon-orange);
-        }
-
-        .action-btn.secondary:hover {
-            box-shadow: 0 0 20px rgba(255, 102, 0, 0.4);
-        }
-
-        .hint-text {
-            color: var(--text-dim);
-            font-size: 0.75rem;
-            text-align: center;
-            line-height: 1.5;
-        }
-
-        #side-panel {
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .control-hint {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-            padding: 8px 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            border-left: 3px solid var(--neon-cyan);
-        }
-
-        .control-hint.touch {
-            border-left-color: var(--neon-pink);
-        }
-
-        .control-key {
-            font-family: 'Orbitron', monospace;
-            font-size: 0.7rem;
-            color: var(--neon-cyan);
-            font-weight: 700;
-        }
-
-        .control-desc {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Modal Overlays */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            backdrop-filter: blur(8px);
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--bg-card);
-            border: 2px solid var(--neon-cyan);
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 
-                0 0 40px rgba(0, 255, 255, 0.3),
-                inset 0 0 40px rgba(0, 255, 255, 0.05);
-            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes modalPop {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .modal-text {
-            color: var(--text-dim);
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        .modal-btn {
-            padding: 14px 32px;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
-            border: none;
-            border-radius: 8px;
-            color: var(--bg-dark);
-            font-family: inherit;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .modal-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
-        }
-
-        /* Completion Celebration */
-        #celebration {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 150;
-        }
-
-        .particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: particleBurst 1.5s ease-out forwards;
-        }
-
-        @keyframes particleBurst {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; }
-        }
-
-        /* Loading Screen */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 300;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-
-        #loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loader {
-            width: 60px;
-            height: 60px;
-            border: 3px solid var(--text-dim);
-            border-top-color: var(--neon-cyan);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: var(--neon-cyan);
-            font-size: 1rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-title { font-size: 1.1rem; }
-            #top-panel, #bottom-panel { min-width: 240px; padding: 12px; }
-            #side-panel { display: none; }
-            .level-btn { padding: 6px 12px; font-size: 0.7rem; }
-            .action-btn { padding: 10px 20px; font-size: 0.8rem; }
-        }
-
-        @media (max-width: 480px) {
-            .game-title { font-size: 1rem; }
-            .stat-value { font-size: 1rem; }
-            .modal-content { padding: 24px; }
-        }
-
-        /* Reduced motion */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
+        #top-panel { top: 16px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 280px; }
+        .game-title { font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5); letter-spacing: 2px; }
+        .level-info { display: flex; align-items: center; gap: 16px; font-size: 0.85rem; }
+        .stat { display: flex; align-items: center; gap: 6px; }
+        .stat-label { color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+        #level-selector { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+        .level-btn { padding: 6px 12px; background: transparent; border: 1px solid var(--neon-cyan); border-radius: 6px; color: var(--neon-cyan); font-family: inherit; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .level-btn:hover { background: rgba(0, 255, 255, 0.15); box-shadow: 0 0 12px rgba(0, 255, 255, 0.4); }
+        .level-btn.active { background: var(--neon-cyan); color: var(--bg-dark); box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); }
+        .level-btn.locked { opacity: 0.3; border-color: var(--text-dim); color: var(--text-dim); cursor: not-allowed; }
+        #bottom-panel { bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 280px; }
+        .action-btn { padding: 10px 24px; background: linear-gradient(135deg, var(--bg-card), #1a1a2e); border: 1px solid var(--neon-pink); border-radius: 8px; color: var(--neon-pink); font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+        .action-btn:hover { background: rgba(255, 0, 255, 0.15); box-shadow: 0 0 15px rgba(255, 0, 255, 0.4); transform: translateY(-1px); }
+        .action-btn:active { transform: translateY(0); }
+        .action-btn.secondary { border-color: var(--neon-orange); color: var(--neon-orange); }
+        .action-btn.secondary:hover { box-shadow: 0 0 15px rgba(255, 102, 0, 0.4); }
+        .hint-text { color: var(--text-dim); font-size: 0.7rem; text-align: center; line-height: 1.4; }
+        #side-panel { right: 16px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; }
+        .control-hint { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; padding: 6px 10px; background: rgba(0, 0, 0, 0.3); border-radius: 6px; border-left: 3px solid var(--neon-cyan); }
+        .control-hint.touch { border-left-color: var(--neon-pink); }
+        .control-key { font-family: 'Orbitron', monospace; font-size: 0.65rem; color: var(--neon-cyan); font-weight: 700; }
+        .control-desc { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(8px); }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-card); border: 2px solid var(--neon-cyan); border-radius: 16px; padding: 32px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), inset 0 0 40px rgba(0, 255, 255, 0.05); animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .modal-text { color: var(--text-dim); margin-bottom: 20px; line-height: 1.5; font-size: 0.9rem; }
+        .modal-btn { padding: 12px 28px; background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue)); border: none; border-radius: 8px; color: var(--bg-dark); font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.6); }
+        
+        #celebration { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 150; }
+        .particle { position: absolute; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; animation: particleBurst 1.2s ease-out forwards; }
+        @keyframes particleBurst { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; } }
+        
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; transition: opacity 0.5s, visibility 0.5s; }
+        #loading-screen.hidden { opacity: 0; visibility: hidden; }
+        .loader { width: 50px; height: 50px; border: 3px solid var(--text-dim); border-top-color: var(--neon-cyan); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: var(--neon-cyan); font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase; }
+        
+        .target-preview { width: 100px; height: 100px; border: 1px solid var(--neon-pink); border-radius: 8px; background: rgba(255, 0, 255, 0.05); margin: 0 auto 12px; position: relative; overflow: hidden; }
+        .target-preview canvas { width: 100%; height: 100%; display: block; }
+        
+        @media (max-width: 768px) { .game-title { font-size: 1rem; } #top-panel, #bottom-panel { min-width: 220px; padding: 10px; } #side-panel { display: none; } .level-btn { padding: 5px 10px; font-size: 0.65rem; } .action-btn { padding: 8px 16px; font-size: 0.75rem; } .target-preview { width: 80px; height: 80px; } }
+        @media (max-width: 480px) { .game-title { font-size: 0.9rem; } .stat-value { font-size: 0.9rem; } .modal-content { padding: 20px; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="loading-screen">
-        <div class="loader"></div>
-        <div class="loading-text">Initializing Neural Link...</div>
-    </div>
-
-    <div id="game-container">
-        <div id="canvas-container"></div>
-
-        <!-- Top Panel -->
+    <div id="loading-screen"><div class="loader"></div><div class="loading-text">Initializing Fusion Core...</div></div>
+    <div id="game-container"><div id="canvas-container"></div>
         <div class="ui-panel" id="top-panel">
             <div class="game-title">SHAPE FUSION</div>
             <div class="level-info">
-                <div class="stat">
-                    <span class="stat-label">Level</span>
-                    <span class="stat-value" id="level-display">1</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Moves</span>
-                    <span class="stat-value" id="moves-display">0</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Time</span>
-                    <span class="stat-value" id="time-display">00:00</span>
-                </div>
+                <div class="stat"><span class="stat-label">Pattern</span><span class="stat-value" id="level-display">1</span></div>
+                <div class="stat"><span class="stat-label">Moves</span><span class="stat-value" id="moves-display">0</span></div>
+                <div class="stat"><span class="stat-label">Time</span><span class="stat-value" id="time-display">00:00</span></div>
             </div>
             <div id="level-selector"></div>
         </div>
-
-        <!-- Bottom Panel -->
         <div class="ui-panel" id="bottom-panel">
-            <button class="action-btn" id="reset-btn">
-                <span>🔄</span> RESET PUZZLE
-            </button>
-            <button class="action-btn secondary" id="hint-btn">
-                <span>💡</span> SHOW HINT
-            </button>
-            <div class="hint-text" id="hint-text">Drag pieces to move • Scroll/Pinch to rotate camera • Double-tap piece to rotate</div>
+            <div class="target-preview" id="target-preview"></div>
+            <button class="action-btn" id="reset-btn"><span>🔄</span> RESET</button>
+            <button class="action-btn secondary" id="hint-btn"><span>💡</span> SHOW GHOST</button>
+            <div class="hint-text" id="hint-text">Drag to move • Right-drag to rotate camera • Click piece to select • Q/E or buttons to rotate piece</div>
         </div>
-
-        <!-- Side Panel (Desktop) -->
         <div class="ui-panel" id="side-panel">
-            <div class="control-hint">
-                <span class="control-key">MOUSE DRAG</span>
-                <span class="control-desc">Rotate Camera</span>
-            </div>
-            <div class="control-hint">
-                <span class="control-key">SCROLL</span>
-                <span class="control-desc">Zoom Camera</span>
-            </div>
-            <div class="control-hint">
-                <span class="control-key">CLICK PIECE</span>
-                <span class="control-desc">Select Piece</span>
-            </div>
-            <div class="control-hint">
-                <span class="control-key">DRAG SELECTED</span>
-                <span class="control-desc">Move Piece</span>
-            </div>
-            <div class="control-hint">
-                <span class="control-key">RIGHT CLICK</span>
-                <span class="control-desc">Rotate Piece</span>
-            </div>
-            <div class="control-hint touch">
-                <span class="control-key">1 FINGER DRAG</span>
-                <span class="control-desc">Rotate Camera</span>
-            </div>
-            <div class="control-hint touch">
-                <span class="control-key">2 FINGER PINCH</span>
-                <span class="control-desc">Zoom Camera</span>
-            </div>
-            <div class="control-hint touch">
-                <span class="control-key">TAP PIECE</span>
-                <span class="control-desc">Select Piece</span>
-            </div>
-            <div class="control-hint touch">
-                <span class="control-key">DOUBLE TAP</span>
-                <span class="control-desc">Rotate Piece</span>
-            </div>
+            <div class="control-hint"><span class="control-key">DRAG</span><span class="control-desc">Move Piece</span></div>
+            <div class="control-hint"><span class="control-key">RIGHT DRAG</span><span class="control-desc">Rotate Camera</span></div>
+            <div class="control-hint"><span class="control-key">CLICK PIECE</span><span class="control-desc">Select</span></div>
+            <div class="control-hint"><span class="control-key">Q / E</span><span class="control-desc">Rotate Piece</span></div>
+            <div class="control-hint touch"><span class="control-key">1 FINGER DRAG</span><span class="control-desc">Move Piece</span></div>
+            <div class="control-hint touch"><span class="control-key">2 FINGER DRAG</span><span class="control-desc">Rotate Camera</span></div>
+            <div class="control-hint touch"><span class="control-key">TAP PIECE</span><span class="control-desc">Select</span></div>
+            <div class="control-hint touch"><span class="control-key">ROTATE BTNS</span><span class="control-desc">Rotate Piece</span></div>
+        </div>
+        
+        <!-- On-screen rotation buttons for touch -->
+        <div class="ui-panel" id="rotate-panel" style="display: none; left: 16px; top: 50%; transform: translateY(-50%); flex-direction: column; gap: 8px;">
+            <button class="action-btn secondary" id="rot-x-btn" style="padding: 12px 16px;">↻ X</button>
+            <button class="action-btn secondary" id="rot-y-btn" style="padding: 12px 16px;">↻ Y</button>
+            <button class="action-btn secondary" id="rot-z-btn" style="padding: 12px 16px;">↻ Z</button>
         </div>
     </div>
-
-    <!-- Modals -->
-    <div class="modal" id="level-complete-modal">
-        <div class="modal-content">
-            <div class="modal-title">LEVEL COMPLETE</div>
-            <div class="modal-text" id="level-complete-text"></div>
-            <button class="modal-btn" id="next-level-btn">NEXT LEVEL</button>
-        </div>
-    </div>
-
-    <div class="modal" id="game-complete-modal">
-        <div class="modal-content">
-            <div class="modal-title" style="background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">MASTER HACKER</div>
-            <div class="modal-text" id="game-complete-text"></div>
-            <button class="modal-btn" id="restart-game-btn">PLAY AGAIN</button>
-        </div>
-    </div>
-
-    <!-- Celebration Particles -->
+    <div class="modal" id="level-complete-modal"><div class="modal-content"><div class="modal-title">PATTERN FUSED</div><div class="modal-text" id="level-complete-text"></div><button class="modal-btn" id="next-level-btn">NEXT PATTERN</button></div></div>
+    <div class="modal" id="game-complete-modal"><div class="modal-content"><div class="modal-title" style="background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">MASTER ARCHITECT</div><div class="modal-text" id="game-complete-text"></div><button class="modal-btn" id="restart-game-btn">PLAY AGAIN</button></div></div>
     <div id="celebration"></div>
-
-    <!-- Three.js & GSAP via CDN -->
-    <script type="importmap">
-    {
+    <script type="importmap">{
         "imports": {
             "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
             "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
-    }
-    </script>
+    }</script>
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        // ============================================
-        // GAME CONFIGURATION
-        // ============================================
-        const CONFIG = {
-            levels: [
-                {
-                    name: "INITIATE",
-                    targetShape: "cube",
-                    pieceShapes: ["cube", "cube", "cube"],
-                    pieceColors: [0x00ffff, 0xff00ff, 0x39ff14],
-                    gridSize: 2,
-                    description: "Three cubes form a larger cube"
-                },
-                {
-                    name: "OPERATIVE",
-                    targetShape: "L-shape",
-                    pieceShapes: ["corner", "bar", "cube"],
-                    pieceColors: [0x00ffff, 0xff6600, 0xff00ff],
-                    gridSize: 3,
-                    description: "Fit the corner, bar, and cube into an L"
-                },
-                {
-                    name: "SPECIALIST",
-                    targetShape: "T-shape",
-                    pieceShapes: ["T-bar", "bar", "corner"],
-                    pieceColors: [0x39ff14, 0x0080ff, 0xffff00],
-                    gridSize: 3,
-                    description: "Assemble the T-shape from three pieces"
-                },
-                {
-                    name: "EXPERT",
-                    targetShape: "cross",
-                    pieceShapes: ["cross-arm", "cross-arm", "center"],
-                    pieceColors: [0xff00ff, 0x00ffff, 0xff6600],
-                    gridSize: 3,
-                    description: "Form a 3D cross from three components"
-                },
-                {
-                    name: "MASTER",
-                    targetShape: "sphere-shell",
-                    pieceShapes: ["sphere-quadrant", "sphere-quadrant", "sphere-half"],
-                    pieceColors: [0x0080ff, 0x39ff14, 0xffff00],
-                    gridSize: 4,
-                    description: "Complete the sphere from curved segments"
-                }
-            ],
-            neonColors: [
-                0x00ffff, // cyan
-                0xff00ff, // magenta
-                0x39ff14, // green
-                0xff6600, // orange
-                0x0080ff, // blue
-                0xffff00, // yellow
-                0xff0080, // pink
-                0x80ff00  // lime
-            ],
-            pieceSize: 1.2,
-            snapDistance: 0.4,
-            rotationSpeed: 0.02,
-            cameraDistance: 8,
-            minCameraDistance: 4,
-            maxCameraDistance: 15
-        };
-
-        // ============================================
-        // GLOBAL STATE
-        // ============================================
-        let scene, camera, renderer, controls;
-        let pieces = [];
-        let targetGhost = null;
-        let selectedPiece = null;
-        let currentLevel = 0;
+        
+        // ============ GAME STATE ============
+        let currentLevel = 1;
+        const maxLevel = 6;
         let moves = 0;
         let startTime = Date.now();
         let timerInterval = null;
-        let isDragging = false;
-        let dragPlane = new THREE.Plane();
-        let dragOffset = new THREE.Vector3();
-        let raycaster = new THREE.Raycaster();
-        let mouse = new THREE.Vector2();
-        let touchStart = null;
-        let lastTouchTime = 0;
-        let touchCount = 0;
-        let isTouchDevice = 'ontouchstart' in window;
-        let audioContext = null;
-        let unlockedLevels = 1;
-        let gameCompleted = false;
-        let hintVisible = false;
-        let hintTimeout = null;
-
-        // ============================================
-        // AUDIO SYSTEM
-        // ============================================
-        function initAudio() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let gameComplete = false;
+        
+        let selectedPiece = null;
+        let pieces = [];
+        let targetShape = null;
+        let ghostShape = null;
+        let showGhost = false;
+        
+        let scene, camera, renderer, controls;
+        let raycaster, mouse;
+        let particles = [];
+        let audioCtx = null;
+        
+        // Level definitions: each level has 3 pieces that form a target shape
+        const levels = [
+            // Level 1: Simple cube from 3 rectangular blocks
+            {
+                name: "BASIC CUBE",
+                target: { type: 'box', size: [2, 2, 2], color: 0xff00ff },
+                pieces: [
+                    { type: 'box', size: [2, 1, 2], color: 0x00ffff, startPos: [-3, 0, 0], targetPos: [0, -0.5, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [2, 1, 2], color: 0x39ff14, startPos: [3, 0, 0], targetPos: [0, 0.5, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [2, 1, 2], color: 0xff6600, startPos: [0, 0, -3], targetPos: [0, 0, 0], targetRot: [Math.PI/2, 0, 0] }
+                ]
+            },
+            // Level 2: L-shape from 3 pieces
+            {
+                name: "L-BLOCK",
+                target: { type: 'compound', color: 0xff00ff },
+                pieces: [
+                    { type: 'box', size: [1, 2, 1], color: 0x00ffff, startPos: [-3, 0, 0], targetPos: [-0.5, 0, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [1, 2, 1], color: 0x39ff14, startPos: [3, 0, 0], targetPos: [0.5, 0, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [2, 1, 1], color: 0xff6600, startPos: [0, 0, -3], targetPos: [0, -1, 0], targetRot: [0, 0, 0] }
+                ]
+            },
+            // Level 3: Staircase
+            {
+                name: "STAIRCASE",
+                target: { type: 'compound', color: 0xff00ff },
+                pieces: [
+                    { type: 'box', size: [2, 1, 2], color: 0x00ffff, startPos: [-3, 0, 0], targetPos: [0, -0.5, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [2, 1, 1.5], color: 0x39ff14, startPos: [3, 0, 0], targetPos: [0, 0.5, -0.25], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [2, 1, 1], color: 0xff6600, startPos: [0, 0, -3], targetPos: [0, 1.5, 0.5], targetRot: [0, 0, 0] }
+                ]
+            },
+            // Level 4: T-shape
+            {
+                name: "T-BLOCK",
+                target: { type: 'compound', color: 0xff00ff },
+                pieces: [
+                    { type: 'box', size: [3, 1, 1], color: 0x00ffff, startPos: [-3, 0, 0], targetPos: [0, 0.5, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [1, 2, 1], color: 0x39ff14, startPos: [3, 0, 0], targetPos: [0, -0.5, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [1, 1, 2], color: 0xff6600, startPos: [0, 0, -3], targetPos: [0, 0, 0.5], targetRot: [0, 0, 0] }
+                ]
+            },
+            // Level 5: Cross shape
+            {
+                name: "CROSS",
+                target: { type: 'compound', color: 0xff00ff },
+                pieces: [
+                    { type: 'box', size: [3, 1, 1], color: 0x00ffff, startPos: [-3, 0, 0], targetPos: [0, 0, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [1, 3, 1], color: 0x39ff14, startPos: [3, 0, 0], targetPos: [0, 0, 0], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [1, 1, 3], color: 0xff6600, startPos: [0, 0, -3], targetPos: [0, 0, 0], targetRot: [0, 0, 0] }
+                ]
+            },
+            // Level 6: Complex - corner tower
+            {
+                name: "TOWER CORNER",
+                target: { type: 'compound', color: 0xff00ff },
+                pieces: [
+                    { type: 'box', size: [2, 2, 1], color: 0x00ffff, startPos: [-3, 0, 0], targetPos: [-0.5, 0, 0.5], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [1, 2, 2], color: 0x39ff14, startPos: [3, 0, 0], targetPos: [0.5, 0, -0.5], targetRot: [0, 0, 0] },
+                    { type: 'box', size: [2, 1, 2], color: 0xff6600, startPos: [0, 0, -3], targetPos: [0, 1.5, 0], targetRot: [0, 0, 0] }
+                ]
             }
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-        }
-
-        function playTone(frequency, duration, type = 'sine', volume = 0.1) {
-            if (!audioContext) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.type = type;
-            osc.frequency.value = frequency;
-            gain.gain.value = volume;
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-            osc.stop(audioContext.currentTime + duration);
-        }
-
-        function playSelect() { playTone(880, 0.1, 'square', 0.08); }
-        function playMove() { playTone(440, 0.08, 'sine', 0.06); }
-        function playSnap() { playTone(660, 0.15, 'triangle', 0.1); playTone(1320, 0.1, 'sine', 0.05); }
-        function playComplete() { 
-            [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.1), i * 80));
-        }
-        function playLevelUp() { 
-            [262, 330, 392, 523, 659, 784].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'square', 0.08), i * 60));
-        }
-        function playError() { playTone(200, 0.2, 'sawtooth', 0.08); }
-
-        // ============================================
-        // GEOMETRY GENERATORS
-        // ============================================
-        function createPieceGeometry(shape, size = 1) {
-            const geometries = [];
-            const half = size / 2;
-            const unit = size;
-
-            switch (shape) {
-                case "cube":
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    break;
-                case "corner": // L-shape: 3 cubes
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    break;
-                case "bar": // 3 cubes in line
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    break;
-                case "T-bar": // T shape: 4 cubes
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    break;
-                case "cross-arm": // 3 cubes
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    break;
-                case "center": // single cube
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-                    break;
-                case "sphere-quadrant": // quarter sphere approximation
-                    geometries.push(new THREE.SphereGeometry(unit * 0.7, 16, 16, 0, Math.PI/2, 0, Math.PI/2));
-                    break;
-                case "sphere-half": // half sphere
-                    geometries.push(new THREE.SphereGeometry(unit * 0.7, 16, 16, 0, Math.PI, 0, Math.PI/2));
-                    break;
-                default:
-                    geometries.push(new THREE.BoxGeometry(unit, unit, unit));
-            }
-
-            return geometries;
-        }
-
-        // Quantize rotation to nearest 90-degree increment
-        function quantizeRotation(angle) {
-            const quarter = Math.PI / 2;
-            return Math.round(angle / quarter) * quarter;
-        }
-
-        function createPieceMesh(shape, color, size = 1) {
-            const group = new THREE.Group();
-            group.userData = { shape, originalColor: color, targetPosition: null, targetRotation: null, isPlaced: false };
-            
-            const geoms = createPieceGeometry(shape, size);
-            const material = createNeonMaterial(color);
-            const wireMaterial = createWireMaterial(color);
-
-            let positions = getPieceOffsets(shape, size);
-            
-            geoms.forEach((geom, i) => {
-                const mesh = new THREE.Mesh(geom, material);
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-                
-                const wire = new THREE.Mesh(geom, wireMaterial);
-                wire.scale.multiplyScalar(1.02);
-                
-                const piece = new THREE.Group();
-                piece.add(mesh);
-                piece.add(wire);
-                
-                if (positions[i]) {
-                    piece.position.set(positions[i].x, positions[i].y, positions[i].z);
-                }
-                
-                piece.userData.isPiecePart = true;
-                group.add(piece);
-            });
-
-            // Add glow outline
-            const outlineMaterial = createOutlineMaterial(color);
-            group.traverse(child => {
-                if (child.isMesh && child.material !== wireMaterial) {
-                    const outline = child.clone();
-                    outline.material = outlineMaterial;
-                    outline.scale.multiplyScalar(1.05);
-                    outline.renderOrder = -1;
-                    group.add(outline);
-                }
-            });
-
-            return group;
-        }
-
-        function getPieceOffsets(shape, size) {
-            const unit = size;
-            const offsets = [];
-            
-            switch (shape) {
-                case "cube":
-                    offsets.push({x: 0, y: 0, z: 0});
-                    break;
-                case "corner":
-                    offsets.push({x: 0, y: 0, z: 0});
-                    offsets.push({x: unit, y: 0, z: 0});
-                    offsets.push({x: 0, y: unit, z: 0});
-                    break;
-                case "bar":
-                    offsets.push({x: -unit, y: 0, z: 0});
-                    offsets.push({x: 0, y: 0, z: 0});
-                    offsets.push({x: unit, y: 0, z: 0});
-                    break;
-                case "T-bar":
-                    offsets.push({x: -unit, y: 0, z: 0});
-                    offsets.push({x: 0, y: 0, z: 0});
-                    offsets.push({x: unit, y: 0, z: 0});
-                    offsets.push({x: 0, y: unit, z: 0});
-                    break;
-                case "cross-arm":
-                    offsets.push({x: -unit, y: 0, z: 0});
-                    offsets.push({x: 0, y: 0, z: 0});
-                    offsets.push({x: unit, y: 0, z: 0});
-                    break;
-                case "center":
-                    offsets.push({x: 0, y: 0, z: 0});
-                    break;
-                case "sphere-quadrant":
-                    offsets.push({x: 0, y: 0, z: 0});
-                    break;
-                case "sphere-half":
-                    offsets.push({x: 0, y: 0, z: 0});
-                    break;
-            }
-            return offsets;
-        }
-
-        function createNeonMaterial(color) {
-            return new THREE.MeshPhysicalMaterial({
-                color: color,
-                metalness: 0.3,
-                roughness: 0.2,
-                transmission: 0.3,
-                thickness: 0.5,
-                clearcoat: 1,
-                clearcoatRoughness: 0.1,
-                emissive: new THREE.Color(color).multiplyScalar(0.3),
-                emissiveIntensity: 0.5
-            });
-        }
-
-        function createWireMaterial(color) {
-            return new THREE.MeshBasicMaterial({
-                color: color,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.4,
-                depthWrite: false
-            });
-        }
-
-        function createOutlineMaterial(color) {
-            return new THREE.MeshBasicMaterial({
-                color: color,
-                side: THREE.BackSide,
-                transparent: true,
-                opacity: 0.2,
-                depthWrite: false
-            });
-        }
-
-        function createGhostMaterial(color) {
-            return new THREE.MeshPhysicalMaterial({
-                color: color,
-                metalness: 0.1,
-                roughness: 0.5,
-                transmission: 0.8,
-                thickness: 0.3,
-                clearcoat: 0.5,
-                clearcoatRoughness: 0.3,
-                transparent: true,
-                opacity: 0.3,
-                depthWrite: false
-            });
-        }
-
-        function createTargetPositions(levelConfig) {
-            const positions = [];
-            const unit = CONFIG.pieceSize;
-            
-            switch (levelConfig.targetShape) {
-                case "cube":
-                    // 2x2x2 cube: center at origin
-                    // Piece 0 (cube): single cube at (-unit/2, -unit/2, -unit/2) to make 2x2x2
-                    // Actually pieces are built around origin, so target pos should be the piece's origin position
-                    // For a 2x2x2 cube made of 3 pieces:
-                    // Piece 0 (cube): occupies one corner
-                    positions.push({ pos: new THREE.Vector3(-unit/2, -unit/2, -unit/2), rot: new THREE.Euler(0, 0, 0) });
-                    // Piece 1 (cube): adjacent corner
-                    positions.push({ pos: new THREE.Vector3(unit/2, -unit/2, -unit/2), rot: new THREE.Euler(0, 0, 0) });
-                    // Piece 2 (cube): top layer
-                    positions.push({ pos: new THREE.Vector3(0, unit/2, 0), rot: new THREE.Euler(0, 0, 0) });
-                    break;
-                case "L-shape":
-                    // L-shape in 3x3 grid, centered at origin
-                    // Corner piece: 3 cubes at (0,0,0), (unit,0,0), (0,unit,0) - group origin at (0,0,0)
-                    // Target: corner at (-unit, -unit, 0) so cubes at (-unit,-unit,0), (0,-unit,0), (-unit,0,0)
-                    positions.push({ pos: new THREE.Vector3(-unit, -unit, 0), rot: new THREE.Euler(0, 0, 0) });
-                    // Bar piece: 3 cubes at (-unit,0,0), (0,0,0), (unit,0,0) - group origin at (0,0,0)
-                    // Target: horizontal bar at y=unit, from x=-unit to x=unit
-                    positions.push({ pos: new THREE.Vector3(0, unit, 0), rot: new THREE.Euler(0, 0, 0) });
-                    // Cube piece: single cube at (0,0,0)
-                    // Target: fill the L at (unit, -unit, 0)
-                    positions.push({ pos: new THREE.Vector3(unit, -unit, 0), rot: new THREE.Euler(0, 0, 0) });
-                    break;
-                case "T-shape":
-                    // T-shape: horizontal bar at y=0 from x=-unit to x=unit, stem at x=0 from y=0 to y=-unit*2
-                    // T-bar piece: 4 cubes at (-unit,0,0), (0,0,0), (unit,0,0), (0,unit,0) - origin at (0,0,0)
-                    // Target: center of T at origin
-                    positions.push({ pos: new THREE.Vector3(0, 0, 0), rot: new THREE.Euler(0, 0, 0) });
-                    // Bar piece: 3 cubes at (-unit,0,0), (0,0,0), (unit,0,0) - origin at (0,0,0)
-                    // Target: vertical stem down from center, so bar at (0, -unit, 0) with cubes at (0,-2unit,0), (0,-unit,0), (0,0,0)
-                    // Wait, the bar's origin is at middle cube. To place stem, origin should be at (0, -unit, 0)
-                    positions.push({ pos: new THREE.Vector3(0, -unit, 0), rot: new THREE.Euler(0, 0, 0) });
-                    // Corner piece: 3 cubes at (0,0,0), (unit,0,0), (0,unit,0) - origin at (0,0,0)
-                    // Target: fill the right side of T top bar at (unit*2, 0, 0) but need to match geometry
-                    // Actually corner at origin has cubes at (0,0,0), (unit,0,0), (0,unit,0)
-                    // To fit at right end of T (x=2*unit), place origin at (unit, 0, 0) so cubes at (unit,0,0), (2unit,0,0), (unit,unit,0)
-                    positions.push({ pos: new THREE.Vector3(unit, 0, 0), rot: new THREE.Euler(0, 0, 0) });
-                    break;
-                case "cross":
-                    // 3D cross: center cube + 6 arms (but we use 3 pieces)
-                    // Cross-arm pieces: 3 cubes at (-unit,0,0), (0,0,0), (unit,0,0) - origin at center
-                    // Piece 0: left arm, target at (-unit*2, 0, 0) so cubes at (-3u,0,0), (-2u,0,0), (-u,0,0)
-                    positions.push({ pos: new THREE.Vector3(-unit * 2, 0, 0), rot: new THREE.Euler(0, 0, 0) });
-                    // Piece 1: right arm, target at (unit*2, 0, 0) so cubes at (u,0,0), (2u,0,0), (3u,0,0)
-                    positions.push({ pos: new THREE.Vector3(unit * 2, 0, 0), rot: new THREE.Euler(0, 0, 0) });
-                    // Piece 2: center cube, target at (0,0,0)
-                    positions.push({ pos: new THREE.Vector3(0, 0, 0), rot: new THREE.Euler(0, 0, 0) });
-                    break;
-                case "sphere-shell":
-                    // Sphere shell: 2 quadrants + 1 half
-                    // Quadrant: quarter sphere at origin
-                    // Half: half sphere at origin
-                    // All centered at origin - use quantized 90° rotations
-                    positions.push({ pos: new THREE.Vector3(0, 0, 0), rot: new THREE.Euler(0, 0, 0) });
-                    positions.push({ pos: new THREE.Vector3(0, 0, 0), rot: new THREE.Euler(0, Math.PI/2, 0) });
-                    positions.push({ pos: new THREE.Vector3(0, 0, 0), rot: new THREE.Euler(Math.PI/2, 0, 0) });
-                    break;
-            }
-            return positions;
-        }
-
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-        function init() {
+        ];
+        
+        // ============ INIT ============
+        async function init() {
+            await initThree();
             initAudio();
-            createScene();
-            createLights();
-            createLevel(currentLevel);
+            createLevelSelector();
+            loadLevel(currentLevel);
             setupEventListeners();
-            animate();
             startTimer();
             hideLoading();
+            animate();
         }
-
-        function createScene() {
+        
+        function hideLoading() {
+            document.getElementById('loading-screen').classList.add('hidden');
+        }
+        
+        // ============ THREE.JS SETUP ============
+        async function initThree() {
             const container = document.getElementById('canvas-container');
             
             // Renderer
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: true, 
-                alpha: true,
-                powerPreference: 'high-performance'
-            });
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
@@ -942,850 +247,858 @@
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.2;
             container.appendChild(renderer.domElement);
-
+            
             // Scene
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a12);
-            scene.fog = new THREE.FogExp2(0x0a0a12, 0.02);
-
+            scene.background = new THREE.Color(0x05050a);
+            scene.fog = new THREE.FogExp2(0x05050a, 0.02);
+            
             // Camera
             camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 5, CONFIG.cameraDistance);
-
+            camera.position.set(6, 6, 6);
+            
             // Controls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.enableZoom = true;
-            controls.minDistance = CONFIG.minCameraDistance;
-            controls.maxDistance = CONFIG.maxCameraDistance;
-            controls.enablePan = false;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.3;
-            controls.minPolarAngle = 0.1;
-            controls.maxPolarAngle = Math.PI - 0.1;
-
-            // Touch adjustments
-            if (isTouchDevice) {
-                controls.autoRotate = false;
-                controls.touches = {
-                    ONE: THREE.TOUCH.ROTATE,
-                    TWO: THREE.TOUCH.DOLLY_PAN
-                };
-            }
-
-            // Grid floor
-            createGridFloor();
-
+            controls.enablePan = true;
+            controls.minDistance = 4;
+            controls.maxDistance = 20;
+            controls.maxPolarAngle = Math.PI / 2 - 0.05;
+            controls.target.set(0, 0, 0);
+            
+            // Lights
+            setupLights();
+            
+            // Ground grid
+            createGroundGrid();
+            
             // Ambient particles
             createAmbientParticles();
+            
+            // Raycaster
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+            
+            // Resize
+            window.addEventListener('resize', onWindowResize);
         }
-
-        function createGridFloor() {
+        
+        function setupLights() {
+            // Ambient
+            const ambient = new THREE.AmbientLight(0x222244, 0.5);
+            scene.add(ambient);
+            
+            // Main neon lights - orbiting
+            const lightColors = [0x00ffff, 0xff00ff, 0x39ff14, 0xff6600];
+            lightColors.forEach((color, i) => {
+                const light = new THREE.PointLight(color, 50, 30);
+                light.position.set(
+                    Math.cos(i * Math.PI / 2) * 8,
+                    5,
+                    Math.sin(i * Math.PI / 2) * 8
+                );
+                light.castShadow = true;
+                light.shadow.mapSize.set(512, 512);
+                scene.add(light);
+                light.userData = { angle: i * Math.PI / 2, radius: 8, height: 5, color };
+            });
+            
+            // Rim light
+            const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            rimLight.position.set(-5, 10, -5);
+            scene.add(rimLight);
+        }
+        
+        function createGroundGrid() {
             const gridSize = 20;
             const divisions = 40;
-            
-            const gridHelper = new THREE.GridHelper(gridSize, divisions, 0x00ffff, 0x1a1a2e);
+            const gridHelper = new THREE.GridHelper(gridSize, divisions, 0x00ffff, 0x003366);
             gridHelper.material.opacity = 0.3;
             gridHelper.material.transparent = true;
-            gridHelper.position.y = -3;
+            gridHelper.position.y = -1.5;
             scene.add(gridHelper);
-
-            // Glow rings
-            for (let i = 1; i <= 3; i++) {
-                const ringGeo = new THREE.RingGeometry(i * 2 - 0.1, i * 2 + 0.1, 64);
+            
+            // Glow rings at origin
+            for (let i = 0; i < 3; i++) {
+                const ringGeo = new THREE.RingGeometry(0.5 + i * 0.8, 0.6 + i * 0.8, 64);
                 const ringMat = new THREE.MeshBasicMaterial({
-                    color: 0x00ffff,
+                    color: [0x00ffff, 0xff00ff, 0x39ff14][i],
                     side: THREE.DoubleSide,
                     transparent: true,
-                    opacity: 0.05 * (4 - i)
+                    opacity: 0.15 - i * 0.04
                 });
                 const ring = new THREE.Mesh(ringGeo, ringMat);
                 ring.rotation.x = -Math.PI / 2;
-                ring.position.y = -2.9;
+                ring.position.y = -1.49;
+                ring.userData = { ringIndex: i, baseScale: 1 };
                 scene.add(ring);
             }
         }
-
+        
         function createAmbientParticles() {
-            const particleCount = 200;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-            const sizes = new Float32Array(particleCount);
+            const count = 200;
+            const geo = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            const sizes = new Float32Array(count);
+            const speeds = new Float32Array(count);
             
-            for (let i = 0; i < particleCount; i++) {
+            const neonColors = [
+                new THREE.Color(0x00ffff),
+                new THREE.Color(0xff00ff),
+                new THREE.Color(0x39ff14),
+                new THREE.Color(0xff6600)
+            ];
+            
+            for (let i = 0; i < count; i++) {
                 positions[i * 3] = (Math.random() - 0.5) * 40;
-                positions[i * 3 + 1] = Math.random() * 20 - 5;
+                positions[i * 3 + 1] = Math.random() * 20 - 2;
                 positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
                 
-                const color = new THREE.Color(CONFIG.neonColors[Math.floor(Math.random() * CONFIG.neonColors.length)]);
+                const color = neonColors[Math.floor(Math.random() * neonColors.length)];
                 colors[i * 3] = color.r;
                 colors[i * 3 + 1] = color.g;
                 colors[i * 3 + 2] = color.b;
                 
                 sizes[i] = Math.random() * 2 + 0.5;
+                speeds[i] = Math.random() * 0.02 + 0.005;
             }
             
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            geo.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
             
-            const material = new THREE.PointsMaterial({
+            const mat = new THREE.PointsMaterial({
                 size: 1,
                 vertexColors: true,
                 transparent: true,
                 opacity: 0.6,
-                sizeAttenuation: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending
-            });
-            
-            const particles = new THREE.Points(geometry, material);
-            particles.userData = { type: 'ambient', originalPositions: positions.slice() };
-            scene.add(particles);
-        }
-
-        function createLights() {
-            // Ambient
-            const ambient = new THREE.AmbientLight(0x222244, 0.5);
-            scene.add(ambient);
-
-            // Main directional light
-            const mainLight = new THREE.DirectionalLight(0xffffff, 1);
-            mainLight.position.set(5, 10, 7);
-            mainLight.castShadow = true;
-            mainLight.shadow.mapSize.width = 2048;
-            mainLight.shadow.mapSize.height = 2048;
-            mainLight.shadow.camera.near = 0.5;
-            mainLight.shadow.camera.far = 30;
-            mainLight.shadow.camera.left = -10;
-            mainLight.shadow.camera.right = 10;
-            mainLight.shadow.camera.top = 10;
-            mainLight.shadow.camera.bottom = -10;
-            mainLight.shadow.bias = -0.001;
-            scene.add(mainLight);
-
-            // Neon accent lights
-            const accentColors = [0x00ffff, 0xff00ff, 0x39ff14];
-            accentColors.forEach((color, i) => {
-                const light = new THREE.PointLight(color, 1, 15, 2);
-                const angle = (i / 3) * Math.PI * 2;
-                light.position.set(Math.cos(angle) * 8, 5, Math.sin(angle) * 8);
-                light.castShadow = false;
-                scene.add(light);
-                
-                // Animate
-                light.userData = { angle, radius: 8, speed: 0.2 + i * 0.1 };
-            });
-
-            // Rim light
-            const rimLight = new THREE.DirectionalLight(0x00ffff, 0.3);
-            rimLight.position.set(-5, 0, -7);
-            scene.add(rimLight);
-        }
-
-        // ============================================
-        // LEVEL MANAGEMENT
-        // ============================================
-        function createLevel(levelIndex) {
-            const config = CONFIG.levels[levelIndex];
-            
-            // Clear existing pieces
-            pieces.forEach(p => {
-                scene.remove(p);
-                p.traverse(child => {
-                    if (child.geometry) child.geometry.dispose();
-                    if (child.material) {
-                        if (Array.isArray(child.material)) {
-                            child.material.forEach(m => m.dispose());
-                        } else {
-                            child.material.dispose();
-                        }
-                    }
-                });
-            });
-            pieces = [];
-
-            // Remove old ghost
-            if (targetGhost) {
-                scene.remove(targetGhost);
-                targetGhost.traverse(child => {
-                    if (child.geometry) child.geometry.dispose();
-                    if (child.material) child.material.dispose();
-                });
-                targetGhost = null;
-            }
-
-            selectedPiece = null;
-
-            // Create pieces
-            const targetPositions = createTargetPositions(config);
-            const startPositions = getStartPositions(config);
-
-            config.pieceShapes.forEach((shape, i) => {
-                const color = config.pieceColors[i];
-                const piece = createPieceMesh(shape, color, CONFIG.pieceSize);
-                
-                // Set start position
-                piece.position.copy(startPositions[i]);
-                piece.rotation.set(
-                    Math.random() * Math.PI * 2,
-                    Math.random() * Math.PI * 2,
-                    Math.random() * Math.PI * 2
-                );
-                
-                // Store target
-                piece.userData.targetPosition = targetPositions[i].pos.clone();
-                piece.userData.targetRotation = targetPositions[i].rot.clone();
-                piece.userData.levelIndex = levelIndex;
-                piece.userData.pieceIndex = i;
-                
-                scene.add(piece);
-                pieces.push(piece);
-            });
-
-            // Create ghost target
-            targetGhost = createGhostTarget(config, targetPositions);
-            scene.add(targetGhost);
-
-            // Update UI
-            updateLevelUI(levelIndex);
-            resetStats();
-        }
-
-        function getStartPositions(config) {
-            const positions = [];
-            const radius = 6;
-            const count = config.pieceShapes.length;
-            
-            for (let i = 0; i < count; i++) {
-                const angle = (i / count) * Math.PI * 2 + Math.PI / 4;
-                const y = (Math.random() - 0.5) * 2 + 1;
-                positions.push(new THREE.Vector3(
-                    Math.cos(angle) * radius,
-                    y,
-                    Math.sin(angle) * radius
-                ));
-            }
-            return positions;
-        }
-
-        function createGhostTarget(config, targetPositions) {
-            const group = new THREE.Group();
-            group.userData = { isGhost: true };
-            
-            const ghostMaterial = createGhostMaterial(0x00ffff);
-            const wireMaterial = new THREE.MeshBasicMaterial({
-                color: 0x00ffff,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.3,
+                blending: THREE.AdditiveBlending,
                 depthWrite: false
             });
-
-            config.pieceShapes.forEach((shape, i) => {
-                const geoms = createPieceGeometry(shape, CONFIG.pieceSize);
-                const offsets = getPieceOffsets(shape, CONFIG.pieceSize);
-                const targetPos = targetPositions[i].pos;
-                const targetRot = targetPositions[i].rot;
-
-                geoms.forEach((geom, j) => {
-                    const mesh = new THREE.Mesh(geom, ghostMaterial);
-                    const wire = new THREE.Mesh(geom, wireMaterial);
-                    wire.scale.multiplyScalar(1.02);
-                    
-                    const piece = new THREE.Group();
-                    piece.add(mesh);
-                    piece.add(wire);
-                    
-                    if (offsets[j]) {
-                        piece.position.set(offsets[j].x, offsets[j].y, offsets[j].z);
-                    }
-                    
-                    piece.rotation.copy(targetRot);
-                    piece.position.add(targetPos);
-                    
-                    group.add(piece);
-                });
-            });
-
-            // Pulsing animation
-            group.userData.pulsePhase = 0;
-            return group;
-        }
-
-        function updateLevelUI(levelIndex) {
-            document.getElementById('level-display').textContent = levelIndex + 1;
-            document.getElementById('hint-text').textContent = CONFIG.levels[levelIndex].description;
             
-            // Update level buttons
-            const selector = document.getElementById('level-selector');
-            selector.innerHTML = '';
-            CONFIG.levels.forEach((level, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'level-btn';
-                btn.textContent = level.name;
-                btn.dataset.level = i;
-                if (i === levelIndex) btn.classList.add('active');
-                if (i >= unlockedLevels) btn.classList.add('locked');
-                btn.addEventListener('click', () => selectLevel(i));
-                selector.appendChild(btn);
+            const particles = new THREE.Points(geo, mat);
+            scene.add(particles);
+            particles.userData = { basePositions: positions.slice() };
+        }
+        
+        // ============ LEVEL CREATION ============
+        function loadLevel(levelNum) {
+            if (levelNum > maxLevel) return;
+            
+            clearLevel();
+            
+            const level = levels[levelNum - 1];
+            document.getElementById('level-display').textContent = levelNum;
+            document.getElementById('level-display').textContent = levelNum;
+            updateLevelButtons();
+            
+            // Create pieces
+            pieces = [];
+            level.pieces.forEach((pieceData, i) => {
+                const piece = createPiece(pieceData, i);
+                pieces.push(piece);
             });
-        }
-
-        function selectLevel(index) {
-            if (index >= unlockedLevels) {
-                playError();
-                return;
-            }
-            playSelect();
-            currentLevel = index;
-            createLevel(currentLevel);
-        }
-
-        function resetStats() {
+            
+            // Create target ghost shape
+            createTargetGhost(level);
+            
+            // Create target preview
+            createTargetPreview(level);
+            
+            // Reset counters
             moves = 0;
             startTime = Date.now();
             document.getElementById('moves-display').textContent = '0';
+            document.getElementById('hint-text').textContent = 'Drag to move • Right-drag to rotate camera • Click piece to select • Q/E to rotate';
+            
+            gameComplete = false;
         }
-
-        function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimer, 1000);
+        
+        function createPiece(data, index) {
+            let geometry;
+            if (data.type === 'box') {
+                geometry = new THREE.BoxGeometry(...data.size);
+            }
+            
+            // Neon material
+            const color = new THREE.Color(data.color);
+            const material = new THREE.MeshPhysicalMaterial({
+                color: color,
+                metalness: 0.3,
+                roughness: 0.2,
+                transmission: 0.3,
+                clearcoat: 1,
+                clearcoatRoughness: 0.1,
+                emissive: color.clone().multiplyScalar(0.3),
+                emissiveIntensity: 0.5
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.position.set(...data.startPos);
+            mesh.userData = {
+                index: index,
+                targetPos: new THREE.Vector3(...data.targetPos),
+                targetRot: new THREE.Euler(...data.targetRot),
+                originalColor: color.clone(),
+                isSnapped: false,
+                dragOffset: new THREE.Vector3(),
+                dragPlane: new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+            };
+            
+            // Add wireframe outline
+            const edges = new THREE.EdgesGeometry(geometry);
+            const lineMat = new THREE.LineBasicMaterial({ 
+                color: color, 
+                transparent: true, 
+                opacity: 0.8 
+            });
+            const wireframe = new THREE.LineSegments(edges, lineMat);
+            mesh.add(wireframe);
+            mesh.userData.wireframe = wireframe;
+            
+            // Add glow sprite
+            const spriteMat = new THREE.SpriteMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.3,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.scale.set(3, 3, 3);
+            mesh.add(sprite);
+            mesh.userData.glow = sprite;
+            
+            scene.add(mesh);
+            return mesh;
         }
-
-        function updateTimer() {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
-            const secs = (elapsed % 60).toString().padStart(2, '0');
-            document.getElementById('time-display').textContent = `${mins}:${secs}`;
+        
+        function createTargetGhost(level) {
+            // Remove old ghost
+            if (ghostShape) {
+                scene.remove(ghostShape);
+                ghostShape.traverse(obj => {
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) obj.material.dispose();
+                });
+            }
+            
+            ghostShape = new THREE.Group();
+            
+            level.pieces.forEach((pieceData, i) => {
+                let geometry;
+                if (pieceData.type === 'box') {
+                    geometry = new THREE.BoxGeometry(...pieceData.size);
+                }
+                
+                const color = new THREE.Color(0xff00ff);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0xff00ff,
+                    transparent: true,
+                    opacity: 0.15,
+                    wireframe: true,
+                    depthWrite: false
+                });
+                
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(...pieceData.targetPos);
+                mesh.rotation.set(...pieceData.targetRot);
+                ghostShape.add(mesh);
+            });
+            
+            ghostShape.visible = false;
+            scene.add(ghostShape);
         }
-
-        // ============================================
-        // INTERACTION HANDLING
-        // ============================================
+        
+        function createTargetPreview(level) {
+            const container = document.getElementById('target-preview');
+            container.innerHTML = '';
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 200;
+            container.appendChild(canvas);
+            
+            const previewRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            previewRenderer.setSize(200, 200);
+            previewRenderer.setPixelRatio(1);
+            
+            const previewScene = new THREE.Scene();
+            const previewCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+            previewCamera.position.set(4, 4, 4);
+            previewCamera.lookAt(0, 0, 0);
+            
+            // Add target pieces
+            level.pieces.forEach(pieceData => {
+                let geometry;
+                if (pieceData.type === 'box') {
+                    geometry = new THREE.BoxGeometry(...pieceData.size);
+                }
+                
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0xff00ff,
+                    transparent: true,
+                    opacity: 0.3,
+                    wireframe: true
+                });
+                
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(...pieceData.targetPos);
+                mesh.rotation.set(...pieceData.targetRot);
+                previewScene.add(mesh);
+            });
+            
+            // Animate preview
+            function renderPreview() {
+                if (container.innerHTML === '') return;
+                previewScene.rotation.y += 0.005;
+                previewRenderer.render(previewScene, previewCamera);
+                requestAnimationFrame(renderPreview);
+            }
+            renderPreview();
+        }
+        
+        function clearLevel() {
+            pieces.forEach(piece => {
+                piece.traverse(obj => {
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) {
+                        if (Array.isArray(obj.material)) {
+                            obj.material.forEach(m => m.dispose());
+                        } else {
+                            obj.material.dispose();
+                        }
+                    }
+                });
+                scene.remove(piece);
+            });
+            pieces = [];
+            
+            if (ghostShape) {
+                scene.remove(ghostShape);
+                ghostShape.traverse(obj => {
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) obj.material.dispose();
+                });
+                ghostShape = null;
+            }
+            
+            selectedPiece = null;
+        }
+        
+        // ============ INTERACTION ============
         function setupEventListeners() {
             // Mouse events
-            renderer.domElement.addEventListener('mousedown', onMouseDown);
-            renderer.domElement.addEventListener('mousemove', onMouseMove);
-            renderer.domElement.addEventListener('mouseup', onMouseUp);
+            renderer.domElement.addEventListener('pointerdown', onPointerDown);
+            renderer.domElement.addEventListener('pointermove', onPointerMove);
+            renderer.domElement.addEventListener('pointerup', onPointerUp);
             renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
-            renderer.domElement.addEventListener('dblclick', onDoubleClick);
-
+            
             // Touch events
             renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
             renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
             renderer.domElement.addEventListener('touchend', onTouchEnd);
-
+            
+            // Keyboard
+            window.addEventListener('keydown', onKeyDown);
+            
             // Buttons
-            document.getElementById('reset-btn').addEventListener('click', resetLevel);
-            document.getElementById('hint-btn').addEventListener('click', toggleHint);
+            document.getElementById('reset-btn').addEventListener('click', () => loadLevel(currentLevel));
+            document.getElementById('hint-btn').addEventListener('click', toggleGhost);
             document.getElementById('next-level-btn').addEventListener('click', nextLevel);
             document.getElementById('restart-game-btn').addEventListener('click', restartGame);
-
-            // Window resize
-            window.addEventListener('resize', onResize);
-
-            // Visibility change
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    if (timerInterval) clearInterval(timerInterval);
-                } else {
-                    startTimer();
+            document.getElementById('rot-x-btn').addEventListener('click', () => rotateSelectedPiece('x'));
+            document.getElementById('rot-y-btn').addEventListener('click', () => rotateSelectedPiece('y'));
+            document.getElementById('rot-z-btn').addEventListener('click', () => rotateSelectedPiece('z'));
+            
+            // Show rotation buttons on touch
+            let touchCount = 0;
+            renderer.domElement.addEventListener('touchstart', () => {
+                touchCount++;
+                if (touchCount > 0) {
+                    document.getElementById('rotate-panel').style.display = 'flex';
                 }
-            });
+            }, { passive: true });
+            renderer.domElement.addEventListener('touchend', () => {
+                touchCount = Math.max(0, touchCount - 1);
+                if (touchCount === 0) {
+                    document.getElementById('rotate-panel').style.display = 'none';
+                }
+            }, { passive: true });
         }
-
+        
         function getMousePosition(event) {
             const rect = renderer.domElement.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         }
-
-        function getIntersectedPiece(event) {
-            getMousePosition(event);
-            raycaster.setFromCamera(mouse, camera);
-            
-            const pieceObjects = [];
-            pieces.forEach(piece => {
-                if (!piece.userData.isPlaced) {
-                    piece.traverse(child => {
-                        if (child.isMesh && !child.material.wireframe && !child.userData.isGhost) {
-                            pieceObjects.push(child);
-                        }
-                    });
-                }
-            });
-            
-            const intersects = raycaster.intersectObjects(pieceObjects, true);
-            if (intersects.length > 0) {
-                let object = intersects[0].object;
-                while (object.parent && !object.userData.shape) {
-                    object = object.parent;
-                }
-                return object;
-            }
-            return null;
-        }
-
-        function onMouseDown(event) {
-            if (event.button === 0) { // Left click - select/drag
-                initAudio();
-                const piece = getIntersectedPiece(event);
-                if (piece && !piece.userData.isPlaced) {
+        
+        function onPointerDown(event) {
+            if (event.button === 0) { // Left click - select/drag piece
+                getMousePosition(event);
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersects = raycaster.intersectObjects(pieces, false);
+                if (intersects.length > 0) {
+                    const piece = intersects[0].object;
                     selectPiece(piece);
-                    startDrag(event);
-                } else {
-                    deselectPiece();
+                    
+                    // Setup drag plane
+                    const planeNormal = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+                    piece.userData.dragPlane.setFromNormalAndCoplanarPoint(planeNormal, piece.position);
+                    
+                    const intersection = new THREE.Vector3();
+                    raycaster.ray.intersectPlane(piece.userData.dragPlane, intersection);
+                    piece.userData.dragOffset.subVectors(piece.position, intersection);
+                    
+                    controls.enabled = false;
                 }
-            } else if (event.button === 2) { // Right click - rotate
-                initAudio();
-                const piece = getIntersectedPiece(event);
-                if (piece && !piece.userData.isPlaced) {
-                    selectPiece(piece);
-                    rotatePiece(piece);
+            } else if (event.button === 2) { // Right click - rotate camera
+                controls.enabled = true;
+            }
+        }
+        
+        function onPointerMove(event) {
+            if (selectedPiece) {
+                getMousePosition(event);
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersection = new THREE.Vector3();
+                if (raycaster.ray.intersectPlane(selectedPiece.userData.dragPlane, intersection)) {
+                    const targetPos = intersection.add(selectedPiece.userData.dragOffset);
+                    // Smooth movement
+                    selectedPiece.position.lerp(targetPos, 0.3);
                 }
             }
         }
-
-        function onMouseMove(event) {
-            if (isDragging && selectedPiece) {
-                dragPiece(event);
+        
+        function onPointerUp(event) {
+            if (selectedPiece) {
+                checkSnap(selectedPiece);
+                deselectPiece();
             }
+            controls.enabled = true;
         }
-
-        function onMouseUp(event) {
-            if (isDragging) {
-                endDrag();
-            }
-        }
-
-        function onDoubleClick(event) {
-            initAudio();
-            const piece = getIntersectedPiece(event);
-            if (piece && !piece.userData.isPlaced) {
-                selectPiece(piece);
-                rotatePiece(piece);
-            }
-        }
-
+        
         // Touch handling
+        let touchStartPositions = new Map();
+        let isTwoFingerRotate = false;
+        
         function onTouchStart(event) {
             event.preventDefault();
-            initAudio();
-            touchCount = event.touches.length;
+            const touches = Array.from(event.touches);
             
-            if (touchCount === 1) {
-                const touch = event.touches[0];
-                touchStart = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+            if (touches.length === 1) {
+                // Single touch - select/drag piece
+                const touch = touches[0];
+                touchStartPositions.set(touch.identifier, { x: touch.clientX, y: touch.clientY, time: Date.now() });
                 
-                const piece = getIntersectedPiece(touch);
-                if (piece && !piece.userData.isPlaced) {
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(pieces, false);
+                if (intersects.length > 0) {
+                    const piece = intersects[0].object;
                     selectPiece(piece);
                     
-                    // Check for double tap
-                    const now = Date.now();
-                    if (now - lastTouchTime < 300) {
-                        rotatePiece(piece);
-                    }
-                    lastTouchTime = now;
+                    const planeNormal = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+                    piece.userData.dragPlane.setFromNormalAndCoplanarPoint(planeNormal, piece.position);
                     
-                    startDrag(touch);
-                } else {
-                    deselectPiece();
+                    const intersection = new THREE.Vector3();
+                    raycaster.ray.intersectPlane(piece.userData.dragPlane, intersection);
+                    piece.userData.dragOffset.subVectors(piece.position, intersection);
+                    
+                    controls.enabled = false;
                 }
+            } else if (touches.length === 2) {
+                // Two fingers - rotate camera
+                isTwoFingerRotate = true;
+                controls.enabled = true;
             }
         }
-
+        
         function onTouchMove(event) {
             event.preventDefault();
-            if (touchCount === 1 && isDragging && selectedPiece) {
-                dragPiece(event.touches[0]);
+            const touches = Array.from(event.touches);
+            
+            if (touches.length === 1 && selectedPiece && !isTwoFingerRotate) {
+                const touch = touches[0];
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersection = new THREE.Vector3();
+                if (raycaster.ray.intersectPlane(selectedPiece.userData.dragPlane, intersection)) {
+                    const targetPos = intersection.add(selectedPiece.userData.dragOffset);
+                    selectedPiece.position.lerp(targetPos, 0.3);
+                }
+            } else if (touches.length === 2) {
+                isTwoFingerRotate = true;
+                controls.enabled = true;
             }
         }
-
+        
         function onTouchEnd(event) {
-            if (touchCount === 1) {
-                endDrag();
+            const touches = Array.from(event.changedTouches);
+            touches.forEach(touch => {
+                touchStartPositions.delete(touch.identifier);
+            });
+            
+            if (event.touches.length < 2) {
+                isTwoFingerRotate = false;
             }
-            touchCount = 0;
+            
+            if (selectedPiece && !isTwoFingerRotate) {
+                checkSnap(selectedPiece);
+                deselectPiece();
+            }
+            controls.enabled = true;
         }
-
-        function startDrag(event) {
+        
+        function onKeyDown(event) {
             if (!selectedPiece) return;
             
-            getMousePosition(event);
-            raycaster.setFromCamera(mouse, camera);
-            
-            // Create drag plane perpendicular to camera
-            dragPlane.setFromNormalAndCoplanarPoint(
-                camera.getWorldDirection(new THREE.Vector3()),
-                selectedPiece.position
-            );
-            
-            const intersect = new THREE.Vector3();
-            raycaster.ray.intersectPlane(dragPlane, intersect);
-            if (intersect) {
-                dragOffset.copy(selectedPiece.position).sub(intersect);
+            switch(event.code) {
+                case 'KeyQ': rotateSelectedPiece('y', -1); break;
+                case 'KeyE': rotateSelectedPiece('y', 1); break;
+                case 'KeyR': rotateSelectedPiece('x', 1); break;
+                case 'KeyF': rotateSelectedPiece('x', -1); break;
+                case 'KeyT': rotateSelectedPiece('z', 1); break;
+                case 'KeyG': rotateSelectedPiece('z', -1); break;
+                case 'KeyH': toggleGhost(); break;
+                case 'Escape': deselectPiece(); break;
             }
+        }
+        
+        function selectPiece(piece) {
+            if (piece.userData.isSnapped) return;
             
-            isDragging = true;
-            controls.enabled = false;
+            selectedPiece = piece;
             
             // Visual feedback
-            highlightPiece(selectedPiece, true);
-            playMove();
+            piece.material.emissiveIntensity = 1.5;
+            piece.material.transmission = 0.5;
+            piece.userData.wireframe.material.opacity = 1;
+            piece.userData.glow.material.opacity = 0.6;
+            piece.userData.glow.scale.set(4, 4, 4);
+            
+            playSound('select');
         }
-
-        function dragPiece(event) {
-            if (!selectedPiece || !isDragging) return;
-            
-            getMousePosition(event);
-            raycaster.setFromCamera(mouse, camera);
-            
-            const intersect = new THREE.Vector3();
-            raycaster.ray.intersectPlane(dragPlane, intersect);
-            
-            if (intersect) {
-                const newPos = intersect.add(dragOffset);
-                // Snap to grid
-                newPos.x = Math.round(newPos.x / CONFIG.pieceSize) * CONFIG.pieceSize;
-                newPos.y = Math.round(newPos.y / CONFIG.pieceSize) * CONFIG.pieceSize;
-                newPos.z = Math.round(newPos.z / CONFIG.pieceSize) * CONFIG.pieceSize;
-                
-                selectedPiece.position.lerp(newPos, 0.2);
-            }
-        }
-
-        function endDrag() {
-            if (!selectedPiece) return;
-            
-            isDragging = false;
-            controls.enabled = true;
-            highlightPiece(selectedPiece, false);
-            
-            // Check for snap
-            checkSnap(selectedPiece);
-            moves++;
-            document.getElementById('moves-display').textContent = moves;
-        }
-
-        function selectPiece(piece) {
-            if (selectedPiece === piece) return;
-            
-            deselectPiece();
-            selectedPiece = piece;
-            highlightPiece(piece, true);
-            playSelect();
-            
-            // Stop auto-rotate
-            controls.autoRotate = false;
-        }
-
+        
         function deselectPiece() {
             if (selectedPiece) {
-                highlightPiece(selectedPiece, false);
+                selectedPiece.material.emissiveIntensity = 0.5;
+                selectedPiece.material.transmission = 0.3;
+                selectedPiece.userData.wireframe.material.opacity = 0.8;
+                selectedPiece.userData.glow.material.opacity = 0.3;
+                selectedPiece.userData.glow.scale.set(3, 3, 3);
                 selectedPiece = null;
             }
-            controls.autoRotate = !isTouchDevice;
         }
-
-        function highlightPiece(piece, on) {
-            piece.traverse(child => {
-                if (child.isMesh && child.material.emissive !== undefined) {
-                    if (on) {
-                        child.material.emissiveIntensity = 1.5;
-                        child.material.emissive.setHex(piece.userData.originalColor);
-                    } else {
-                        child.material.emissiveIntensity = 0.5;
-                        child.material.emissive.setHex(piece.userData.originalColor).multiplyScalar(0.3);
-                    }
-                }
-                if (child.isMesh && child.material.wireframe) {
-                    child.material.opacity = on ? 0.8 : 0.4;
-                }
-            });
-        }
-
-        function rotatePiece(piece) {
-            const angle = Math.PI / 2;
+        
+        function rotateSelectedPiece(axis, direction = 1) {
+            if (!selectedPiece) return;
             
-            // Quantize current rotation to nearest 90° first, then add 90°
-            const currentQuantized = quantizeRotation(piece.rotation.y);
-            const targetRot = currentQuantized + angle;
-            const duration = 300;
-            const startTime = Date.now();
+            const angle = direction * Math.PI / 2; // 90 degrees
+            const euler = new THREE.Euler();
+            euler[axis] = angle;
+            const quat = new THREE.Quaternion().setFromEuler(euler);
+            selectedPiece.quaternion.premultiply(quat);
             
-            function animateRotation() {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                piece.rotation.y = currentQuantized + (targetRot - currentQuantized) * eased;
-                
-                if (progress < 1) {
-                    requestAnimationFrame(animateRotation);
-                } else {
-                    piece.rotation.y = targetRot;
-                    checkSnap(piece);
-                }
-            }
-            
-            animateRotation();
-            playMove();
             moves++;
             document.getElementById('moves-display').textContent = moves;
+            playSound('rotate');
         }
-
+        
         function checkSnap(piece) {
-            if (!piece.userData.targetPosition) return;
+            const targetPos = piece.userData.targetPos;
+            const targetRot = piece.userData.targetRot;
             
-            const distance = piece.position.distanceTo(piece.userData.targetPosition);
-            const rotDiff = Math.abs(normalizeAngle(piece.rotation.y - piece.userData.targetRotation.y));
+            const posDist = piece.position.distanceTo(targetPos);
+            const rotDiff = new THREE.Quaternion().setFromEuler(targetRot).multiply(
+                piece.quaternion.clone().invert()
+            );
+            const rotAngle = 2 * Math.acos(Math.min(1, Math.abs(rotDiff.w)));
             
-            if (distance < CONFIG.snapDistance && rotDiff < 0.3) {
-                // Snap to position
-                snapPiece(piece);
-            }
-        }
-
-        function normalizeAngle(angle) {
-            while (angle > Math.PI) angle -= Math.PI * 2;
-            while (angle < -Math.PI) angle += Math.PI * 2;
-            return Math.abs(angle);
-        }
-
-        function snapPiece(piece) {
-            if (piece.userData.isPlaced) return;
-            
-            piece.userData.isPlaced = true;
-            
-            // Animate snap
-            const targetPos = piece.userData.targetPosition.clone();
-            const targetRot = piece.userData.targetRotation.clone();
-            
-            const duration = 400;
-            const startTime = Date.now();
-            const startPos = piece.position.clone();
-            const startRot = piece.rotation.clone();
-            
-            function animateSnap() {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 4);
+            // Snap threshold
+            if (posDist < 0.8 && rotAngle < 0.5) {
+                // SNAP!
+                piece.position.copy(targetPos);
+                piece.quaternion.setFromEuler(targetRot);
+                piece.userData.isSnapped = true;
                 
-                piece.position.lerpVectors(startPos, targetPos, eased);
-                piece.rotation.x = startRot.x + (targetRot.x - startRot.x) * eased;
-                piece.rotation.y = startRot.y + (targetRot.y - startRot.y) * eased;
-                piece.rotation.z = startRot.z + (targetRot.z - startRot.z) * eased;
+                // Visual snap effect
+                piece.material.emissiveIntensity = 2;
+                piece.material.transmission = 0.7;
+                setTimeout(() => {
+                    if (piece.userData.isSnapped) {
+                        piece.material.emissiveIntensity = 0.2;
+                        piece.material.transmission = 0.5;
+                    }
+                }, 300);
                 
-                if (progress < 1) {
-                    requestAnimationFrame(animateSnap);
-                } else {
-                    piece.position.copy(targetPos);
-                    piece.rotation.copy(targetRot);
-                    onPiecePlaced(piece);
-                }
-            }
-            
-            animateSnap();
-            playSnap();
-            createSnapParticles(piece.position);
-        }
-
-        function onPiecePlaced(piece) {
-            // Disable interaction
-            piece.traverse(child => {
-                if (child.isMesh) {
-                    child.material.emissiveIntensity = 0.3;
-                }
-            });
-            
-            // Check if all pieces placed
-            const allPlaced = pieces.every(p => p.userData.isPlaced);
-            if (allPlaced) {
-                setTimeout(() => levelComplete(), 500);
+                // Disable interaction
+                piece.userData.wireframe.material.opacity = 0.4;
+                piece.userData.glow.material.opacity = 0.1;
+                
+                playSound('snap');
+                createSnapParticles(piece.position.clone());
+                
+                checkLevelComplete();
             }
         }
-
-        function createSnapParticles(position) {
-            const count = 20;
-            for (let i = 0; i < count; i++) {
-                const geometry = new THREE.SphereGeometry(0.08, 8, 8);
-                const color = CONFIG.neonColors[Math.floor(Math.random() * CONFIG.neonColors.length)];
-                const material = new THREE.MeshBasicMaterial({
-                    color: color,
-                    transparent: true,
-                    opacity: 1,
-                    depthWrite: false,
-                    blending: THREE.AdditiveBlending
-                });
-                const particle = new THREE.Mesh(geometry, material);
-                particle.position.copy(position);
+        
+        function checkLevelComplete() {
+            const allSnapped = pieces.every(p => p.userData.isSnapped);
+            if (allSnapped) {
+                gameComplete = true;
+                const timeTaken = Math.floor((Date.now() - startTime) / 1000);
                 
-                const velocity = new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.2,
-                    Math.random() * 0.15 + 0.05,
-                    (Math.random() - 0.5) * 0.2
-                );
-                
-                particle.userData = { velocity, life: 1, maxLife: 1 };
-                scene.add(particle);
-                
-                animateParticle(particle);
-            }
-        }
-
-        function animateParticle(particle) {
-            const delta = 1/60;
-            particle.position.add(particle.userData.velocity);
-            particle.userData.velocity.y -= 0.003; // gravity
-            particle.userData.life -= delta;
-            particle.material.opacity = particle.userData.life / particle.userData.maxLife;
-            particle.scale.multiplyScalar(0.98);
-            
-            if (particle.userData.life > 0) {
-                requestAnimationFrame(() => animateParticle(particle));
-            } else {
-                scene.remove(particle);
-                particle.geometry.dispose();
-                particle.material.dispose();
-            }
-        }
-
-        function levelComplete() {
-            playComplete();
-            playLevelUp();
-            createCelebration();
-            
-            // Unlock next level
-            if (currentLevel + 1 >= unlockedLevels && currentLevel + 1 < CONFIG.levels.length) {
-                unlockedLevels = currentLevel + 2;
-            }
-            
-            // Show modal
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
-            const secs = (elapsed % 60).toString().padStart(2, '0');
-            
-            if (currentLevel === CONFIG.levels.length - 1) {
-                // Game complete
-                document.getElementById('game-complete-text').innerHTML = 
-                    `All levels mastered!<br><br>Total Time: ${mins}:${secs}<br>Total Moves: ${moves}<br><br>Rank: NEURAL ARCHITECT`;
-                document.getElementById('game-complete-modal').classList.add('active');
-                gameCompleted = true;
-            } else {
                 document.getElementById('level-complete-text').innerHTML = 
-                    `Level ${currentLevel + 1} Complete!<br><br>Time: ${mins}:${secs}<br>Moves: ${moves}<br><br>Next: ${CONFIG.levels[currentLevel + 1].name}`;
+                    `Pattern: <span style="color: var(--neon-cyan)">${levels[currentLevel-1].name}</span><br>
+                    Moves: <span style="color: var(--neon-green)">${moves}</span><br>
+                    Time: <span style="color: var(--neon-yellow)">${formatTime(timeTaken)}</span>`;
                 document.getElementById('level-complete-modal').classList.add('active');
-            }
-            
-            if (timerInterval) clearInterval(timerInterval);
-        }
-
-        function createCelebration() {
-            const container = document.getElementById('celebration');
-            const colors = ['#00ffff', '#ff00ff', '#39ff14', '#ff6600', '#ffff00', '#0080ff'];
-            
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.background = color;
-                particle.style.boxShadow = `0 0 10px ${color}`;
                 
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 100 + Math.random() * 200;
-                const tx = Math.cos(angle) * distance;
-                const ty = Math.sin(angle) * distance;
+                playSound('complete');
+                createCelebration();
                 
-                particle.style.setProperty('--tx', `${tx}px`);
-                particle.style.setProperty('--ty', `${ty}px`);
-                particle.style.left = '50%';
-                particle.style.top = '50%';
-                particle.style.animationDelay = `${Math.random() * 0.3}s`;
-                
-                container.appendChild(particle);
-                
-                setTimeout(() => particle.remove(), 1500);
+                // Unlock next level
+                if (currentLevel < maxLevel) {
+                    // Level unlocking handled by level selector
+                }
             }
         }
-
+        
         function nextLevel() {
             document.getElementById('level-complete-modal').classList.remove('active');
             currentLevel++;
-            createLevel(currentLevel);
-            startTimer();
-        }
-
-        function restartGame() {
-            document.getElementById('game-complete-modal').classList.remove('active');
-            currentLevel = 0;
-            unlockedLevels = 1;
-            gameCompleted = false;
-            createLevel(currentLevel);
-            startTimer();
-        }
-
-        function resetLevel() {
-            playSelect();
-            createLevel(currentLevel);
-        }
-
-        function toggleHint() {
-            hintVisible = !hintVisible;
-            const btn = document.getElementById('hint-btn');
-            const ghostPieces = [];
-            
-            if (hintVisible) {
-                btn.textContent = 'HIDE HINT';
-                btn.style.borderColor = '#39ff14';
-                btn.style.color = '#39ff14';
-                
-                // Show ghost more prominently
-                if (targetGhost) {
-                    targetGhost.traverse(child => {
-                        if (child.isMesh && child.material.transparent) {
-                            child.material.opacity = 0.6;
-                        }
-                        if (child.isMesh && child.material.wireframe) {
-                            child.material.opacity = 0.8;
-                        }
-                    });
-                }
+            if (currentLevel <= maxLevel) {
+                loadLevel(currentLevel);
             } else {
-                btn.innerHTML = '<span>💡</span> SHOW HINT';
-                btn.style.borderColor = '#ff6600';
-                btn.style.color = '#ff6600';
-                
-                if (targetGhost) {
-                    targetGhost.traverse(child => {
-                        if (child.isMesh && child.material.transparent) {
-                            child.material.opacity = 0.3;
-                        }
-                        if (child.isMesh && child.material.wireframe) {
-                            child.material.opacity = 0.3;
-                        }
-                    });
-                }
+                showGameComplete();
             }
         }
-
-        function onResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        function showGameComplete() {
+            const totalTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('game-complete-text').innerHTML = 
+                `All ${maxLevel} patterns fused!<br>
+                Total Moves: <span style="color: var(--neon-green)">${moves}</span><br>
+                Total Time: <span style="color: var(--neon-yellow)">${formatTime(totalTime)}</span>`;
+            document.getElementById('game-complete-modal').classList.add('active');
+            playSound('gameComplete');
+            createCelebration(true);
         }
-
-        function hideLoading() {
-            const loading = document.getElementById('loading-screen');
-            loading.classList.add('hidden');
-            setTimeout(() => loading.style.display = 'none', 500);
+        
+        function restartGame() {
+            document.getElementById('game-complete-modal').classList.remove('active');
+            currentLevel = 1;
+            moves = 0;
+            startTime = Date.now();
+            loadLevel(1);
         }
-
-        // ============================================
-        // ANIMATION LOOP
-        // ============================================
+        
+        function toggleGhost() {
+            showGhost = !showGhost;
+            if (ghostShape) ghostShape.visible = showGhost;
+            document.getElementById('hint-btn').textContent = showGhost ? '💡 HIDE GHOST' : '💡 SHOW GHOST';
+            document.getElementById('hint-btn').classList.toggle('secondary', !showGhost);
+            playSound('select');
+        }
+        
+        // ============ LEVEL SELECTOR ============
+        function createLevelSelector() {
+            const selector = document.getElementById('level-selector');
+            selector.innerHTML = '';
+            
+            levels.forEach((level, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'level-btn' + (i === 0 ? ' active' : i > 0 ? ' locked' : '');
+                btn.textContent = level.name;
+                btn.dataset.level = i + 1;
+                btn.addEventListener('click', () => {
+                    if (!btn.classList.contains('locked')) {
+                        currentLevel = i + 1;
+                        loadLevel(currentLevel);
+                    }
+                });
+                selector.appendChild(btn);
+            });
+        }
+        
+        function updateLevelButtons() {
+            document.querySelectorAll('.level-btn').forEach((btn, i) => {
+                btn.classList.remove('active', 'locked');
+                if (i + 1 === currentLevel) {
+                    btn.classList.add('active');
+                } else if (i + 1 > currentLevel && i > 0) {
+                    btn.classList.add('locked');
+                }
+            });
+        }
+        
+        // ============ AUDIO ============
+        function initAudio() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch(e) {
+                audioCtx = null;
+            }
+        }
+        
+        function playSound(type) {
+            if (!audioCtx) return;
+            
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            switch(type) {
+                case 'select':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                    break;
+                case 'rotate':
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                    break;
+                case 'snap':
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                    break;
+                case 'complete':
+                    [600, 800, 1000, 1200].forEach((f, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.type = 'sine';
+                        o.frequency.value = f;
+                        g.gain.setValueAtTime(0.1, now + i * 0.08);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+                        o.start(now + i * 0.08);
+                        o.stop(now + i * 0.08 + 0.3);
+                    });
+                    break;
+                case 'gameComplete':
+                    [400, 500, 600, 800, 1000, 1200, 1600].forEach((f, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.type = 'triangle';
+                        o.frequency.value = f;
+                        g.gain.setValueAtTime(0.08, now + i * 0.06);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.4);
+                        o.start(now + i * 0.06);
+                        o.stop(now + i * 0.06 + 0.4);
+                    });
+                    break;
+            }
+        }
+        
+        // ============ PARTICLES & EFFECTS ============
+        function createSnapParticles(position) {
+            const colors = [0x00ffff, 0xff00ff, 0x39ff14, 0xff6600];
+            
+            for (let i = 0; i < 20; i++) {
+                const geo = new THREE.SphereGeometry(0.08, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    transparent: true,
+                    opacity: 1,
+                    blending: THREE.AdditiveBlending
+                });
+                const particle = new THREE.Mesh(geo, mat);
+                particle.position.copy(position);
+                
+                const velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.3,
+                    Math.random() * 0.3 + 0.1,
+                    (Math.random() - 0.5) * 0.3
+                );
+                const life = 1;
+                particle.userData = { velocity, life, maxLife: life };
+                scene.add(particle);
+                particles.push(particle);
+            }
+        }
+        
+        function createCelebration(big = false) {
+            const count = big ? 100 : 50;
+            const colors = [0x00ffff, 0xff00ff, 0x39ff14, 0xff6600, 0xffff00, 0x0080ff];
+            
+            for (let i = 0; i < count; i++) {
+                const geo = new THREE.SphereGeometry(big ? 0.15 : 0.1, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    transparent: true,
+                    opacity: 1,
+                    blending: THREE.AdditiveBlending
+                });
+                const particle = new THREE.Mesh(geo, mat);
+                particle.position.set(0, 0, 0);
+                
+                const phi = Math.random() * Math.PI * 2;
+                const theta = Math.random() * Math.PI;
+                const speed = big ? 0.5 + Math.random() * 0.5 : 0.3 + Math.random() * 0.3;
+                const velocity = new THREE.Vector3(
+                    Math.sin(theta) * Math.cos(phi) * speed,
+                    Math.cos(theta) * speed + 0.2,
+                    Math.sin(theta) * Math.sin(phi) * speed
+                );
+                const life = 2;
+                particle.userData = { velocity, life, maxLife: life };
+                scene.add(particle);
+                particles.push(particle);
+            }
+            
+            // CSS particles
+            const celebration = document.getElementById('celebration');
+            const cssCount = big ? 50 : 20;
+            for (let i = 0; i < cssCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = '#' + color.toString(16).padStart(6, '0');
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                const tx = (Math.random() - 0.5) * (big ? 800 : 400);
+                const ty = (Math.random() - 0.5) * (big ? 800 : 400);
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                celebration.appendChild(particle);
+                setTimeout(() => particle.remove(), 1200);
+            }
+        }
+        
+        // ============ ANIMATION LOOP ============
         function animate() {
             requestAnimationFrame(animate);
             
@@ -1794,53 +1107,108 @@
             // Update controls
             controls.update();
             
-            // Animate ambient particles
-            scene.traverse(object => {
-                if (object.userData.type === 'ambient') {
-                    const positions = object.geometry.attributes.position.array;
-                    const originals = object.userData.originalPositions;
-                    for (let i = 0; i < positions.length; i += 3) {
-                        positions[i + 1] = originals[i + 1] + Math.sin(time * 0.5 + i) * 0.5;
-                        positions[i] = originals[i] + Math.cos(time * 0.3 + i) * 0.3;
-                    }
-                    object.geometry.attributes.position.needsUpdate = true;
-                    object.rotation.y += 0.0001;
-                }
-                
-                // Animate accent lights
-                if (object.isPointLight && object.userData.angle !== undefined) {
-                    object.userData.angle += object.userData.speed * 0.01;
-                    object.position.x = Math.cos(object.userData.angle) * object.userData.radius;
-                    object.position.z = Math.sin(object.userData.angle) * object.userData.radius;
-                    object.position.y = 5 + Math.sin(time * object.userData.speed + object.userData.angle) * 2;
+            // Animate orbiting lights
+            scene.children.forEach(obj => {
+                if (obj.isPointLight && obj.userData.angle !== undefined) {
+                    obj.userData.angle += 0.001;
+                    obj.position.x = Math.cos(obj.userData.angle) * obj.userData.radius;
+                    obj.position.z = Math.sin(obj.userData.angle) * obj.userData.radius;
+                    obj.position.y = obj.userData.height + Math.sin(time * 0.5 + obj.userData.angle) * 0.5;
                 }
             });
             
-            // Pulse ghost
-            if (targetGhost) {
-                targetGhost.userData.pulsePhase += 0.02;
-                const pulse = Math.sin(targetGhost.userData.pulsePhase) * 0.1 + 0.9;
-                targetGhost.scale.setScalar(pulse);
-                
-                targetGhost.traverse(child => {
-                    if (child.isMesh && child.material.transparent) {
-                        child.material.opacity = 0.2 + Math.sin(targetGhost.userData.pulsePhase) * 0.1;
+            // Animate ground rings
+            scene.children.forEach(obj => {
+                if (obj.userData.ringIndex !== undefined) {
+                    const i = obj.userData.ringIndex;
+                    obj.scale.setScalar(1 + Math.sin(time * 1.5 + i) * 0.3);
+                    obj.material.opacity = 0.15 + Math.sin(time * 2 + i) * 0.05 - i * 0.04;
+                }
+            });
+            
+            // Animate ambient particles
+            scene.children.forEach(obj => {
+                if (obj.isPoints && obj.userData.basePositions) {
+                    const positions = obj.geometry.attributes.position.array;
+                    const speeds = obj.geometry.attributes.speed.array;
+                    const basePositions = obj.userData.basePositions;
+                    
+                    for (let i = 0; i < positions.length / 3; i++) {
+                        positions[i * 3 + 1] = basePositions[i * 3 + 1] + Math.sin(time * speeds[i] * 100 + i) * 2;
+                        positions[i * 3] = basePositions[i * 3] + Math.cos(time * speeds[i] * 50 + i) * 1;
                     }
+                    obj.geometry.attributes.position.needsUpdate = true;
+                    obj.rotation.y += 0.0001;
+                }
+            });
+            
+            // Animate pieces (subtle hover for non-snapped)
+            pieces.forEach((piece, i) => {
+                if (!piece.userData.isSnapped) {
+                    piece.position.y += Math.sin(time * 2 + i) * 0.003;
+                    piece.rotation.y += 0.002;
+                    piece.userData.glow.material.opacity = 0.3 + Math.sin(time * 3 + i) * 0.1;
+                }
+            });
+            
+            // Animate ghost
+            if (ghostShape && ghostShape.visible) {
+                ghostShape.rotation.y += 0.002;
+                ghostShape.children.forEach((child, i) => {
+                    child.material.opacity = 0.15 + Math.sin(time * 2 + i) * 0.05;
                 });
             }
             
-            // Animate unplaced pieces (subtle float)
-            pieces.forEach(piece => {
-                if (!piece.userData.isPlaced) {
-                    piece.position.y += Math.sin(time * 2 + piece.userData.pieceIndex) * 0.002;
-                    piece.rotation.y += 0.001;
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.position.add(p.userData.velocity);
+                p.userData.velocity.y -= 0.01; // gravity
+                p.userData.life -= 0.016;
+                p.material.opacity = p.userData.life / p.userData.maxLife;
+                p.scale.setScalar(p.userData.life / p.userData.maxLife);
+                
+                if (p.userData.life <= 0) {
+                    scene.remove(p);
+                    p.geometry.dispose();
+                    p.material.dispose();
+                    particles.splice(i, 1);
                 }
-            });
+            }
+            
+            // Highlight piece under mouse (when not dragging)
+            if (!selectedPiece) {
+                getMousePosition({ clientX: mouse.clientX || window.innerWidth/2, clientY: mouse.clientY || window.innerHeight/2 });
+                // Skip highlight for performance
+            }
             
             renderer.render(scene, camera);
         }
-
-        // Start the game
+        
+        // ============ UTILITIES ============
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+        
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!gameComplete) {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    document.getElementById('time-display').textContent = formatTime(elapsed);
+                }
+            }, 1000);
+        }
+        
+        // Start game
         init();
     </script>
 </body>

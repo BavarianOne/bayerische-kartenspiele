@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Multi-Color Studio (Crostini Stable Fix)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            background-color: #05050d;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        header {
+            background: #010103;
+            border-bottom: 2px solid #1a0f30;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            min-height: 60px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        header h1 {
+            font-size: 15px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .ui-element {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: monospace;
+            color: #a5a5cc;
+        }
+        input[type="range"] {
+            accent-color: #ff00ff;
+            cursor: pointer;
+            width: 70px;
+        }
+        input[type="color"] {
+            background: transparent;
+            border: 1px solid #331a5e;
+            border-radius: 4px;
+            width: 28px;
+            height: 24px;
+            cursor: pointer;
+        }
+        button {
+            background: transparent;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        #btnClear { border: 1px solid #ff00ff; color: #ff00ff; }
+        #btnToggleDetect { border: 1px solid #ffff00; color: #ffff00; }
+        #btnGenerate { border: 2px solid #00ffff; color: #00ffff; box-shadow: 0 0 8px rgba(0,255,255,0.3); }
+        
+        #detectedTag {
+            color: #ff00ff;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 11px;
+            background: #0b061a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #221144;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 15px;
+            gap: 15px;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        .panel {
+            flex: 1;
+            background: #010104;
+            border: 2px solid #110924;
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel-title {
+            padding: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            background: #03030b;
+            border-bottom: 1px solid #110924;
+            flex-shrink: 0;
+        }
+        #title2d { color: #ff00ff; }
+        #title3d { color: #00ffff; }
+        
+        .canvas-wrapper {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            background: #000002;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .mobile-zoom-ui {
+            position: absolute;
+            bottom: 20px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00ffff;
+            background: rgba(1, 1, 4, 0.8);
+            color: #00ffff;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            header { height: auto; }
+            .container { flex-direction: column; overflow-y: auto; height: auto; }
+            .panel { height: 43vh; flex: none; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="control-group">
+        <h1>3D STUDIO</h1>
+        <button id="btnClear">Clear</button>
+        <button id="btnToggleDetect">Auto-Detect: ON</button>
+        
+        <div class="ui-element">
+            <label for="thicknessSlider">BOLD:</label>
+            <input type="range" id="thicknessSlider" min="5" max="40" value="15">
+        </div>
+        
+        <div class="ui-element">
+            <label for="colorPicker">COLOR:</label>
+            <input type="color" id="colorPicker" value="#ff00ff">
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <div id="detectedTag">Shape: None</div>
+        <button id="btnGenerate">Render 3D</button>
+    </div>
+</header>
+
+<div class="container">
+    <div class="panel">
+        <div class="panel-title" id="title2d">1. Input Sketchpad</div>
+        <div class="canvas-wrapper">
+            <canvas id="canvas2d"></canvas>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title" id="title3d">2. Shaded 3D Viewport</div>
+        <div class="canvas-wrapper">
+            <canvas id="canvas3d"></canvas>
+            <div class="mobile-zoom-ui">
+                <div class="zoom-btn" id="zoomIn">+</div>
+                <div class="zoom-btn" id="zoomOut">−</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas2d = document.getElementById('canvas2d');
+const ctx2d = canvas2d.getContext('2d');
+const canvas3d = document.getElementById('canvas3d');
+const ctx3d = canvas3d.getContext('2d');
+const tag = document.getElementById('detectedTag');
+const btnToggleDetect = document.getElementById('btnToggleDetect');
+const thicknessSlider = document.getElementById('thicknessSlider');
+const colorPicker = document.getElementById('colorPicker');
+
+let currentStroke = [];
+let allStrokes = []; 
+let isDrawing = false;
+let detectedShape = "None";
+let autoDetectEnabled = true;
+
+let vertices = [];
+let faces = []; 
+let zoom = 1.0;
+let angleX = -0.3;
+let angleY = 0.3;
+
+const lightSource = { x: -0.3, y: -1.0, z: 0.8 };
+const mag = Math.sqrt(lightSource.x**2 + lightSource.y**2 + lightSource.z**2);
+lightSource.x /= mag; lightSource.y /= mag; lightSource.z /= mag;
+
+// CROSTINI ENVIRONMENT GUARD: Force safe resolutions if container sizes are missing
+function resize() {
+    const wrap2d = canvas2d.parentElement;
+    canvas2d.width = wrap2d.clientWidth > 50 ? wrap2d.clientWidth : 800;
+    canvas2d.height = wrap2d.clientHeight > 50 ? wrap2d.clientHeight : 600;
+
+    const wrap3d = canvas3d.parentElement;
+    canvas3d.width = wrap3d.clientWidth > 50 ? wrap3d.clientWidth : 800;
+    canvas3d.height = wrap3d.clientHeight > 50 ? wrap3d.clientHeight : 600;
+
+    redraw2DCanvas();
+    render3D();
+}
+
+function getCoords(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    let rawX = clientX - rect.left;
+    let rawY = clientY - rect.top;
+    
+    let scaleX = rect.width > 0 ? (canvas.width / rect.width) : 1;
+    let scaleY = rect.height > 0 ? (canvas.height / rect.height) : 1;
+    
+    return {
+        x: rawX * scaleX,
+        y: rawY * scaleY
+    };
+}
+
+function hexToRgb(hex) {
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : { r: 255, g: 0, b: 255 };
+}
+
+function redraw2DCanvas() {
+    ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+    ctx2d.lineCap = 'round';
+    ctx2d.lineJoin = 'round';
+    
+    allStrokes.forEach(stroke => {
+        if(stroke.points.length < 1) return;
+        ctx2d.strokeStyle = stroke.color; 
+        ctx2d.lineWidth = stroke.width;
+        ctx2d.beginPath();
+        ctx2d.moveTo(stroke.points[0].x, stroke.points[0].y);
+        for(let i=1; i<stroke.points.length; i++) ctx2d.lineTo(stroke.points[i].x, stroke.points[i].y);
+        ctx2d.stroke();
+    });
+}
+
+thicknessSlider.addEventListener('input', redraw2DCanvas);
+colorPicker.addEventListener('input', redraw2DCanvas);
+
+// --- DRAW LOGIC ---
+function startDrawingAction(c) {
+    isDrawing = true;
+    currentStroke = [{x: c.x, y: c.y}];
+}
+
+function moveDrawingAction(c) {
+    if(!isDrawing) return;
+    currentStroke.push({x: c.x, y: c.y});
+    
+    ctx2d.strokeStyle = colorPicker.value;
+    ctx2d.lineWidth = parseInt(thicknessSlider.value);
+    ctx2d.lineCap = 'round';
+    ctx2d.lineJoin = 'round';
+    ctx2d.beginPath();
+    ctx2d.moveTo(currentStroke[currentStroke.length-2].x, currentStroke[currentStroke.length-2].y);
+    ctx2d.lineTo(c.x, c.y);
+    ctx2d.stroke();
+}
+
+function stopDrawingAction() {
+    if(!isDrawing) return;
+    isDrawing = false;
+    if(currentStroke.length > 1) {
+        let clean = [currentStroke[0]];
+        for(let i=1; i<currentStroke.length; i++){
+            let d = Math.hypot(currentStroke[i].x - clean[clean.length-1].x, currentStroke[i].y - clean[clean.length-1].y);
+            if(d > 4) clean.push(currentStroke[i]);
+        }
+        if(clean.length > 1) {
+            allStrokes.push({
+                points: clean,
+                color: colorPicker.value,
+                width: parseInt(thicknessSlider.value)
+            });
+        }
+    }
+    if (autoDetectEnabled) analyzeShape();
+}
+
+canvas2d.addEventListener('mousedown', (e) => { startDrawingAction(getCoords(e, canvas2d)); });
+canvas2d.addEventListener('mousemove', (e) => { moveDrawingAction(getCoords(e, canvas2d)); });
+window.addEventListener('mouseup', stopDrawingAction);
+canvas2d.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawingAction(getCoords(e, canvas2d)); });
+canvas2d.addEventListener('touchmove', (e) => { e.preventDefault(); moveDrawingAction(getCoords(e, canvas2d)); });
+window.addEventListener('touchend', stopDrawingAction);
+
+btnToggleDetect.addEventListener('click', () => {
+    autoDetectEnabled = !autoDetectEnabled;
+    if (autoDetectEnabled) {
+        btnToggleDetect.innerText = "Auto-Detect: ON";
+        btnToggleDetect.style.borderColor = "#ffff00";
+        btnToggleDetect.style.color = "#ffff00";
+        analyzeShape();
+    } else {
+        btnToggleDetect.innerText = "Auto-Detect: OFF";
+        btnToggleDetect.style.borderColor = "#888";
+        btnToggleDetect.style.color = "#888";
+        detectedShape = "Custom Extrusion";
+        tag.innerText = "Shape: Custom Forced";
+    }
+});
+
+function analyzeShape() {
+    if (!autoDetectEnabled || allStrokes.length > 1) {
+        detectedShape = "Custom Extrusion";
+        tag.innerText = allStrokes.length > 1 ? "Shape: Multi-Stroke Text" : "Shape: Custom Extrusion";
+        return;
+    }
+    if (allStrokes.length === 0) return;
+    let singleStroke = allStrokes[0].points;
+    if (!singleStroke || singleStroke.length < 5) return;
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    singleStroke.forEach(p => {
+        if(p.x < minX) minX = p.x; if(p.x > maxX) maxX = p.x;
+        if(p.y < minY) minY = p.y; if(p.y > maxY) maxY = p.y;
+    });
+    let boxW = maxX - minX, boxH = maxY - minY;
+    let centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+    let radiusRadius = (boxW + boxH) / 4;
+
+    let totalVariance = 0;
+    singleStroke.forEach(p => {
+        totalVariance += Math.abs(Math.hypot(p.x - centerX, p.y - centerY) - radiusRadius);
+    });
+    let averageVariance = totalVariance / singleStroke.length;
+    let aspect = Math.max(boxW, boxH) / Math.min(boxW, boxH);
+
+    if (averageVariance < radiusRadius * 0.18 && aspect < 1.3) detectedShape = "Ball (Sphere)";
+    else if (aspect < 1.35) detectedShape = "Cube";
+    else detectedShape = "Custom Extrusion";
+    tag.innerText = `Shape: ${detectedShape}`;
+}
+
+// --- 3D MESH GENERATION ---
+document.getElementById('btnGenerate').addEventListener('click', () => {
+    vertices = []; faces = [];
+    const size = 60;
+    const globalColor = colorPicker.value;
+
+    if (!autoDetectEnabled || allStrokes.length > 1) detectedShape = "Custom Extrusion";
+
+    if (allStrokes.length > 0 && detectedShape === "Cube") {
+        vertices = [
+            {x: -size, y: -size, z: size},  {x: size, y: -size, z: size},
+            {x: size, y: size, z: size},    {x: -size, y: size, z: size},
+            {x: -size, y: -size, z: -size}, {x: size, y: -size, z: -size},
+            {x: size, y: size, z: -size},   {x: -size, y: size, z: -size}
+        ];
+        faces = [
+            [0, 1, 2, 3, globalColor], [1, 5, 6, 2, globalColor], [4, 0, 3, 7, globalColor], 
+            [4, 5, 1, 0, globalColor], [3, 2, 6, 7, globalColor], [5, 4, 7, 6, globalColor]
+        ];
+    } 
+    else if (allStrokes.length > 0 && detectedShape === "Ball (Sphere)") {
+        const rings = 12, sectors = 12, r = 80;
+        for (let i = 0; i <= rings; i++) {
+            let phi = Math.PI * i / rings;
+            for (let j = 0; j < sectors; j++) {
+                let theta = 2 * Math.PI * j / sectors;
+                vertices.push({ x: r * Math.sin(phi) * Math.cos(theta), y: r * Math.cos(phi), z: r * Math.sin(phi) * Math.sin(theta) });
+            }
+        }
+        for (let i = 0; i < rings; i++) {
+            for (let j = 0; j < sectors; j++) {
+                faces.push([i*sectors+j, i*sectors+((j+1)%sectors), (i+1)*sectors+((j+1)%sectors), (i+1)*sectors+j, globalColor]);
+            }
+        }
+    } 
+    else {
+        if(allStrokes.length === 0) return;
+
+        let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+        allStrokes.forEach(s => s.points.forEach(p => { minX=Math.min(minX,p.x); maxX=Math.max(maxX,p.x); minY=Math.min(minY,p.y); maxY=Math.max(maxY,p.y); }));
+        
+        let cX=(minX+maxX)/2, cY=(minY+maxY)/2;
+        const depth = 25; 
+        let vCount = 0;
+
+        allStrokes.forEach(stroke => {
+            if (stroke.points.length < 2) return;
+
+            let ribbonVerticesStart = vCount;
+            let nPoints = stroke.points.length;
+            let strokeColor = stroke.color; 
+            let halfThickness = stroke.width / 2;
+
+            for (let i = 0; i < nPoints; i++) {
+                let dx, dy;
+                if (i === 0) {
+                    dx = stroke.points[1].x - stroke.points[0].x; dy = stroke.points[1].y - stroke.points[0].y;
+                } else if (i === nPoints - 1) {
+                    dx = stroke.points[nPoints-1].x - stroke.points[nPoints-2].x; dy = stroke.points[nPoints-1].y - stroke.points[nPoints-2].y;
+                } else {
+                    dx = stroke.points[i+1].x - stroke.points[i-1].x; dy = stroke.points[i+1].y - stroke.points[i-1].y;
+                }
+                let len = Math.hypot(dx, dy);
+                if(len === 0) len = 1;
+                let nx = -dy / len * halfThickness;
+                let ny = dx / len * halfThickness;
+
+                let originX = stroke.points[i].x - cX;
+                let originY = stroke.points[i].y - cY;
+
+                vertices.push({x: originX + nx, y: originY + ny, z: depth});  
+                vertices.push({x: originX - nx, y: originY - ny, z: depth});  
+                vertices.push({x: originX + nx, y: originY + ny, z: -depth}); 
+                vertices.push({x: originX - nx, y: originY - ny, z: -depth}); 
+                vCount += 4;
+            }
+
+            for (let i = 0; i < nPoints - 1; i++) {
+                let curr = ribbonVerticesStart + i * 4;
+                let next = ribbonVerticesStart + (i + 1) * 4;
+
+                faces.push([curr + 0, next + 0, next + 1, curr + 1, strokeColor]);
+                faces.push([curr + 3, next + 3, next + 2, curr + 2, strokeColor]);
+                faces.push([curr + 2, next + 2, next + 0, curr + 0, strokeColor]);
+                faces.push([curr + 1, next + 1, next + 3, curr + 3, strokeColor]);
+            }
+
+            let head = ribbonVerticesStart;
+            let tail = ribbonVerticesStart + (nPoints - 1) * 4;
+            faces.push([head + 1, head + 0, head + 2, head + 3, strokeColor]); 
+            faces.push([tail + 2, tail + 0, tail + 1, tail + 3, strokeColor]); 
+        });
+    }
+    render3D();
+});
+
+// --- VIEWPORT MATRIX RENDER LOOP ---
+let isInteracting = false, lastPos = {x:0, y:0};
+function start3D(e) { isInteracting = true; const c = getCoords(e, canvas3d); lastPos = {x:c.x, y:c.y}; }
+function move3D(e) {
+    if(!isInteracting) return;
+    const c = getCoords(e, canvas3d);
+    angleY += (c.x - lastPos.x) * 0.01; angleX += (c.y - lastPos.y) * 0.01;
+    lastPos = {x:c.x, y:c.y};
+    render3D();
+}
+canvas3d.addEventListener('mousedown', start3D); canvas3d.addEventListener('mousemove', move3D);
+window.addEventListener('mouseup', () => isInteracting = false);
+canvas3d.addEventListener('touchstart', start3D); canvas3d.addEventListener('touchmove', move3D);
+window.addEventListener('touchend', () => isInteracting = false);
+
+canvas3d.addEventListener('wheel', (e) => { zoom += e.deltaY * -0.001; zoom = Math.max(0.2, zoom); render3D(); });
+document.getElementById('zoomIn').addEventListener('click', () => { zoom += 0.15; render3D(); });
+document.getElementById('zoomOut').addEventListener('click', () => { zoom = Math.max(0.1, zoom - 0.15); render3D(); });
+
+document.getElementById('btnClear').addEventListener('click', () => { 
+    allStrokes = []; currentStroke = [];
+    ctx2d.clearRect(0,0,canvas2d.width,canvas2d.height); ctx2d.beginPath();
+    if (autoDetectEnabled) { detectedShape = "None"; tag.innerText="Shape: None"; }
+    else { detectedShape = "Custom Extrusion"; tag.innerText="Shape: Custom Forced"; }
+    vertices = []; faces = [];
+    render3D();
+});
+
+function render3D() {
+    ctx3d.clearRect(0, 0, canvas3d.width, canvas3d.height);
+    if(vertices.length === 0) return;
+
+    const cx = canvas3d.width / 2, cy = canvas3d.height / 2;
+    const cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+    const cosY = Math.cos(angleY), sinY = Math.sin(angleY);
+
+    let rotatedVertices = vertices.map(v => {
+        let x1 = v.x * cosY - v.z * sinY; let z1 = v.x * sinY + v.z * cosY;
+        let y2 = v.y * cosX - z1 * sinX; let z2 = v.y * sinX + z1 * cosX;
+        return { x: x1, y: y2, z: z2 };
+    });
+
+    const cameraZ = 300; 
+    let computedFaces = [];
+    
+    faces.forEach(f => {
+        let v0 = rotatedVertices[f[0]], v1 = rotatedVertices[f[1]], v2 = rotatedVertices[f[2]];
+        let ax = v1.x - v0.x, ay = v1.y - v0.y, az = v1.z - v0.z;
+        let bx = v2.x - v0.x, by = v2.y - v0.y, bz = v2.z - v0.z;
+        let nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
+
+        let nMag = Math.sqrt(nx*nx + ny*ny + nz*nz);
+        if (nMag === 0) return;
+        nx /= nMag; ny /= nMag; nz /= nMag;
+
+        let viewX = v0.x, viewY = v0.y, viewZ = v0.z - cameraZ;
+        if (nx * viewX + ny * viewY + nz * viewZ < 0) { 
+            let intensity = Math.max(0.2, nx * lightSource.x + ny * lightSource.y + nz * lightSource.z); 
+            let avgZ = 0; f.forEach(idx => { if(typeof idx === 'number') avgZ += rotatedVertices[idx].z; });
+            computedFaces.push({ indices: f.slice(0, f.length-1), colorHex: f[f.length-1], intensity: intensity, z: avgZ / (f.length-1) });
+        }
+    });
+
+    computedFaces.sort((a, b) => b.z - a.z);
+
+    computedFaces.forEach(f => {
+        const baseColor = hexToRgb(f.colorHex);
+        let r = Math.floor(baseColor.r * f.intensity);
+        let g = Math.floor(baseColor.g * f.intensity);
+        let b = Math.floor(baseColor.b * f.intensity);
+
+        ctx3d.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx3d.strokeStyle = "rgba(0,0,0,0.3)";
+        ctx3d.lineWidth = 0.6;
+
+        ctx3d.beginPath();
+        f.indices.forEach((idx, i) => {
+            let v = rotatedVertices[idx];
+            let distanceScale = cameraZ / (cameraZ + v.z);
+            let screenX = cx + v.x * distanceScale * zoom;
+            let screenY = cy + v.y * distanceScale * zoom;
+            if (i === 0) ctx3d.moveTo(screenX, screenY);
+            else ctx3d.lineTo(screenX, screenY);
+        });
+        ctx3d.closePath();
+        ctx3d.fill();
+        ctx3d.stroke();
+    });
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('load', () => {
+    resize();
+    setTimeout(resize, 250);
+});
+</script>
+</body>
+</html>
