@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D Multi-Color Studio (Crostini Stable Fix)</title>
+    <title>3D Fluid Tube Studio</title>
     <style>
         * {
             box-sizing: border-box;
@@ -182,7 +182,7 @@
         <button id="btnToggleDetect">Auto-Detect: ON</button>
         
         <div class="ui-element">
-            <label for="thicknessSlider">BOLD:</label>
+            <label for="thicknessSlider">THICKNESS:</label>
             <input type="range" id="thicknessSlider" min="5" max="40" value="15">
         </div>
         
@@ -244,7 +244,6 @@ const lightSource = { x: -0.3, y: -1.0, z: 0.8 };
 const mag = Math.sqrt(lightSource.x**2 + lightSource.y**2 + lightSource.z**2);
 lightSource.x /= mag; lightSource.y /= mag; lightSource.z /= mag;
 
-// CROSTINI ENVIRONMENT GUARD: Force safe resolutions if container sizes are missing
 function resize() {
     const wrap2d = canvas2d.parentElement;
     canvas2d.width = wrap2d.clientWidth > 50 ? wrap2d.clientWidth : 800;
@@ -269,10 +268,7 @@ function getCoords(e, canvas) {
     let scaleX = rect.width > 0 ? (canvas.width / rect.width) : 1;
     let scaleY = rect.height > 0 ? (canvas.height / rect.height) : 1;
     
-    return {
-        x: rawX * scaleX,
-        y: rawY * scaleY
-    };
+    return { x: rawX * scaleX, y: rawY * scaleY };
 }
 
 function hexToRgb(hex) {
@@ -330,7 +326,7 @@ function stopDrawingAction() {
         let clean = [currentStroke[0]];
         for(let i=1; i<currentStroke.length; i++){
             let d = Math.hypot(currentStroke[i].x - clean[clean.length-1].x, currentStroke[i].y - clean[clean.length-1].y);
-            if(d > 4) clean.push(currentStroke[i]);
+            if(d > 6) clean.push(currentStroke[i]); 
         }
         if(clean.length > 1) {
             allStrokes.push({
@@ -398,10 +394,10 @@ function analyzeShape() {
     tag.innerText = `Shape: ${detectedShape}`;
 }
 
-// --- 3D MESH GENERATION ---
+// --- SMOOTH TUBE GENERATOR ---
 document.getElementById('btnGenerate').addEventListener('click', () => {
     vertices = []; faces = [];
-    const size = 60;
+    const size = 50;
     const globalColor = colorPicker.value;
 
     if (!autoDetectEnabled || allStrokes.length > 1) detectedShape = "Custom Extrusion";
@@ -414,12 +410,16 @@ document.getElementById('btnGenerate').addEventListener('click', () => {
             {x: size, y: size, z: -size},   {x: -size, y: size, z: -size}
         ];
         faces = [
-            [0, 1, 2, 3, globalColor], [1, 5, 6, 2, globalColor], [4, 0, 3, 7, globalColor], 
-            [4, 5, 1, 0, globalColor], [3, 2, 6, 7, globalColor], [5, 4, 7, 6, globalColor]
+            { indices: [0, 1, 2, 3], color: globalColor },
+            { indices: [1, 5, 6, 2], color: globalColor },
+            { indices: [4, 0, 3, 7], color: globalColor },
+            { indices: [4, 5, 1, 0], color: globalColor },
+            { indices: [3, 2, 6, 7], color: globalColor },
+            { indices: [5, 4, 7, 6], color: globalColor }
         ];
     } 
     else if (allStrokes.length > 0 && detectedShape === "Ball (Sphere)") {
-        const rings = 12, sectors = 12, r = 80;
+        const rings = 12, sectors = 12, r = 70;
         for (let i = 0; i <= rings; i++) {
             let phi = Math.PI * i / rings;
             for (let j = 0; j < sectors; j++) {
@@ -429,7 +429,10 @@ document.getElementById('btnGenerate').addEventListener('click', () => {
         }
         for (let i = 0; i < rings; i++) {
             for (let j = 0; j < sectors; j++) {
-                faces.push([i*sectors+j, i*sectors+((j+1)%sectors), (i+1)*sectors+((j+1)%sectors), (i+1)*sectors+j, globalColor]);
+                faces.push({
+                    indices: [i*sectors+j, i*sectors+((j+1)%sectors), (i+1)*sectors+((j+1)%sectors), (i+1)*sectors+j],
+                    color: globalColor
+                });
             }
         }
     } 
@@ -438,63 +441,81 @@ document.getElementById('btnGenerate').addEventListener('click', () => {
 
         let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
         allStrokes.forEach(s => s.points.forEach(p => { minX=Math.min(minX,p.x); maxX=Math.max(maxX,p.x); minY=Math.min(minY,p.y); maxY=Math.max(maxY,p.y); }));
-        
         let cX=(minX+maxX)/2, cY=(minY+maxY)/2;
-        const depth = 25; 
+        
         let vCount = 0;
+        const radialSegments = 8; 
 
         allStrokes.forEach(stroke => {
             if (stroke.points.length < 2) return;
 
-            let ribbonVerticesStart = vCount;
             let nPoints = stroke.points.length;
             let strokeColor = stroke.color; 
-            let halfThickness = stroke.width / 2;
+            let tubeRadius = stroke.width / 2.2; 
+            let strokeVertStart = vCount;
 
             for (let i = 0; i < nPoints; i++) {
-                let dx, dy;
+                let p = stroke.points[i];
+                let origX = p.x - cX;
+                let origY = p.y - cY;
+
+                let tx, ty;
                 if (i === 0) {
-                    dx = stroke.points[1].x - stroke.points[0].x; dy = stroke.points[1].y - stroke.points[0].y;
+                    tx = stroke.points[1].x - stroke.points[0].x; ty = stroke.points[1].y - stroke.points[0].y;
                 } else if (i === nPoints - 1) {
-                    dx = stroke.points[nPoints-1].x - stroke.points[nPoints-2].x; dy = stroke.points[nPoints-1].y - stroke.points[nPoints-2].y;
+                    tx = stroke.points[nPoints-1].x - stroke.points[nPoints-2].x; ty = stroke.points[nPoints-1].y - stroke.points[nPoints-2].y;
                 } else {
-                    dx = stroke.points[i+1].x - stroke.points[i-1].x; dy = stroke.points[i+1].y - stroke.points[i-1].y;
+                    tx = stroke.points[i+1].x - stroke.points[i-1].x; ty = stroke.points[i+1].y - stroke.points[i-1].y;
                 }
-                let len = Math.hypot(dx, dy);
-                if(len === 0) len = 1;
-                let nx = -dy / len * halfThickness;
-                let ny = dx / len * halfThickness;
+                let len = Math.hypot(tx, ty) || 1;
+                tx /= len; ty /= len;
 
-                let originX = stroke.points[i].x - cX;
-                let originY = stroke.points[i].y - cY;
+                let nx = -ty; let ny = tx;
 
-                vertices.push({x: originX + nx, y: originY + ny, z: depth});  
-                vertices.push({x: originX - nx, y: originY - ny, z: depth});  
-                vertices.push({x: originX + nx, y: originY + ny, z: -depth}); 
-                vertices.push({x: originX - nx, y: originY - ny, z: -depth}); 
-                vCount += 4;
+                for (let s = 0; s < radialSegments; s++) {
+                    let angle = (s / radialSegments) * Math.PI * 2;
+                    let cosA = Math.cos(angle);
+                    let sinA = Math.sin(angle);
+
+                    let vx = origX + nx * cosA * tubeRadius;
+                    let vy = origY + ny * cosA * tubeRadius;
+                    let vz = sinA * tubeRadius;
+
+                    vertices.push({x: vx, y: vy, z: vz});
+                    vCount++;
+                }
             }
 
             for (let i = 0; i < nPoints - 1; i++) {
-                let curr = ribbonVerticesStart + i * 4;
-                let next = ribbonVerticesStart + (i + 1) * 4;
+                let currentRingIdx = strokeVertStart + i * radialSegments;
+                let nextRingIdx = strokeVertStart + (i + 1) * radialSegments;
 
-                faces.push([curr + 0, next + 0, next + 1, curr + 1, strokeColor]);
-                faces.push([curr + 3, next + 3, next + 2, curr + 2, strokeColor]);
-                faces.push([curr + 2, next + 2, next + 0, curr + 0, strokeColor]);
-                faces.push([curr + 1, next + 1, next + 3, curr + 3, strokeColor]);
+                for (let s = 0; s < radialSegments; s++) {
+                    let sNext = (s + 1) % radialSegments;
+
+                    let v0 = currentRingIdx + s;
+                    let v1 = nextRingIdx + s;
+                    let v2 = nextRingIdx + sNext;
+                    let v3 = currentRingIdx + sNext;
+
+                    faces.push({ indices: [v0, v1, v2, v3], color: strokeColor });
+                }
             }
 
-            let head = ribbonVerticesStart;
-            let tail = ribbonVerticesStart + (nPoints - 1) * 4;
-            faces.push([head + 1, head + 0, head + 2, head + 3, strokeColor]); 
-            faces.push([tail + 2, tail + 0, tail + 1, tail + 3, strokeColor]); 
+            let capStartIndices = [];
+            let capEndIndices = [];
+            for(let s = 0; s < radialSegments; s++) {
+                capStartIndices.push(strokeVertStart + s);
+                capEndIndices.push(strokeVertStart + (nPoints - 1) * radialSegments + (radialSegments - 1 - s));
+            }
+            faces.push({ indices: capStartIndices.reverse(), color: strokeColor });
+            faces.push({ indices: capEndIndices, color: strokeColor });
         });
     }
     render3D();
 });
 
-// --- VIEWPORT MATRIX RENDER LOOP ---
+// --- INTERACTIONS ---
 let isInteracting = false, lastPos = {x:0, y:0};
 function start3D(e) { isInteracting = true; const c = getCoords(e, canvas3d); lastPos = {x:c.x, y:c.y}; }
 function move3D(e) {
@@ -536,11 +557,15 @@ function render3D() {
         return { x: x1, y: y2, z: z2 };
     });
 
-    const cameraZ = 300; 
+    const cameraZ = 280; 
     let computedFaces = [];
     
     faces.forEach(f => {
-        let v0 = rotatedVertices[f[0]], v1 = rotatedVertices[f[1]], v2 = rotatedVertices[f[2]];
+        let v0 = rotatedVertices[f.indices[0]];
+        let v1 = rotatedVertices[f.indices[1]];
+        let v2 = rotatedVertices[f.indices[2]];
+        if(!v0 || !v1 || !v2) return;
+
         let ax = v1.x - v0.x, ay = v1.y - v0.y, az = v1.z - v0.z;
         let bx = v2.x - v0.x, by = v2.y - v0.y, bz = v2.z - v0.z;
         let nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
@@ -551,9 +576,9 @@ function render3D() {
 
         let viewX = v0.x, viewY = v0.y, viewZ = v0.z - cameraZ;
         if (nx * viewX + ny * viewY + nz * viewZ < 0) { 
-            let intensity = Math.max(0.2, nx * lightSource.x + ny * lightSource.y + nz * lightSource.z); 
-            let avgZ = 0; f.forEach(idx => { if(typeof idx === 'number') avgZ += rotatedVertices[idx].z; });
-            computedFaces.push({ indices: f.slice(0, f.length-1), colorHex: f[f.length-1], intensity: intensity, z: avgZ / (f.length-1) });
+            let intensity = Math.max(0.15, nx * lightSource.x + ny * lightSource.y + nz * lightSource.z); 
+            let avgZ = 0; f.indices.forEach(idx => avgZ += rotatedVertices[idx].z);
+            computedFaces.push({ indices: f.indices, colorHex: f.color, intensity: intensity, z: avgZ / f.indices.length });
         }
     });
 
@@ -566,8 +591,8 @@ function render3D() {
         let b = Math.floor(baseColor.b * f.intensity);
 
         ctx3d.fillStyle = `rgb(${r}, ${g}, ${b})`;
-        ctx3d.strokeStyle = "rgba(0,0,0,0.3)";
-        ctx3d.lineWidth = 0.6;
+        ctx3d.strokeStyle = `rgba(${Math.floor(baseColor.r*0.4)}, ${Math.floor(baseColor.g*0.4)}, ${Math.floor(baseColor.b*0.4)}, 0.2)`;
+        ctx3d.lineWidth = 0.5;
 
         ctx3d.beginPath();
         f.indices.forEach((idx, i) => {
@@ -587,7 +612,7 @@ function render3D() {
 window.addEventListener('resize', resize);
 window.addEventListener('load', () => {
     resize();
-    setTimeout(resize, 250);
+    setTimeout(resize, 150);
 });
 </script>
 </body>
