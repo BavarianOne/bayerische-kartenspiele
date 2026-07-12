@@ -1423,6 +1423,7 @@ async function submitWord() {
     
     // Valid word found!
     foundWords.add(word);
+    updateWordCounter();
     const wordScore = calculateWordScore(word);
     score += wordScore;
     
