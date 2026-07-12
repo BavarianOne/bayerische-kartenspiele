@@ -552,14 +552,108 @@ function normalizeWord(word) {
 }
 
 /**
- * Lädt Wörterbuch - nur lokale Fallback-Wörter (kein Netzwerk)
+ * Prüft ob ein Wort deutsch aussieht (einfache Heuristik)
+ * Filtert offensichtliche Nicht-Deutsch-Wörter heraus
+ */
+function isGermanWord(word) {
+    if (!word || word.length < 3) return false;
+    
+    // Muss nur deutsche Buchstaben enthalten
+    if (!/^[A-ZÄÖÜ]+$/.test(word)) return false;
+    
+    // Typisch deutsche Buchstabenkombinationen (mindestens eine sollte vorkommen)
+    const germanPatterns = [
+        /SCH/, /CH/, /CK/, /TZ/, /ST/, /SP/, /PF/, /QU/, /IE/, /EI/, /AU/, /EU/, /ÄU/,
+        /UNG/, /HEIT/, /KEIT/, /SCHAFT/, /UNGEN/, /LICH/, /IG/, /ISCH/, /BAR/, /SAM/,
+        /GE/, /BE/, /VER/, /ENT/, /ER/, /ZER/, /MISS/, /UN/, /AB/, /AN/, /AUF/, /AUS/,
+        /DA/, /DAR/, /DRÜBER/, /EIN/, /FEHL/, /FERN/, /FORT/, /GE/, /HEIM/, /HER/,
+        /HIN/, /MIT/, /NACH/, /NEBEN/, /NIEDER/, /OB/, /UM/, /UNTER/, /VOLL/, /VOR/,
+        /WEG/, /WEITER/, /WIEDER/, /ZER/, /ZU/, /ZURÜCK/, /ZUSAMMEN/
+    ];
+    
+    // Für kurze Wörter (3-4 Buchstaben) weniger streng
+    if (word.length <= 4) {
+        // Häufige deutsche Kurz-Wörter
+        const commonShort = ['DER','DIE','DAS','UND','IST','ICH','DU','ER','SIE','ES','WIR','IHR',
+            'EIN','EIN','EIN','EIN','EIN','EIN','DEM','DEN','DES','VOM','ZUM','ZUR',
+            'IN','AN','AUF','UNTER','ÜBER','VOR','HINTER','NEBEN','ZWISCHEN','DURCH',
+            'FÜR','GEGEN','OHNE','MIT','NACH','VON','ZU','BEI','SEIT','BIS',
+            'JA','NEIN','DOCH','NICHT','KEIN','KEINE','DA','HIER','DORT','WO','WANN',
+            'WIE','WAS','WER','WEN','WEM','WAR','WAREN','HABE','HAST','HAT','HABEN',
+            'KOMM','KOMMT','KAM','KAMEN','GEH','GEHT','GING','GINGEN','SEH','SIEHT',
+            'SAH','SAHEN','GIB','GIBT','GAB','GABEN','NIMM','NIMMT','NAHM','NAHMEN',
+            'KENN','KENNT','KANNTE','DENK','DENKT','DACHTE','WEISS','WEISST','WUSSTE',
+            'HAUS','AUTO','MENSCH','FRAU','MANN','KIND','HUND','KATZE','BAUM','BLUME',
+            'APFEL','BIRNE','WASSER','TEE','KAFFEE','GELD','EURO','ZEIT','TAG','JAHR',
+            'GROSS','KLEIN','NEU','ALT','GUT','SCHLECHT','SCHÖN','SCHNELL','LANGSAM',
+            'ROT','BLAU','GRÜN','GELB','SCHWARZ','WEISS','EINS','ZWEI','DREI','VIER',
+            'FÜNF','SECHS','SIEBEN','ACHT','NEUN','ZEHN','KOMMEN','GEHEN','SEHEN','GEBEN',
+            'NEHMEN','KENNEN','DENKEN','WISSEN','FINDEN','SAGEN','FRAGEN','ANTWORTEN',
+            'LEBEN','ARBEITEN','SPIELEN','LAUFEN','FAHREN','ESSEN','TRINKEN','SCHLAFEN',
+            'KAUFEN','VERKAUFEN','BEZAHLEN','SCHREIBEN','LESEN','LERNEN','VERSTEHEN',
+            'SUCHEN','FINDEN','ÖFFNEN','SCHLIESSEN','BEGINNEN','ENDEN','STARTEN','STOPPEN',
+            'LIEBEN','HASSEN','MÖGEN','HOFFEN','WARTEN','REISEN','TREFFEN','HEISSEN'];
+        return commonShort.includes(word);
+    }
+    
+    // Für längere Wörter: mindestens ein deutsches Muster
+    return germanPatterns.some(pattern => pattern.test(word));
+}
+
+/**
+ * Lädt Wörterbuch - erst Online (FrequencyWords), dann Fallback
  */
 async function loadDictionary() {
     if (DICTIONARY.size > 0) return DICTIONARY;
 
-    // Nur lokales Fallback-Wörterbuch laden (schnell, offline-fähig)
+    // Erst Online-Wörterbuch versuchen (viel mehr Wörter)
+    try {
+        updateLoadingText('Lade Online-Wörterbuch...');
+        await loadOnlineDictionary();
+        if (DICTIONARY.size > 10000) {
+            console.log(`Online-Wörterbuch geladen: ${DICTIONARY.size} Wörter`);
+            return DICTIONARY;
+        }
+    } catch (e) {
+        console.warn('Online-Wörterbuch fehlgeschlagen, nutze Fallback:', e);
+    }
+
+    // Fallback: lokales Wörterbuch
     updateLoadingText('Lade lokales Wörterbuch...');
     return loadFallbackDictionary();
+}
+
+/**
+ * Lädt Online-Wörterbuch von GitHub (FrequencyWords - deutsche Worthäufigkeitsliste)
+ */
+async function loadOnlineDictionary() {
+    const response = await fetch(DICT_CONFIG.url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const text = await response.text();
+    const words = text.split('\n')
+        .map(line => line.split(' ')[0]) // Format: "wort count"
+        .map(normalizeWord)
+        .filter(w => w.length >= DICT_CONFIG.minLength && w.length <= DICT_CONFIG.maxLength)
+        .filter(isGermanWord); // Nur deutsche Wörter
+    
+    // In Set und Trie einfügen
+    for (const word of words) {
+        DICTIONARY.add(word);
+        DICTIONARY_TRIE.insert(word);
+    }
+    
+    // Cache in localStorage für Offline-Nutzung
+    try {
+        const cacheData = {
+            version: DICT_CONFIG.cacheVersion,
+            timestamp: Date.now(),
+            words: [...DICTIONARY]
+        };
+        localStorage.setItem(DICT_CONFIG.cacheKey, JSON.stringify(cacheData));
+    } catch (e) {
+        console.warn('Cache speichern fehlgeschlagen:', e);
+    }
 }
 
 /**
