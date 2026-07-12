@@ -479,6 +479,53 @@ const CFG = {
     lengthBonus: { 3: 0, 4: 1, 5: 2, 6: 4, 7: 7, 8: 10, 9: 15, 10: 20 }
 };
 
+/* ========== TRIE (PREFIX TREE) FÜR WÖRTERBUCH ========== */
+class TrieNode {
+    constructor() {
+        this.children = new Map();
+        this.isWord = false;
+    }
+}
+
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
+        this.size = 0;
+    }
+
+    insert(word) {
+        let node = this.root;
+        for (const char of word) {
+            if (!node.children.has(char)) {
+                node.children.set(char, new TrieNode());
+            }
+            node = node.children.get(char);
+        }
+        if (!node.isWord) {
+            node.isWord = true;
+            this.size++;
+        }
+    }
+
+    has(word) {
+        let node = this.root;
+        for (const char of word) {
+            if (!node.children.has(char)) return false;
+            node = node.children.get(char);
+        }
+        return node.isWord;
+    }
+
+    hasPrefix(prefix) {
+        let node = this.root;
+        for (const char of prefix) {
+            if (!node.children.has(char)) return false;
+            node = node.children.get(char);
+        }
+        return true;
+    }
+}
+
 /* ========== WÖRTERBUCH MANAGEMENT ========== */
 const DICT_CONFIG = {
     // FrequencyWords von GitHub (deutsche Worthäufigkeitsliste, ~50k Einträge)
@@ -490,6 +537,7 @@ const DICT_CONFIG = {
 };
 
 let DICTIONARY = new Set();
+let DICTIONARY_TRIE = new Trie();
 let dictLoadPromise = null;
 
 /**
@@ -647,7 +695,14 @@ function loadFallbackDictionary() {
     
     const normalized = fallbackWords.map(normalizeWord).filter(w => w.length >= 3);
     DICTIONARY = new Set([...new Set(normalized)]);
-    console.log(`Fallback-Wörterbuch geladen: ${DICTIONARY.size} Wörter`);
+    
+    // Build Trie for prefix pruning
+    DICTIONARY_TRIE = new Trie();
+    for (const word of DICTIONARY) {
+        DICTIONARY_TRIE.insert(word);
+    }
+    
+    console.log(`Fallback-Wörterbuch geladen: ${DICTIONARY.size} Wörter, Trie Größe: ${DICTIONARY_TRIE.size}`);
     updateLoadingText(`Bereit (Offline: ${DICTIONARY.size} Wörter)`);
     return DICTIONARY;
 }
@@ -897,17 +952,28 @@ function computeAllPossibleWords() {
     // Directions: 8 neighbors
     const dirs = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]];
     
-    function dfs(x, y, currentWord, depth) {
+    // Track computation state for async processing
+    let computationState = {
+        x: 0,
+        y: 0,
+        startTime: performance.now(),
+        maxTimePerChunk: 16 // ms per chunk (aim for 60fps)
+    };
+    
+    function dfs(x, y, currentWord, depth, trieNode) {
         if (depth > maxDepth) return;
         
-        currentWord += grid[y][x].letter;
+        const letter = grid[y][x].letter;
+        const nextNode = trieNode.children.get(letter);
         
-        if (currentWord.length >= CFG.minWordLength && DICTIONARY.has(currentWord)) {
+        // Prefix pruning: if no words in dictionary start with this prefix, stop exploring
+        if (!nextNode) return;
+        
+        currentWord += letter;
+        
+        if (currentWord.length >= CFG.minWordLength && nextNode.isWord) {
             allPossibleWords.add(currentWord);
         }
-        
-        // Continue if prefix could form valid words (optimization: check if any dict word starts with this)
-        // For performance, we'll just continue up to maxDepth
         
         visited[y][x] = true;
         
@@ -915,24 +981,47 @@ function computeAllPossibleWords() {
             const nx = x + dx;
             const ny = y + dy;
             if (nx >= 0 && nx < CFG.gridSize && ny >= 0 && ny < CFG.gridSize && !visited[ny][nx]) {
-                dfs(nx, ny, currentWord, depth + 1);
+                dfs(nx, ny, currentWord, depth + 1, nextNode);
             }
         }
         
         visited[y][x] = false;
     }
     
-    // Start DFS from every tile
-    for (let y = 0; y < CFG.gridSize; y++) {
-        for (let x = 0; x < CFG.gridSize; x++) {
-            dfs(x, y, '', 0);
+    function processChunk() {
+        const chunkStart = performance.now();
+        
+        while (computationState.y < CFG.gridSize) {
+            while (computationState.x < CFG.gridSize) {
+                dfs(computationState.x, computationState.y, '', 0, DICTIONARY_TRIE.root);
+                computationState.x++;
+            }
+            computationState.x = 0;
+            computationState.y++;
+            
+            // Check if we've used too much time in this chunk
+            if (performance.now() - chunkStart > computationState.maxTimePerChunk) {
+                // Schedule next chunk
+                if (typeof requestIdleCallback !== 'undefined') {
+                    requestIdleCallback(processChunk, { timeout: 1000 });
+                } else {
+                    setTimeout(processChunk, 0);
+                }
+                return;
+            }
         }
+        
+        // Computation complete
+        updateWordCounter();
+        console.log(`Grid ${CFG.gridSize}x${CFG.gridSize}: ${allPossibleWords.size} possible words found in ${(performance.now() - computationState.startTime).toFixed(1)}ms`);
     }
     
-    // Update word counter display
-    updateWordCounter();
-    
-    console.log(`Grid ${CFG.gridSize}x${CFG.gridSize}: ${allPossibleWords.size} possible words found`);
+    // Start async computation
+    if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(processChunk, { timeout: 2000 });
+    } else {
+        setTimeout(processChunk, 0);
+    }
 }
 
 function updateWordCounter() {
