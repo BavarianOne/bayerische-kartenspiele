@@ -552,52 +552,149 @@ function normalizeWord(word) {
 }
 
 /**
- * Prüft ob ein Wort deutsch aussieht (einfache Heuristik)
- * Filtert offensichtliche Nicht-Deutsch-Wörter heraus
+ * Prüft ob ein Wort deutsch aussieht (großzügige Heuristik)
+ * Erlaubt alle Wörter die nur deutsche Buchstaben enthalten
+ * Wiktionary API wird später für Validierung genutzt
  */
 function isGermanWord(word) {
     if (!word || word.length < 3) return false;
     
-    // Muss nur deutsche Buchstaben enthalten
+    // Muss nur deutsche Buchstaben enthalten (A-Z, Ä, Ö, Ü)
+    // Keine Zahlen, keine Sonderzeichen, keine Bindestriche
     if (!/^[A-ZÄÖÜ]+$/.test(word)) return false;
     
-    // Typisch deutsche Buchstabenkombinationen (mindestens eine sollte vorkommen)
-    const germanPatterns = [
-        /SCH/, /CH/, /CK/, /TZ/, /ST/, /SP/, /PF/, /QU/, /IE/, /EI/, /AU/, /EU/, /ÄU/,
-        /UNG/, /HEIT/, /KEIT/, /SCHAFT/, /UNGEN/, /LICH/, /IG/, /ISCH/, /BAR/, /SAM/,
-        /GE/, /BE/, /VER/, /ENT/, /ER/, /ZER/, /MISS/, /UN/, /AB/, /AN/, /AUF/, /AUS/,
-        /DA/, /DAR/, /DRÜBER/, /EIN/, /FEHL/, /FERN/, /FORT/, /GE/, /HEIM/, /HER/,
-        /HIN/, /MIT/, /NACH/, /NEBEN/, /NIEDER/, /OB/, /UM/, /UNTER/, /VOLL/, /VOR/,
-        /WEG/, /WEITER/, /WIEDER/, /ZER/, /ZU/, /ZURÜCK/, /ZUSAMMEN/
-    ];
+    // Für alle Längen: nur Buchstaben-Prüfung
+    // Wiktionary API validiert später echte Wörter
+    return true;
+}
+
+/**
+ * Normalisiert Wort für Wiktionary API
+ * Wiktionary erwartet: ä→ae, ö→oe, ü→ue, ß→ss, alles kleingeschrieben
+ */
+function normalizeForWiktionary(word) {
+    return word
+        .toLowerCase()
+        .replace(/ä/g, 'ae')
+        .replace(/ö/g, 'oe')
+        .replace(/ü/g, 'ue')
+        .replace(/ß/g, 'ss');
+}
+
+/**
+ * Wiktionary API Cache im localStorage
+ */
+const WIKTIONARY_CACHE_KEY = 'wordament_wiktionary_cache_v1';
+const WIKTIONARY_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 Tage
+
+function getWiktionaryCache() {
+    try {
+        const cached = localStorage.getItem(WIKTIONARY_CACHE_KEY);
+        if (cached) {
+            const data = JSON.parse(cached);
+            // Cache bereinigen: alte Einträge entfernen
+            const now = Date.now();
+            const filtered = Object.fromEntries(
+                Object.entries(data).filter(([_, v]) => now - v.timestamp < WIKTIONARY_CACHE_MAX_AGE)
+            );
+            if (Object.keys(filtered).length !== Object.keys(data).length) {
+                localStorage.setItem(WIKTIONARY_CACHE_KEY, JSON.stringify(filtered));
+            }
+            return filtered;
+        }
+    } catch (e) {
+        console.warn('Wiktionary Cache lesen fehlgeschlagen:', e);
+    }
+    return {};
+}
+
+function setWiktionaryCache(cache) {
+    try {
+        localStorage.setItem(WIKTIONARY_CACHE_KEY, JSON.stringify(cache));
+    } catch (e) {
+        console.warn('Wiktionary Cache speichern fehlgeschlagen:', e);
+    }
+}
+
+/**
+ * Prüft Wort gegen Wiktionary API (mit Cache)
+ * @returns {Promise<{exists: boolean, definitions?: any[]}>}
+ */
+async function checkWiktionary(word) {
+    const normalized = normalizeForWiktionary(word);
+    const cache = getWiktionaryCache();
     
-    // Für kurze Wörter (3-4 Buchstaben) weniger streng
-    if (word.length <= 4) {
-        // Häufige deutsche Kurz-Wörter
-        const commonShort = ['DER','DIE','DAS','UND','IST','ICH','DU','ER','SIE','ES','WIR','IHR',
-            'EIN','EIN','EIN','EIN','EIN','EIN','DEM','DEN','DES','VOM','ZUM','ZUR',
-            'IN','AN','AUF','UNTER','ÜBER','VOR','HINTER','NEBEN','ZWISCHEN','DURCH',
-            'FÜR','GEGEN','OHNE','MIT','NACH','VON','ZU','BEI','SEIT','BIS',
-            'JA','NEIN','DOCH','NICHT','KEIN','KEINE','DA','HIER','DORT','WO','WANN',
-            'WIE','WAS','WER','WEN','WEM','WAR','WAREN','HABE','HAST','HAT','HABEN',
-            'KOMM','KOMMT','KAM','KAMEN','GEH','GEHT','GING','GINGEN','SEH','SIEHT',
-            'SAH','SAHEN','GIB','GIBT','GAB','GABEN','NIMM','NIMMT','NAHM','NAHMEN',
-            'KENN','KENNT','KANNTE','DENK','DENKT','DACHTE','WEISS','WEISST','WUSSTE',
-            'HAUS','AUTO','MENSCH','FRAU','MANN','KIND','HUND','KATZE','BAUM','BLUME',
-            'APFEL','BIRNE','WASSER','TEE','KAFFEE','GELD','EURO','ZEIT','TAG','JAHR',
-            'GROSS','KLEIN','NEU','ALT','GUT','SCHLECHT','SCHÖN','SCHNELL','LANGSAM',
-            'ROT','BLAU','GRÜN','GELB','SCHWARZ','WEISS','EINS','ZWEI','DREI','VIER',
-            'FÜNF','SECHS','SIEBEN','ACHT','NEUN','ZEHN','KOMMEN','GEHEN','SEHEN','GEBEN',
-            'NEHMEN','KENNEN','DENKEN','WISSEN','FINDEN','SAGEN','FRAGEN','ANTWORTEN',
-            'LEBEN','ARBEITEN','SPIELEN','LAUFEN','FAHREN','ESSEN','TRINKEN','SCHLAFEN',
-            'KAUFEN','VERKAUFEN','BEZAHLEN','SCHREIBEN','LESEN','LERNEN','VERSTEHEN',
-            'SUCHEN','FINDEN','ÖFFNEN','SCHLIESSEN','BEGINNEN','ENDEN','STARTEN','STOPPEN',
-            'LIEBEN','HASSEN','MÖGEN','HOFFEN','WARTEN','REISEN','TREFFEN','HEISSEN'];
-        return commonShort.includes(word);
+    // Cache prüfen
+    if (cache[normalized] !== undefined) {
+        return { exists: cache[normalized].exists, definitions: cache[normalized].definitions };
     }
     
-    // Für längere Wörter: mindestens ein deutsches Muster
-    return germanPatterns.some(pattern => pattern.test(word));
+    // API aufrufen
+    const url = `https://de.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(normalized)}`;
+    
+    try {
+        const response = await fetch(url);
+        let exists = false;
+        let definitions = null;
+        
+        if (response.ok) {
+            const data = await response.json();
+            // Wiktionary gibt Array von Definitionen zurück
+            exists = Array.isArray(data) && data.length > 0 && 
+                     data.some(d => d.partOfSpeech && d.definitions && d.definitions.length > 0);
+            definitions = data;
+        } else if (response.status === 404) {
+            exists = false;
+        } else {
+            // Andere HTTP-Fehler: nicht cachen, aber nicht als "nicht existent" werten
+            console.warn(`Wiktionary API Fehler: ${response.status} für ${normalized}`);
+            return { exists: null, definitions: null }; // null = unbekannt
+        }
+        
+        // In Cache speichern
+        cache[normalized] = { exists, definitions, timestamp: Date.now() };
+        setWiktionaryCache(cache);
+        
+        return { exists, definitions };
+    } catch (e) {
+        console.warn('Wiktionary API Fehler:', e);
+        return { exists: null, definitions: null }; // Netzwerkfehler = unbekannt
+    }
+}
+
+/**
+ * Kombinierte Wort-Prüfung: Lokal + Wiktionary
+ * @returns {Promise<boolean>} true wenn Wort gültig
+ */
+async function isValidGermanWord(word) {
+    if (!word || word.length < 3) return false;
+    
+    const normalized = normalizeWord(word);
+    
+    // 1. Lokales Dictionary prüfen (schnell)
+    if (DICTIONARY.has(normalized)) return true;
+    
+    // 2. Heuristik: nur deutsche Buchstaben?
+    if (!isGermanWord(normalized)) return false;
+    
+    // 3. Wiktionary API prüfen (mit Cache)
+    const result = await checkWiktionary(normalized);
+    
+    if (result.exists === true) {
+        // Wort existiert laut Wiktionary - zum lokalen Dictionary hinzufügen
+        DICTIONARY.add(normalized);
+        DICTIONARY_TRIE.insert(normalized);
+        return true;
+    }
+    
+    if (result.exists === false) {
+        // Wort existiert definitiv nicht
+        return false;
+    }
+    
+    // result.exists === null (Netzwerkfehler/API-Fehler): großzügig erlauben
+    // Wenn nur deutsche Buchstaben, dann erlauben
+    return true;
 }
 
 /**
