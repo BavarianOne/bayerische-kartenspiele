@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wordament - Wortsuche</title>
+<title>Wordmnt - Wortsuche</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -400,7 +400,7 @@
 </style>
 </head>
 <body>
-<h1>🔤 Wordament</h1>
+<h1>🔤 Wordmnt</h1>
 <p class="subtitle">Verbinde benachbarte Buchstaben zu Wörtern. Diagonal, horizontal, vertikal - alles geht!</p>
 
 <div id="loadingOverlay">
@@ -433,7 +433,7 @@
     <div id="controls">
         <button id="shuffleBtn" class="btn" title="Neues Brett (neues Spiel)">🔀 Neu</button>
         <button id="clearBtn" class="btn" title="Aktuelle Auswahl löschen">✕ Löschen</button>
-        <button id="hintBtn" class="btn" title="Tipp anzeigen (Kosten: 50 Punkte, Cooldown: 30s)">💡 Tipp</button>
+<button id="hintBtn" class="btn" title="Tipp anzeigen (kostenlos)">💡 Tipp</button>
     </div>
     <div id="wordCounter" style="text-align:center; padding: 8px; font-size: 0.85rem; color: #a0c4e8; min-height: 20px;">
         <span id="wordsFoundCount">0</span> / <span id="wordsTotalCount">—</span> Wörter möglich
@@ -449,7 +449,7 @@
     </style>
 
     <div id="overlay">
-        <h2 id="overlayTitle">🔤 Wordament</h2>
+<h2 id="overlayTitle">🔤 Wordmnt</h2>
         <p id="overlayText">Finde so viele Wörter wie möglich in 2 Minuten! Verbinde benachbarte Buchstaben (auch diagonal). Jeder Buchstabe darf pro Wort nur einmal verwendet werden. Mindestlänge: 3 Buchstaben.</p>
         <div class="stats" id="overlayStats"></div>
         <button id="startBtn" onclick="startGame()">🎮 Los geht's!</button>
@@ -1224,11 +1224,11 @@ function updateWordCounter() {
 
 function updateTileFontSizes() {
     // Scale font size based on grid size
-    // 5x5: ~2rem, 20x20: ~0.7rem
+    // 5x5: ~2rem, 20x20: ~0.9rem (minimum 0.9rem for umlaut readability)
     const baseSize = 2.2;
-    const scaleFactor = Math.max(0.35, 1 - (CFG.gridSize - 5) * 0.045);
-    const fontSize = Math.max(0.7, baseSize * scaleFactor);
-    const pointsSize = Math.max(0.4, fontSize * 0.35);
+    const scaleFactor = Math.max(0.4, 1 - (CFG.gridSize - 5) * 0.045);
+    const fontSize = Math.max(0.9, baseSize * scaleFactor);
+    const pointsSize = Math.max(0.5, fontSize * 0.35);
     
     document.documentElement.style.setProperty('--tile-font-size', `${fontSize}rem`);
     document.documentElement.style.setProperty('--tile-points-size', `${pointsSize}rem`);
@@ -1237,6 +1237,10 @@ function updateTileFontSizes() {
     const gap = Math.max(2, 6 - Math.floor(CFG.gridSize / 3));
     gridContainer.style.gap = `${gap}px`;
     gridContainer.style.padding = `${Math.max(8, 16 - CFG.gridSize / 2)}px`;
+    
+    // Ensure good text rendering for umlauts at all sizes
+    gridContainer.style.textRendering = 'optimizeLegibility';
+    gridContainer.style.fontFeatureSettings = '"liga" 1, "kern" 1';
 }
 
 /* ========== TOUCH/MOUSE DRAG HANDLING ========== */
@@ -1646,15 +1650,6 @@ function showOverlay(title, message, showNewGame) {
 function showHint() {
     if (!gameRunning) return;
     
-    const now = Date.now();
-    const cooldownMs = 30000; // 30 seconds
-    
-    if (now - lastHintTime < cooldownMs) {
-        const remaining = Math.ceil((cooldownMs - (now - lastHintTime)) / 1000);
-        showFeedback(`Tipp-Cooldown: ${remaining}s`, 'error');
-        return;
-    }
-    
     // Find unfound words
     const unfoundWords = [...allPossibleWords].filter(w => !foundWords.has(w));
     if (unfoundWords.length === 0) {
@@ -1666,20 +1661,10 @@ function showHint() {
     const longerWords = unfoundWords.filter(w => w.length >= 5);
     const hintWord = (longerWords.length > 0 ? longerWords : unfoundWords)[Math.floor(Math.random() * (longerWords.length > 0 ? longerWords.length : unfoundWords.length))];
     
-    // Cost: 50 points
-    if (score < 50) {
-        showFeedback('Nicht genug Punkte für Tipp (50)', 'error');
-        return;
-    }
-    
-    score -= 50;
-    updateStats();
-    lastHintTime = now;
-    
     // Highlight the word on the grid
     highlightHintWord(hintWord);
     
-    showFeedback(`Tipp: "${hintWord}" (-50 Pkt)`, 'success');
+    showFeedback(`Tipp: "${hintWord}"`, 'success');
 }
 
 function highlightHintWord(word) {
