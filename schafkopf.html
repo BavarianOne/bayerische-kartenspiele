@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schafkopf - Bayerisches Kartenspiel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a4a2e 0%, #2d6b3f 50%, #1a4a2e 100%);
+            min-height: 100vh;
+            color: #f5f0e1;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #c9a84c;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px #000;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #c9a84c;
+            font-size: 1rem;
+            font-style: italic;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #c9a84c;
+        }
+
+        .score-panel {
+            display: flex;
+            gap: 30px;
+        }
+
+        .team-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .team-name {
+            font-size: 0.85rem;
+            color: #c9a84c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .team-points {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .game-phase {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .current-player {
+            color: #90ee90;
+        }
+
+        /* Player Areas */
+        .play-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .player-area {
+            position: absolute;
+            transition: all 0.3s ease;
+        }
+
+        /* Player 0 - Human (Bottom) */
+        .player-0 {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Player 1 - Right */
+        .player-1 {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+            transform-origin: center center;
+        }
+
+        /* Player 2 - Top (Partner in Normalspiel) */
+        .player-2 {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg);
+            transform-origin: center center;
+        }
+
+        /* Player 3 - Left */
+        .player-3 {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: center center;
+        }
+
+        .hand-container {
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+        }
+
+        .hand-container.active {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .hand-container.partner {
+            border-color: #90ee90;
+        }
+
+        .player-label {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #c9a84c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .player-0 .player-label {
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .player-1 .player-label {
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+        }
+
+        .player-2 .player-label {
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg);
+        }
+
+        .player-3 .player-label {
+            left: -25px;
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        /* Cards */
+        .card {
+            width: 70px;
+            height: 100px;
+            border-radius: 6px;
+            background: #fff;
+            border: 2px solid #333;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.6);
+            z-index: 10;
+        }
+
+        .card.selected {
+            transform: translateY(-20px);
+            box-shadow: 0 12px 30px rgba(255, 215, 0, 0.8);
+            border-color: #ffd700;
+        }
+
+        .card.played {
+            transform: scale(0.7) rotate(0deg) !important;
+            opacity: 0.8;
+            cursor: default;
+        }
+
+        .card.face-down {
+            background: linear-gradient(135deg, #1a4a2e 0%, #2d6b3f 100%);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(201, 168, 76, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(201, 168, 76, 0.1) 0%, transparent 50%);
+        }
+
+        .card.face-down::before {
+            content: '🂠';
+            font-size: 40px;
+            align-self: center;
+        }
+
+        .card.suit-eichel { border-left: 4px solid #8b4513; }
+        .card.suit-gras { border-left: 4px solid #228b22; }
+        .card.suit-herz { border-left: 4px solid #dc143c; }
+        .card.suit-schellen { border-left: 4px solid #ffd700; }
+
+        .card-rank {
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .card-suit {
+            font-size: 1.8rem;
+            line-height: 1;
+            align-self: center;
+        }
+
+        .card-rank-bottom {
+            transform: rotate(180deg);
+            align-self: flex-end;
+        }
+
+        .card.suit-herz .card-rank,
+        .card.suit-schellen .card-rank {
+            color: #dc143c;
+        }
+
+        .card.suit-eichel .card-rank,
+        .card.suit-gras .card-rank {
+            color: #1a4a2e;
+        }
+
+        .card.suit-herz .card-suit,
+        .card.suit-schellen .card-suit {
+            color: #dc143c;
+        }
+
+        .card.suit-eichel .card-suit {
+            color: #8b4513;
+        }
+
+        .card.suit-gras .card-suit {
+            color: #228b22;
+        }
+
+        /* Trick Area */
+        .trick-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 15px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .trick-card {
+            width: 60px;
+            height: 85px;
+            border-radius: 5px;
+            background: #fff;
+            border: 2px solid #333;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px 6px;
+            position: relative;
+            animation: cardPlayed 0.4s ease-out;
+        }
+
+        @keyframes cardPlayed {
+            from {
+                opacity: 0;
+                transform: scale(0.5) translateY(-100px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .trick-card.winner {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+
+        .trick-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: #c9a84c;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* Bidding Dialog */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #2d4a2e 0%, #1a3a1e 100%);
+            border: 3px solid #c9a84c;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(201, 168, 76, 0.3);
+        }
+
+        .modal h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+            color: #f5f0e1;
+            font-size: 1.1rem;
+        }
+
+        .bid-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .bid-btn {
+            padding: 15px 20px;
+            border: 2px solid #c9a84c;
+            background: linear-gradient(135deg, #3a5a3a 0%, #2d4a2e 100%);
+            color: #ffd700;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bid-btn:hover {
+            background: linear-gradient(135deg, #c9a84c 0%, #b8963a 100%);
+            color: #1a3a1e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+        }
+
+        .bid-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bid-btn.pass {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #5a3a3a 0%, #4a2e2e 100%);
+            border-color: #8b4513;
+            color: #ffaa88;
+        }
+
+        .bid-btn.pass:hover {
+            background: linear-gradient(135deg, #8b4513 0%, #6b3513 100%);
+            color: #fff;
+        }
+
+        /* Game Log */
+        .game-log {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #c9a84c;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-player { color: #90ee90; font-weight: bold; }
+        .log-action { color: #ffd700; }
+        .log-card { color: #ffaa88; }
+        .log-system { color: #c9a84c; font-style: italic; }
+        .log-score { color: #ffd700; font-weight: bold; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid #c9a84c;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: 2px solid #c9a84c;
+            background: linear-gradient(135deg, #3a5a3a 0%, #2d4a2e 100%);
+            color: #ffd700;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #c9a84c 0%, #b8963a 100%);
+            color: #1a3a1e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Game Over Modal */
+        .game-over-modal .modal {
+            max-width: 600px;
+        }
+
+        .final-scores {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .final-score-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c9a84c;
+        }
+
+        .final-score-item.winner {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .final-score-name {
+            color: #c9a84c;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .final-score-value {
+            color: #ffd700;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .card {
+                width: 55px;
+                height: 78px;
+                padding: 4px 6px;
+            }
+
+            .card-rank {
+                font-size: 0.9rem;
+            }
+
+            .card-suit {
+                font-size: 1.4rem;
+            }
+
+            .player-1, .player-3 {
+                display: none;
+            }
+
+            .game-container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .bid-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .bid-btn.pass {
+                grid-column: span 1;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Trump indicator */
+        .trump-indicator {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 215, 0, 0.9);
+            color: #1a3a1e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+            border: 2px solid #c9a84c;
+        }
+
+        .trump-suit-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        /* Partner indicator */
+        .partner-badge {
+            position: absolute;
+            top: -22px;
+            right: -8px;
+            background: #90ee90;
+            color: #1a3a1e;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid #228b22;
+        }
+
+        /* Score animation */
+        @keyframes scorePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); color: #ffd700; }
+            100% { transform: scale(1); }
+        }
+
+        .score-pop {
+            animation: scorePop 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🃏 Schafkopf</h1>
+            <div class="subtitle">Bayerisches Kult-Kartenspiel</div>
+        </header>
+
+        <div class="game-info">
+            <div class="score-panel">
+                <div class="team-score">
+                    <div class="team-name" id="team1-name">Wir (Spieler + Partner)</div>
+                    <div class="team-points" id="team1-score">0</div>
+                </div>
+                <div class="team-score">
+                    <div class="team-name" id="team2-name">Gegner</div>
+                    <div class="team-points" id="team2-score">0</div>
+                </div>
+            </div>
+            <div class="game-phase" id="game-phase">Neues Spiel starten</div>
+            <div class="score-panel">
+                <div class="team-score">
+                    <div class="team-name">Runde</div>
+                    <div class="team-points" id="round-num">1</div>
+                </div>
+                <div class="team-score">
+                    <div class="team-name">Geber</div>
+                    <div class="team-points" id="dealer-display">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="play-area" id="play-area">
+            <!-- Player 0 (Human) - Bottom -->
+            <div class="player-area player-0" id="player-0-area">
+                <div class="player-label">Du</div>
+                <div class="hand-container" id="hand-0"></div>
+            </div>
+
+            <!-- Player 1 (Right) -->
+            <div class="player-area player-1" id="player-1-area">
+                <div class="player-label">Spieler 2</div>
+                <div class="hand-container" id="hand-1"></div>
+            </div>
+
+            <!-- Player 2 (Top) -->
+            <div class="player-area player-2" id="player-2-area">
+                <div class="player-label">Partner / Gegner</div>
+                <div class="hand-container" id="hand-2"></div>
+            </div>
+
+            <!-- Player 3 (Left) -->
+            <div class="player-area player-3" id="player-3-area">
+                <div class="player-label">Spieler 4</div>
+                <div class="hand-container" id="hand-3"></div>
+            </div>
+
+            <!-- Trick Area -->
+            <div class="trick-area" id="trick-area"></div>
+        </div>
+
+        <div class="game-log" id="game-log">
+            <div class="log-entry log-system">Willkommen beim Schafkopf! Klicke auf "Neues Spiel" um zu beginnen.</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="new-game-btn" onclick="startNewGame()">Neues Spiel</button>
+            <button class="btn" id="next-round-btn" onclick="nextRound()" disabled>Nächste Runde</button>
+            <button class="btn" id="rules-btn" onclick="showRules()">Regeln</button>
+        </div>
+    </div>
+
+    <!-- Bidding Modal -->
+    <div class="modal-overlay" id="bid-modal">
+        <div class="modal">
+            <h2 id="bid-title">Spielansage</h2>
+            <p id="bid-text">Du bist dran. Was spielst du?</p>
+            <div class="bid-buttons" id="bid-buttons"></div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal-overlay game-over-modal" id="game-over-modal">
+        <div class="modal">
+            <h2>🏆 Spiel beendet!</h2>
+            <p>Nach 4 Runden (einer "Rund") steht der Sieger fest.</p>
+            <div class="final-scores" id="final-scores"></div>
+            <button class="btn" onclick="startNewGame()">Neues Spiel starten</button>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div class="modal-overlay" id="rules-modal">
+        <div class="modal" style="max-width: 700px; text-align: left; max-height: 80vh; overflow-y: auto;">
+            <h2 style="text-align: center;">📜 Schafkopf Regeln</h2>
+            <div style="font-size: 0.9rem; line-height: 1.6;">
+                <h3 style="color: #ffd700; margin-top: 20px; margin-bottom: 10px;">🃏 Karten & Werte</h3>
+                <p>32 Karten (Bayrisches Blatt): Eichel 🌰, Gras 🍃, Herz ❤️, Schellen 🔔</p>
+                <p>Ränge: Ass/Sau (11), Zehn (10), König (4), Ober (3), Unter (2), 9/8/7 (0)</p>
+                <p><strong>Trumpf-Reihenfolge (Normalspiel):</strong> Eichel-Ober, Gras-Ober, Herz-Ober, Schellen-Ober, Eichel-Unter, Gras-Unter, Herz-Unter, Schellen-Unter, Herz-Ass, Herz-Zeh, Herz-König, Herz-9, Herz-8, Herz-7</p>
+
+                <h3 style="color: #ffd700; margin-top: 20px; margin-bottom: 10px;">🎮 Spielarten</h3>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Normalspiel (Rufspiel/Sauspiel):</strong> Ruft ein Ass (Sau) → Partner hat das Ass. Trumpf: Alle Ober, Unter + Herz.</li>
+                    <li><strong>Farbsolo:</strong> Allein gegen 3. Wählt Trumpffarbe (Eichel/Gras/Herz/Schellen). Trumpf: Ober, Unter + gewählte Farbe.</li>
+                    <li><strong>Wenz:</strong> Nur die 4 Unter sind Trumpf. Keine Trumpffarbe. Ober sind normale Karten.</li>
+                    <li><strong>Geier:</strong> Nur die 4 Ober sind Trumpf. Keine Trumpffarbe.</li>
+                    <li><strong>Ramsch:</strong> Keiner will spielen → Jeder für sich. Wenige Augen = gut. Durchmarsch (alle Stiche) gewinnt.</li>
+                </ul>
+
+                <h3 style="color: #ffd700; margin-top: 20px; margin-bottom: 10px;">📋 Spielablauf</h3>
+                <ol style="margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Geben:</strong> 2×4 Karten im Uhrzeigersinn. Vorhand (links vom Geber) fängt an.</li>
+                    <li><strong>Ansagen:</strong> Reihum "Ich spiele" oder "Weiter". Höheres Spiel überbietet.</li>
+                    <li><strong>Rufspiel:</strong> Spieler ruft Ass (Sau) → Besitzer wird Partner (unbekannt bis gespielt).</li>
+                    <li><strong>Stiche:</strong> Farbzwang, Trumpfzwang, kein Stichzwang. 8 Stiche pro Runde.</li>
+                    <li><strong>Wertung:</strong> 61+ Augen = Gewonnen, 91+ = Schneider, 120 = Schwarz.</li>
+                </ol>
+
+                <h3 style="color: #ffd700; margin-top: 20px; margin-bottom: 10px;">💰 Abrechnung (vereinfacht)</h3>
+                <p>Partnerspiel: Verlierer zahlen an Gewinner. Solo: Solospieler gegen alle 3.</p>
+                <p>Schneider = ×2, Schwarz = ×3, Laufende (höchste Trümpfe in Reihe) erhöhen Wert.</p>
+
+                <h3 style="color: #ffd700; margin-top: 20px; margin-bottom: 10px;">🤖 KI-Strategie</h3>
+                <p>Die KI bewertet Handstärke für Ansagen und spielt regelkonform: Bedienen, Stechen, Trumpf schonen.</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="closeModal('rules-modal')">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============================================
+// SCHAFKOPF - Game Logic
+// ============================================
+
+// --- Constants ---
+const SUITS = ['eichel', 'gras', 'herz', 'schellen'];
+const SUIT_SYMBOLS = { eichel: '🌰', gras: '🍃', herz: '❤️', schellen: '🔔' };
+const SUIT_NAMES = { eichel: 'Eichel', gras: 'Gras', herz: 'Herz', schellen: 'Schellen' };
+const RANKS = ['7', '8', '9', 'könig', 'ober', 'unter', '10', 'ass'];
+const RANK_VALUES = { '7': 0, '8': 0, '9': 0, 'könig': 4, 'ober': 3, 'unter': 2, '10': 10, 'ass': 11 };
+const RANK_DISPLAY = { '7': '7', '8': '8', '9': '9', 'könig': 'K', 'ober': 'O', 'unter': 'U', '10': '10', 'ass': 'A' };
+const RANK_ORDER = { '7': 0, '8': 1, '9': 2, 'könig': 3, 'ober': 4, 'unter': 5, '10': 6, 'ass': 7 };
+
+const GAME_TYPES = {
+    'ramsch': { name: 'Ramsch', value: 0, solo: false },
+    'normal': { name: 'Rufspiel', value: 1, solo: false },
+    'farbsolo-eichel': { name: 'Eichel-Solo', value: 2, solo: true, trumpSuit: 'eichel' },
+    'farbsolo-gras': { name: 'Gras-Solo', value: 2, solo: true, trumpSuit: 'gras' },
+    'farbsolo-herz': { name: 'Herz-Solo', value: 2, solo: true, trumpSuit: 'herz' },
+    'farbsolo-schellen': { name: 'Schellen-Solo', value: 2, solo: true, trumpSuit: 'schellen' },
+    'wenz': { name: 'Wenz', value: 3, solo: true },
+    'geier': { name: 'Geier', value: 4, solo: true }
+};
+
+const GAME_TYPE_ORDER = ['ramsch', 'normal', 'farbsolo-eichel', 'farbsolo-gras', 'farbsolo-herz', 'farbsolo-schellen', 'wenz', 'geier'];
+
+// --- Game State ---
+let gameState = {
+    deck: [],
+    hands: [[], [], [], []],
+    currentPlayer: 0,
+    dealer: 0,
+    round: 1,
+    phase: 'idle', // idle, bidding, playing, scoring, roundEnd, gameOver
+    gameType: null,
+    gameTypeValue: 0,
+    declarer: -1,
+    partner: -1,
+    calledSuit: null,
+    trumpSuit: 'herz',
+    trick: [],
+    trickWinner: -1,
+    tricksWon: [[], [], [], []],
+    scores: [0, 0, 0, 0],
+    roundScores: [0, 0, 0, 0],
+    bids: [null, null, null, null],
+    bidOrder: [],
+    currentBidIndex: 0,
+    mustPlay: false,
+    kontra: false,
+    re: false,
+    gelegt: [false, false, false, false],
+    stock: 0,
+    log: []
+};
+
+// --- Card Class ---
+class Card {
+    constructor(suit, rank) {
+        this.suit = suit;
+        this.rank = rank;
+        this.value = RANK_VALUES[rank];
+        this.id = `${suit}-${rank}`;
+    }
+
+    isTrump(gameType, trumpSuit) {
+        if (gameType === 'ramsch' || gameType === 'normal') {
+            // Normalspiel: Alle Ober, Unter + Herz
+            return this.rank === 'ober' || this.rank === 'unter' || this.suit === 'herz';
+        }
+        if (gameType === 'wenz') {
+            // Wenz: Nur Unter
+            return this.rank === 'unter';
+        }
+        if (gameType === 'geier') {
+            // Geier: Nur Ober
+            return this.rank === 'ober';
+        }
+        if (gameType.startsWith('farbsolo')) {
+            // Farbsolo: Ober, Unter + gewählte Farbe
+            return this.rank === 'ober' || this.rank === 'unter' || this.suit === trumpSuit;
+        }
+        return false;
+    }
+
+    getTrumpRank(gameType, trumpSuit) {
+        if (!this.isTrump(gameType, trumpSuit)) return -1;
+
+        if (gameType === 'ramsch' || gameType === 'normal') {
+            // Normalspiel Trumpf-Reihenfolge
+            if (this.rank === 'ober') {
+                return 14 - SUITS.indexOf(this.suit); // Eichel-Ober=14, Gras-Ober=13, Herz-Ober=12, Schellen-Ober=11
+            }
+            if (this.rank === 'unter') {
+                return 10 - SUITS.indexOf(this.suit); // Eichel-Unter=10, Gras-Unter=9, Herz-Unter=8, Schellen-Unter=7
+            }
+            // Herz-Farbe
+            return RANK_ORDER[this.rank]; // Ass=7, 10=6, König=3, 9=2, 8=1, 7=0
+        }
+
+        if (gameType === 'wenz') {
+            // Nur Unter als Trumpf
+            return 10 - SUITS.indexOf(this.suit);
+        }
+
+        if (gameType === 'geier') {
+            // Nur Ober als Trumpf
+            return 14 - SUITS.indexOf(this.suit);
+        }
+
+        if (gameType.startsWith('farbsolo')) {
+            // Farbsolo: Ober, Unter, dann Trumpffarbe
+            if (this.rank === 'ober') return 14 - SUITS.indexOf(this.suit);
+            if (this.rank === 'unter') return 10 - SUITS.indexOf(this.suit);
+            // Trumpffarbe
+            return RANK_ORDER[this.rank];
+        }
+
+        return -1;
+    }
+
+    getSuitForPlay(gameType, trumpSuit) {
+        // Für Farbzwang: welche "Farbe" hat die Karte effektiv?
+        if (this.isTrump(gameType, trumpSuit)) return 'trumpf';
+        return this.suit;
+    }
+
+    beats(other, gameType, trumpSuit) {
+        const thisTrump = this.isTrump(gameType, trumpSuit);
+        const otherTrump = other.isTrump(gameType, trumpSuit);
+
+        if (thisTrump && !otherTrump) return true;
+        if (!thisTrump && otherTrump) return false;
+        if (thisTrump && otherTrump) {
+            return this.getTrumpRank(gameType, trumpSuit) > other.getTrumpRank(gameType, trumpSuit);
+        }
+        // Beide gleiche Farbe (kein Trumpf)
+        if (this.suit === other.suit) {
+            return RANK_ORDER[this.rank] > RANK_ORDER[other.rank];
+        }
+        return false; // Verschiedene Farben, kein Trumpf -> kann nicht stechen
+    }
+}
+
+// --- Deck Functions ---
+function createDeck() {
+    const deck = [];
+    for (const suit of SUITS) {
+        for (const rank of RANKS) {
+            deck.push(new Card(suit, rank));
+        }
+    }
+    return deck;
+}
+
+function shuffleDeck(deck) {
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    return deck;
+}
+
+function dealCards(deck) {
+    const hands = [[], [], [], []];
+    // 2x4 Karten im Uhrzeigersinn, beginnend bei Vorhand (dealer+1)
+    let cardIndex = 0;
+    for (let round = 0; round < 2; round++) {
+        for (let i = 0; i < 4; i++) {
+            const player = (gameState.dealer + 1 + i) % 4;
+            for (let c = 0; c < 4; c++) {
+                hands[player].push(deck[cardIndex++]);
+            }
+        }
+    }
+    // Sortiere Hände
+    for (let h of hands) {
+        h.sort((a, b) => {
+            const aTrump = a.isTrump('normal', 'herz');
+            const bTrump = b.isTrump('normal', 'herz');
+            if (aTrump !== bTrump) return bTrump - aTrump;
+            if (a.suit !== b.suit) return SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit);
+            return RANK_ORDER[b.rank] - RANK_ORDER[a.rank];
+        });
+    }
+    return hands;
+}
+
+// --- UI Rendering ---
+function renderCard(card, playerIndex, index, selectable = false, faceDown = false) {
+    const isTrump = card.isTrump(gameState.gameType, gameState.trumpSuit);
+    const trumpRank = card.getTrumpRank(gameState.gameType, gameState.trumpSuit);
+    const suitClass = `suit-${card.suit}`;
+
+    let rankDisplay = RANK_DISPLAY[card.rank];
+    let suitDisplay = SUIT_SYMBOLS[card.suit];
+
+    // Für Trumpf-Karten im Normalspiel: Zeige Trumpf-Rang
+    let extraInfo = '';
+    if (isTrump && (gameState.gameType === 'normal' || gameState.gameType === 'ramsch')) {
+        if (card.rank === 'ober') {
+            extraInfo = `<span class="card-rank" style="font-size: 0.7rem; opacity: 0.8;">${trumpRank}. Trumpf</span>`;
+        } else if (card.rank === 'unter') {
+            extraInfo = `<span class="card-rank" style="font-size: 0.7rem; opacity: 0.8;">${trumpRank}. Trumpf</span>`;
+        }
+    }
+
+    if (faceDown) {
+        return `<div class="card face-down ${suitClass}" data-player="${playerIndex}" data-index="${index}"></div>`;
+    }
+
+    const selectedClass = selectable && gameState.phase === 'playing' && gameState.currentPlayer === 0 ? '' : '';
+    const clickHandler = (selectable && gameState.phase === 'playing' && gameState.currentPlayer === 0) 
+        ? `onclick="playCard(${index})"` 
+        : '';
+
+    return `
+        <div class="card ${suitClass} ${isTrump ? 'trump' : ''} ${selectedClass}" 
+             data-player="${playerIndex}" data-index="${index}" ${clickHandler}>
+            <div class="card-rank">${rankDisplay}${extraInfo}</div>
+            <div class="card-suit">${suitDisplay}</div>
+            <div class="card-rank card-rank-bottom">${rankDisplay}</div>
+        </div>
+    `;
+}
+
+function renderHand(playerIndex) {
+    const hand = gameState.hands[playerIndex];
+    const container = document.getElementById(`hand-${playerIndex}`);
+    const isHuman = playerIndex === 0;
+    const isActive = gameState.phase === 'playing' && gameState.currentPlayer === playerIndex;
+
+    let html = '';
+    for (let i = 0; i < hand.length; i++) {
+        const faceDown = !isHuman && gameState.phase !== 'scoring' && gameState.phase !== 'roundEnd' && gameState.phase !== 'gameOver';
+        html += renderCard(hand[i], playerIndex, i, isHuman && isActive, faceDown);
+    }
+    container.innerHTML = html;
+
+    // Update container classes
+    container.classList.toggle('active', isActive);
+    container.classList.toggle('partner', playerIndex === gameState.partner && gameState.gameType === 'normal');
+}
+
+function renderAllHands() {
+    for (let i = 0; i < 4; i++) {
+        renderHand(i);
+    }
+    updatePlayerLabels();
+}
+
+function updatePlayerLabels() {
+    const labels = ['Du', 'Spieler 2', 'Spieler 3', 'Spieler 4'];
+    const areas = [0, 1, 2, 3];
+
+    for (let i = 0; i < 4; i++) {
+        const labelEl = document.querySelector(`#player-${i}-area .player-label`);
+        if (labelEl) {
+            let text = labels[i];
+            if (gameState.gameType === 'normal') {
+                if (i === gameState.declarer) text += ' (Spieler)';
+                else if (i === gameState.partner) text += ' ★ Partner';
+                else text += ' (Gegner)';
+            } else if (gameState.gameType && gameState.gameType.startsWith('farbsolo')) {
+                if (i === gameState.declarer) text += ' (Solist)';
+                else text += ' (Gegner)';
+            } else if (gameState.gameType === 'wenz' || gameState.gameType === 'geier') {
+                if (i === gameState.declarer) text += ' (Solist)';
+                else text += ' (Gegner)';
+            } else if (gameState.gameType === 'ramsch') {
+                text += ' (Ramsch)';
+            }
+            labelEl.textContent = text;
+        }
+    }
+}
+
+function renderTrickArea() {
+    const container = document.getElementById('trick-area');
+    let html = '';
+
+    for (let i = 0; i < gameState.trick.length; i++) {
+        const { card, player } = gameState.trick[i];
+        const isWinner = (gameState.trickWinner === player && gameState.trick.length === 4);
+        html += `
+            <div class="trick-card ${isWinner ? 'winner' : ''}" style="transform: rotate(${getTrickRotation(player)}deg);">
+                ${renderCard(card, player, 0, false, false)}
+                <div class="trick-label">${getPlayerName(player)}</div>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+}
+
+function getTrickRotation(player) {
+    // Karten so drehen, dass sie zum Spieler zeigen
+    const rotations = [0, 90, 180, -90];
+    return rotations[player] || 0;
+}
+
+function getPlayerName(player) {
+    const names = ['Du', 'Sp. 2', 'Sp. 3', 'Sp. 4'];
+    return names[player];
+}
+
+// --- Game Logic ---
+
+function startNewGame() {
+    // Reset game state
+    gameState = {
+        deck: [],
+        hands: [[], [], [], []],
+        currentPlayer: 0,
+        dealer: Math.floor(Math.random() * 4),
+        round: 1,
+        phase: 'bidding',
+        gameType: null,
+        gameTypeValue: 0,
+        declarer: -1,
+        partner: -1,
+        calledSuit: null,
+        trumpSuit: 'herz',
+        trick: [],
+        trickWinner: -1,
+        tricksWon: [[], [], [], []],
+        scores: [0, 0, 0, 0],
+        roundScores: [0, 0, 0, 0],
+        bids: [null, null, null, null],
+        bidOrder: [],
+        currentBidIndex: 0,
+        mustPlay: false,
+        kontra: false,
+        re: false,
+        gelegt: [false, false, false, false],
+        stock: 0,
+        log: []
+    };
+
+    // Create and deal cards
+    gameState.deck = shuffleDeck(createDeck());
+    gameState.hands = dealCards(gameState.deck);
+
+    // Determine bidding order (starting with Vorhand = dealer+1)
+    gameState.bidOrder = [];
+    for (let i = 0; i < 4; i++) {
+        gameState.bidOrder.push((gameState.dealer + 1 + i) % 4);
+    }
+    gameState.currentBidIndex = 0;
+    gameState.currentPlayer = gameState.bidOrder[0];
+
+    // Update UI
+    document.getElementById('round-num').textContent = gameState.round;
+    document.getElementById('dealer-display').textContent = getPlayerName(gameState.dealer);
+    document.getElementById('team1-score').textContent = gameState.scores[0] + gameState.scores[2];
+    document.getElementById('team2-score').textContent = gameState.scores[1] + gameState.scores[3];
+    document.getElementById('new-game-btn').disabled = true;
+    document.getElementById('next-round-btn').disabled = true;
+
+    renderAllHands();
+    renderTrickArea();
+    addLog('system', 'Neues Spiel begonnen. Karten werden gegeben...');
+    addLog('system', `Geber: ${getPlayerName(gameState.dealer)}, Vorhand: ${getPlayerName(gameState.bidOrder[0])}`);
+
+    // Start bidding after short delay
+    setTimeout(() => {
+        nextBid();
+    }, 1000);
+}
+
+function nextBid() {
+    if (gameState.currentBidIndex >= gameState.bidOrder.length) {
+        // Alle haben gepasst
+        handleAllPassed();
+        return;
+    }
+
+    const player = gameState.bidOrder[gameState.currentBidIndex];
+    gameState.currentPlayer = player;
+
+    if (player === 0) {
+        // Human's turn to bid
+        showBidDialog();
+    } else {
+        // AI bids
+        setTimeout(() => {
+            const bid = aiBid(player);
+            processBid(player, bid);
+        }, 800);
+    }
+}
+
+function showBidDialog() {
+    const modal = document.getElementById('bid-modal');
+    const buttonsContainer = document.getElementById('bid-buttons');
+    const title = document.getElementById('bid-title');
+    const text = document.getElementById('bid-text');
+
+    title.textContent = 'Spielansage';
+    text.textContent = `Du bist dran, ${getPlayerName(gameState.currentPlayer)}. Was spielst du?`;
+
+    // Determine available bids based on previous bids
+    let maxBidValue = 0;
+    for (const bid of gameState.bids) {
+        if (bid && GAME_TYPES[bid].value > maxBidValue) {
+            maxBidValue = GAME_TYPES[bid].value;
+        }
+    }
+
+    let html = '';
+    for (const typeKey of GAME_TYPE_ORDER) {
+        const type = GAME_TYPES[typeKey];
+        const canBid = type.value > maxBidValue || (type.value === maxBidValue && maxBidValue > 0);
+        const isHumanTurn = gameState.currentPlayer === 0;
+
+        if (typeKey === 'ramsch') {
+            // Ramsch nur wenn alle gepasst haben
+            continue;
+        }
+
+        if (typeKey.startsWith('farbsolo')) {
+            // Für Farbsolo: 4 Buttons
+            continue; // Wir machen separate Buttons
+        }
+
+        if (canBid || typeKey === 'normal') {
+            html += `<button class="bid-btn" onclick="humanBid('${typeKey}')" ${!canBid && typeKey !== 'normal' ? 'disabled' : ''}>${type.name}</button>`;
+        }
+    }
+
+    // Farbsolo Buttons
+    const soloTypes = ['farbsolo-eichel', 'farbsolo-gras', 'farbsolo-herz', 'farbsolo-schellen'];
+    for (const st of soloTypes) {
+        const type = GAME_TYPES[st];
+        const canBid = type.value > maxBidValue;
+        html += `<button class="bid-btn" onclick="humanBid('${st}')" ${!canBid ? 'disabled' : ''}>${type.name}</button>`;
+    }
+
+    // Wenz & Geier
+    for (const st of ['wenz', 'geier']) {
+        const type = GAME_TYPES[st];
+        const canBid = type.value > maxBidValue;
+        html += `<button class="bid-btn" onclick="humanBid('${st}')" ${!canBid ? 'disabled' : ''}>${type.name}</button>`;
+    }
+
+    // Pass button
+    html += `<button class="bid-btn pass" onclick="humanBid('pass')">Weiter (Passen)</button>`;
+
+    buttonsContainer.innerHTML = html;
+    modal.classList.add('active');
+}
+
+function humanBid(bidType) {
+    document.getElementById('bid-modal').classList.remove('active');
+    processBid(0, bidType);
+}
+
+function aiBid(player) {
+    const hand = gameState.hands[player];
+    const handStrength = evaluateHand(hand);
+
+    // Einfache KI-Logik für Ansagen
+    // Ramsch wird nicht aktiv angesagt, nur bei "alle weiter"
+
+    // Prüfe auf Solo-Möglichkeiten
+    const soloStrength = evaluateSoloHand(hand);
+    const wenzStrength = evaluateWenzHand(hand);
+    const geierStrength = evaluateGeierHand(hand);
+    const normalStrength = evaluateNormalHand(hand);
+
+    const maxBidValue = Math.max(...gameState.bids.filter(b => b).map(b => GAME_TYPES[b].value), 0);
+
+    // Versuche höher zu bieten
+    if (geierStrength > 70 && GAME_TYPES.geier.value > maxBidValue) return 'geier';
+    if (wenzStrength > 65 && GAME_TYPES.wenz.value > maxBidValue) return 'wenz';
+    if (soloStrength.best > 60 && GAME_TYPES.farbsolo.value > maxBidValue) return soloStrength.bestType;
+    if (normalStrength > 50 && GAME_TYPES.normal.value > maxBidValue) return 'normal';
+
+    // Überbieten wenn schon was angesagt wurde
+    if (maxBidValue > 0) {
+        // Einfache Logik: manchmal überbieten
+        if (Math.random() < 0.3) {
+            if (maxBidValue < GAME_TYPES.geier.value && geierStrength > 50) return 'geier';
+            if (maxBidValue < GAME_TYPES.wenz.value && wenzStrength > 45) return 'wenz';
+            if (maxBidValue < GAME_TYPES.farbsolo.value && soloStrength.best > 40) return soloStrength.bestType;
+        }
+    }
+
+    return 'pass';
+}
+
+function evaluateHand(hand) {
+    let trumpCount = 0;
+    let trumpQuality = 0;
+    let aceCount = 0;
+    let tenCount = 0;
+    let suitLengths = { eichel: 0, gras: 0, herz: 0, schellen: 0 };
+
+    for (const card of hand) {
+        if (card.isTrump('normal', 'herz')) {
+            trumpCount++;
+            trumpQuality += card.getTrumpRank('normal', 'herz');
+        }
+        if (card.rank === 'ass') aceCount++;
+        if (card.rank === '10') tenCount++;
+        suitLengths[card.suit]++;
+    }
+
+    return { trumpCount, trumpQuality, aceCount, tenCount, suitLengths };
+}
+
+function evaluateSoloHand(hand) {
+    let best = { value: 0, bestType: null };
+    for (const suit of SUITS) {
+        let strength = 0;
+        let trumpCount = 0;
+        let highTrumps = 0;
+        let aceCount = 0;
+        let tenCount = 0;
+        let voidSuits = 0;
+
+        for (const card of hand) {
+            if (card.rank === 'ober' || card.rank === 'unter' || card.suit === suit) {
+                trumpCount++;
+                const tr = card.getTrumpRank('farbsolo', suit);
+                if (tr > 10) highTrumps++;
+                strength += tr;
+            }
+            if (card.suit === suit && card.rank === 'ass') aceCount++;
+            if (card.suit === suit && card.rank === '10') tenCount++;
+        }
+
+        for (const s of SUITS) {
+            if (s !== suit && !hand.some(c => c.suit === s)) voidSuits++;
+        }
+
+        strength += aceCount * 15 + tenCount * 10 + voidSuits * 20 + highTrumps * 8;
+
+        if (strength > best.value) {
+            best = { value: strength, bestType: `farbsolo-${suit}` };
+        }
+    }
+    return best;
+}
+
+function evaluateWenzHand(hand) {
+    let strength = 0;
+    let unterCount = 0;
+    let highUnters = 0;
+    let aceCount = 0;
+    let tenCount = 0;
+    let voidSuits = 0;
+
+    for (const card of hand) {
+        if (card.rank === 'unter') {
+            unterCount++;
+            const tr = card.getTrumpRank('wenz', 'herz');
+            if (tr > 5) highUnters++;
+            strength += tr * 2;
+        }
+        if (card.rank === 'ass') { aceCount++; strength += 15; }
+        if (card.rank === '10') { tenCount++; strength += 10; }
+    }
+
+    for (const suit of SUITS) {
+        if (!hand.some(c => c.suit === suit && c.rank !== 'unter')) voidSuits++;
+    }
+
+    strength += voidSuits * 15;
+    return strength;
+}
+
+function evaluateGeierHand(hand) {
+    let strength = 0;
+    let oberCount = 0;
+    let highObers = 0;
+    let aceCount = 0;
+    let tenCount = 0;
+    let voidSuits = 0;
+
+    for (const card of hand) {
+        if (card.rank === 'ober') {
+            oberCount++;
+            const tr = card.getTrumpRank('geier', 'herz');
+            if (tr > 10) highObers++;
+            strength += tr * 2;
+        }
+        if (card.rank === 'ass') { aceCount++; strength += 15; }
+        if (card.rank === '10') { tenCount++; strength += 10; }
+    }
+
+    for (const suit of SUITS) {
+        if (!hand.some(c => c.suit === suit && c.rank !== 'ober')) voidSuits++;
+    }
+
+    strength += voidSuits * 15;
+    return strength;
+}
+
+function evaluateNormalHand(hand) {
+    // Rufspiel: Braucht starkes Trumpf + Ass in einer Farbe (nicht Herz)
+    let strength = 0;
+    let trumpCount = 0;
+    let highTrumps = 0;
+    let nonHerzAces = [];
+
+    for (const card of hand) {
+        if (card.isTrump('normal', 'herz')) {
+            trumpCount++;
+            const tr = card.getTrumpRank('normal', 'herz');
+            if (tr > 8) highTrumps++;
+            strength += tr;
+        }
+        if (card.rank === 'ass' && card.suit !== 'herz') {
+            nonHerzAces.push(card.suit);
+            strength += 20;
+        }
+        if (card.rank === '10' && card.suit !== 'herz') strength += 8;
+    }
+
+    // Bonus für kurze Farben (zum Abwerfen)
+    for (const suit of SUITS) {
+        if (suit !== 'herz') {
+            const count = hand.filter(c => c.suit === suit).length;
+            if (count === 0) strength += 15; // Frei
+            else if (count === 1) strength += 8; // Kurz
+        }
+    }
+
+    // Braucht mindestens ein Ass zum Rufen
+    if (nonHerzAces.length === 0) strength = 0;
+
+    return strength;
+}
+
+function processBid(player, bidType) {
+    gameState.bids[player] = bidType;
+    addLog('action', `${getPlayerName(player)}: ${bidType === 'pass' ? 'Weiter' : GAME_TYPES[bidType]?.name || bidType}`);
+
+    if (bidType !== 'pass') {
+        // Neues höchstes Gebot
+        gameState.gameType = bidType;
+        gameState.gameTypeValue = GAME_TYPES[bidType].value;
+        gameState.declarer = player;
+
+        // Bei Farbsolo: Trumpffarbe setzen
+        if (bidType.startsWith('farbsolo')) {
+            gameState.trumpSuit = GAME_TYPES[bidType].trumpSuit;
+        } else if (bidType === 'normal') {
+            gameState.trumpSuit = 'herz';
+        } else if (bidType === 'wenz' || bidType === 'geier') {
+            gameState.trumpSuit = 'none';
+        }
+
+        // Bieter-Reihenfolge neu: der Spieler kann nochmal, dann die anderen
+        // Vereinfacht: Wir gehen einfach weiter im Uhrzeigersinn
+    }
+
+    gameState.currentBidIndex++;
+    nextBid();
+}
+
+function handleAllPassed() {
+    addLog('system', 'Alle haben gepasst. Ramsch wird gespielt.');
+    gameState.gameType = 'ramsch';
+    gameState.gameTypeValue = GAME_TYPES.ramsch.value;
+    gameState.declarer = -1; // Kein Solist
+    gameState.trumpSuit = 'herz'; // Wie Normalspiel
+    gameState.phase = 'playing';
+    gameState.currentPlayer = (gameState.dealer + 1) % 4; // Vorhand beginnt
+
+    // Bei Ramsch: Kein Partner, jeder für sich
+    gameState.partner = -1;
+
+    updatePhaseDisplay();
+    renderAllHands();
+    renderTrickArea();
+
+    if (gameState.currentPlayer === 0) {
+        addLog('system', 'Du beginnst. Wähle eine Karte.');
+    } else {
+        setTimeout(() => aiPlayCard(), 1000);
+    }
+}
+
+function updatePhaseDisplay() {
+    const phaseEl = document.getElementById('game-phase');
+    const phaseNames = {
+        'bidding': 'Ansage-Phase',
+        'playing': 'Spielphase',
+        'scoring': 'Abrechnung',
+        'roundEnd': 'Runde beendet',
+        'gameOver': 'Spiel beendet'
+    };
+    phaseEl.textContent = phaseNames[gameState.phase] || gameState.phase;
+
+    if (gameState.gameType) {
+        const typeName = GAME_TYPES[gameState.gameType]?.name || gameState.gameType;
+        phaseEl.textContent += ` - ${typeName}`;
+        if (gameState.declarer >= 0) {
+            phaseEl.textContent += ` (Spieler: ${getPlayerName(gameState.declarer)})`;
+        }
+    }
+}
+
+// --- Playing Phase ---
+
+function playCard(cardIndex) {
+    if (gameState.phase !== 'playing' || gameState.currentPlayer !== 0) return;
+
+    const card = gameState.hands[0][cardIndex];
+    if (!isValidPlay(card, 0)) {
+        addLog('system', 'Ungültige Karte! Du musst Farbe bedienen oder trumpfen.');
+        return;
+    }
+
+    executePlay(0, cardIndex);
+}
+
+function isValidPlay(card, player) {
+    if (gameState.trick.length === 0) return true; // Anspielen: immer erlaubt
+
+    const ledCard = gameState.trick[0].card;
+    const ledSuit = ledCard.getSuitForPlay(gameState.gameType, gameState.trumpSuit);
+
+    const cardSuit = card.getSuitForPlay(gameState.gameType, gameState.trumpSuit);
+
+    // Farbzwang / Trumpfzwang
+    if (cardSuit === ledSuit) return true;
+
+    // Hat Spieler die angespielte Farbe?
+    const hasLedSuit = gameState.hands[player].some(c => 
+        c.getSuitForPlay(gameState.gameType, gameState.trumpSuit) === ledSuit
+    );
+
+    if (hasLedSuit) return false; // Muss Farbe bedienen
+
+    // Kann nicht bedienen: Trumpf oder abwerfen erlaubt (kein Trumpfzwang beim Schafkopf!)
+    return true;
+}
+
+function executePlay(player, cardIndex) {
+    const card = gameState.hands[player].splice(cardIndex, 1)[0];
+    gameState.trick.push({ card, player });
+
+    addLog('card', `${getPlayerName(player)} spielt ${formatCard(card)}`);
+
+    renderAllHands();
+    renderTrickArea();
+
+    // Check if trick complete
+    if (gameState.trick.length === 4) {
+        setTimeout(resolveTrick, 1000);
+    } else {
+        // Next player
+        gameState.currentPlayer = (gameState.currentPlayer + 1) % 4;
+        if (gameState.currentPlayer === 0) {
+            addLog('system', 'Du bist dran.');
+        } else {
+            setTimeout(() => aiPlayCard(), 800);
+        }
+    }
+}
+
+function aiPlayCard() {
+    if (gameState.phase !== 'playing' || gameState.currentPlayer === 0) return;
+
+    const player = gameState.currentPlayer;
+    const hand = gameState.hands[player];
+    const validCards = hand.filter((c, i) => isValidPlay(c, player));
+
+    if (validCards.length === 0) return;
+
+    // KI wählt Karte
+    const cardIndex = hand.indexOf(chooseAICard(validCards, player));
+    executePlay(player, cardIndex);
+}
+
+function chooseAICard(validCards, player) {
+    // Einfache KI-Strategie
+    const isFirst = gameState.trick.length === 0;
+    const isPartner = (gameState.gameType === 'normal' && player === gameState.partner) ||
+                      (gameState.gameType !== 'normal' && gameState.gameType !== 'ramsch' && player !== gameState.declarer);
+
+    if (isFirst) {
+        // Anspielen: Trumpf ziehen wenn stark, sonst lange Farbe, Ass
+        const trumps = validCards.filter(c => c.isTrump(gameState.gameType, gameState.trumpSuit));
+        const nonTrumps = validCards.filter(c => !c.isTrump(gameState.gameType, gameState.trumpSuit));
+
+        if (trumps.length > 0 && (trumps.length > 2 || trumps.some(t => t.getTrumpRank(gameState.gameType, gameState.trumpSuit) > 10))) {
+            // Starke Trümpfe: höchsten Trumpf ziehen
+            return trumps.reduce((a, b) => a.getTrumpRank(gameState.gameType, gameState.trumpSuit) > b.getTrumpRank(gameState.gameType, gameState.trumpSuit) ? a : b);
+        }
+
+        // Ass in langer Farbe anspielen
+        const aces = nonTrumps.filter(c => c.rank === 'ass');
+        if (aces.length > 0) {
+            // Farbe mit meisten Karten
+            const suitCounts = {};
+            for (const c of nonTrumps) suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
+            let bestSuit = Object.keys(suitCounts).reduce((a, b) => suitCounts[a] > suitCounts[b] ? a : b);
+            const aceInBest = aces.find(a => a.suit === bestSuit);
+            return aceInBest || aces[0];
+        }
+
+        // Höchste Karte in längster Farbe
+        const suitCounts = {};
+        for (const c of nonTrumps) suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
+        let bestSuit = Object.keys(suitCounts).reduce((a, b) => suitCounts[a] > suitCounts[b] ? a : b);
+        const suitCards = nonTrumps.filter(c => c.suit === bestSuit);
+        return suitCards.reduce((a, b) => RANK_ORDER[a.rank] > RANK_ORDER[b.rank] ? a : b);
+    } else {
+        // Nicht anspielen: Stich machen oder klein abwerfen
+        const ledCard = gameState.trick[0].card;
+        const ledSuit = ledCard.getSuitForPlay(gameState.gameType, gameState.trumpSuit);
+        const currentWinner = getCurrentTrickWinner();
+
+        const canWin = validCards.some(c => c.beats(ledCard, gameState.gameType, gameState.trumpSuit));
+
+        if (canWin) {
+            // Gewinnen wenn Partner nicht schon gewonnen hat oder wir Solist sind
+            const shouldWin = (gameState.declarer === player || (gameState.gameType === 'normal' && gameState.partner !== currentWinner) || gameState.gameType === 'ramsch');
+            if (shouldWin) {
+                // Niedrigste gewinnende Karte
+                const winningCards = validCards.filter(c => c.beats(ledCard, gameState.gameType, gameState.trumpSuit));
+                return winningCards.reduce((a, b) => {
+                    const ar = a.isTrump(gameState.gameType, gameState.trumpSuit) ? a.getTrumpRank(gameState.gameType, gameState.trumpSuit) : RANK_ORDER[a.rank];
+                    const br = b.isTrump(gameState.gameType, gameState.trumpSuit) ? b.getTrumpRank(gameState.gameType, gameState.trumpSuit) : RANK_ORDER[b.rank];
+                    return ar < br ? a : b;
+                });
+            }
+        }
+
+        // Nicht gewinnen können/wollen: Kleinste Karte abwerfen
+        return validCards.reduce((a, b) => {
+            const av = a.value;
+            const bv = b.value;
+            if (av !== bv) return av < bv ? a : b;
+            // Bei gleichem Wert: Trumpf eher behalten
+            const aTrump = a.isTrump(gameState.gameType, gameState.trumpSuit);
+            const bTrump = b.isTrump(gameState.gameType, gameState.trumpSuit);
+            if (aTrump !== bTrump) return aTrump ? b : a;
+            return RANK_ORDER[a.rank] < RANK_ORDER[b.rank] ? a : b;
+        });
+    }
+}
+
+function getCurrentTrickWinner() {
+    if (gameState.trick.length === 0) return -1;
+    let winner = gameState.trick[0].player;
+    let winningCard = gameState.trick[0].card;
+
+    for (let i = 1; i < gameState.trick.length; i++) {
+        if (gameState.trick[i].card.beats(winningCard, gameState.gameType, gameState.trumpSuit)) {
+            winningCard = gameState.trick[i].card;
+            winner = gameState.trick[i].player;
+        }
+    }
+    return winner;
+}
+
+function resolveTrick() {
+    gameState.trickWinner = getCurrentTrickWinner();
+    gameState.tricksWon[gameState.trickWinner].push(...gameState.trick.map(t => t.card));
+
+    addLog('action', `${getPlayerName(gameState.trickWinner)} macht den Stich!`);
+
+    // Animate winner card
+    renderTrickArea();
+
+    setTimeout(() => {
+        gameState.trick = [];
+        gameState.currentPlayer = gameState.trickWinner;
+        renderTrickArea();
+
+        // Check if round over
+        if (gameState.hands[0].length === 0) {
+            endRound();
+        } else {
+            updatePhaseDisplay();
+            if (gameState.currentPlayer === 0) {
+                addLog('system', 'Du bist dran.');
+            } else {
+                setTimeout(() => aiPlayCard(), 800);
+            }
+        }
+    }, 1500);
+}
+
+function endRound() {
+    gameState.phase = 'scoring';
+    updatePhaseDisplay();
+    calculateScores();
+}
+
+function calculateScores() {
+    // Punkte zählen
+    const points = [0, 0, 0, 0];
+    for (let p = 0; p < 4; p++) {
+        for (const card of gameState.tricksWon[p]) {
+            points[p] += card.value;
+        }
+    }
+
+    gameState.roundScores = points;
+
+    let resultText = '';
+    let team1Points = 0, team2Points = 0;
+    let team1Won = false;
+
+    if (gameState.gameType === 'ramsch') {
+        // Ramsch: Wenige Punkte = gut. Wer die meisten hat, verliert.
+        const maxPoints = Math.max(...points);
+        const losers = points.map((p, i) => p === maxPoints ? i : -1).filter(i => i >= 0);
+        // Vereinfacht: Verlierer zahlt an alle anderen
+        resultText = `Ramsch: Punkte: ${points.map((p, i) => `${getPlayerName(i)}: ${p}`).join(', ')}. `;
+        if (losers.length === 1) {
+            resultText += `${getPlayerName(losers[0])} verliert mit ${maxPoints} Augen.`;
+        } else {
+            resultText += `Gleichstand bei ${maxPoints} Augen.`;
+        }
+    } else if (gameState.gameType === 'normal') {
+        // Partnerspiel: Spieler + Partner vs. Gegner
+        team1Points = points[gameState.declarer] + points[gameState.partner];
+        team2Points = points.reduce((a, b) => a + b, 0) - team1Points;
+
+        const declarerTeam = [gameState.declarer, gameState.partner];
+        const opponentTeam = [0, 1, 2, 3].filter(p => !declarerTeam.includes(p));
+
+        team1Won = team1Points >= 61;
+        const schneider = team1Won ? team2Points <= 30 : team1Points <= 30;
+        const schwarz = team1Won ? team2Points === 0 : team1Points === 0;
+
+        resultText = `Rufspiel: ${getPlayerName(gameState.declarer)} & ${getPlayerName(gameState.partner)}: ${team1Points} Augen. `;
+        resultText += `Gegner: ${team2Points} Augen. `;
+        resultText += team1Won ? 'Spielerpartei gewinnt! ' : 'Gegner gewinnen! ';
+        if (schneider) resultText += team1Won ? 'Schneider! ' : 'Schneider gegen Spieler! ';
+        if (schwarz) resultText += 'Schwarz! ';
+    } else {
+        // Solo (Farbsolo, Wenz, Geier): Solist gegen 3
+        const soloPoints = points[gameState.declarer];
+        const oppPoints = points.reduce((a, b) => a + b, 0) - soloPoints;
+
+        team1Won = soloPoints >= 61;
+        const schneider = team1Won ? oppPoints <= 30 : soloPoints <= 30;
+        const schwarz = team1Won ? oppPoints === 0 : soloPoints === 0;
+
+        resultText = `Solo (${GAME_TYPES[gameState.gameType].name}): ${getPlayerName(gameState.declarer)}: ${soloPoints} Augen. `;
+        resultText += `Gegner: ${oppPoints} Augen. `;
+        resultText += team1Won ? 'Solist gewinnt! ' : 'Gegner gewinnen! ';
+        if (schneider) resultText += team1Won ? 'Schneider! ' : 'Schneider gegen Solist! ';
+        if (schwarz) resultText += 'Schwarz! ';
+    }
+
+    addLog('score', resultText);
+
+    // Einfache Punktevergabe für UI
+    if (gameState.gameType === 'ramsch') {
+        // Vereinfacht: Verlierer bekommt Minuspunkte
+        const maxP = Math.max(...points);
+        const loser = points.indexOf(maxP);
+        gameState.scores[loser] -= 10;
+        for (let i = 0; i < 4; i++) if (i !== loser) gameState.scores[i] += 3;
+    } else if (gameState.gameType === 'normal') {
+        const declarerTeam = [gameState.declarer, gameState.partner];
+        const opponentTeam = [0, 1, 2, 3].filter(p => !declarerTeam.includes(p));
+        const base = 10;
+        if (team1Won) {
+            for (const p of declarerTeam) gameState.scores[p] += base;
+            for (const p of opponentTeam) gameState.scores[p] -= base;
+        } else {
+            for (const p of declarerTeam) gameState.scores[p] -= base;
+            for (const p of opponentTeam) gameState.scores[p] += base;
+        }
+    } else {
+        // Solo
+        const base = 20;
+        if (team1Won) {
+            gameState.scores[gameState.declarer] += base * 3;
+            for (let i = 0; i < 4; i++) if (i !== gameState.declarer) gameState.scores[i] -= base;
+        } else {
+            gameState.scores[gameState.declarer] -= base * 3;
+            for (let i = 0; i < 4; i++) if (i !== gameState.declarer) gameState.scores[i] += base;
+        }
+    }
+
+    // Update score display
+    document.getElementById('team1-score').textContent = gameState.scores[0] + gameState.scores[2];
+    document.getElementById('team2-score').textContent = gameState.scores[1] + gameState.scores[3];
+
+    // Animate scores
+    document.querySelectorAll('.team-points').forEach(el => el.classList.add('score-pop'));
+    setTimeout(() => document.querySelectorAll('.team-points').forEach(el => el.classList.remove('score-pop')), 500);
+
+    gameState.phase = 'roundEnd';
+    updatePhaseDisplay();
+
+    document.getElementById('next-round-btn').disabled = false;
+
+    if (gameState.round >= 4) {
+        setTimeout(endGame, 2000);
+    }
+}
+
+function nextRound() {
+    gameState.round++;
+    gameState.dealer = (gameState.dealer + 1) % 4;
+
+    // Reset round state
+    gameState.phase = 'bidding';
+    gameState.gameType = null;
+    gameState.gameTypeValue = 0;
+    gameState.declarer = -1;
+    gameState.partner = -1;
+    gameState.calledSuit = null;
+    gameState.trumpSuit = 'herz';
+    gameState.trick = [];
+    gameState.trickWinner = -1;
+    gameState.tricksWon = [[], [], [], []];
+    gameState.roundScores = [0, 0, 0, 0];
+    gameState.bids = [null, null, null, null];
+    gameState.currentBidIndex = 0;
+    gameState.mustPlay = false;
+    gameState.kontr = false;
+    gameState.re = false;
+    gameState.gelegt = [false, false, false, false];
+
+    document.getElementById('round-num').textContent = gameState.round;
+    document.getElementById('dealer-display').textContent = getPlayerName(gameState.dealer);
+    document.getElementById('next-round-btn').disabled = true;
+
+    // New deal
+    gameState.deck = shuffleDeck(createDeck());
+    gameState.hands = dealCards(gameState.deck);
+
+    gameState.bidOrder = [];
+    for (let i = 0; i < 4; i++) {
+        gameState.bidOrder.push((gameState.dealer + 1 + i) % 4);
+    }
+    gameState.currentBidIndex = 0;
+    gameState.currentPlayer = gameState.bidOrder[0];
+
+    renderAllHands();
+    renderTrickArea();
+    updatePhaseDisplay();
+
+    addLog('system', `--- Runde ${gameState.round} ---`);
+    addLog('system', `Geber: ${getPlayerName(gameState.dealer)}, Vorhand: ${getPlayerName(gameState.bidOrder[0])}`);
+
+    setTimeout(() => nextBid(), 1000);
+}
+
+function endGame() {
+    gameState.phase = 'gameOver';
+    updatePhaseDisplay();
+
+    const modal = document.getElementById('game-over-modal');
+    const scoresContainer = document.getElementById('final-scores');
+
+    const playerNames = ['Du', 'Spieler 2', 'Spieler 3', 'Spieler 4'];
+    let html = '';
+    const maxScore = Math.max(...gameState.scores);
+    const winners = gameState.scores.map((s, i) => s === maxScore ? i : -1).filter(i => i >= 0);
+
+    for (let i = 0; i < 4; i++) {
+        const isWinner = winners.includes(i);
+        html += `
+            <div class="final-score-item ${isWinner ? 'winner' : ''}">
+                <div class="final-score-name">${playerNames[i]}${isWinner ? ' 🏆' : ''}</div>
+                <div class="final-score-value">${gameState.scores[i] > 0 ? '+' : ''}${gameState.scores[i]}</div>
+            </div>
+        `;
+    }
+    scoresContainer.innerHTML = html;
+    modal.classList.add('active');
+}
+
+function formatCard(card) {
+    return `${RANK_DISPLAY[card.rank]}${SUIT_SYMBOLS[card.suit]}`;
+}
+
+// --- Partner Determination (Rufspiel) ---
+function determinePartner() {
+    if (gameState.gameType !== 'normal') return;
+
+    // Spieler ruft ein Ass (Sau) - in dieser Implementierung: erstes Ass nicht Herz
+    const declarerHand = gameState.hands[gameState.declarer];
+    const nonHerzAces = declarerHand.filter(c => c.rank === 'ass' && c.suit !== 'herz');
+
+    if (nonHerzAces.length === 0) {
+        // Kein Ass zum Rufen -> Muss-Spiel oder Ramsch (vereinfacht: Farbsolo)
+        gameState.gameType = 'farbsolo-herz';
+        gameState.trumpSuit = 'herz';
+        addLog('system', `${getPlayerName(gameState.declarer)} hat kein Ass zum Rufen -> Herz-Solo!`);
+        return;
+    }
+
+    // Rufe das erste Ass (vereinfacht: Eichel > Gras > Schellen)
+    const suitOrder = ['eichel', 'gras', 'schellen'];
+    let calledSuit = null;
+    for (const s of suitOrder) {
+        const ace = nonHerzAces.find(c => c.suit === s);
+        if (ace) { calledSuit = s; break; }
+    }
+    if (!calledSuit) calledSuit = nonHerzAces[0].suit;
+
+    gameState.calledSuit = calledSuit;
+
+    // Finde Partner (Besitzer des Ass)
+    for (let p = 0; p < 4; p++) {
+        if (p === gameState.declarer) continue;
+        const hasAce = gameState.hands[p].some(c => c.rank === 'ass' && c.suit === calledSuit);
+        if (hasAce) {
+            gameState.partner = p;
+            addLog('action', `${getPlayerName(gameState.declarer)} ruft die ${SUIT_NAMES[calledSuit]}-Sau! ${getPlayerName(p)} ist Partner.`);
+            return;
+        }
+    }
+
+    // Ass nicht gefunden (im Stock oder Fehler) -> Solist
+    gameState.partner = -1;
+    addLog('system', `Die ${SUIT_NAMES[calledSuit]}-Sau ist nicht im Spiel! ${getPlayerName(gameState.declarer)} spielt allein.`);
+}
+
+// Call this after bidding ends and before playing starts
+function startPlayingPhase() {
+    if (gameState.gameType === 'normal') {
+        determinePartner();
+    } else if (gameState.gameType.startsWith('farbsolo') || gameState.gameType === 'wenz' || gameState.gameType === 'geier') {
+        gameState.partner = -1; // Kein Partner
+    }
+
+    gameState.phase = 'playing';
+    gameState.currentPlayer = (gameState.dealer + 1) % 4; // Vorhand beginnt
+    updatePhaseDisplay();
+    renderAllHands();
+
+    if (gameState.currentPlayer === 0) {
+        addLog('system', 'Du beginnst. Wähle eine Karte.');
+    } else {
+        setTimeout(() => aiPlayCard(), 1000);
+    }
+}
+
+// Modify processBid to call startPlayingPhase when bidding ends
+// We need to detect when bidding is done. In our simplified version:
+// Bidding ends when 3 players pass after a bid, or all pass.
+// Let's track this.
+
+let passCount = 0;
+function processBid(player, bidType) {
+    gameState.bids[player] = bidType;
+    addLog('action', `${getPlayerName(player)}: ${bidType === 'pass' ? 'Weiter' : GAME_TYPES[bidType]?.name || bidType}`);
+
+    if (bidType !== 'pass') {
+        passCount = 0;
+        gameState.gameType = bidType;
+        gameState.gameTypeValue = GAME_TYPES[bidType].value;
+        gameState.declarer = player;
+
+        if (bidType.startsWith('farbsolo')) {
+            gameState.trumpSuit = GAME_TYPES[bidType].trumpSuit;
+        } else if (bidType === 'normal') {
+            gameState.trumpSuit = 'herz';
+        } else {
+            gameState.trumpSuit = 'none';
+        }
+    } else {
+        passCount++;
+    }
+
+    gameState.currentBidIndex++;
+
+    // Check if bidding ends
+    const activeBids = gameState.bids.filter(b => b && b !== 'pass').length;
+    const totalPasses = gameState.bids.filter(b => b === 'pass').length;
+
+    if (activeBids > 0 && passCount >= 3) {
+        // 3 Pässe nach einem Gebot -> Bieten beendet
+        setTimeout(startPlayingPhase, 500);
+        return;
+    }
+
+    if (gameState.currentBidIndex >= gameState.bidOrder.length && activeBids === 0) {
+        // Alle gepasst
+        handleAllPassed();
+        return;
+    }
+
+    if (gameState.currentBidIndex >= gameState.bidOrder.length) {
+        // Eine Runde vorbei, aber es gibt ein Gebot -> nochmal fragen ob überboten wird
+        // Vereinfacht: Bieten endet nach einer vollen Runde ohne Überbieten
+        setTimeout(startPlayingPhase, 500);
+        return;
+    }
+
+    nextBid();
+}
+
+// --- Logging ---
+function addLog(type, message) {
+    const logEl = document.getElementById('game-log');
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    entry.textContent = `> ${message}`;
+    logEl.appendChild(entry);
+    logEl.scrollTop = logEl.scrollHeight;
+    gameState.log.push({ type, message, time: Date.now() });
+}
+
+// --- Modal Helpers ---
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+function showRules() {
+    document.getElementById('rules-modal').classList.add('active');
+}
+
+// --- Initialize ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial render
+    renderAllHands();
+    addLog('system', 'Willkommen beim Schafkopf! Klicke auf "Neues Spiel" um zu beginnen.');
+});
+</script>
+</body>
+</html>
