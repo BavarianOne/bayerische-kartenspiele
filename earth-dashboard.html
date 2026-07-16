@@ -52,6 +52,7 @@
             top: 0;
             left: 0;
             z-index: 1;
+            touch-action: none;
         }
 
         /* Background atmosphere */
@@ -1314,7 +1315,7 @@
         tooltip.id = 'globe-tooltip';
         tooltip.style.cssText = `
             position: fixed;
-            pointer-events: none;
+            pointer-events: auto;
             z-index: 1000;
             background: rgba(15, 23, 42, 0.95);
             border: 1px solid rgba(148, 163, 184, 0.2);
@@ -1336,9 +1337,18 @@
         const mouse = new THREE.Vector2();
         let hoveredObject = null;
 
-        function onMouseMove(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        // Unified pointer handler for both mouse and touch
+        function getPointerCoords(event) {
+            if (event.touches) {
+                return { clientX: event.touches[0].clientX, clientY: event.touches[0].clientY };
+            }
+            return { clientX: event.clientX, clientY: event.clientY };
+        }
+
+        function onPointerMove(event) {
+            const coords = getPointerCoords(event);
+            mouse.x = (coords.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(coords.clientY / window.innerHeight) * 2 + 1;
             
             raycaster.setFromCamera(mouse, camera);
             
@@ -1360,14 +1370,28 @@
                 
                 if (obj !== hoveredObject) {
                     hoveredObject = obj;
-                    showTooltip(obj, intersect.point, event.clientX, event.clientY);
+                    showTooltip(obj, intersect.point, coords.clientX, coords.clientY);
                 } else {
-                    updateTooltipPosition(event.clientX, event.clientY);
+                    updateTooltipPosition(coords.clientX, coords.clientY);
                 }
             } else {
                 hideTooltip();
                 hoveredObject = null;
             }
+        }
+
+        function onTouchStart(event) {
+            // Prevent default to avoid scroll/zoom interference
+            event.preventDefault();
+            onPointerMove(event);
+        }
+
+        function onTouchEnd(event) {
+            // Keep tooltip visible briefly so user can tap links inside it
+            setTimeout(() => {
+                hideTooltip();
+                hoveredObject = null;
+            }, 300);
         }
 
         function getTimeAgo(date) {
@@ -1518,8 +1542,11 @@
             tooltip.style.opacity = '0';
         }
 
-        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mousemove', onPointerMove);
         window.addEventListener('mouseleave', hideTooltip);
+        window.addEventListener('touchstart', onTouchStart, { passive: false });
+        window.addEventListener('touchmove', onPointerMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd);
 
         // ============ DATA FETCHING ============
         // ============ FALLBACK DATA GENERATORS ============
