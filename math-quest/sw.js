@@ -5,20 +5,20 @@
 
 const CACHE_NAME = 'math-quest-v1';
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/css/main.css',
-    '/css/ui.css',
-    '/css/map.css',
-    '/css/challenge.css',
-    '/js/storage.js',
-    '/js/audio.js',
-    '/js/challenges.js',
-    '/js/game.js',
-    '/js/ui.js',
-    '/js/map.js',
-    '/js/main.js'
+    './',
+    './index.html',
+    './manifest.json',
+    './css/main.css',
+    './css/ui.css',
+    './css/map.css',
+    './css/challenge.css',
+    './js/storage.js',
+    './js/audio.js',
+    './js/challenges.js',
+    './js/game.js',
+    './js/ui.js',
+    './js/map.js',
+    './js/main.js'
 ];
 
 // Install event - cache static assets
@@ -89,7 +89,7 @@ self.addEventListener('fetch', (event) => {
                     .catch(() => {
                         // Offline fallback for HTML pages
                         if (event.request.mode === 'navigate') {
-                            return caches.match('/index.html');
+                            return caches.match('./index.html');
                         }
                         // Return a generic offline response for other resources
                         return new Response('Offline', { status: 503 });
@@ -131,7 +131,7 @@ self.addEventListener('periodicsync', (event) => {
 
 async function checkForUpdates() {
     try {
-        const response = await fetch('/manifest.json', { cache: 'no-cache' });
+        const response = await fetch('./manifest.json', { cache: 'no-cache' });
         if (response.ok) {
             const manifest = await response.json();
             // Notify clients of update

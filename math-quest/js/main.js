@@ -74,8 +74,9 @@ function setupErrorHandling() {
 async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         try {
-            const registration = await navigator.serviceWorker.register('/sw.js', {
-                scope: '/'
+            // Use relative path for file:// protocol compatibility
+            const registration = await navigator.serviceWorker.register('./sw.js', {
+                scope: './'
             });
             console.log('Service Worker registered:', registration.scope);
             

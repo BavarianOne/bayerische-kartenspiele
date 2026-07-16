@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainbow Catch - Kids Game</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 50%, #FFF8E7 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Sky background with animated clouds */
+        .sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: floatCloud 20s linear infinite;
+        }
+        
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+        }
+        
+        .cloud::before {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 20px;
+        }
+        
+        .cloud::after {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            right: 10px;
+        }
+        
+        @keyframes floatCloud {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+        
+        /* Ground */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(180deg, #8FBC8F 0%, #6B8E23 100%);
+            border-radius: 20px 20px 0 0;
+            z-index: 10;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .grass-blades {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background-image: 
+                radial-gradient(ellipse at 10px 0, #7CB342 3px, transparent 4px),
+                radial-gradient(ellipse at 30px 0, #8BC34A 2px, transparent 3px),
+                radial-gradient(ellipse at 50px 0, #689F38 3px, transparent 4px);
+            background-size: 60px 20px;
+            animation: swayGrass 3s ease-in-out infinite;
+        }
+        
+        @keyframes swayGrass {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            50% { transform: translateX(2px) rotate(1deg); }
+        }
+        
+        /* UI */
+        .ui-bar {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .ui-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .ui-icon { font-size: 1.5rem; }
+        
+        .ui-value {
+            background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            min-width: 40px;
+            text-align: right;
+        }
+        
+        /* Basket/Player */
+        .basket {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 60px;
+            z-index: 15;
+            transition: left 0.05s linear, transform 0.05s linear;
+            cursor: pointer;
+        }
+        
+        .basket-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #D2691E 0%, #8B4513 100%);
+            border-radius: 0 0 50px 50px / 0 0 30px 30px;
+            position: relative;
+            box-shadow: inset 0 -5px 15px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .basket-body::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 20px;
+            background: linear-gradient(180deg, #CD853F 0%, #8B4513 100%);
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .basket-handle {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 30px;
+            border: 4px solid #8B4513;
+            border-bottom: none;
+            border-radius: 30px 30px 0 0;
+            background: linear-gradient(180deg, #D2691E 0%, #8B4513 100%);
+        }
+        
+        .basket-face {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            pointer-events: none;
+        }
+        
+        .eye {
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 4s infinite;
+        }
+        
+        .eye::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+        
+        .mouth {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid #333;
+            border-radius: 0 0 20px 20px;
+            transition: all 0.3s;
+        }
+        
+        .basket.happy .mouth {
+            border-bottom: none;
+            border-top: 3px solid #333;
+            border-radius: 20px 20px 0 0;
+            bottom: 10px;
+        }
+        
+        .basket.sad .mouth {
+            border-bottom: 3px solid #333;
+            border-radius: 0 0 20px 20px;
+            bottom: 18px;
+        }
+        
+        /* Falling Objects */
+        .falling-object {
+            position: absolute;
+            top: -50px;
+            width: 50px;
+            height: 50px;
+            z-index: 12;
+            animation: fall linear forwards;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .falling-object:hover {
+            transform: scale(1.1) rotate(10deg);
+        }
+        
+        .falling-object.caught {
+            animation: none !important;
+            animation: caughtAnim 0.5s ease-out forwards !important;
+            pointer-events: none;
+        }
+        
+        .falling-object.missed {
+            animation: none !important;
+            animation: missedAnim 0.5s ease-out forwards !important;
+            pointer-events: none;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(calc(100vh + 100px)); }
+        }
+        
+        @keyframes caughtAnim {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes missedAnim {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0.5) rotate(-30deg) translateY(50px); opacity: 0; }
+        }
+        
+        /* Object Types */
+        .obj-apple { background: radial-gradient(circle at 30% 30%, #FF6B6B, #C0392B); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
+        .obj-apple::before { content: ''; position: absolute; top: 5px; left: 50%; transform: translateX(-50%); width: 4px; height: 12px; background: #5D4037; border-radius: 2px; transform-origin: bottom; transform: rotate(-20deg); }
+        .obj-apple::after { content: ''; position: absolute; top: 8px; right: 12px; width: 10px; height: 6px; background: #4CAF50; border-radius: 0 0 5px 5px; }
+        
+        .obj-star { background: linear-gradient(135deg, #FFD700, #FFA500); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+        
+        .obj-heart { background: #E91E63; clip-path: path('M25,10 C15,10 10,15 10,25 C10,35 25,45 25,45 C25,45 40,35 40,25 C40,15 35,10 25,10'); }
+        
+        .obj-gem { background: linear-gradient(135deg, #00BCD4, #006064); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        
+        .obj-flower { background: #FF9800; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        .obj-flower::before { content: ''; position: absolute; inset: 8px; background: #E91E63; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        .obj-flower::after { content: ''; position: absolute; inset: 16px; background: #FFEB3B; border-radius: 50%; }
+        
+        .obj-balloon { background: radial-gradient(circle at 30% 30%, #2196F3, #0D47A1); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
+        .obj-balloon::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 1px; height: 15px; background: #666; }
+        
+        .obj-coin { background: linear-gradient(135deg, #FFD700, #B8860B); border-radius: 50%; box-shadow: inset 0 -3px 10px rgba(0,0,0,0.2); }
+        .obj-coin::before { content: '$'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; font-weight: bold; color: #8B6914; text-shadow: 0 1px 1px rgba(255,255,255,0.5); }
+        
+        .obj-rainbow { background: linear-gradient(90deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3); border-radius: 50%; animation: spin 2s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Particles */
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+            animation: particleAnim 0.8s ease-out forwards;
+        }
+        
+        @keyframes particleAnim {
+            0% { transform: scale(1) translate(0,0); opacity: 1; }
+            100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+        
+        /* Combo Text */
+        .combo-text {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FF6B6B;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            pointer-events: none;
+            z-index: 25;
+            animation: comboPop 1s ease-out forwards;
+        }
+        
+        @keyframes comboPop {
+            0% { transform: scale(0) translateY(0); opacity: 1; }
+            20% { transform: scale(1.2) translateY(-20px); opacity: 1; }
+            100% { transform: scale(1) translateY(-80px); opacity: 0; }
+        }
+        
+        /* Level Up */
+        .level-up {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 100;
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .level-up.show {
+            animation: levelUpAnim 1.5s ease-out forwards;
+        }
+        
+        @keyframes levelUpAnim {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+        }
+        
+        .level-up-text {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #FF6B6B, #FFD93D, #6BCB77, #4D96FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: rainbowText 2s linear infinite;
+        }
+        
+        @keyframes rainbowText {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        .level-up-sub {
+            font-size: 1.5rem;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        /* Screens */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .screen.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .screen-content {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .screen.show .screen-content {
+            transform: scale(1);
+        }
+        
+        .screen h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #FF6B6B, #FFD93D, #6BCB77, #4D96FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .screen p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: #F5F5F5;
+            border-radius: 15px;
+        }
+        
+        .stat-item { text-align: center; }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #FF6B6B, #4D96FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: inherit;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #FF6B6B, #EE5A5A);
+            color: white;
+            box-shadow: 0 5px 15px rgba(238, 90, 90, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(238, 90, 90, 0.5);
+        }
+        
+        .btn-primary:active { transform: translateY(0); }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #4D96FF, #3D85E8);
+            color: white;
+            box-shadow: 0 5px 15px rgba(77, 150, 255, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(77, 150, 255, 0.5);
+        }
+        
+        /* Difficulty Select */
+        .difficulty-options {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .diff-btn {
+            padding: 12px 24px;
+            border: 3px solid #DDD;
+            background: white;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #666;
+        }
+        
+        .diff-btn:hover {
+            border-color: #FF6B6B;
+            color: #FF6B6B;
+        }
+        
+        .diff-btn.selected {
+            border-color: #FF6B6B;
+            background: #FFF0F0;
+            color: #FF6B6B;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .ui-bar { padding: 8px 15px; gap: 15px; }
+            .ui-item { font-size: 1rem; }
+            .ui-icon { font-size: 1.2rem; }
+            .basket { width: 80px; height: 50px; }
+            .screen-content { padding: 30px 20px; margin: 10px; }
+            .screen h1 { font-size: 2rem; }
+            .level-up-text { font-size: 2rem; }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Sky with clouds -->
+        <div class="sky" id="sky"></div>
+        
+        <!-- Ground -->
+        <div class="ground">
+            <div class="grass-blades"></div>
+        </div>
+        
+        <!-- UI Bar -->
+        <div class="ui-bar">
+            <div class="ui-item">
+                <span class="ui-icon">⭐</span>
+                <span>Score</span>
+                <span class="ui-value" id="score">0</span>
+            </div>
+            <div class="ui-item">
+                <span class="ui-icon">❤️</span>
+                <span>Lives</span>
+                <span class="ui-value" id="lives">3</span>
+            </div>
+            <div class="ui-item">
+                <span class="ui-icon">🌈</span>
+                <span>Level</span>
+                <span class="ui-value" id="level">1</span>
+            </div>
+            <div class="ui-item">
+                <span class="ui-icon">🔥</span>
+                <span>Combo</span>
+                <span class="ui-value" id="combo">0</span>
+            </div>
+        </div>
+        
+        <!-- Basket/Player -->
+        <div class="basket" id="basket">
+            <div class="basket-body">
+                <div class="basket-handle"></div>
+                <div class="basket-face">
+                    <div class="eye"></div>
+                    <div class="eye"></div>
+                </div>
+                <div class="mouth"></div>
+            </div>
+        </div>
+        
+        <!-- Level Up Overlay -->
+        <div class="level-up" id="levelUp">
+            <div class="level-up-text">LEVEL UP!</div>
+            <div class="level-up-sub">New objects unlocked!</div>
+        </div>
+    </div>
+    
+    <!-- Start Screen -->
+    <div class="screen" id="startScreen">
+        <div class="screen-content">
+            <h1>🌈 Rainbow Catch</h1>
+            <p>Catch the falling treasures! Move the basket left and right.</p>
+            <div class="difficulty-options">
+                <button class="diff-btn selected" data-difficulty="easy">😊 Easy</button>
+                <button class="diff-btn" data-difficulty="normal">😎 Normal</button>
+                <button class="diff-btn" data-difficulty="hard">🤯 Hard</button>
+            </div>
+            <p style="font-size: 0.9rem; color: #888; margin-top: 10px;">
+                🖱️ Mouse/Touch • ⬅️➡️ Arrow Keys • A/D Keys
+            </p>
+            <button class="btn btn-primary" id="startBtn">Start Adventure!</button>
+        </div>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div class="screen" id="gameOverScreen">
+        <div class="screen-content">
+            <h1>🎮 Game Over</h1>
+            <p>Great catching! You reached level <span id="finalLevel">1</span></p>
+            <div class="stat-row">
+                <div class="stat-item">
+                    <div class="stat-value" id="finalScore">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalCaught">0</div>
+                    <div class="stat-label">Caught</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalMaxCombo">0</div>
+                    <div class="stat-label">Max Combo</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="playAgainBtn">Play Again</button>
+            <button class="btn btn-secondary" id="menuBtn">Main Menu</button>
+        </div>
+    </div>
+    
+    <!-- Pause Screen -->
+    <div class="screen" id="pauseScreen">
+        <div class="screen-content">
+            <h1>⏸️ Paused</h1>
+            <p>Take a break, then keep catching!</p>
+            <button class="btn btn-primary" id="resumeBtn">Continue</button>
+            <button class="btn btn-secondary" id="quitBtn">Quit to Menu</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
+        const CONFIG = {
+            easy: { spawnRate: 1500, fallSpeed: 4000, maxObjects: 3, lives: 5 },
+            normal: { spawnRate: 1000, fallSpeed: 3000, maxObjects: 5, lives: 3 },
+            hard: { spawnRate: 700, fallSpeed: 2200, maxObjects: 7, lives: 2 }
+        };
+        
+        const OBJECT_TYPES = [
+            { class: 'obj-apple', points: 10, name: 'Apple', minLevel: 1 },
+            { class: 'obj-star', points: 20, name: 'Star', minLevel: 1 },
+            { class: 'obj-heart', points: 15, name: 'Heart', minLevel: 2 },
+            { class: 'obj-gem', points: 30, name: 'Gem', minLevel: 2 },
+            { class: 'obj-flower', points: 15, name: 'Flower', minLevel: 3 },
+            { class: 'obj-balloon', points: 25, name: 'Balloon', minLevel: 3 },
+            { class: 'obj-coin', points: 50, name: 'Coin', minLevel: 4 },
+            { class: 'obj-rainbow', points: 100, name: 'Rainbow', minLevel: 5 }
+        ];
+        
+        // Game State
+        let gameState = {
+            running: false,
+            paused: false,
+            score: 0,
+            lives: 3,
+            level: 1,
+            combo: 0,
+            maxCombo: 0,
+            caught: 0,
+            missed: 0,
+            difficulty: 'normal',
+            config: CONFIG.normal,
+            spawnTimer: null,
+            gameLoopId: null,
+            lastTime: 0,
+            objects: [],
+            basketX: 50,
+            targetBasketX: 50
+        };
+        
+        // DOM Elements
+        const basket = document.getElementById('basket');
+        const gameContainer = document.getElementById('game-container');
+        const sky = document.getElementById('sky');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const levelEl = document.getElementById('level');
+        const comboEl = document.getElementById('combo');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const pauseScreen = document.getElementById('pauseScreen');
+        const levelUpEl = document.getElementById('levelUp');
+        const finalScoreEl = document.getElementById('finalScore');
+        const finalLevelEl = document.getElementById('finalLevel');
+        const finalCaughtEl = document.getElementById('finalCaught');
+        const finalMaxComboEl = document.getElementById('finalMaxCombo');
+        
+        // Initialize clouds
+        function createClouds() {
+            for (let i = 0; i < 5; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = 'cloud';
+                cloud.style.width = `${60 + Math.random() * 80}px`;
+                cloud.style.height = `${40 + Math.random() * 30}px`;
+                cloud.style.top = `${10 + Math.random() * 40}%`;
+                cloud.style.left = `${-100 + Math.random() * 200}px`;
+                cloud.style.animationDuration = `${15 + Math.random() * 15}s`;
+                cloud.style.animationDelay = `${Math.random() * 20}s`;
+                sky.appendChild(cloud);
+            }
+        }
+        
+        // Get available object types for current level
+        function getAvailableObjects() {
+            return OBJECT_TYPES.filter(obj => obj.minLevel <= gameState.level);
+        }
+        
+        // Create falling object
+        function createFallingObject() {
+            if (!gameState.running || gameState.paused) return;
+            if (gameState.objects.length >= gameState.config.maxObjects) return;
+            
+            const available = getAvailableObjects();
+            const objType = available[Math.floor(Math.random() * available.length)];
+            
+            const obj = document.createElement('div');
+            obj.className = `falling-object ${objType.class}`;
+            obj.dataset.points = objType.points;
+            obj.dataset.name = objType.name;
+            
+            // Random horizontal position (avoid edges)
+            const containerRect = gameContainer.getBoundingClientRect();
+            const basketWidth = 100;
+            const minX = basketWidth / 2;
+            const maxX = containerRect.width - basketWidth / 2;
+            const x = minX + Math.random() * (maxX - minX);
+            
+            obj.style.left = `${x}px`;
+            obj.style.animationDuration = `${gameState.config.fallSpeed / 1000}s`;
+            
+            // Click/touch handler
+            obj.addEventListener('click', (e) => {
+                e.stopPropagation();
+                catchObject(obj);
+            });
+            
+            gameContainer.appendChild(obj);
+            gameState.objects.push({ element: obj, type: objType, x: x, caught: false });
+            
+            // Check if missed
+            setTimeout(() => {
+                const idx = gameState.objects.findIndex(o => o.element === obj);
+                if (idx !== -1 && !gameState.objects[idx].caught) {
+                    missObject(idx);
+                }
+            }, gameState.config.fallSpeed + 100);
+        }
+        
+        // Catch object
+        function catchObject(obj) {
+            const idx = gameState.objects.findIndex(o => o.element === obj);
+            if (idx === -1 || gameState.objects[idx].caught) return;
+            
+            gameState.objects[idx].caught = true;
+            obj.classList.add('caught');
+            
+            const points = parseInt(obj.dataset.points);
+            const comboBonus = Math.min(gameState.combo * 5, 100);
+            const totalPoints = points + comboBonus;
+            
+            gameState.score += totalPoints;
+            gameState.combo++;
+            gameState.caught++;
+            gameState.maxCombo = Math.max(gameState.maxCombo, gameState.combo);
+            
+            updateUI();
+            showComboText(obj, totalPoints, gameState.combo);
+            createParticles(obj, getComputedStyle(obj).backgroundColor);
+            playCatchSound();
+            basketHappy();
+            
+            // Level up check
+            checkLevelUp();
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (obj.parentNode) obj.remove();
+                gameState.objects.splice(idx, 1);
+            }, 500);
+        }
+        
+        // Miss object
+        function missObject(idx) {
+            if (idx >= gameState.objects.length) return;
+            
+            const obj = gameState.objects[idx];
+            if (obj.caught) return;
+            
+            obj.caught = true;
+            obj.element.classList.add('missed');
+            
+            gameState.lives--;
+            gameState.combo = 0;
+            gameState.missed++;
+            
+            updateUI();
+            basketSad();
+            playMissSound();
+            
+            setTimeout(() => {
+                if (obj.element.parentNode) obj.element.remove();
+                gameState.objects.splice(idx, 1);
+                checkGameOver();
+            }, 500);
+        }
+        
+        // Check game over
+        function checkGameOver() {
+            if (gameState.lives <= 0) {
+                endGame();
+            }
+        }
+        
+        // Check level up
+        function checkLevelUp() {
+            const newLevel = Math.floor(gameState.score / 500) + 1;
+            if (newLevel > gameState.level) {
+                gameState.level = newLevel;
+                levelEl.textContent = gameState.level;
+                showLevelUp();
+                
+                // Increase difficulty slightly
+                gameState.config.fallSpeed = Math.max(1500, gameState.config.fallSpeed - 100);
+                gameState.config.spawnRate = Math.max(400, gameState.config.spawnRate - 50);
+                
+                // Restart spawn timer with new rate
+                if (gameState.spawnTimer) {
+                    clearInterval(gameState.spawnTimer);
+                    gameState.spawnTimer = setInterval(createFallingObject, gameState.config.spawnRate);
+                }
+            }
+        }
+        
+        // Show level up animation
+        function showLevelUp() {
+            levelUpEl.classList.add('show');
+            setTimeout(() => levelUpEl.classList.remove('show'), 1500);
+        }
+        
+        // Show combo text
+        function showComboText(obj, points, combo) {
+            const rect = obj.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            
+            const text = document.createElement('div');
+            text.className = 'combo-text';
+            text.textContent = combo > 1 ? `+${points} (x${combo} COMBO!)` : `+${points}`;
+            text.style.left = `${rect.left - containerRect.left + rect.width / 2}px`;
+            text.style.top = `${rect.top - containerRect.top}px`;
+            text.style.color = combo > 2 ? '#FFD700' : combo > 1 ? '#FF6B6B' : '#4D96FF';
+            
+            gameContainer.appendChild(text);
+            setTimeout(() => text.remove(), 1000);
+        }
+        
+        // Create particles
+        function createParticles(obj, color) {
+            const rect = obj.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            const centerX = rect.left - containerRect.left + rect.width / 2;
+            const centerY = rect.top - containerRect.top + rect.height / 2;
+            
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+                particle.style.background = color;
+                
+                const angle = (i / 8) * Math.PI * 2;
+                const distance = 50 + Math.random() * 50;
+                particle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+                particle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+                
+                gameContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+        
+        // Basket expressions
+        function basketHappy() {
+            basket.classList.add('happy');
+            basket.classList.remove('sad');
+            setTimeout(() => basket.classList.remove('happy'), 500);
+        }
+        
+        function basketSad() {
+            basket.classList.add('sad');
+            basket.classList.remove('happy');
+            setTimeout(() => basket.classList.remove('sad'), 500);
+        }
+        
+        // Update UI
+        function updateUI() {
+            scoreEl.textContent = gameState.score.toLocaleString();
+            livesEl.textContent = '❤️'.repeat(gameState.lives);
+            levelEl.textContent = gameState.level;
+            comboEl.textContent = gameState.combo > 1 ? `${gameState.combo}x` : gameState.combo;
+        }
+        
+        // Move basket
+        function moveBasket(x) {
+            const containerRect = gameContainer.getBoundingClientRect();
+            const basketWidth = 100;
+            const minX = basketWidth / 2;
+            const maxX = containerRect.width - basketWidth / 2;
+            
+            gameState.targetBasketX = Math.max(minX, Math.min(maxX, x));
+        }
+        
+        // Game loop
+        function gameLoop(timestamp) {
+            if (!gameState.running || gameState.paused) return;
+            
+            // Smooth basket movement
+            const diff = gameState.targetBasketX - gameState.basketX;
+            if (Math.abs(diff) > 0.5) {
+                gameState.basketX += diff * 0.2;
+                basket.style.left = `${gameState.basketX}px`;
+                basket.style.transform = `translateX(-50%)`;
+            }
+            
+            // Check collisions
+            checkCollisions();
+            
+            gameState.gameLoopId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Check collisions
+        function checkCollisions() {
+            const basketRect = basket.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            
+            const basketLeft = basketRect.left - containerRect.left;
+            const basketRight = basketLeft + basketRect.width;
+            const basketTop = basketRect.top - containerRect.top;
+            const basketBottom = basketTop + basketRect.height;
+            
+            gameState.objects.forEach((obj, idx) => {
+                if (obj.caught) return;
+                
+                const objRect = obj.element.getBoundingClientRect();
+                const objLeft = objRect.left - containerRect.left;
+                const objRight = objLeft + objRect.width;
+                const objTop = objRect.top - containerRect.top;
+                const objBottom = objTop + objRect.height;
+                
+                // Check overlap
+                if (objRight > basketLeft + 15 && 
+                    objLeft < basketRight - 15 && 
+                    objBottom > basketTop + 10 && 
+                    objTop < basketBottom - 10) {
+                    catchObject(obj.element);
+                }
+            });
+        }
+        
+        // Start game
+        function startGame(difficulty = 'normal') {
+            gameState.difficulty = difficulty;
+            gameState.config = CONFIG[difficulty];
+            gameState.lives = gameState.config.lives;
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.combo = 0;
+            gameState.maxCombo = 0;
+            gameState.caught = 0;
+            gameState.missed = 0;
+            gameState.objects = [];
+            gameState.basketX = gameContainer.getBoundingClientRect().width / 2;
+            gameState.targetBasketX = gameState.basketX;
+            
+            // Clear existing objects
+            document.querySelectorAll('.falling-object').forEach(el => el.remove());
+            
+            updateUI();
+            basket.style.left = `${gameState.basketX}px`;
+            
+            startScreen.classList.remove('show');
+            gameOverScreen.classList.remove('show');
+            pauseScreen.classList.remove('show');
+            
+            gameState.running = true;
+            gameState.paused = false;
+            
+            // Start spawn timer
+            gameState.spawnTimer = setInterval(createFallingObject, gameState.config.spawnRate);
+            
+            // Start game loop
+            gameState.gameLoopId = requestAnimationFrame(gameLoop);
+            
+            // Create initial objects
+            setTimeout(createFallingObject, 500);
+            setTimeout(createFallingObject, 1000);
+        }
+        
+        // End game
+        function endGame() {
+            gameState.running = false;
+            gameState.paused = true;
+            
+            if (gameState.spawnTimer) {
+                clearInterval(gameState.spawnTimer);
+            }
+            if (gameState.gameLoopId) {
+                cancelAnimationFrame(gameState.gameLoopId);
+            }
+            
+            // Clear remaining objects
+            document.querySelectorAll('.falling-object').forEach(el => el.remove());
+            gameState.objects = [];
+            
+            // Show game over screen
+            finalScoreEl.textContent = gameState.score.toLocaleString();
+            finalLevelEl.textContent = gameState.level;
+            finalCaughtEl.textContent = gameState.caught;
+            finalMaxComboEl.textContent = gameState.maxCombo;
+            
+            setTimeout(() => {
+                gameOverScreen.classList.add('show');
+            }, 500);
+        }
+        
+        // Pause game
+        function pauseGame() {
+            if (!gameState.running || gameState.paused) return;
+            gameState.paused = true;
+            pauseScreen.classList.add('show');
+        }
+        
+        // Resume game
+        function resumeGame() {
+            if (!gameState.running || !gameState.paused) return;
+            gameState.paused = false;
+            pauseScreen.classList.remove('show');
+            gameState.gameLoopId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Sound effects using Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(frequency, duration, type = 'sine', volume = 0.1) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+        
+        function playCatchSound() {
+            playTone(523, 0.1, 'sine', 0.15); // C5
+            setTimeout(() => playTone(659, 0.1, 'sine', 0.15), 50); // E5
+            setTimeout(() => playTone(784, 0.1, 'sine', 0.15), 100); // G5
+        }
+        
+        function playMissSound() {
+            playTone(200, 0.3, 'sawtooth', 0.1);
+        }
+        
+        function playLevelUpSound() {
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((note, i) => {
+                setTimeout(() => playTone(note, 0.2, 'sine', 0.15), i * 100);
+            });
+        }
+        
+        // Event Listeners
+        // Mouse movement
+        gameContainer.addEventListener('mousemove', (e) => {
+            if (!gameState.running || gameState.paused) return;
+            const rect = gameContainer.getBoundingClientRect();
+            moveBasket(e.clientX - rect.left);
+        });
+        
+        // Touch movement
+        gameContainer.addEventListener('touchmove', (e) => {
+            if (!gameState.running || gameState.paused) return;
+            e.preventDefault();
+            const rect = gameContainer.getBoundingClientRect();
+            const touch = e.touches[0];
+            moveBasket(touch.clientX - rect.left);
+        }, { passive: false });
+        
+        // Keyboard
+        document.addEventListener('keydown', (e) => {
+            if (!gameState.running || gameState.paused) return;
+            
+            const containerRect = gameContainer.getBoundingClientRect();
+            const step = containerRect.width * 0.08;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    moveBasket(gameState.targetBasketX - step);
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    moveBasket(gameState.targetBasketX + step);
+                    break;
+                case 'Escape':
+                case 'p':
+                case 'P':
+                    pauseGame();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (gameState.paused) resumeGame();
+                    break;
+            }
+        });
+        
+        // Buttons
+        document.getElementById('startBtn').addEventListener('click', () => {
+            const selectedDiff = document.querySelector('.diff-btn.selected');
+            startGame(selectedDiff.dataset.difficulty);
+        });
+        
+        document.getElementById('playAgainBtn').addEventListener('click', () => {
+            const selectedDiff = document.querySelector('.diff-btn.selected');
+            startGame(selectedDiff.dataset.difficulty);
+        });
+        
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            gameOverScreen.classList.remove('show');
+            startScreen.classList.add('show');
+        });
+        
+        document.getElementById('resumeBtn').addEventListener('click', resumeGame);
+        
+        document.getElementById('quitBtn').addEventListener('click', () => {
+            endGame();
+            pauseScreen.classList.remove('show');
+            startScreen.classList.add('show');
+        });
+        
+        // Difficulty buttons
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+        });
+        
+        // Click on game container to move basket (for mobile)
+        gameContainer.addEventListener('click', (e) => {
+            if (!gameState.running || gameState.paused) return;
+            if (e.target === gameContainer || e.target.classList.contains('ground') || e.target.classList.contains('grass-blades')) {
+                const rect = gameContainer.getBoundingClientRect();
+                moveBasket(e.clientX - rect.left);
+            }
+        });
+        
+        // Touch start for basket click
+        gameContainer.addEventListener('touchstart', (e) => {
+            if (!gameState.running || gameState.paused) return;
+            const rect = gameContainer.getBoundingClientRect();
+            const touch = e.touches[0];
+            moveBasket(touch.clientX - rect.left);
+        });
+        
+        // Handle visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && gameState.running && !gameState.paused) {
+                pauseGame();
+            }
+        });
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            if (gameState.running) {
+                const containerRect = gameContainer.getBoundingClientRect();
+                gameState.basketX = Math.min(gameState.basketX, containerRect.width - 50);
+                gameState.targetBasketX = gameState.basketX;
+                basket.style.left = `${gameState.basketX}px`;
+            }
+        });
+        
+        // Initialize
+        createClouds();
+        startScreen.classList.add('show');
+        
+        console.log('🌈 Rainbow Catch loaded! Click "Start Adventure!" to play.');
+    </script>
+</body>
+</html>
