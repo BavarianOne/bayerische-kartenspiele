@@ -1,0 +1,868 @@
+/**
+ * Math Quest: Number Kingdom - Challenge Styles
+ * Game screen, questions, answers, timer, visual elements
+ */
+
+/* ===== CHALLENGE SCREEN ===== */
+#screen-challenge {
+    flex-direction: column;
+    background: var(--color-bg-gradient);
+}
+
+/* ===== CHALLENGE HEADER ===== */
+.challenge-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    gap: var(--space-md);
+}
+
+.challenge-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+}
+
+.world-name {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.level-name {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    opacity: 0.8;
+}
+
+.challenge-counter {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-light);
+    background: rgba(255,255,255,0.15);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Timer */
+.challenge-timer {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+}
+
+.timer-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-bg {
+    stroke: rgba(255,255,255,0.2);
+}
+
+.timer-progress {
+    stroke: var(--color-primary);
+    stroke-dasharray: 163.36; /* 2 * PI * 26 */
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke var(--transition-fast);
+    filter: drop-shadow(0 0 4px var(--color-primary));
+}
+
+.timer-progress.warning {
+    stroke: var(--color-warning);
+    filter: drop-shadow(0 0 4px var(--color-warning));
+    animation: timerPulse 0.5s ease-in-out infinite;
+}
+
+.timer-progress.danger {
+    stroke: var(--color-danger);
+    filter: drop-shadow(0 0 4px var(--color-danger));
+    animation: timerPulse 0.3s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+    color: var(--color-text-light);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    pointer-events: none;
+}
+
+/* ===== CHALLENGE MAIN ===== */
+.challenge-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-lg) var(--space-md);
+    overflow-y: auto;
+    gap: var(--space-xl);
+    min-height: 0;
+}
+
+/* Question Area */
+.question-area {
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    border: 2px solid rgba(255,255,255,0.2);
+    text-align: center;
+    animation: questionAppear 0.5s var(--transition-bounce);
+}
+
+@keyframes questionAppear {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.question-type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.type-icon {
+    font-size: var(--font-size-xl);
+    animation: iconSpin 3s ease-in-out infinite;
+}
+
+@keyframes iconSpin {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+}
+
+.question-text {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-light);
+    line-height: 1.3;
+    margin-bottom: var(--space-lg);
+    min-height: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Question Visual */
+.question-visual {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    padding: var(--space-md);
+}
+
+.visual-objects {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+    max-width: 100%;
+}
+
+.visual-object {
+    font-size: 3rem;
+    animation: objectPop 0.4s var(--transition-bounce) backwards;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    transition: transform var(--transition-fast);
+}
+
+.visual-object:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.visual-object:nth-child(1) { animation-delay: 0.05s; }
+.visual-object:nth-child(2) { animation-delay: 0.1s; }
+.visual-object:nth-child(3) { animation-delay: 0.15s; }
+.visual-object:nth-child(4) { animation-delay: 0.2s; }
+.visual-object:nth-child(5) { animation-delay: 0.25s; }
+.visual-object:nth-child(6) { animation-delay: 0.3s; }
+.visual-object:nth-child(7) { animation-delay: 0.35s; }
+.visual-object:nth-child(8) { animation-delay: 0.4s; }
+.visual-object:nth-child(9) { animation-delay: 0.45s; }
+.visual-object:nth-child(10) { animation-delay: 0.5s; }
+
+@keyframes objectPop {
+    from { opacity: 0; transform: scale(0) rotate(-180deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* Number line visual */
+.number-line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: var(--space-md);
+}
+
+.number-line-point {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: var(--font-size-lg);
+    box-shadow: var(--shadow-md);
+    position: relative;
+}
+
+.number-line-point::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 15px;
+    background: var(--color-text-light);
+    opacity: 0.5;
+}
+
+.number-line-point:last-child::after {
+    display: none;
+}
+
+.number-line-point.highlight {
+    background: var(--color-secondary);
+    animation: highlightPulse 1s ease-in-out infinite;
+}
+
+@keyframes highlightPulse {
+    0%, 100% { box-shadow: var(--shadow-md); }
+    50% { box-shadow: 0 0 0 8px rgba(255, 230, 109, 0.4), var(--shadow-md); }
+}
+
+/* Equation visual */
+.equation-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    font-size: var(--font-size-3xl);
+    font-weight: 800;
+    color: var(--color-text-light);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.equation-part {
+    background: rgba(255,255,255,0.15);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    min-width: 60px;
+    transition: all var(--transition-fast);
+}
+
+.equation-part.blank {
+    background: var(--color-surface);
+    border: 3px dashed var(--color-primary);
+    color: var(--color-primary);
+    animation: blankPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes blankPulse {
+    0%, 100% { border-color: var(--color-primary); }
+    50% { border-color: var(--color-secondary); }
+}
+
+.equation-operator {
+    opacity: 0.8;
+}
+
+/* ===== ANSWER AREA ===== */
+.answer-area {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    animation: answerAppear 0.5s var(--transition-bounce) 0.2s backwards;
+}
+
+@keyframes answerAppear {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Multiple Choice */
+.answers-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.answer-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-lg) var(--space-md);
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border: 3px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-xl);
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    color: var(--color-text-light);
+    transition: all var(--transition-normal);
+    min-height: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.answer-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+}
+
+.answer-btn:hover::before {
+    transform: translateX(100%);
+}
+
+.answer-btn:focus-visible {
+    outline: 3px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.answer-btn:active {
+    transform: scale(0.96);
+}
+
+.answer-btn.correct {
+    border-color: var(--color-success);
+    background: rgba(78, 205, 196, 0.2);
+    animation: correctFlash 0.5s ease;
+}
+
+@keyframes correctFlash {
+    0%, 100% { background: rgba(78, 205, 196, 0.2); }
+    50% { background: rgba(78, 205, 196, 0.4); }
+}
+
+.answer-btn.incorrect {
+    border-color: var(--color-danger);
+    background: rgba(255, 107, 107, 0.2);
+    animation: incorrectShake 0.5s ease;
+}
+
+@keyframes incorrectShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+
+.answer-btn.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.answer-letter {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: var(--font-size-base);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.answer-value {
+    flex: 1;
+    text-align: center;
+}
+
+/* Number Input */
+.number-input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.number-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+}
+
+.number-digit {
+    width: 70px;
+    height: 90px;
+    background: var(--color-surface);
+    border: 3px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-4xl);
+    font-weight: 800;
+    color: var(--color-text-light);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+}
+
+.number-digit.empty {
+    background: rgba(255,255,255,0.05);
+    border-style: dashed;
+    color: var(--color-text-light);
+    opacity: 0.5;
+}
+
+.number-digit.filled {
+    animation: digitFill 0.3s var(--transition-bounce);
+}
+
+@keyframes digitFill {
+    0% { transform: scale(0.8); border-color: var(--color-primary); }
+    50% { transform: scale(1.1); border-color: var(--color-secondary); }
+    100% { transform: scale(1); border-color: rgba(255,255,255,0.2); }
+}
+
+.number-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    width: 100%;
+    max-width: 300px;
+}
+
+.keypad-btn {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-light);
+    transition: all var(--transition-fast);
+}
+
+.keypad-btn:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-text);
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.keypad-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.keypad-btn.action {
+    background: var(--color-primary);
+    color: var(--color-text);
+    border-color: var(--color-primary);
+    font-size: var(--font-size-lg);
+}
+
+.keypad-btn.action:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+}
+
+.keypad-btn.delete {
+    background: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+}
+
+.keypad-btn.delete:hover:not(:disabled) {
+    background: var(--color-accent-dark);
+}
+
+.keypad-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Drag Drop */
+.drag-drop-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    align-items: center;
+}
+
+.drop-zones {
+    display: flex;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.drop-zone {
+    width: 100px;
+    height: 100px;
+    border: 3px dashed var(--color-primary);
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(78, 205, 196, 0.1);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.drop-zone.active {
+    border-color: var(--color-secondary);
+    background: rgba(255, 230, 109, 0.2);
+    border-style: solid;
+    animation: dropZonePulse 1s ease-in-out infinite;
+}
+
+@keyframes dropZonePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 230, 109, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(255, 230, 109, 0); }
+}
+
+.drop-zone.filled {
+    border-color: var(--color-success);
+    background: rgba(78, 205, 196, 0.2);
+    border-style: solid;
+}
+
+.drop-zone-content {
+    font-size: var(--font-size-3xl);
+    font-weight: 800;
+    color: var(--color-text-light);
+    pointer-events: none;
+}
+
+.drag-items {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: var(--space-md);
+}
+
+.drag-item {
+    width: 80px;
+    height: 80px;
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border: 3px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-3xl);
+    font-weight: 800;
+    color: var(--color-text-light);
+    cursor: grab;
+    touch-action: none;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.drag-item:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+}
+
+.drag-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+    transform: rotate(5deg) scale(1.1);
+    z-index: 100;
+}
+
+.drag-item.correct {
+    border-color: var(--color-success);
+    background: rgba(78, 205, 196, 0.2);
+    animation: correctFlash 0.5s ease;
+}
+
+.drag-item.incorrect {
+    border-color: var(--color-danger);
+    background: rgba(255, 107, 107, 0.2);
+    animation: incorrectShake 0.5s ease;
+}
+
+/* ===== CHALLENGE FOOTER ===== */
+.challenge-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.game-stats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.hearts-display {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.heart {
+    font-size: var(--font-size-xl);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    transition: all var(--transition-bounce);
+}
+
+.heart.lost {
+    opacity: 0.2;
+    filter: grayscale(1) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    animation: heartBreak 0.5s ease;
+}
+
+@keyframes heartBreak {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 0.2; }
+}
+
+.streak-display {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: rgba(255,255,255,0.15);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.streak-display.active {
+    animation: streakPulse 0.5s var(--transition-bounce);
+    background: var(--color-warning);
+    color: var(--color-text);
+}
+
+@keyframes streakPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Progress Bar */
+.progress-container {
+    flex: 1;
+    max-width: 200px;
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+#progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-normal) ease;
+    width: 0%;
+}
+
+/* ===== PAUSE MODAL ===== */
+.pause-modal .modal-content {
+    max-width: 320px;
+}
+
+.pause-menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.pause-menu .btn {
+    width: 100%;
+}
+
+/* ===== FEEDBACK ANIMATIONS ===== */
+.feedback-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: var(--z-toast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback-icon {
+    font-size: 6rem;
+    animation: feedbackPop 0.6s var(--transition-bounce);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+}
+
+.feedback-icon.correct {
+    color: var(--color-success);
+    text-shadow: 0 0 30px var(--color-success);
+}
+
+.feedback-icon.incorrect {
+    color: var(--color-danger);
+    text-shadow: 0 0 30px var(--color-danger);
+}
+
+@keyframes feedbackPop {
+    0% { opacity: 0; transform: scale(0.3) rotate(-20deg); }
+    50% { transform: scale(1.1) rotate(5deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .challenge-header {
+        padding: var(--space-sm) var(--space-md);
+        gap: var(--space-sm);
+    }
+    
+    .world-name { font-size: var(--font-size-base); }
+    .level-name { font-size: var(--font-size-xs); }
+    .challenge-counter { font-size: var(--font-size-base); padding: var(--space-xs) var(--space-sm); }
+    .challenge-timer { width: 56px; height: 56px; }
+    .timer-text { font-size: var(--font-size-lg); }
+    
+    .challenge-main {
+        padding: var(--space-md) var(--space-sm);
+        gap: var(--space-lg);
+    }
+    
+    .question-area {
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
+    }
+    
+    .question-text { font-size: var(--font-size-xl); min-height: 2.5em; }
+    .visual-object { font-size: 2.5rem; }
+    .equation-visual { font-size: var(--font-size-2xl); }
+    
+    .answers-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .answer-btn {
+        font-size: var(--font-size-xl);
+        min-height: 70px;
+    }
+    
+    .number-digit { width: 60px; height: 75px; font-size: var(--font-size-3xl); }
+    .keypad-btn { font-size: var(--font-size-xl); }
+    
+    .drop-zone { width: 80px; height: 80px; }
+    .drag-item { width: 70px; height: 70px; font-size: var(--font-size-2xl); }
+    
+    .challenge-footer {
+        padding: var(--space-sm) var(--space-md);
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .game-stats { justify-content: center; }
+    .progress-container { max-width: none; order: -1; }
+    .btn-hint { width: 100%; }
+}
+
+@media (min-width: 768px) {
+    .challenge-main {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    
+    .question-area {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .answers-grid {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    .question-area,
+    .answer-area,
+    .visual-object,
+    .answer-btn,
+    .number-digit.filled,
+    .keypad-btn,
+    .drag-item,
+    .drop-zone,
+    .heart,
+    .streak-display,
+    .feedback-icon,
+    .type-icon,
+    .timer-progress,
+    .blankPulse,
+    .highlightPulse,
+    .dropZonePulse,
+    .pulseAvailable,
+    .pulseCurrent,
+    .currentRing,
+    .starFill,
+    .badgeBounce,
+    .correctFlash,
+    .incorrectShake,
+    .streakPulse,
+    .feedbackPop {
+        animation: none !important;
+        transition: none !important;
+    }
+}

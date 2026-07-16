@@ -1,0 +1,442 @@
+/**
+ * Math Quest: Number Kingdom - Map Styles
+ * World map, level nodes, path animations, particles
+ */
+
+/* ===== MAP CONTAINER ===== */
+.map-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== MAP HEADER ===== */
+.map-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.map-header .btn-icon {
+    flex-shrink: 0;
+}
+
+.map-title {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+}
+
+.map-title h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    color: var(--color-text-light);
+    margin-bottom: var(--space-xs);
+}
+
+.map-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    opacity: 0.8;
+}
+
+.progress-bar-container {
+    width: 100%;
+    max-width: 200px;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow) ease;
+    width: 0%;
+}
+
+.map-stats {
+    display: flex;
+    gap: var(--space-md);
+    flex-shrink: 0;
+}
+
+.map-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: rgba(255,255,255,0.15);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+/* ===== MAP SCENE ===== */
+.map-scene {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+
+.map-scene::-webkit-scrollbar {
+    display: none;
+}
+.map-scene {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ===== MAP PATH ===== */
+.map-path {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.path-segment {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+/* ===== MAP DECORATIONS ===== */
+.map-decorations {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.map-decoration {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    animation: floatDecoration 20s ease-in-out infinite;
+    user-select: none;
+}
+
+@keyframes floatDecoration {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+    25% { transform: translate(-50%, -50%) translateY(-15px) rotate(5deg); }
+    50% { transform: translate(-50%, -50%) translateY(5px) rotate(-3deg); }
+    75% { transform: translate(-50%, -50%) translateY(-10px) rotate(2deg); }
+}
+
+/* ===== MAP LEVELS ===== */
+.map-levels {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.level-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: var(--node-size);
+    height: var(--node-size);
+    border-radius: 50%;
+    border: none;
+    background: var(--node-color);
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    box-shadow: 
+        0 4px 16px rgba(0,0,0,0.3),
+        0 0 0 4px rgba(255,255,255,0.2),
+        inset 0 2px 4px rgba(255,255,255,0.2);
+    transition: all var(--transition-normal);
+    z-index: 5;
+}
+
+.level-node:focus-visible {
+    outline: 3px solid var(--color-secondary);
+    outline-offset: 3px;
+}
+
+.level-node:active:not(:disabled) {
+    transform: translate(-50%, -50%) scale(0.9);
+}
+
+.level-number {
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+    line-height: 1;
+    z-index: 2;
+}
+
+/* Level Node States */
+.level-node.locked {
+    background: var(--node-color);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.level-node.locked .level-number {
+    color: rgba(255,255,255,0.5);
+}
+
+.level-node.available {
+    animation: pulseAvailable 2s ease-in-out infinite;
+}
+
+@keyframes pulseAvailable {
+    0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.2), inset 0 2px 4px rgba(255,255,255,0.2); }
+    50% { box-shadow: 0 4px 24px var(--node-color), 0 0 0 6px rgba(255,255,255,0.3), inset 0 2px 4px rgba(255,255,255,0.2); }
+}
+
+.level-node.completed {
+    background: var(--node-color);
+}
+
+.level-node.current {
+    animation: pulseCurrent 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseCurrent {
+    0%, 100% { 
+        box-shadow: 
+            0 4px 16px rgba(0,0,0,0.3), 
+            0 0 0 4px rgba(255,255,255,0.2), 
+            inset 0 2px 4px rgba(255,255,255,0.2),
+            0 0 20px var(--node-color);
+    }
+    50% { 
+        box-shadow: 
+            0 4px 24px rgba(0,0,0,0.3), 
+            0 0 0 8px rgba(255,107,107,0.4), 
+            inset 0 2px 4px rgba(255,255,255,0.2),
+            0 0 30px var(--node-color);
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+}
+
+.level-node.current .current-pulse {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 3px solid var(--node-color);
+    animation: currentRing 1.5s ease-out infinite;
+    pointer-events: none;
+}
+
+@keyframes currentRing {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+/* Level Stars */
+.level-stars {
+    display: flex;
+    gap: 2px;
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+}
+
+.level-stars .star {
+    font-size: 0.7rem;
+    color: var(--color-secondary);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    opacity: 0.4;
+    transition: all var(--transition-fast);
+}
+
+.level-stars .star.filled {
+    opacity: 1;
+    animation: starFill 0.3s var(--transition-bounce) backwards;
+}
+
+@keyframes starFill {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.perfect-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 0.9rem;
+    animation: badgeBounce 1s ease-in-out infinite;
+}
+
+@keyframes badgeBounce {
+    0%, 100% { transform: translateY(0) rotate(-10deg); }
+    50% { transform: translateY(-5px) rotate(10deg); }
+}
+
+.lock-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(0,0,0,0.4);
+    border-radius: 50%;
+    z-index: 4;
+}
+
+/* ===== MAP FOOTER ===== */
+.map-footer {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.map-footer .btn {
+    min-width: 120px;
+}
+
+/* ===== MAP PARTICLES ===== */
+.map-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.map-particle {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    user-select: none;
+    will-change: transform, opacity;
+}
+
+/* ===== WORLD SPECIFIC STYLES ===== */
+
+/* World 1 - Ocean */
+.world-1 .level-node.available { --node-color: #4ecdc4; }
+.world-1 .level-node.completed { --node-color: #ffd93d; }
+.world-1 .level-node.current { --node-color: #ff6b6b; }
+.world-1 .level-node.locked { --node-color: #1a3a4a; }
+
+/* World 2 - Forest */
+.world-2 .level-node.available { --node-color: #7fb069; }
+.world-2 .level-node.completed { --node-color: #ffd93d; }
+.world-2 .level-node.current { --node-color: #ff6b6b; }
+.world-2 .level-node.locked { --node-color: #1a3d16; }
+
+/* World 3 - Sky */
+.world-3 .level-node.available { --node-color: #ffeaa7; }
+.world-3 .level-node.completed { --node-color: #ffd93d; }
+.world-3 .level-node.current { --node-color: #ff6b6b; }
+.world-3 .level-node.locked { --node-color: #2d6a8a; }
+.world-3 .level-node .level-number { color: #1a3a4a; }
+.world-3 .level-node.available .level-number { color: #1a3a4a; }
+.world-3 .level-node.current .level-number { color: white; }
+
+/* World 4 - Ice */
+.world-4 .level-node.available { --node-color: #81ecec; }
+.world-4 .level-node.completed { --node-color: #ffd93d; }
+.world-4 .level-node.current { --node-color: #ff6b6b; }
+.world-4 .level-node.locked { --node-color: #2d3a6a; }
+
+/* World 5 - Space */
+.world-5 .level-node.available { --node-color: #a29bfe; }
+.world-5 .level-node.completed { --node-color: #ffd93d; }
+.world-5 .level-node.current { --node-color: #ff6b6b; }
+.world-5 .level-node.locked { --node-color: #0f0f1a; }
+.world-5 .level-node .level-number { color: white; }
+.world-5 .level-node.available .level-number { color: white; }
+.world-5 .level-node.current .level-number { color: white; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    :root {
+        --node-size: 50px;
+        --node-size-sm: 44px;
+    }
+    
+    .map-header {
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+        padding: var(--space-sm) var(--space-md);
+    }
+    
+    .map-title h1 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .map-stats {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .map-footer {
+        flex-direction: column;
+    }
+    
+    .map-footer .btn {
+        width: 100%;
+    }
+    
+    .level-stars {
+        bottom: -14px;
+    }
+    
+    .level-stars .star {
+        font-size: 0.6rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .map-scene {
+        min-height: 600px;
+    }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    .map-decoration,
+    .level-node.available,
+    .level-node.current,
+    .current-pulse,
+    .perfect-badge,
+    .star.filled,
+    .map-particle {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .path-segment {
+        stroke-dashoffset: 0 !important;
+        transition: none !important;
+    }
+}

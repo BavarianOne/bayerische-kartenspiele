@@ -1,80 +1,1447 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bayerische Kartenspiele</title>
+    <meta name="description" content="Bayerische Kartenspiele & Kinderspiele Hub - Spaßige Lern- und Kartenspiele für alle Altersgruppen">
+    <title>🎮 Bayerische Spiele Hub - Spaßige Spiele für Kinder & Familien</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="math-quest/manifest.json">
+    <meta name="theme-color" content="#4a90d9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Bayerische Spiele">
+    <link rel="apple-touch-icon" href="math-quest/icons/icon-192.png">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --accent-primary: #4a90d9;
+            --accent-secondary: #667eea;
+            --accent-tertiary: #764ba2;
+            --accent-warm: #f6ad55;
+            --accent-green: #48bb78;
+            --accent-red: #fc8181;
+            --accent-purple: #9f7aea;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --shadow-xl: 0 16px 48px rgba(0,0,0,0.15);
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #1a202c;
+                --bg-secondary: #2d3748;
+                --bg-card: #2d3748;
+                --text-primary: #f7fafc;
+                --text-secondary: #e2e8f0;
+                --text-muted: #a0aec0;
+                --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+                --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+                --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+                --shadow-xl: 0 16px 48px rgba(0,0,0,0.5);
+            }
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #2c3e50;
-            color: white;
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Background decoration */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-blob:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-primary);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-blob:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-tertiary);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -7s;
+        }
+
+        .bg-blob:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            background: var(--accent-warm);
+            top: 50%;
+            left: 10%;
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 30px) scale(1.02); }
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: drift 30s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.08; }
+            90% { opacity: 0.08; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 10;
+            padding: 2rem 1.5rem;
             text-align: center;
-            padding: 50px 20px;
+            background: linear-gradient(180deg, rgba(74, 144, 217, 0.1) 0%, transparent 100%);
         }
 
-        h1 {
-            color: #f1c40f;
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        .menu {
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: var(--shadow-lg);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: var(--shadow-lg); }
+            50% { transform: scale(1.05); box-shadow: var(--shadow-xl); }
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Content */
+        .main {
+            position: relative;
+            z-index: 10;
+            padding: 0 1.5rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Category Sections */
+        .category-section {
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .category-section:nth-child(1) { animation-delay: 0.1s; }
+        .category-section:nth-child(2) { animation-delay: 0.2s; }
+        .category-section:nth-child(3) { animation-delay: 0.3s; }
+        .category-section:nth-child(4) { animation-delay: 0.4s; }
+        .category-section:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary)) 1;
+        }
+
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .category-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .category-count {
+            margin-left: auto;
+            background: var(--bg-primary);
+            padding: 0.35rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Game Grid */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Game Card */
+        .game-card {
+            position: relative;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--accent-primary);
+        }
+
+        .game-card:focus-visible {
+            outline: 3px solid var(--accent-primary);
+            outline-offset: 3px;
+        }
+
+        .game-card.featured {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 200px;
+        }
+
+        .game-card.featured .game-card-content {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            max-width: 300px;
-            margin: 40px auto;
+            justify-content: center;
+            padding: 2.5rem;
         }
 
-        a {
-            background: #34495e;
+        .game-card.featured .game-card-media {
+            position: relative;
+            min-height: 200px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+        }
+
+        .game-card-media {
+            position: relative;
+            height: 160px;
+            background: linear-gradient(135deg, var(--card-color-start), var(--card-color-end));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .game-card-media::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .game-card-icon {
+            font-size: 4rem;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+            animation: bounce 3s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .game-card.featured .game-card-icon {
+            font-size: 6rem;
+        }
+
+        .game-card-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            padding: 0.35rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+            z-index: 2;
+        }
+
+        .game-card-badge.new { background: linear-gradient(135deg, #48bb78, #38a169); color: white; }
+        .game-card-badge.popular { background: linear-gradient(135deg, #ed8936, #dd6b20); color: white; }
+        .game-card-badge.featured { background: linear-gradient(135deg, #9f7aea, #805ad5); color: white; }
+        .game-card-badge.educational { background: linear-gradient(135deg, #4299e1, #3182ce); color: white; }
+
+        .game-card-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .game-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .game-card-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .game-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .game-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .game-tag.age { color: var(--accent-primary); }
+        .game-tag.type { color: var(--accent-tertiary); }
+        .game-tag.players { color: var(--accent-warm); }
+
+        .game-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            margin-top: auto;
+        }
+
+        .game-card.featured .game-card-footer {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             color: white;
-            padding: 15px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border: 2px solid #f1c40f;
-            transition: background 0.3s;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
         }
 
-        a:hover {
-            background: #f1c40f;
-            color: #2c3e50;
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .play-btn:active {
+            transform: translateY(0);
+        }
+
+        .play-btn:focus-visible {
+            outline: 3px solid var(--accent-primary);
+            outline-offset: 3px;
+        }
+
+        .play-btn.large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .play-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .play-btn.large svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .game-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* Featured Game Content */
+        .featured-content h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .featured-content p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .featured-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .featured-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-category {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 2px dashed rgba(0,0,0,0.1);
+        }
+
+        .empty-category p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            z-index: 10;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            background: var(--bg-secondary);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .footer-link:hover {
+            color: var(--accent-primary);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Install Prompt */
+        .install-banner {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            right: 1.5rem;
+            max-width: 400px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            padding: 1.25rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 1000;
+            animation: slideUp 0.4s ease-out;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .install-banner.show {
+            display: flex;
+        }
+
+        .install-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .install-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .install-text {
+            flex: 1;
+        }
+
+        .install-text strong {
+            display: block;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .install-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .install-actions {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .install-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .install-btn.primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .install-btn.secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .install-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Loading State */
+        .game-card.loading {
+            pointer-events: none;
+        }
+
+        .game-card.loading .game-card-media {
+            background: linear-gradient(90deg, var(--bg-primary) 25%, var(--bg-secondary) 50%, var(--bg-primary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .game-card.featured {
+                grid-column: span 1;
+                display: flex;
+                min-height: auto;
+            }
+
+            .game-card.featured .game-card-media {
+                width: 140px;
+                height: 140px;
+                min-height: 140px;
+                border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+            }
+
+            .game-card.featured .game-card-content {
+                padding: 1.5rem;
+            }
+
+            .featured-content h3 {
+                font-size: 1.5rem;
+            }
+
+            .featured-content p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1.5rem 1rem;
+            }
+
+            .logo-text {
+                font-size: 2rem;
+            }
+
+            .main {
+                padding: 0 1rem 2rem;
+            }
+
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-card.featured {
+                flex-direction: column;
+            }
+
+            .game-card.featured .game-card-media {
+                width: 100%;
+                height: 160px;
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            }
+
+            .category-title {
+                font-size: 1.5rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .install-banner {
+                left: 1rem;
+                right: 1rem;
+                bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 1.75rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            .game-card-content {
+                padding: 1.25rem;
+            }
+
+            .play-btn {
+                padding: 0.65rem 1.25rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
-
 <body>
-    <h1>Bayerische Kartenspiele</h1>
-    <p>Wähle ein Spiel aus:</p>
-    <div class="menu">
-        <a href="weather.html">☀️ Weather Dashboard</a>
-        <a href="uno.html">🎴 UNO</a>
-        <a href="WallacherMobile3.html">Wallachen</a>
-        <a href="neunerln3.html">Neunerln</a>
-        <a href="watten.html">Watten</a>
-        <a href="asteroids.html">🚀 Asteroids</a>
-        <a href="neonshooter.html">🎯 Neon Shooter</a>
-        <a href="schach.html">♟️ Schach</a>
-        <a href="auto.html">🚘🚔 Auto</a>
-        <a href="brecher.html">🧱 Brecher</a>
-        <a href="snake.html">🐍 Snake</a>
-        <a href="td.html">🕳️ Tower Defense</a>
-        <a href="space3d.html">🌌 3D Space</a>
-        <a href="maze3d.html">🏰 3D Maze</a>
-        <a href="neontangram.html">🧩 Neon Tangram</a>
-        <a href="neonufo.html">🛸 Neon UFO</a>
-        <a href="shapefusion.html">🔮 Shape Fusion</a>
-        <a href="neon-velocity-chrono-run.html">⚡ Neon Velocity: Chrono Run</a>
-        <a href="neon-velocity-chrono-run-3d.html">🌃 Neon Velocity 3D</a>
-        <a href="subway-runner-3d.html">🚇 Subway Runner 3D</a>
-        <a href="shapeCreate.html">✨ Shape Creator</a>
-        <a href="neonblocks.html"> neon blocks</a>
-        <a href="igelspiel.html">🦔 Igelspiel</a>
-        <a href="wordament.html">🔤 Wordmnt</a>
-        <a href="memory.html">🧠 Memory</a>
+    <!-- Background Decorations -->
+    <div class="bg-decoration" aria-hidden="true">
+        <div class="bg-blob"></div>
+        <div class="bg-blob"></div>
+        <div class="bg-blob"></div>
     </div>
-</body>
+    <div class="floating-shapes" id="floatingShapes" aria-hidden="true"></div>
 
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon" aria-hidden="true">🎮</div>
+                <span class="logo-text">Bayerische Spiele</span>
+            </div>
+            <p class="tagline">Spaßige Kartenspiele, Lernabenteuer & Arcade-Klassiker für die ganze Familie</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main" id="mainContent">
+        <!-- Categories will be injected here by JavaScript -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/BavarianOne/bayerische-kartenspiele" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+                <a href="math-quest/index.html" class="footer-link">Math Quest</a>
+                <a href="#" class="footer-link" id="installLink">App installieren</a>
+            </div>
+            <p class="footer-copyright">Mit ❤️ für Kinder & Familien gemacht • <a href="https://github.com/BavarianOne/bayerische-kartenspiele" target="_blank" rel="noopener" style="color: inherit;">Open Source</a></p>
+        </div>
+    </footer>
+
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner" role="dialog" aria-label="App installieren">
+        <div class="install-content">
+            <div class="install-icon" aria-hidden="true">📱</div>
+            <div class="install-text">
+                <strong>Bayerische Spiele installieren</strong>
+                <span>Offline spielen, Benachrichtigungen & schnellerer Zugriff</span>
+            </div>
+        </div>
+        <div class="install-actions">
+            <button class="install-btn secondary" id="installCancel">Später</button>
+            <button class="install-btn primary" id="installConfirm">Installieren</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Data Configuration
+        const GAME_CATEGORIES = [
+            {
+                id: 'featured',
+                title: '⭐ Empfohlen',
+                icon: '⭐',
+                colorStart: '#667eea',
+                colorEnd: '#764ba2',
+                games: [
+                    {
+                        id: 'math-quest',
+                        title: 'Math Quest',
+                        description: 'Begib dich auf ein episches Mathe-Abenteuer durch 5 magische Welten! Löse Aufgaben, sammle Sterne, schalte Avatare frei und werde zur Mathe-Legende.',
+                        path: 'math-quest/index.html',
+                        tags: { age: '6+', type: 'Lernspiel', players: '1 Spieler' },
+                        badges: ['featured', 'educational', 'new'],
+                        featured: true,
+                        colorStart: '#4299e1',
+                        colorEnd: '#3182ce',
+                        icon: '🧙‍♂️'
+                    }
+                ]
+            },
+            {
+                id: 'education',
+                title: '🎓 Kinder & Lernen',
+                icon: '🎓',
+                colorStart: '#48bb78',
+                colorEnd: '#38a169',
+                games: [
+                    {
+                        id: 'memory',
+                        title: 'Memory Match',
+                        description: 'Klassisches Memory-Spiel mit niedlichen Tieren, Formen und Emojis. Trainiere dein Gehirn und verbessere die Konzentration!',
+                        path: 'memory.html',
+                        tags: { age: '3+', type: 'Gedächtnis', players: '1-2 Spieler' },
+                        badges: ['popular', 'educational'],
+                        colorStart: '#48bb78',
+                        colorEnd: '#38a169',
+                        icon: '🧠'
+                    },
+                    {
+                        id: 'neontangram',
+                        title: 'Neon Tangram',
+                        description: 'Löse bunte geometrische Puzzles! Setze 7 Teile zusammen, um die Silhouette zu matchen. Super für räumliches Denken.',
+                        path: 'neontangram.html',
+                        tags: { age: '5+', type: 'Puzzle', players: '1 Spieler' },
+                        badges: ['educational'],
+                        colorStart: '#48bb78',
+                        colorEnd: '#38a169',
+                        icon: '🔷'
+                    },
+                    {
+                        id: 'shapefusion',
+                        title: 'Shape Fusion',
+                        description: 'Verschmelze Formen zu neuen! Lerne Geometrie durch Spielen. Kombiniere Kreise, Quadrate, Dreiecke und mehr.',
+                        path: 'shapefusion.html',
+                        tags: { age: '4+', type: 'Lernspiel', players: '1 Spieler' },
+                        badges: ['educational', 'new'],
+                        colorStart: '#48bb78',
+                        colorEnd: '#38a169',
+                        icon: '🔴'
+                    },
+                    {
+                        id: 'wordament',
+                        title: 'Wordament',
+                        description: 'Finde Wörter in einem Buchstaben-Gitter! Boggle-ähnliche Wortsuche. Erweitere Wortschatz und Rechtschreibung.',
+                        path: 'wordament.html',
+                        tags: { age: '7+', type: 'Wortspiel', players: '1 Spieler' },
+                        badges: ['educational'],
+                        colorStart: '#48bb78',
+                        colorEnd: '#38a169',
+                        icon: '📝'
+                    }
+                ]
+            },
+            {
+                id: 'card',
+                title: '🃏 Bayerische Kartenspiele',
+                icon: '🃏',
+                colorStart: '#ed8936',
+                colorEnd: '#dd6b20',
+                games: [
+                    {
+                        id: 'schafkopf',
+                        title: 'Schafkopf',
+                        description: 'Der klassische bayerische Kartenspiel-Klassiker! Spiele mit 4 Spielern, Trumpf-Farben und kniffligen Regeln. Authentische Regeln inklusive.',
+                        path: 'schafkopf.html',
+                        tags: { age: '10+', type: 'Kartenspiel', players: '4 Spieler' },
+                        badges: ['popular'],
+                        colorStart: '#ed8936',
+                        colorEnd: '#dd6b20',
+                        icon: '🃏'
+                    },
+                    {
+                        id: 'watten',
+                        title: 'Watten',
+                        description: 'Traditionelles bayerisch/österreichisches Kartenspiel. Bildet Teams, ratet den Trumpf und überlistet eure Gegner!',
+                        path: 'watten.html',
+                        tags: { age: '10+', type: 'Kartenspiel', players: '4 Spieler' },
+                        badges: [],
+                        colorStart: '#ed8936',
+                        colorEnd: '#dd6b20',
+                        icon: '🎴'
+                    },
+                    {
+                        id: 'wallacher',
+                        title: 'Wallacher Mobile 3',
+                        description: 'Mobile-optimiertes Wallacher (Bayerischer Whist). Spiele solo oder mit Freunden. Saubere Touch-Steuerung.',
+                        path: 'WallacherMobile3.html',
+                        tags: { age: '10+', type: 'Kartenspiel', players: '1-4 Spieler' },
+                        badges: ['new'],
+                        colorStart: '#ed8936',
+                        colorEnd: '#dd6b20',
+                        icon: '📱'
+                    },
+                    {
+                        id: 'neunerln',
+                        title: 'Neunerln 3',
+                        description: 'Temporeiches bayerisches Stichspiel. Einfache Regeln, tiefe Strategie. Perfekt für schnelle Runden.',
+                        path: 'neunerln3.html',
+                        tags: { age: '8+', type: 'Kartenspiel', players: '3-4 Spieler' },
+                        badges: [],
+                        colorStart: '#ed8936',
+                        colorEnd: '#dd6b20',
+                        icon: '🂡'
+                    },
+                    {
+                        id: 'uno',
+                        title: 'UNO',
+                        description: 'Klassisches UNO Kartenspiel! Farben und Zahlen matchen, Aktionskarten spielen und als Erster alle Karten loswerden.',
+                        path: 'uno.html',
+                        tags: { age: '6+', type: 'Kartenspiel', players: '2-4 Spieler' },
+                        badges: ['popular'],
+                        colorStart: '#ed8936',
+                        colorEnd: '#dd6b20',
+                        icon: '🎯'
+                    }
+                ]
+            },
+            {
+                id: 'arcade',
+                title: '🕹️ Arcade & Action',
+                icon: '🕹️',
+                colorStart: '#fc8181',
+                colorEnd: '#f56565',
+                games: [
+                    {
+                        id: 'snake',
+                        title: 'Snake Classic',
+                        description: 'Der zeitlose Klassiker! Fress Äpfel, werd länger, vermeide Wände und dich selbst. Wie hoch schaffst du den Highscore?',
+                        path: 'snake.html',
+                        tags: { age: '5+', type: 'Arcade', players: '1 Spieler' },
+                        badges: ['popular'],
+                        colorStart: '#fc8181',
+                        colorEnd: '#f56565',
+                        icon: '🐍'
+                    },
+                    {
+                        id: 'asteroids',
+                        title: 'Asteroids',
+                        description: 'Retro-Weltraum-Shooter! Ballere Asteroiden weg, weiche Trümmern aus und überlebe Welle um Welle. Vektor-Grafik-Stil.',
+                        path: 'asteroids.html',
+                        tags: { age: '7+', type: 'Arcade', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#fc8181',
+                        colorEnd: '#f56565',
+                        icon: '☄️'
+                    },
+                    {
+                        id: 'neonshooter',
+                        title: 'Neon Shooter',
+                        description: 'Twin-Stick Neon Arcade Shooter! Überlebe endlose Gegnerwellen. Power-Ups, Bosse und Bestenlisten.',
+                        path: 'neonshooter.html',
+                        tags: { age: '8+', type: 'Action', players: '1 Spieler' },
+                        badges: ['new'],
+                        colorStart: '#fc8181',
+                        colorEnd: '#f56565',
+                        icon: '🔫'
+                    },
+                    {
+                        id: 'neonblocks',
+                        title: 'Neon Blocks',
+                        description: 'Breakout-Ziegelbrecher mit Neon-Glow! Fange Power-Ups, Multi-Ball und räume alle Level ab.',
+                        path: 'neonblocks.html',
+                        tags: { age: '6+', type: 'Arcade', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#fc8181',
+                        colorEnd: '#f56565',
+                        icon: '🧱'
+                    },
+                    {
+                        id: 'neonufo',
+                        title: 'Neon UFO',
+                        description: 'Steuere ein UFO durch Neon-Hindernisse! Sammle Sterne, weiche Lasern aus und erreiche das Portal. Flüssige Physik.',
+                        path: 'neonufo.html',
+                        tags: { age: '7+', type: 'Action', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#fc8181',
+                        colorEnd: '#f56565',
+                        icon: '🛸'
+                    }
+                ]
+            },
+            {
+                id: 'puzzle3d',
+                title: '🧩 Puzzles & 3D Spiele',
+                icon: '🧩',
+                colorStart: '#9f7aea',
+                colorEnd: '#805ad5',
+                games: [
+                    {
+                        id: 'maze3d',
+                        title: 'Maze 3D',
+                        description: 'Navigiere durch immersive 3D-Labyrinthe! Ego-Perspektive, mehrere Schwierigkeitsgrade und prozedurale Generierung.',
+                        path: 'maze3d.html',
+                        tags: { age: '8+', type: '3D Puzzle', players: '1 Spieler' },
+                        badges: ['new'],
+                        colorStart: '#9f7aea',
+                        colorEnd: '#805ad5',
+                        icon: '🏰'
+                    },
+                    {
+                        id: 'space3d',
+                        title: 'Space 3D',
+                        description: 'Erkunde den Weltraum in 3D! Fliege durch Asteroidenfelder, besuche Planeten und erfülle Missionen. WebGL powered.',
+                        path: 'space3d.html',
+                        tags: { age: '10+', type: '3D Erkundung', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#9f7aea',
+                        colorEnd: '#805ad5',
+                        icon: '🚀'
+                    },
+                    {
+                        id: 'subway3d',
+                        title: 'Subway Runner 3D',
+                        description: 'Endlos-Runner in 3D-U-Bahn-Tunneln! Weiche Zügen aus, sammle Münzen, schalte Charaktere frei. Rasante Action.',
+                        path: 'subway-runner-3d.html',
+                        tags: { age: '7+', type: '3D Runner', players: '1 Spieler' },
+                        badges: ['popular'],
+                        colorStart: '#9f7aea',
+                        colorEnd: '#805ad5',
+                        icon: '🏃'
+                    },
+                    {
+                        id: 'neonvelocity',
+                        title: 'Neon Velocity Chrono Run',
+                        description: 'Hochgeschwindigkeits-Neon-Rennen durch die Zeit! Dimensionen wechseln, Paradoxa vermeiden, die Uhr schlagen.',
+                        path: 'neon-velocity-chrono-run-3d.html',
+                        tags: { age: '10+', type: '3D Racing', players: '1 Spieler' },
+                        badges: ['new'],
+                        colorStart: '#9f7aea',
+                        colorEnd: '#805ad5',
+                        icon: '⚡'
+                    },
+                    {
+                        id: 'schach',
+                        title: 'Schach',
+                        description: 'Klassisches Schach mit wunderschönen 3D-Figuren! Spiele gegen KI oder lokal zu zweit. Mehrere Schwierigkeitsgrade.',
+                        path: 'schach.html',
+                        tags: { age: '8+', type: 'Strategie', players: '1-2 Spieler' },
+                        badges: ['popular'],
+                        colorStart: '#9f7aea',
+                        colorEnd: '#805ad5',
+                        icon: '♟️'
+                    }
+                ]
+            },
+            {
+                id: 'other',
+                title: '🎲 Weitere Spiele',
+                icon: '🎲',
+                colorStart: '#4fd1c5',
+                colorEnd: '#38b2ac',
+                games: [
+                    {
+                        id: 'igelspiel',
+                        title: 'Igelspiel',
+                        description: 'Niedliches Igel-Abenteuer! Sammle Äpfel, vermeide Hindernisse und erreiche das Ziel. Familienfreundlicher Platformer.',
+                        path: 'igelspiel.html',
+                        tags: { age: '5+', type: 'Platformer', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#4fd1c5',
+                        colorEnd: '#38b2ac',
+                        icon: '🦔'
+                    },
+                    {
+                        id: 'brecher',
+                        title: 'Brecher',
+                        description: 'Breakout-Spiel mit Twist! Zerschlage Steine, fange Power-Ups und räume alle Level ab.',
+                        path: 'brecher.html',
+                        tags: { age: '6+', type: 'Arcade', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#4fd1c5',
+                        colorEnd: '#38b2ac',
+                        icon: '🔨'
+                    },
+                    {
+                        id: 'auto',
+                        title: 'Auto Racing',
+                        description: 'Top-Down Rennspiel! Steuere dein Auto, vermeide Hindernisse und rase ins Ziel.',
+                        path: 'auto.html',
+                        tags: { age: '7+', type: 'Rennspiel', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#4fd1c5',
+                        colorEnd: '#38b2ac',
+                        icon: '🏎️'
+                    },
+                    {
+                        id: 'td',
+                        title: 'Tower Defense',
+                        description: 'Strategisches Tower Defense! Baue Türme, verbessere sie und stoppe Wellen von Feinden, bevor sie deine Basis erreichen.',
+                        path: 'td.html',
+                        tags: { age: '10+', type: 'Strategie', players: '1 Spieler' },
+                        badges: [],
+                        colorStart: '#4fd1c5',
+                        colorEnd: '#38b2ac',
+                        icon: '🏰'
+                    },
+                    {
+                        id: 'weather',
+                        title: 'Wetter App',
+                        description: 'Schönes Wetter-Dashboard! Aktuelle Bedingungen, Vorhersagen und interaktive Karten. Lehrreich & praktisch.',
+                        path: 'weather.html',
+                        tags: { age: 'Alle', type: 'Nützlich', players: '1 Spieler' },
+                        badges: ['educational'],
+                        colorStart: '#4fd1c5',
+                        colorEnd: '#38b2ac',
+                        icon: '🌤️'
+                    },
+                    {
+                        id: 'shapecreate',
+                        title: 'Shape Creator',
+                        description: 'Kreatives Zeichenwerkzeug! Kombiniere Formen, Farben und Muster zu Kunst. Exportiere deine Kreationen.',
+                        path: 'shapeCreate.html',
+                        tags: { age: '4+', type: 'Kreativ', players: '1 Spieler' },
+                        badges: ['educational', 'new'],
+                        colorStart: '#4fd1c5',
+                        colorEnd: '#38b2ac',
+                        icon: '🎨'
+                    }
+                ]
+            }
+        ];
+
+        // Badge Labels (German)
+        const BADGE_LABELS = {
+            'new': 'NEU',
+            'popular': 'BELIEBT',
+            'featured': 'EMPFOHLEN',
+            'educational': 'LERNSPIEL'
+        };
+
+        // DOM Elements
+        const mainContent = document.getElementById('mainContent');
+        const floatingShapes = document.getElementById('floatingShapes');
+        const installBanner = document.getElementById('installBanner');
+        const installCancel = document.getElementById('installCancel');
+        const installConfirm = document.getElementById('installConfirm');
+        let deferredPrompt = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            createFloatingShapes();
+            setupPWA();
+            checkInstallBanner();
+        });
+
+        // Render all categories
+        function renderCategories() {
+            GAME_CATEGORIES.forEach((category, catIndex) => {
+                const section = document.createElement('section');
+                section.className = 'category-section';
+                section.style.setProperty('--cat-color-start', category.colorStart);
+                section.style.setProperty('--cat-color-end', category.colorEnd);
+                section.setAttribute('aria-labelledby', `cat-${category.id}-title`);
+
+                const hasGames = category.games.length > 0;
+
+                section.innerHTML = `
+                    <div class="category-header">
+                        <span class="category-icon" style="background: linear-gradient(135deg, ${category.colorStart}, ${category.colorEnd});" aria-hidden="true">${category.icon}</span>
+                        <h2 class="category-title" id="cat-${category.id}-title">${category.title}</h2>
+                        ${hasGames ? `<span class="category-count">${category.games.length} Spiel${category.games.length !== 1 ? 'e' : ''}</span>` : ''}
+                    </div>
+                    <div class="game-grid" role="list" aria-label="${category.title} Spiele">
+                        ${hasGames ? category.games.map((game, gameIndex) => createGameCard(game, catIndex, gameIndex)).join('') : createEmptyState(category)}
+                    </div>
+                `;
+
+                mainContent.appendChild(section);
+            });
+        }
+
+        // Create game card HTML
+        function createGameCard(game, catIndex, gameIndex) {
+            const isFeatured = game.featured === true;
+            const badges = game.badges || [];
+            const badgeHTML = badges.map(b => `<span class="game-card-badge ${b}">${BADGE_LABELS[b] || b.toUpperCase()}</span>`).join('');
+
+            const cardClass = isFeatured ? 'game-card featured' : 'game-card';
+            const delay = (catIndex * 0.1) + (gameIndex * 0.05);
+
+            return `
+                <article class="${cardClass}" role="listitem" tabindex="0"
+                    style="--card-color-start: ${game.colorStart}; --card-color-end: ${game.colorEnd};
+                           animation-delay: ${delay}s;"
+                    data-game-path="${game.path}"
+                    data-game-id="${game.id}"
+                    aria-label="${game.title}${badges.includes('educational') ? ', Lernspiel' : ''}${badges.includes('new') ? ', Neu' : ''}${badges.includes('popular') ? ', Beliebt' : ''}">
+                    ${badgeHTML}
+                    <div class="game-card-media" aria-hidden="true">
+                        <span class="game-card-icon">${game.icon}</span>
+                    </div>
+                    <div class="game-card-content">
+                        ${isFeatured ? `
+                            <div class="featured-content">
+                                <h3>${game.title}</h3>
+                                <p>${game.description}</p>
+                                <div class="featured-features">
+                                    <span class="featured-feature">✨ 5 Magische Welten</span>
+                                    <span class="featured-feature">📚 Adaptive Schwierigkeit</span>
+                                    <span class="featured-feature">🎭 20+ Avatare</span>
+                                    <span class="featured-feature">🏆 Erfolge</span>
+                                    <span class="featured-feature">📱 Funktioniert Offline</span>
+                                    <span class="featured-feature">🎵 Musik & Sounds</span>
+                                </div>
+                            </div>
+                        ` : `
+                            <h3 class="game-card-title">${game.title}</h3>
+                            <p class="game-card-desc">${game.description}</p>
+                            <div class="game-card-meta">
+                                <span class="game-tag age">${game.tags.age}</span>
+                                <span class="game-tag type">${game.tags.type}</span>
+                                <span class="game-tag players">${game.tags.players}</span>
+                            </div>
+                        `}
+                        <div class="game-card-footer">
+                            <button class="play-btn ${isFeatured ? 'large' : ''}" aria-label="${game.title} spielen">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                                ${isFeatured ? 'Abenteuer starten' : 'Jetzt spielen'}
+                            </button>
+                            <div class="game-stats">
+                                <span class="game-stat" title="Lernspiel">📚</span>
+                                <span class="game-stat" title="Offline bereit">📱</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        // Empty state for categories with no games
+        function createEmptyState(category) {
+            return `
+                <div class="empty-category" role="status">
+                    <p>Noch keine Spiele in dieser Kategorie. Bald wieder vorbeischauen!</p>
+                </div>
+            `;
+        }
+
+        // Create floating background shapes
+        function createFloatingShapes() {
+            const shapes = ['🎮', '🎲', '🃏', '🧩', '🎯', '🌟', '🎨', '🚀', '🐍', '🧠', '📝', '🔷'];
+            const count = window.innerWidth < 768 ? 15 : 25;
+
+            for (let i = 0; i < count; i++) {
+                const shape = document.createElement('div');
+                shape.className = 'shape';
+                shape.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                shape.style.left = `${Math.random() * 100}%`;
+                shape.style.fontSize = `${Math.random() * 1.5 + 1}rem`;
+                shape.style.animationDelay = `${Math.random() * 30}s`;
+                shape.style.animationDuration = `${Math.random() * 20 + 20}s`;
+                floatingShapes.appendChild(shape);
+            }
+        }
+
+        // Event delegation for game cards
+        mainContent.addEventListener('click', (e) => {
+            const card = e.target.closest('.game-card');
+            const playBtn = e.target.closest('.play-btn');
+
+            if (playBtn) {
+                e.stopPropagation();
+                const cardEl = playBtn.closest('.game-card');
+                if (cardEl) navigateToGame(cardEl.dataset.gamePath);
+            } else if (card && !e.target.closest('.game-card-badge')) {
+                navigateToGame(card.dataset.gamePath);
+            }
+        });
+
+        // Keyboard navigation
+        mainContent.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const card = e.target.closest('.game-card');
+                if (card && !e.target.closest('.play-btn')) {
+                    e.preventDefault();
+                    navigateToGame(card.dataset.gamePath);
+                }
+            }
+        });
+
+        // Navigate to game
+        function navigateToGame(path) {
+            // Add a nice transition effect
+            document.body.style.transition = 'opacity 0.2s ease';
+            document.body.style.opacity = '0.8';
+
+            setTimeout(() => {
+                window.location.href = path;
+            }, 150);
+        }
+
+        // PWA Install handling
+        function setupPWA() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallBanner();
+            });
+
+            window.addEventListener('appinstalled', () => {
+                hideInstallBanner();
+                deferredPrompt = null;
+            });
+        }
+
+        function checkInstallBanner() {
+            // Show banner if not installed and not dismissed
+            const dismissed = localStorage.getItem('installBannerDismissed');
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+            if (!dismissed && !isStandalone && deferredPrompt) {
+                setTimeout(() => showInstallBanner(), 10000);
+            }
+        }
+
+        function showInstallBanner() {
+            installBanner.classList.add('show');
+        }
+
+        function hideInstallBanner() {
+            installBanner.classList.remove('show');
+        }
+
+        installCancel.addEventListener('click', () => {
+            localStorage.setItem('installBannerDismissed', 'true');
+            hideInstallBanner();
+        });
+
+        installConfirm.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    hideInstallBanner();
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('math-quest/sw.js', { scope: './' })
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+
+        // Performance: Lazy load images if any added later
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                        }
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
 </html>

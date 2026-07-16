@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Math Quest: Number Kingdom - A fun math adventure game for kids!">
+    <meta name="theme-color" content="#4ecdc4">
+    <title>Math Quest: Number Kingdom</title>
+    
+    <!-- Base href for correct asset loading when served from subdirectory -->
+    <base href="/math-quest/">
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="css/main.css" as="style">
+    <link rel="preload" href="css/ui.css" as="style">
+    <link rel="preload" href="css/map.css" as="style">
+    <link rel="preload" href="css/challenge.css" as="style">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/ui.css">
+    <link rel="stylesheet" href="css/map.css">
+    <link rel="stylesheet" href="css/challenge.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Math Quest">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen" role="status" aria-label="Loading game">
+        <div class="loading-content">
+            <div class="loading-logo">🏰</div>
+            <h1>Math Quest</h1>
+            <p>Number Kingdom</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loading-progress"></div>
+            </div>
+            <p class="loading-text" id="loading-text">Preparing adventure...</p>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app" hidden>
+        <!-- Particle Container for Map -->
+        <div id="map-particles" class="map-particles" aria-hidden="true"></div>
+
+        <!-- Screen: Main Menu -->
+        <section id="screen-menu" class="screen" role="region" aria-label="Main Menu">
+            <div class="menu-background">
+                <div class="menu-floating-elements" aria-hidden="true">
+                    <span class="float-emoji" style="--i: 0">🏰</span>
+                    <span class="float-emoji" style="--i: 1">🧙‍♂️</span>
+                    <span class="float-emoji" style="--i: 2">📚</span>
+                    <span class="float-emoji" style="--i: 3">⭐</span>
+                    <span class="float-emoji" style="--i: 4">💰</span>
+                    <span class="float-emoji" style="--i: 5">🧮</span>
+                </div>
+            </div>
+            
+            <header class="menu-header">
+                <h1>Math Quest: <span class="highlight">Number Kingdom</span></h1>
+                <p class="menu-subtitle">Learn math through adventure!</p>
+            </header>
+            
+            <div class="menu-profile" id="menu-profile">
+                <div class="profile-avatar" id="menu-avatar">🧙‍♂️</div>
+                <div class="profile-info">
+                    <h2 id="menu-name">Young Mathematician</h2>
+                    <div class="profile-stats">
+                        <span id="menu-level">Level 1</span>
+                        <span id="menu-xp">0 / 100 XP</span>
+                    </div>
+                </div>
+                <div class="profile-resources">
+                    <div class="resource">
+                        <span id="menu-coins" class="resource-value">0</span>
+                        <span class="resource-icon">💰</span>
+                    </div>
+                    <div class="resource">
+                        <span id="menu-hearts" class="resource-value">❤️❤️❤️</span>
+                    </div>
+                    <div class="resource">
+                        <span id="menu-streak" class="resource-value">🔥 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="menu-nav" role="navigation" aria-label="Main navigation">
+                <button class="nav-btn btn-primary" data-action="change-screen" data-value="map">
+                    <span class="btn-icon">🗺️</span>
+                    <span class="btn-text">Adventure Map</span>
+                </button>
+                <button class="nav-btn btn-secondary" data-action="change-screen" data-value="shop">
+                    <span class="btn-icon">🏪</span>
+                    <span class="btn-text">Shop</span>
+                </button>
+                <button class="nav-btn btn-secondary" data-action="change-screen" data-value="profile">
+                    <span class="btn-icon">👤</span>
+                    <span class="btn-text">Profile</span>
+                </button>
+                <button class="nav-btn btn-secondary" data-action="change-screen" data-value="settings">
+                    <span class="btn-icon">⚙️</span>
+                    <span class="btn-text">Settings</span>
+                </button>
+            </nav>
+            
+            <div class="menu-daily" id="menu-daily">
+                <button class="btn-daily" id="btn-daily" data-action="claim-daily" aria-label="Claim daily reward">
+                    <span class="daily-icon">🎁</span>
+                    <span class="daily-text">Daily Reward</span>
+                    <span class="daily-streak">🔥 0</span>
+                </button>
+            </div>
+            
+            <footer class="menu-footer">
+                <p>Made with ❤️ for young mathematicians</p>
+                <p class="version">v1.0.0</p>
+            </footer>
+        </section>
+
+        <!-- Screen: World Map -->
+        <section id="screen-map" class="screen" role="region" aria-label="Adventure Map">
+            <div id="map-container" class="map-container"></div>
+        </section>
+
+        <!-- Screen: Challenge -->
+        <section id="screen-challenge" class="screen" role="region" aria-label="Math Challenge">
+            <header class="challenge-header">
+                <div class="challenge-info">
+                    <span class="world-name" id="challenge-world">Ocean Cove</span>
+                    <span class="level-name" id="challenge-level">Level 1</span>
+                </div>
+                <div class="challenge-counter" id="challenge-counter">1 / 10</div>
+                <div class="challenge-timer" aria-live="polite">
+                    <svg class="timer-ring" viewBox="0 0 64 64">
+                        <circle class="timer-bg" cx="32" cy="32" r="26" fill="none" stroke-width="4"/>
+                        <circle class="timer-progress" cx="32" cy="32" r="26" fill="none" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                    <span class="timer-text">30</span>
+                </div>
+            </header>
+            
+            <main class="challenge-main">
+                <div class="question-area">
+                    <div class="question-type">
+                        <span class="type-icon" id="question-type-icon">🔢</span>
+                        <span class="type-label" id="question-type">Counting</span>
+                    </div>
+                    <div class="question-text" id="question-text">How many fish do you see?</div>
+                    <div class="question-visual" id="question-visual" aria-label="Visual representation of the problem"></div>
+                </div>
+                
+                <div class="answer-area" id="answer-area" role="region" aria-label="Answer input">
+                    <!-- Answer buttons rendered dynamically -->
+                </div>
+            </main>
+            
+            <footer class="challenge-footer">
+                <div class="game-stats">
+                    <div class="hearts-display" id="hearts-display" aria-label="Hearts remaining">
+                        <span class="heart">❤️</span>
+                        <span class="heart">❤️</span>
+                        <span class="heart">❤️</span>
+                    </div>
+                    <div class="streak-display" id="streak-display" aria-label="Current streak"></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <button class="btn btn-hint" data-action="use-hint" aria-label="Get a hint">💡 Hint</button>
+            </footer>
+            
+            <!-- Pause Modal -->
+            <div id="pause-modal" class="modal pause-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">
+                <div class="modal-content">
+                    <h2 id="pause-title">⏸️ Paused</h2>
+                    <div class="pause-menu">
+                        <button class="btn btn-primary" data-action="resume">Continue</button>
+                        <button class="btn btn-secondary" data-action="change-screen" data-value="settings">Settings</button>
+                        <button class="btn btn-danger" data-action="quit-level">Quit Level</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screen: Results -->
+        <section id="screen-results" class="screen" role="region" aria-label="Level Results">
+            <div class="results-container">
+                <div id="results-content" class="results-content">
+                    <!-- Results rendered dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Screen: Shop -->
+        <section id="screen-shop" class="screen" role="region" aria-label="Shop">
+            <header class="screen-header">
+                <button class="btn btn-icon" data-action="change-screen" data-value="menu" aria-label="Back">←</button>
+                <h1>🏪 Kingdom Shop</h1>
+                <div class="header-coins">
+                    <span id="shop-coins">0</span> 💰
+                </div>
+            </header>
+            <main class="shop-content" id="shop-content">
+                <!-- Shop items rendered dynamically -->
+            </main>
+        </section>
+
+        <!-- Screen: Settings -->
+        <section id="screen-settings" class="screen" role="region" aria-label="Settings">
+            <header class="screen-header">
+                <button class="btn btn-icon" data-action="change-screen" data-value="menu" aria-label="Back">←</button>
+                <h1>⚙️ Settings</h1>
+                <div></div>
+            </header>
+            <main class="settings-content" id="settings-content">
+                <!-- Settings form rendered dynamically -->
+            </main>
+        </section>
+
+        <!-- Screen: Profile -->
+        <section id="screen-profile" class="screen" role="region" aria-label="Profile">
+            <header class="screen-header">
+                <button class="btn btn-icon" data-action="change-screen" data-value="menu" aria-label="Back">←</button>
+                <h1>👤 Profile</h1>
+                <div></div>
+            </header>
+            <main class="profile-content" id="profile-content">
+                <!-- Profile rendered dynamically -->
+            </main>
+        </section>
+    </div>
+
+    <!-- Achievement Notification Container -->
+    <div id="achievement-container" class="achievement-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Offline Notice Container -->
+    <div id="offline-container" class="offline-container" aria-live="assertive"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/challenges.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
