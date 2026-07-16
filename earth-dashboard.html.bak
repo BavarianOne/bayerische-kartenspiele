@@ -774,10 +774,10 @@
 
     <!-- Legend -->
     <div class="legend" role="img" aria-label="Map legend">
-        <div class="legend-item"><span class="legend-color iss"></span>🛰️ ISS Orbit & Position</div>
-        <div class="legend-item"><span class="legend-color quake"></span>🌋 Earthquakes (M1.0+)</div>
-        <div class="legend-item"><span class="legend-color lightning"></span>⚡ Lightning Strikes</div>
-        <div class="legend-item"><span class="legend-color aurora"></span>🌌 Aurora Ovals (Kp)</div>
+        <div class="legend-item"><span class="legend-color iss"></span>ISS Orbit</div>
+        <div class="legend-item"><span class="legend-color quake"></span>Earthquakes</div>
+        <div class="legend-item"><span class="legend-color lightning"></span>Lightning</div>
+        <div class="legend-item"><span class="legend-color aurora"></span>Aurora Oval</div>
     </div>
 
     <!-- Three.js & Libraries -->
@@ -841,7 +841,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 2.0;
+        renderer.toneMappingExposure = 1.2;
         renderer.shadowMap.enabled = false;
         container.appendChild(renderer.domElement);
 
@@ -866,7 +866,7 @@
         
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
-            0.3, 0.3, 0.7
+            0.6, 0.4, 0.85
         );
         composer.addPass(bloomPass);
 
@@ -878,35 +878,8 @@
         const earthGroup = new THREE.Group();
         scene.add(earthGroup);
 
-        // Earth mesh - using real Earth texture from Three.js examples
-        const earthGeometry = new THREE.SphereGeometry(CONFIG.earthRadius, 128, 64);
-        let earthMaterial = null;
-        let earthMesh = null;
-
-        // Load real Earth texture
-        const textureLoader = new THREE.TextureLoader();
-        const earthTexture = textureLoader.load(
-            'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
-            (texture) => {
-                texture.wrapS = THREE.RepeatWrapping;
-                texture.wrapT = THREE.ClampToEdgeWrapping;
-                texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-                texture.colorSpace = THREE.SRGBColorSpace;
-                if (earthMaterial) {
-                    earthMaterial.map = texture;
-                    earthMaterial.needsUpdate = true;
-                }
-            },
-            undefined,
-            (err) => {
-                console.warn('Failed to load Earth texture, using fallback:', err);
-                // Fallback to procedural texture
-                createFallbackEarthTexture();
-            }
-        );
-
-        // Fallback procedural texture (simplified)
-        function createFallbackEarthTexture() {
+        // Earth textures (procedural)
+        function createEarthTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 2048;
             canvas.height = 1024;
@@ -922,34 +895,69 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 2048, 1024);
 
-            // Simple land approximation
+            // Continents (simplified noise-based)
             ctx.fillStyle = '#1a4a2e';
-            // Draw some basic continent shapes
-            const continents = [
-                { cx: 300, cy: 300, rx: 200, ry: 150 },  // North America
-                { cx: 600, cy: 400, rx: 150, ry: 200 },  // South America
-                { cx: 1000, cy: 250, rx: 300, ry: 200 }, // Europe/Africa/Asia
-                { cx: 1600, cy: 300, rx: 200, ry: 150 }, // Australia/Asia
-                { cx: 1000, cy: 700, rx: 100, ry: 100 }, // Antarctica
-            ];
-            continents.forEach(c => {
-                ctx.beginPath();
-                ctx.ellipse(c.cx, c.cy, c.rx, c.ry, 0, 0, Math.PI * 2);
-                ctx.fill();
-            });
+            ctx.globalCompositeOperation = 'lighter';
+            
+            // Generate landmasses using noise
+            for (let y = 0; y < 1024; y += 4) {
+                for (let x = 0; x < 2048; x += 4) {
+                    const lat = (y / 1024 - 0.5) * Math.PI;
+                    const lon = (x / 2048) * Math.PI * 2;
+                    
+                    // Simple continental shapes using noise
+                    const n1 = noise3D(Math.cos(lat) * Math.cos(lon), Math.sin(lon), Math.sin(lat)) * 0.5;
+                    const n2 = noise3D(Math.cos(lat) * Math.cos(lon) * 2, Math.sin(lon) * 2, Math.sin(lat) * 2) * 0.25;
+                    const n3 = noise3D(Math.cos(lat) * Math.cos(lon) * 4, Math.sin(lon) * 4, Math.sin(lat) * 4) * 0.125;
+                    const land = n1 + n2 + n3;
+                    
+                    if (land > 0.15) {
+                        const intensity = Math.min((land - 0.15) * 3, 1);
+                        const r = Math.floor(26 + intensity * 60);
+                        const g = Math.floor(74 + intensity * 100);
+                        const b = Math.floor(46 + intensity * 40);
+                        ctx.fillStyle = `rgb(${r},${g},${b})`;
+                        ctx.fillRect(x, y, 4, 4);
+                    }
+                }
+            }
 
             // Ice caps
             ctx.fillStyle = 'rgba(255,255,255,0.9)';
-            ctx.fillRect(0, 0, 2048, 80);
-            ctx.fillRect(0, 944, 2048, 80);
+            for (let y = 0; y < 100; y++) {
+                const lat = (y / 1024 - 0.5) * Math.PI;
+                if (Math.abs(lat) > 1.3) {
+                    for (let x = 0; x < 2048; x += 2) {
+                        if (Math.random() > 0.3) ctx.fillRect(x, y, 2, 2);
+                        if (Math.random() > 0.3) ctx.fillRect(x, 1023 - y, 2, 2);
+                    }
+                }
+            }
 
             const texture = new THREE.CanvasTexture(canvas);
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.ClampToEdgeWrapping;
             texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            texture.colorSpace = THREE.SRGBColorSpace;
             return texture;
         }
+
+        // Simple 3D noise
+        function noise3D(x, y, z) {
+            const X = Math.floor(x * 100) & 255;
+            const Y = Math.floor(y * 100) & 255;
+            const Z = Math.floor(z * 100) & 255;
+            return Math.sin(X * 12.9898 + Y * 78.233 + Z * 43758.5453) * 43758.5453 % 1;
+        }
+
+        // Earth mesh
+        const earthGeometry = new THREE.SphereGeometry(CONFIG.earthRadius, 128, 64);
+        const earthMaterial = new THREE.MeshStandardMaterial({
+            map: createEarthTexture(),
+            roughness: 0.8,
+            metalness: 0.1,
+        });
+        const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+        earthGroup.add(earthMesh);
 
         // Night lights texture
         function createNightTexture() {
@@ -1106,22 +1114,12 @@
         const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
         scene.add(starsMesh);
 
-        // Sun light - brighter for better Earth visibility
-        const sunLight = new THREE.DirectionalLight(0xffffee, 4.5);
+        // Sun light
+        const sunLight = new THREE.DirectionalLight(0xffffee, 2);
         sunLight.position.set(1, 0.3, 1).normalize();
         scene.add(sunLight);
 
-        // Secondary fill light from opposite side to reduce harsh shadows
-        const fillLight = new THREE.DirectionalLight(0x88aaff, 2.5);
-        fillLight.position.set(-1, -0.2, -1).normalize();
-        scene.add(fillLight);
-
-        // Additional rim light for edge glow
-        const rimLight = new THREE.DirectionalLight(0xfff8e7, 1.5);
-        rimLight.position.set(0, -1, 0).normalize();
-        scene.add(rimLight);
-
-        const ambientLight = new THREE.AmbientLight(0x667788, 1.2);
+        const ambientLight = new THREE.AmbientLight(0x223344, 0.5);
         scene.add(ambientLight);
 
         // ============ DATA LAYERS ============
@@ -1309,297 +1307,15 @@
             return `${Math.abs(lat).toFixed(1)}°${latDir} ${Math.abs(lon).toFixed(1)}°${lonDir}`;
         }
 
-        // ============ TOOLTIP SYSTEM ============
-        const tooltip = document.createElement('div');
-        tooltip.id = 'globe-tooltip';
-        tooltip.style.cssText = `
-            position: fixed;
-            pointer-events: none;
-            z-index: 1000;
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            font-size: 0.75rem;
-            color: var(--fg);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
-            transform: translate(-50%, -100%);
-            opacity: 0;
-            transition: opacity 0.15s ease;
-            white-space: nowrap;
-            max-width: 280px;
-        `;
-        document.body.appendChild(tooltip);
-
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let hoveredObject = null;
-
-        function onMouseMove(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            
-            // Collect all pickable objects
-            const pickableObjects = [
-                issMesh,
-                ...quakeMeshes,
-                lightningMesh,
-                auroraNorth,
-                auroraSouth,
-                auroraParticlesMesh,
-            ].filter(Boolean);
-            
-            const intersects = raycaster.intersectObjects(pickableObjects, false);
-            
-            if (intersects.length > 0) {
-                const intersect = intersects[0];
-                const obj = intersect.object;
-                
-                if (obj !== hoveredObject) {
-                    hoveredObject = obj;
-                    showTooltip(obj, intersect.point, event.clientX, event.clientY);
-                } else {
-                    updateTooltipPosition(event.clientX, event.clientY);
-                }
-            } else {
-                hideTooltip();
-                hoveredObject = null;
-            }
-        }
-
-        function getTimeAgo(date) {
-            const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-            if (seconds < 60) return `${seconds}s ago`;
-            const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return `${minutes}m ago`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `${hours}h ago`;
-            const days = Math.floor(hours / 24);
-            return `${days}d ago`;
-        }
-
-        function showTooltip(object, worldPoint, clientX, clientY) {
-            let content = '';
-            
-            if (object === issMesh) {
-                const iss = state.iss;
-                const timeAgo = iss ? getTimeAgo(new Date(iss.timestamp * 1000)) : '—';
-                content = `
-                    <div style="color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🛰️</span> International Space Station
-                    </div>
-                    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; font-size: 0.7rem;">
-                        <span style="color: var(--muted);">Position:</span>
-                        <span style="font-family: 'Orbitron', monospace; font-weight: 700;">${iss ? formatCoords(iss.lat, iss.lon) : '—'}</span>
-                        <span style="color: var(--muted);">Altitude:</span>
-                        <span>${iss ? Math.round(iss.altitude) + ' km' : '~408 km'}</span>
-                        <span style="color: var(--muted);">Velocity:</span>
-                        <span>${iss ? Math.round(iss.velocity) + ' km/h' : '~27,600 km/h'}</span>
-                        <span style="color: var(--muted);">Orbit Period:</span>
-                        <span>~92 min</span>
-                        <span style="color: var(--muted);">Crew:</span>
-                        <span>${state.crew?.length || '—'}</span>
-                        <span style="color: var(--muted);">Data Age:</span>
-                        <span style="color: var(--success);">${timeAgo}</span>
-                    </div>
-                    <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); font-size: 0.6rem; color: var(--muted);">
-                        <a href="https://spotthestation.nasa.gov/" target="_blank" style="color: var(--accent); text-decoration: none;">🔗 Spot the Station</a> | 
-                        <a href="https://www.nasa.gov/mission_pages/station/main/index.html" target="_blank" style="color: var(--accent); text-decoration: none;">🔗 NASA ISS</a>
-                    </div>
-                `;
-            } else if (quakeMeshes.includes(object)) {
-                const idx = quakeMeshes.indexOf(object);
-                const q = state.quakes[idx];
-                if (q) {
-                    const magClass = getMagnitudeClass(q.mag);
-                    const magColor = magClass === 'major' ? '#f43f5e' : magClass === 'strong' ? '#fb923c' : magClass === 'moderate' ? '#fbbf24' : '#3b82f6';
-                    const timeAgo = getTimeAgo(new Date(q.time));
-                    const usgsUrl = `https://earthquake.usgs.gov/earthquakes/eventpage/${q.id || 'us' + q.time}`;
-                    content = `
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                            <span style="background: ${magColor}; color: white; padding: 0.15rem 0.5rem; border-radius: 4px; font-family: 'Orbitron', monospace; font-weight: 700; font-size: 0.75rem;">M${q.mag.toFixed(1)}</span>
-                            <span style="font-weight: 700; color: var(--danger);">🌋 Earthquake</span>
-                            <span style="background: ${magColor}; color: white; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.55rem; text-transform: uppercase;">${magClass}</span>
-                        </div>
-                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; font-size: 0.7rem;">
-                            <span style="color: var(--muted);">Location:</span>
-                            <span>${escapeHtml(q.place)}</span>
-                            <span style="color: var(--muted);">Coordinates:</span>
-                            <span style="font-family: 'Orbitron', monospace;">${formatCoords(q.lat, q.lon)}</span>
-                            <span style="color: var(--muted);">Depth:</span>
-                            <span>${q.depth.toFixed(1)} km</span>
-                            <span style="color: var(--muted);">Time (UTC):</span>
-                            <span>${formatTime(new Date(q.time))}</span>
-                            <span style="color: var(--muted);">Time Ago:</span>
-                            <span style="color: var(--accent);">${timeAgo}</span>
-                        </div>
-                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); font-size: 0.6rem; color: var(--muted);">
-                            <a href="${usgsUrl}" target="_blank" style="color: var(--accent); text-decoration: none;">🔗 USGS Event Page</a>
-                        </div>
-                    `;
-                }
-            } else if (object === lightningMesh) {
-                const totalHour = state.lightningHistory.reduce((s,h)=>s+h.count,0);
-                content = `
-                    <div style="color: var(--warning); font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>⚡</span> Global Lightning Activity
-                    </div>
-                    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; font-size: 0.7rem;">
-                        <span style="color: var(--muted);">Strikes/min:</span>
-                        <span style="font-family: 'Orbitron', monospace; font-weight: 700; color: var(--warning);">${state.lightningThisMinute}</span>
-                        <span style="color: var(--muted);">Total (hour):</span>
-                        <span>${totalHour.toLocaleString()}</span>
-                        <span style="color: var(--muted);">Active Regions:</span>
-                        <span>${state.lightningRegions || '—'}</span>
-                        <span style="color: var(--muted);">Density:</span>
-                        <span>${state.lightningDensity || '—'} /km²</span>
-                    </div>
-                    <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); font-size: 0.6rem; color: var(--muted);">
-                        <span>⚡ Simulated real-time data</span>
-                    </div>
-                `;
-            } else if (object === auroraNorth || object === auroraSouth) {
-                const hemi = object === auroraNorth ? 'Northern' : 'Southern';
-                content = `
-                    <div style="color: #8b5cf6; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🌌</span> ${hemi} Aurora Oval
-                    </div>
-                    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; font-size: 0.7rem;">
-                        <span style="color: var(--muted);">Kp Index:</span>
-                        <span style="font-family: 'Orbitron', monospace; font-weight: 700; color: #8b5cf6;">${state.kpIndex.toFixed(1)}</span>
-                        <span style="color: var(--muted);">Visibility:</span>
-                        <span style="color: var(--success);">${state.auroraVisibility}</span>
-                        <span style="color: var(--muted);">Lat. Range:</span>
-                        <span>${hemi === 'Northern' ? '65°-75°N' : '65°-75°S'}</span>
-                    </div>
-                    <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); font-size: 0.6rem; color: var(--muted);">
-                        <a href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" style="color: var(--accent); text-decoration: none;">🔗 NOAA Aurora Forecast</a>
-                    </div>
-                `;
-            } else if (object === auroraParticlesMesh) {
-                content = `
-                    <div style="color: #8b5cf6; font-weight: 700; margin-bottom: 0.5rem;">🌌 Aurora Particles</div>
-                    <div style="font-size: 0.7rem; color: var(--muted);">Kp Index: ${state.kpIndex.toFixed(1)}</div>
-                    <div style="font-size: 0.7rem; color: var(--muted);">Visibility: ${state.auroraVisibility}</div>
-                `;
-            }
-            
-            if (content) {
-                tooltip.innerHTML = content;
-                tooltip.style.opacity = '1';
-                updateTooltipPosition(clientX, clientY);
-            }
-        }
-
-        function updateTooltipPosition(clientX, clientY) {
-            const padding = 16;
-            let left = clientX;
-            let top = clientY - padding;
-            
-            // Keep tooltip in viewport
-            const rect = tooltip.getBoundingClientRect();
-            if (left + rect.width / 2 > window.innerWidth - padding) {
-                left = window.innerWidth - rect.width - padding;
-            } else if (left - rect.width / 2 < padding) {
-                left = padding + rect.width / 2;
-            }
-            if (top < padding) {
-                top = clientY + padding + 20;
-            }
-            
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
-        }
-
-        function hideTooltip() {
-            tooltip.style.opacity = '0';
-        }
-
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseleave', hideTooltip);
-
         // ============ DATA FETCHING ============
-        // ============ FALLBACK DATA GENERATORS ============
-        function generateFallbackISS() {
-            // Simulate ISS orbit: ~51.6° inclination, ~92 min period
-            const t = Date.now() / 1000;
-            const period = 5550; // ~92.5 minutes in seconds
-            const phase = (t % period) / period;
-            const lat = 51.6 * Math.sin(phase * Math.PI * 2);
-            const lon = ((t * 0.0648) % 360) - 180; // ~0.0648 deg/s = 360 deg / 5550s
-            return {
-                lat: parseFloat(lat.toFixed(4)),
-                lon: parseFloat(lon.toFixed(4)),
-                timestamp: Math.floor(t),
-            };
-        }
-
-        function generateFallbackCrew() {
-            return ['Oleg Kononenko', 'Nikolai Chub', 'Tracy Caldwell-Dyson', 'Matthew Dominick', 'Michael Barratt', 'Jeanette Epps', 'Alexander Grebenkin'];
-        }
-
-        function generateFallbackQuakes() {
-            const quakes = [];
-            const now = Date.now();
-            const regions = [
-                { lat: 35, lon: -118, place: 'California, USA' },
-                { lat: -20, lon: -70, place: 'Northern Chile' },
-                { lat: 38, lon: 142, place: 'Honshu, Japan' },
-                { lat: -6, lon: 150, place: 'New Britain, PNG' },
-                { lat: 38, lon: 22, place: 'Greece' },
-                { lat: -30, lon: -178, place: 'Kermadec Islands' },
-                { lat: 55, lon: -160, place: 'Alaska Peninsula' },
-                { lat: -10, lon: 120, place: 'Sumba, Indonesia' },
-                { lat: 19, lon: -105, place: 'Offshore Jalisco, Mexico' },
-                { lat: -22, lon: 170, place: 'Loyalty Islands' },
-            ];
-            for (let i = 0; i < 8; i++) {
-                const region = regions[i % regions.length];
-                const mag = 1.5 + Math.random() * 4.5;
-                const depth = 2 + Math.random() * 30;
-                const timeOffset = Math.random() * 3600000;
-                quakes.push({
-                    lat: region.lat + (Math.random() - 0.5) * 5,
-                    lon: region.lon + (Math.random() - 0.5) * 5,
-                    depth: parseFloat(depth.toFixed(1)),
-                    mag: parseFloat(mag.toFixed(1)),
-                    place: region.place,
-                    time: now - timeOffset,
-                    url: '#',
-                });
-            }
-            return quakes.sort((a, b) => b.time - a.time);
-        }
-
-        function generateFallbackAurora() {
-            return { kp: 1 + Math.random() * 5 };
-        }
-
-        // ============ RETRY WITH EXPONENTIAL BACKOFF ============
-        async function fetchWithRetry(url, options = {}, maxRetries = 3) {
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-                try {
-                    const res = await fetch(url, options);
-                    if (res.ok) return await res.json();
-                    throw new Error(`HTTP ${res.status}`);
-                } catch (e) {
-                    if (attempt === maxRetries - 1) throw e;
-                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-                    console.warn(`Retry ${attempt + 1}/${maxRetries} for ${url} in ${Math.round(delay)}ms`);
-                    await new Promise(r => setTimeout(r, delay));
-                }
-            }
-        }
-
         async function fetchISS() {
             try {
-                const [posData, crewData] = await Promise.all([
-                    fetchWithRetry('https://api.open-notify.org/iss-now.json', {}, 2),
-                    fetchWithRetry('https://api.open-notify.org/astros.json', {}, 2)
+                const [posRes, crewRes] = await Promise.all([
+                    fetch('https://api.open-notify.org/iss-now.json'),
+                    fetch('https://api.open-notify.org/astros.json')
                 ]);
+                const posData = await posRes.json();
+                const crewData = await crewRes.json();
                 
                 state.iss = {
                     lat: parseFloat(posData.iss_position.latitude),
@@ -1609,19 +1325,18 @@
                 state.crew = crewData.people.filter(p => p.craft === 'ISS').map(p => p.name);
                 
                 updateISSUI();
-                document.getElementById('statusISS').className = 'status-dot live';
+                document.getElementById('statusISS').classList.add('live');
             } catch (e) {
-                console.warn('ISS fetch failed, using fallback:', e);
-                state.iss = generateFallbackISS();
-                state.crew = generateFallbackCrew();
-                updateISSUI();
-                document.getElementById('statusISS').className = 'status-dot warning';
+                console.warn('ISS fetch failed:', e);
+                document.getElementById('statusISS').classList.remove('live');
+                document.getElementById('statusISS').classList.add('danger');
             }
         }
 
         async function fetchEarthquakes() {
             try {
-                const data = await fetchWithRetry('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson', {}, 2);
+                const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson');
+                const data = await res.json();
                 
                 state.quakes = data.features
                     .filter(f => f.properties.mag && f.properties.mag > 0)
@@ -1639,13 +1354,11 @@
                 
                 updateQuakesUI();
                 renderQuakes();
-                document.getElementById('statusQuakes').className = 'status-dot live';
+                document.getElementById('statusQuakes').classList.add('live');
             } catch (e) {
-                console.warn('Earthquake fetch failed, using fallback:', e);
-                state.quakes = generateFallbackQuakes();
-                updateQuakesUI();
-                renderQuakes();
-                document.getElementById('statusQuakes').className = 'status-dot warning';
+                console.warn('Earthquake fetch failed:', e);
+                document.getElementById('statusQuakes').classList.remove('live');
+                document.getElementById('statusQuakes').classList.add('danger');
             }
         }
 
@@ -1653,7 +1366,7 @@
             // Using a simulated approach since real-time lightning APIs require keys
             // In production, you'd use: blitzortung.org, lightningmaps.org, or NOAA
             simulateLightning();
-            document.getElementById('statusLightning').className = 'status-dot warning';
+            document.getElementById('statusLightning').classList.add('live');
         }
 
         function simulateLightning() {
@@ -1707,31 +1420,13 @@
 
         async function fetchAurora() {
             try {
-                // NOAA SWPC Kp index - try multiple endpoints for CORS resilience
-                const endpoints = [
-                    'https://services.swpc.noaa.gov/json/planetary_k_index_1m.json',
-                    'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json',
-                ];
+                // NOAA SWPC Kp index
+                const res = await fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json');
+                const data = await res.json();
                 
-                let data = null;
-                for (const endpoint of endpoints) {
-                    try {
-                        const res = await fetch(endpoint, { mode: 'cors' });
-                        if (res.ok) {
-                            data = await res.json();
-                            console.log('Aurora data fetched from:', endpoint);
-                            break;
-                        }
-                    } catch (e) {
-                        console.warn('Aurora endpoint failed:', endpoint, e);
-                    }
-                }
-                
-                if (data && data.length > 0) {
+                if (data.length > 0) {
                     const latest = data[data.length - 1];
                     state.kpIndex = parseFloat(latest.kp_index) || 0;
-                } else {
-                    throw new Error('All aurora endpoints failed');
                 }
                 
                 // Determine visibility
@@ -1741,14 +1436,14 @@
                 else state.auroraVisibility = 'Very Low';
                 
                 updateAuroraUI();
-                document.getElementById('statusAurora').className = 'status-dot live';
+                document.getElementById('statusAurora').classList.add('live');
             } catch (e) {
-                console.error('Aurora fetch failed:', e);
+                console.warn('Aurora fetch failed:', e);
                 // Fallback simulated
                 state.kpIndex = Math.random() * 5;
                 state.auroraVisibility = 'Simulated';
                 updateAuroraUI();
-                document.getElementById('statusAurora').className = 'status-dot warning';
+                document.getElementById('statusAurora').classList.add('warning');
             }
         }
 
@@ -1853,46 +1548,25 @@
             
             state.quakes.forEach(q => {
                 const vec = latLonToVector3(q.lat, q.lon, CONFIG.earthRadius + 0.5);
-                // Larger minimum size so even M1.8 quakes are visible
-                const size = Math.max(1.2, 0.8 + q.mag * 0.6);
+                const size = 0.5 + q.mag * 0.8;
                 
-                const magClass = getMagnitudeClass(q.mag);
-                const color = magClass === 'major' ? 0xf43f5e :
-                              magClass === 'strong' ? 0xfb923c :
-                              magClass === 'moderate' ? 0xfbbf24 : 0x3b82f6;
-                
-                // Main marker - slightly emissive for visibility
+                // Main marker
                 const geometry = new THREE.SphereGeometry(size, 16, 16);
+                const color = getMagnitudeClass(q.mag) === 'major' ? 0xf43f5e :
+                              getMagnitudeClass(q.mag) === 'strong' ? 0xfb923c :
+                              getMagnitudeClass(q.mag) === 'moderate' ? 0xfbbf24 : 0x3b82f6;
                 const material = new THREE.MeshBasicMaterial({
                     color,
                     transparent: true,
-                    opacity: 0.9,
+                    opacity: 0.8,
                 });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.position.copy(vec);
                 mesh.lookAt(0, 0, 0);
-                mesh.userData = { quake: q, index: quakeMeshes.length };
                 dataGroup.add(mesh);
                 quakeMeshes.push(mesh);
                 
-                // Glow/halo ring for ALL quakes (especially helps small ones)
-                const glowGeometry = new THREE.RingGeometry(size * 1.5, size * 2.5, 32);
-                const glowMaterial = new THREE.MeshBasicMaterial({
-                    color,
-                    transparent: true,
-                    opacity: 0.3,
-                    side: THREE.DoubleSide,
-                    depthWrite: false,
-                    blending: THREE.AdditiveBlending,
-                });
-                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-                glow.position.copy(vec);
-                glow.lookAt(0, 0, 0);
-                glow.userData = { baseSize: size * 1.5, maxSize: size * 4, speed: 0.3 + Math.random() * 0.4, color };
-                dataGroup.add(glow);
-                quakePulses.push(glow);
-                
-                // Pulse ring (expanding ring)
+                // Pulse ring
                 const pulseGeometry = new THREE.RingGeometry(size * 1.2, size * 2, 32);
                 const pulseMaterial = new THREE.MeshBasicMaterial({
                     color,
@@ -1961,9 +1635,8 @@
                 pulse.material.opacity = 0.4 * (1 - (pulse.userData.baseSize - pulse.userData.maxSize * 0.5) / (pulse.userData.maxSize * 0.5));
             });
             
-            // Animate lightning - only update when active
+            // Animate lightning
             let activeLightning = 0;
-            let lightningNeedsUpdate = false;
             for (let i = 0; i < maxLightning; i++) {
                 if (lightningLifes[i] > 0) {
                     lightningAges[i] += delta * 1000;
@@ -1971,43 +1644,37 @@
                     if (lifeRatio >= 1) {
                         lightningLifes[i] = 0;
                         lightningSizes[i] = 0;
-                        lightningNeedsUpdate = true;
                     } else {
                         lightningSizes[i] = (3 + Math.random() * 3) * (1 - lifeRatio) * (1 - lifeRatio);
-                        lightningNeedsUpdate = true;
+                        lightningColors[i * 3 + 3] = 1 - lifeRatio; // alpha in w component
                         activeLightning++;
                     }
                 }
             }
-            if (lightningNeedsUpdate) {
-                lightningGeometry.attributes.size.needsUpdate = true;
-                lightningGeometry.attributes.age.needsUpdate = true;
-                // Only update color when new strikes are added (in addLightningStrike)
-            }
+            lightningGeometry.attributes.size.needsUpdate = true;
+            lightningGeometry.attributes.age.needsUpdate = true;
             
             // Simulate new lightning occasionally
             if (Math.random() < 0.02 * speedDelta * 60) {
                 simulateLightning();
             }
             
-            // Animate aurora particles - update every 3rd frame to reduce flickering
-            if (frameCount % 3 === 0) {
-                const auroraPositions = auroraParticlesGeometry.attributes.position.array;
-                const auroraPhases = auroraParticlesGeometry.attributes.phase.array;
-                const auroraSizes = auroraParticlesGeometry.attributes.size.array;
-                const timeSec = time * 0.001;
+            // Animate aurora particles
+            const auroraPositions = auroraParticlesGeometry.attributes.position.array;
+            const auroraPhases = auroraParticlesGeometry.attributes.phase.array;
+            const auroraSizes = auroraParticlesGeometry.attributes.size.array;
+            const time = time * 0.001;
+            
+            for (let i = 0; i < auroraParticleCount; i++) {
+                const phase = auroraPhases[i] + time * 0.5;
+                const wave = Math.sin(phase) * 0.5 + Math.sin(phase * 2.3) * 0.3;
+                auroraSizes[i] = (1 + wave) * (0.5 + state.kpIndex / 18);
                 
-                for (let i = 0; i < auroraParticleCount; i++) {
-                    const phase = auroraPhases[i] + timeSec * 0.5;
-                    const wave = Math.sin(phase) * 0.5 + Math.sin(phase * 2.3) * 0.3;
-                    auroraSizes[i] = (1 + wave) * (0.5 + state.kpIndex / 18);
-                    
-                    // Gentle vertical movement
-                    auroraPositions[i * 3 + 1] += Math.sin(phase * 0.7) * 0.02;
-                }
-                auroraParticlesGeometry.attributes.size.needsUpdate = true;
-                auroraParticlesGeometry.attributes.position.needsUpdate = true;
+                // Gentle vertical movement
+                auroraPositions[i * 3 + 1] += Math.sin(phase * 0.7) * 0.02;
             }
+            auroraParticlesGeometry.attributes.size.needsUpdate = true;
+            auroraParticlesGeometry.attributes.position.needsUpdate = true;
             
             // Pulse aurora ovals
             const pulse = 0.5 + 0.5 * Math.sin(time * 0.5);
@@ -2098,38 +1765,17 @@
         async function init() {
             setupControls();
             
-            try {
-                // Create Earth material with placeholder texture - real texture loads async
-                const placeholderTexture = new THREE.TextureLoader().load(
-                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
-                );
-                placeholderTexture.colorSpace = THREE.SRGBColorSpace;
-                
-                earthMaterial = new THREE.MeshStandardMaterial({
-                    map: placeholderTexture,
-                    roughness: 0.5,
-                    metalness: 0.05,
-                    emissive: new THREE.Color(0x112244),
-                    emissiveIntensity: 0.15,
-                });
-                earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
-                earthGroup.add(earthMesh);
-                
-                // Initial data fetch
-                await Promise.all([
-                    fetchISS(),
-                    fetchEarthquakes(),
-                    fetchLightning(),
-                    fetchAurora(),
-                ]);
-            } catch (err) {
-                console.error('Initialization error:', err);
-                // Ensure loading overlay hides even on error
-            } finally {
-                // Start animation
-                loadingOverlay.classList.add('hidden');
-                requestAnimationFrame(animate);
-            }
+            // Initial data fetch
+            await Promise.all([
+                fetchISS(),
+                fetchEarthquakes(),
+                fetchLightning(),
+                fetchAurora(),
+            ]);
+            
+            // Start animation
+            loadingOverlay.classList.add('hidden');
+            requestAnimationFrame(animate);
             
             // Periodic updates
             setInterval(fetchISS, CONFIG.dataRefreshInterval);
