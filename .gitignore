@@ -17,3 +17,11 @@ schafkopf_text.txt
 test-memory.js
 earth-dashboard.html.backup3
 earth-dashboard.html.backup2
+tests/watten-fix.spec.js
+test-results/tests-watten-fix-Watten-Full-round-playthrough/error-context.md
+test-results/tests-watten-fix-Watten-Pl-71606-ore-declaring-Schlag-Trumpf/error-context.md
+test-results/.last-run.json
+package.json
+test-watten-fix.js
+playwright.config.js
+package.json

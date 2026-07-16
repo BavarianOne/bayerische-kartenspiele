@@ -374,17 +374,16 @@
         }
 
         /* Modals & Dialogs */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 15px;
-            backdrop-filter: blur(4px);
-        }
+                .modal {
+                    display: none;
+                    position: fixed;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0, 0, 0, 0.85);
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 100;
+                    padding: 15px;
+                }
 
         .modal-content {
             background: #2c3e50;
@@ -895,14 +894,17 @@
             logAction(`Geber: ${dealer === 'player' ? 'Du' : 'Gegner'}. Ansager: ${declarer === 'player' ? 'Du' : 'Gegner'}.`);
 
             // Deal cards
-            createDeck();
-            dealCards();
-            
-            if (declarer === 'player') {
-                showDeclareModal();
-            } else {
-                aiDeclare();
-            }
+                        createDeck();
+                        dealCards();
+                        // WICHTIG: Spieler-Hand sofort anzeigen, BEVOR Ansage passiert
+                        sortHand(playerHand);
+                        renderPlayerHand();
+           
+                        if (declarer === 'player') {
+                            showDeclareModal();
+                        } else {
+                            aiDeclare();
+                        }
         }
 
         // Card Deck Operations
@@ -1022,10 +1024,11 @@
         }
 
         function announceDeclarations() {
-            document.getElementById('info-schlag').innerText = selectedSchlag;
-            document.getElementById('info-trumpf').innerHTML = `${SUIT_SVGS[selectedTrumpf]} ${selectedTrumpf}`;
-            sortHand(playerHand);
-            renderPlayerHand();
+                    document.getElementById('info-schlag').innerText = selectedSchlag;
+                    document.getElementById('info-trumpf').innerHTML = `${SUIT_SVGS[selectedTrumpf]} ${selectedTrumpf}`;
+                    // renderPlayerHand() bereits in startNewRound() aufgerufen
+                    // sortHand(playerHand); // schon sortiert
+                    // renderPlayerHand();
         }
 
         function startPlayPhase() {

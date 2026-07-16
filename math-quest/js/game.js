@@ -68,6 +68,12 @@ const Game = (function() {
         // Show menu
         showScreen('menu');
         
+        // Hide loading screen and show app
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) loadingScreen.hidden = true;
+        const app = document.getElementById('app');
+        if (app) app.hidden = false;
+        
         // Start menu music
         Audio.playMusic('menu');
         
