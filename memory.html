@@ -1,0 +1,557 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Memory Spiel - Karten-Suche</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+            color: #333;
+        }
+        
+        h1 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: #555;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        #ui {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ui-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            font-weight: 600;
+        }
+        
+        #moves, #timer {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        
+        #grid {
+            display: grid;
+            gap: 8px;
+            padding: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .card {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #3498db;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card.hidden {
+            background: #3498db;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+            background: #2ecc71;
+        }
+        
+        .card.matched {
+            background: #2ecc71;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.8);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            opacity: 0.8;
+        }
+        
+        .card.flipped::before {
+            content: attr(data-symbol);
+            opacity: 1;
+        }
+        
+        .card.flipped::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60%;
+            height: 60%;
+            background: #2ecc71;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .card.flipped::before {
+            z-index: 1;
+        }
+        
+        .card.flipped::after {
+            z-index: 0;
+        }
+        
+        .card:active {
+            transform: scale(0.95);
+        }
+        
+        #overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        #overlay h2 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        #overlay p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            max-width: 90%;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #c8e6c9;
+        }
+        
+        #overlay button {
+            padding: 12px 30px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-weight: 600;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+            transition: transform 0.1s, box-shadow 0.2s;
+            min-width: 180px;
+        }
+        
+        #overlay button:active {
+            transform: scale(0.95);
+        }
+        
+        #overlay button:focus {
+            outline: 3px solid #81c784;
+            outline-offset: 3px;
+        }
+        
+        #overlay button.secondary {
+            background: linear-gradient(135deg, #78909c, #546e7a);
+            box-shadow: 0 4px 15px rgba(118,144,156,0.4);
+        }
+        
+        .grid-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            color: white;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        }
+        
+        .grid-selector label {
+            font-weight: 600;
+        }
+        
+        .grid-selector select {
+            padding: 8px 12px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .grid-selector select:focus {
+            outline: 3px solid #81c784;
+            outline-offset: 2px;
+        }
+        
+        @media (max-width: 480px) {
+            #grid {
+                gap: 6px;
+                padding: 15px;
+            }
+            
+            .card {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (pointer: coarse) {
+            .card {
+                touch-action: manipulation;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🃏 Memory Spiel</h1>
+    <p class="subtitle">Finde alle Paare! Klicke oder tippe auf die Karten, um sie zu öffnen.</p>
+    
+    <div id="gameContainer">
+        <div id="ui">
+            <div class="ui-item">
+                <span class="icon">🎯</span>
+                <span id="moves">Bewegungen: 0</span>
+            </div>
+            <div class="ui-item">
+                <span class="icon">⏱️</span>
+                <span id="timer">Zeit: 0s</span>
+            </div>
+        </div>
+        
+        <div id="grid"></div>
+        
+        <div id="overlay">
+            <h2 id="overlayTitle">🃏 Memory Spiel</h2>
+            <p id="overlayText">Finde alle Paare in der gegebenen Zeit! Klicke auf zwei Karten, um sie zu öffnen. Wenn sie passen, bleiben sie offen. Wenn nicht, schließen sie sich wieder.</p>
+            
+            <div class="grid-selector">
+            <label for="gridSize">Gittergröße:</label>
+                <select id="gridSize" onchange="updateGridSize(this.value)">
+                    <option value="2">2x2 (2 Paare)</option>
+                    <option value="3">3x3 (4 Paare)</option>
+                    <option value="4" selected>4x4 (8 Paare)</option>
+                    <option value="5">5x5 (12 Paare)</option>
+                    <option value="6">6x6 (18 Paare)</option>
+                </select>
+            </div>
+            
+            <button id="startBtn" onclick="startGame()">Los geht's!</button>
+        </div>
+    </div>
+    
+    <script>
+        /* ========== KONFIGURATION ========== */
+        const CFG = {
+            gridSize: 4,          // 4x4 grid (16 cards = 8 pairs)
+            cardSize: 80,
+            flipDuration: 300,
+            matchDelay: 1000,
+            maxTime: 120         // 2 minutes
+        };
+        
+        /* ========== STATE ========== */
+        let gridEl, overlay, startBtn, movesEl, timerEl;
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let totalPairs = 0;
+        let moves = 0;
+        let timer = null;
+        let timeElapsed = 0;
+        let gameRunning = false;
+        let symbols = ['🍎', '🍊', '🍋', '🍓', '🍐', '🍑', '🍰', '🍒'];
+        
+        /* ========== INIT ========== */
+        function init() {
+            gridEl = document.getElementById('grid');
+            overlay = document.getElementById('overlay');
+            startBtn = document.getElementById('startBtn');
+            movesEl = document.getElementById('moves');
+            timerEl = document.getElementById('timer');
+            
+            // Calculate grid size based on screen
+            const screenWidth = Math.min(window.innerWidth, 500);
+            const cardCount = CFG.gridSize * CFG.gridSize;
+            totalPairs = cardCount / 2;
+            
+            // Adjust grid for smaller screens
+            if (screenWidth < 350) {
+                CFG.gridSize = 3;
+            } else if (screenWidth < 450) {
+                CFG.gridSize = 4;
+            } else {
+                CFG.gridSize = 4;
+            }
+            
+            createCards();
+            updateUI();
+        }
+        
+        /* ========== CARD CREATION ========== */
+        function createCards() {
+            gridEl.innerHTML = '';
+            cards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            
+            // Create pairs of symbols
+            const pairSymbols = [];
+            for (let i = 0; i < totalPairs; i++) {
+                pairSymbols.push(symbols[i % symbols.length]);
+            }
+            
+            // Duplicate for pairs
+            const allSymbols = [...pairSymbols, ...pairSymbols];
+            
+            // Shuffle
+            shuffleArray(allSymbols);
+            
+            // Create card elements
+            for (let i = 0; i < allSymbols.length; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.symbol = allSymbols[i];
+                card.dataset.index = i;
+                card.addEventListener('click', () => handleCardClick(card));
+                card.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleCardClick(card);
+                }, { passive: false });
+                
+                gridEl.appendChild(card);
+                cards.push({
+                    element: card,
+                    symbol: allSymbols[i],
+                    matched: false,
+                    flipped: false
+                });
+            }
+            
+            // Set grid template columns
+            gridEl.style.gridTemplateColumns = `repeat(${CFG.gridSize}, 1fr)`;
+        }
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        /* ========== GAME LOGIC ========== */
+        function handleCardClick(card) {
+            if (!gameRunning) return;
+            
+            const cardData = cards.find(c => c.element === card);
+            
+            // Ignore if already matched or flipped
+            if (cardData.matched || cardData.flipped) return;
+            
+            // Flip the card
+            flipCard(card, cardData);
+            
+            flippedCards.push(cardData);
+            
+            // Check for match after second card
+            if (flippedCards.length === 2) {
+                moves++;
+                updateUI();
+                
+                const card1 = flippedCards[0];
+                const card2 = flippedCards[1];
+                
+                if (card1.symbol === card2.symbol) {
+                    // Match found!
+                    card1.matched = true;
+                    card2.matched = true;
+                    matchedPairs++;
+                    
+                    // Add animation for matched cards
+                    setTimeout(() => {
+                        card1.element.classList.add('matched');
+                        card2.element.classList.add('matched');
+                    }, CFG.flipDuration / 2);
+                    
+                    checkWin();
+                } else {
+                    // No match - flip back
+                    setTimeout(() => {
+                        flipCardBack(card1);
+                        flipCardBack(card2);
+                    }, CFG.matchDelay);
+                }
+                
+                flippedCards = [];
+            }
+        }
+        
+        function flipCard(card, cardData) {
+            card.classList.add('flipped');
+            cardData.flipped = true;
+        }
+        
+        function flipCardBack(cardData) {
+            cardData.element.classList.remove('flipped');
+            cardData.flipped = false;
+        }
+        
+        function checkWin() {
+            if (matchedPairs >= totalPairs) {
+                endGame(true);
+            }
+        }
+        
+        /* ========== GAME STATE ========== */
+        function updateUI() {
+            movesEl.textContent = `Bewegungen: ${moves}`;
+        }
+        
+        function updateTimer() {
+            timeElapsed++;
+            timerEl.textContent = `Zeit: ${timeElapsed}s`;
+            
+            if (timeElapsed >= CFG.maxTime) {
+                endGame(false);
+            }
+        }
+        
+        function startGame() {
+            moves = 0;
+            timeElapsed = 0;
+            matchedPairs = 0;
+            flippedCards = [];
+            
+            // Reset cards
+            cards.forEach(card => {
+                card.element.classList.remove('flipped', 'matched');
+                card.matched = false;
+                card.flipped = false;
+            });
+            
+            // Create new shuffled cards
+            createCards();
+            
+            // Hide overlay
+            overlay.classList.add('hidden');
+            
+            // Start timer
+            gameRunning = true;
+            timer = setInterval(updateTimer, 1000);
+        }
+        
+        function endGame(win) {
+            gameRunning = false;
+            clearInterval(timer);
+            
+            const title = document.getElementById('overlayTitle');
+            const text = document.getElementById('overlayText');
+            const btn = document.getElementById('startBtn');
+            
+            if (win) {
+                title.textContent = '🏆 Gewonnen!';
+                text.innerHTML = `Du hast alle Paare in ${moves} Bewegungen und ${timeElapsed} Sekunden gefunden!<br><br>Klicke auf "Neu starten", um erneut zu spielen.`;
+                btn.textContent = 'Neu starten';
+                btn.classList.remove('secondary');
+                btn.onclick = () => { init(); startGame(); };
+            } else {
+                title.textContent = '⏰ Zeit abgelaufen!';
+                text.innerHTML = `Du hast ${matchedPairs} von ${totalPairs} Paaren gefunden.<br><br>Zeit: ${CFG.maxTime} Sekunden.<br><br>Klicke auf "Neu starten", um erneut zu spielen.`;
+                btn.textContent = 'Neu starten';
+                btn.classList.remove('secondary');
+                btn.onclick = () => { init(); startGame(); };
+            }
+            
+            overlay.classList.remove('hidden');
+        }
+        
+        /* ========== RESET ========== */
+        function resetGame() {
+            moves = 0;
+            timeElapsed = 0;
+            matchedPairs = 0;
+            flippedCards = [];
+            
+            cards.forEach(card => {
+                card.element.classList.remove('flipped', 'matched');
+                card.matched = false;
+                card.flipped = false;
+            });
+            
+            createCards();
+            updateUI();
+        }
+        
+        /* ========== GRID SIZE SELECTION ========== */
+        function updateGridSize(value) {
+            CFG.gridSize = parseInt(value);
+            const cardCount = CFG.gridSize * CFG.gridSize;
+            totalPairs = cardCount / 2;
+            
+            // Update the grid selector to show the selected value
+            const selector = document.getElementById('gridSize');
+            if (selector) {
+                selector.value = value;
+            }
+            
+            // Recreate cards with new grid size
+            createCards();
+            updateUI();
+        }
+        
+        /* ========== INIT ========== */
+        window.onload = init;
+    </script>
+</body>
+</html>
