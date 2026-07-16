@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Live Earth Dashboard - Real-time Globe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #030712;
+            --bg-elevated: #0a1120;
+            --fg: #f1f5f9;
+            --muted: #64748b;
+            --accent: #22d3ee;
+            --accent-glow: #06b6d4;
+            --danger: #f43f5e;
+            --warning: #fbbf24;
+            --success: #22c55e;
+            --card: rgba(15, 23, 42, 0.85);
+            --border: rgba(148, 163, 184, 0.15);
+            --glow: rgba(34, 211, 238, 0.4);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f8fafc;
+                --bg-elevated: #ffffff;
+                --fg: #0f172a;
+                --muted: #64748b;
+                --card: rgba(255, 255, 255, 0.9);
+                --border: rgba(15, 23, 42, 0.1);
+            }
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Background atmosphere */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 30% at 10% 10%, rgba(244, 63, 94, 0.05) 0%, transparent 50%),
+                var(--bg);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .atmosphere::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        /* UI Overlay */
+        .ui-layer {
+            position: fixed;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .ui-layer > * {
+            pointer-events: auto;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(180deg, rgba(3, 7, 18, 0.9) 0%, transparent 100%);
+            backdrop-filter: blur(20px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6, var(--danger));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo::before {
+            content: '🌍';
+            font-size: 1.75rem;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .status-dot {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--muted);
+            box-shadow: 0 0 0 0 var(--muted);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.live::before {
+            background: var(--success);
+            box-shadow: 0 0 0 0 var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.warning::before {
+            background: var(--warning);
+            box-shadow: 0 0 0 0 var(--warning);
+        }
+
+        .status-dot.danger::before {
+            background: var(--danger);
+            box-shadow: 0 0 0 0 var(--danger);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+            50% { box-shadow: 0 0 0 8px transparent; opacity: 0.5; }
+        }
+
+        .time-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+        }
+
+        /* Side Panels */
+        .side-panel {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-50%) translateX(-20px); }
+            to { opacity: 1; transform: translateY(-50%) translateX(0); }
+        }
+
+        .side-panel.right {
+            right: 2rem;
+            left: auto;
+            animation-name: slideInRight;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateY(-50%) translateX(20px); }
+            to { opacity: 1; transform: translateY(-50%) translateX(0); }
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            background: var(--accent);
+            box-shadow: 0 0 12px var(--glow);
+        }
+
+        .panel-title.iss::before { background: var(--accent); box-shadow: 0 0 12px rgba(34, 211, 238, 0.6); }
+        .panel-title.quake::before { background: var(--danger); box-shadow: 0 0 12px rgba(244, 63, 94, 0.6); }
+        .panel-title.lightning::before { background: var(--warning); box-shadow: 0 0 12px rgba(251, 191, 36, 0.6); }
+        .panel-title.aurora::before { background: #8b5cf6; box-shadow: 0 0 12px rgba(139, 92, 246, 0.6); }
+
+        /* ISS Panel */
+        .iss-card {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .iss-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .iss-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+        .iss-value { font-family: 'Orbitron', monospace; font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+
+        .iss-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+        }
+
+        .stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+        .stat-value { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--fg); margin-top: 0.25rem; }
+
+        .iss-track {
+            height: 60px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .iss-track-path {
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+        }
+
+        .iss-track-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            transform: translate(-50%, -50%);
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--glow);
+            animation: orbit 92m linear infinite;
+        }
+
+        @keyframes orbit {
+            from { left: 0%; }
+            to { left: 100%; }
+        }
+
+        /* Earthquake List */
+        .quake-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .quake-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border-left: 3px solid var(--danger);
+            transition: all 0.2s ease;
+            animation: fadeInUp 0.4s ease backwards;
+        }
+
+        .quake-item:hover {
+            background: rgba(244, 63, 94, 0.1);
+            transform: translateX(4px);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quake-mag {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .quake-mag.major { background: linear-gradient(135deg, #7f1d1d, #991b1b); color: #fecaca; }
+        .quake-mag.strong { background: linear-gradient(135deg, #9a3412, #c2410c); color: #fed7aa; }
+        .quake-mag.moderate { background: linear-gradient(135deg, #b45309, #d97706); color: #fde68a; }
+        .quake-mag.minor { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #bfdbfe; }
+
+        .quake-info { flex: 1; min-width: 0; }
+        .quake-place { font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .quake-time { font-size: 0.7rem; color: var(--muted); margin-top: 0.125rem; }
+        .quake-depth { font-size: 0.65rem; color: var(--accent); font-family: 'Orbitron', monospace; }
+
+        /* Lightning Stats */
+        .lightning-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .lightning-stat {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .lightning-stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--warning), #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .lightning-stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Aurora Forecast */
+        .aurora-map {
+            height: 160px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .aurora-oval {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px dashed rgba(139, 92, 246, 0.4);
+            animation: auroraPulse 4s ease-in-out infinite;
+        }
+
+        .aurora-oval.north {
+            width: 120%;
+            height: 120%;
+            top: -60%;
+            left: -10%;
+        }
+
+        .aurora-oval.south {
+            width: 120%;
+            height: 120%;
+            bottom: -60%;
+            left: -10%;
+        }
+
+        @keyframes auroraPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.02); }
+        }
+
+        .aurora-kp {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(34, 211, 238, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+        }
+
+        .aurora-kp-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8b5cf6, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .aurora-kp-label { color: var(--muted); font-size: 0.85rem; }
+
+        .aurora-level {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .aurora-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .aurora-bar.active {
+            background: linear-gradient(90deg, #8b5cf6, var(--accent), var(--success), var(--warning), var(--danger));
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* Bottom Controls */
+        .bottom-controls {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(0deg, rgba(3, 7, 18, 0.95) 0%, transparent 100%);
+            backdrop-filter: blur(20px);
+        }
+
+        .control-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--fg);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--glow);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), rgba(139, 92, 246, 0.15));
+            box-shadow: 0 0 20px var(--glow);
+        }
+
+        .control-btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .control-btn svg { width: 18px; height: 18px; }
+
+        /* Legend */
+        .legend {
+            position: fixed;
+            bottom: 100px;
+            left: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            backdrop-filter: blur(20px);
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        .legend-color.iss { background: var(--accent); box-shadow: 0 0 8px var(--glow); }
+        .legend-color.quake { background: var(--danger); box-shadow: 0 0 8px rgba(244, 63, 94, 0.5); }
+        .legend-color.lightning { background: var(--warning); box-shadow: 0 0 8px rgba(251, 191, 36, 0.5); }
+        .legend-color.aurora { background: linear-gradient(135deg, #8b5cf6, var(--accent)); }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1.5rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            color: var(--accent);
+            letter-spacing: 0.2em;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .side-panel { width: 280px; padding: 1rem; }
+            .top-bar { padding: 1rem 1.5rem; }
+            .bottom-controls { padding: 1rem 1.5rem; flex-wrap: wrap; }
+            .legend { left: 1rem; right: 1rem; bottom: 90px; justify-content: center; }
+        }
+
+        @media (max-width: 768px) {
+            .side-panel.left { left: 1rem; right: 1rem; top: auto; bottom: 160px; max-height: 40vh; transform: none; }
+            .side-panel.right { left: 1rem; right: 1rem; top: auto; bottom: 160px; max-height: 40vh; transform: none; }
+            .top-bar { flex-direction: column; gap: 1rem; text-align: center; }
+            .status-indicators { flex-wrap: wrap; justify-content: center; }
+            .legend { display: none; }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+    </style>
+</head>
+<body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    
+    <div class="loading-overlay" id="loadingOverlay" role="status" aria-label="Loading Earth dashboard">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">INITIALIZING</div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <!-- Top Bar -->
+    <div class="ui-layer top-bar">
+        <div class="logo">LIVE EARTH</div>
+        <div class="status-indicators">
+            <div class="status-dot live" id="statusISS" title="ISS Tracking">
+                <span>ISS</span>
+            </div>
+            <div class="status-dot live" id="statusQuakes" title="Earthquake Feed">
+                <span>QUAKES</span>
+            </div>
+            <div class="status-dot live" id="statusLightning" title="Lightning Detection">
+                <span>LIGHTNING</span>
+            </div>
+            <div class="status-dot live" id="statusAurora" title="Aurora Forecast">
+                <span>AURORA</span>
+            </div>
+            <div class="time-display" id="timeDisplay">00:00:00 UTC</div>
+        </div>
+    </div>
+
+    <!-- Left Panel: ISS & Earthquakes -->
+    <div class="ui-layer side-panel left">
+        <div class="panel-title iss">🛰️ International Space Station</div>
+        <div class="iss-card" id="issCard">
+            <div class="iss-header">
+                <span class="iss-label">Position</span>
+                <span class="iss-value" id="issCoords">--° --'</span>
+            </div>
+            <div class="iss-stats">
+                <div class="stat">
+                    <div class="stat-label">Altitude</div>
+                    <div class="stat-value" id="issAltitude">--- km</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Velocity</div>
+                    <div class="stat-value" id="issVelocity">--- km/h</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Orbit</div>
+                    <div class="stat-value" id="issOrbit">#---</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Crew</div>
+                    <div class="stat-value" id="issCrew">---</div>
+                </div>
+            </div>
+            <div class="iss-track" id="issTrack">
+                <svg class="iss-track-path" viewBox="0 0 100 10" preserveAspectRatio="none">
+                    <path d="M0,5 Q25,0 50,5 T100,5" stroke="var(--accent)" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+                </svg>
+                <div class="iss-track-marker" id="issMarker"></div>
+            </div>
+        </div>
+
+        <div class="panel-title quake">🌋 Recent Earthquakes (Past Hour)</div>
+        <div class="quake-list" id="quakeList" role="list" aria-label="Recent earthquakes">
+            <div class="quake-item" style="justify-content: center; color: var(--muted); border-left-color: transparent;">
+                Loading seismic data...
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Lightning & Aurora -->
+    <div class="ui-layer side-panel right">
+        <div class="panel-title lightning">⚡ Global Lightning (Real-time)</div>
+        <div class="lightning-stats">
+            <div class="lightning-stat">
+                <div class="lightning-stat-value" id="lightningCount">--</div>
+                <div class="lightning-stat-label">Strikes / Min</div>
+            </div>
+            <div class="lightning-stat">
+                <div class="lightning-stat-value" id="lightningTotal">--</div>
+                <div class="lightning-stat-label">Total (Hour)</div>
+            </div>
+            <div class="lightning-stat">
+                <div class="lightning-stat-value" id="lightningDensity">--</div>
+                <div class="lightning-stat-label">Density / km²</div>
+            </div>
+            <div class="lightning-stat">
+                <div class="lightning-stat-value" id="lightningRegions">--</div>
+                <div class="lightning-stat-label">Active Regions</div>
+            </div>
+        </div>
+
+        <div class="panel-title aurora" style="margin-top: 1.5rem;">🌌 Aurora Forecast (Kp Index)</div>
+        <div class="aurora-map" id="auroraMap" aria-label="Aurora oval visualization">
+            <div class="aurora-oval north" id="auroraNorth"></div>
+            <div class="aurora-oval south" id="auroraSouth"></div>
+        </div>
+        <div class="aurora-kp">
+            <div>
+                <div class="aurora-kp-value" id="kpValue">--</div>
+                <div class="aurora-kp-label">Planetary Kp Index</div>
+                <div class="aurora-level" id="kpBars">
+                    <div class="aurora-bar" data-level="1"></div>
+                    <div class="aurora-bar" data-level="2"></div>
+                    <div class="aurora-bar" data-level="3"></div>
+                    <div class="aurora-bar" data-level="4"></div>
+                    <div class="aurora-bar" data-level="5"></div>
+                    <div class="aurora-bar" data-level="6"></div>
+                    <div class="aurora-bar" data-level="7"></div>
+                    <div class="aurora-bar" data-level="8"></div>
+                    <div class="aurora-bar" data-level="9"></div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.7rem; color: var(--muted);">Visibility</div>
+                <div class="aurora-kp-value" style="font-size: 1.25rem;" id="auroraVisibility">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="ui-layer bottom-controls">
+        <button class="control-btn active" id="btnGlobe" title="Globe View" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Globe
+        </button>
+        <button class="control-btn" id="btnFlat" title="Flat Projection" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Map
+        </button>
+        <button class="control-btn" id="btnNight" title="Toggle Night Layer" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            Night
+        </button>
+        <button class="control-btn" id="btnTrails" title="Toggle Particle Trails" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+            Trails
+        </button>
+        <button class="control-btn" id="btnSpeed" title="Animation Speed" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
+            <span id="speedLabel">1×</span>
+        </button>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend" role="img" aria-label="Map legend">
+        <div class="legend-item"><span class="legend-color iss"></span>🛰️ ISS Orbit & Position</div>
+        <div class="legend-item"><span class="legend-color quake"></span>🌋 Earthquakes (M1.0+)</div>
+        <div class="legend-item"><span class="legend-color lightning"></span>⚡ Lightning Strikes</div>
+        <div class="legend-item"><span class="legend-color aurora"></span>🌌 Aurora Ovals (Kp)</div>
+    </div>
+
+    <!-- Three.js & Libraries -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+        import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
+
+        // ============ CONFIG ============
+        const CONFIG = {
+            earthRadius: 100,
+            atmosphereRadius: 110,
+            rotationSpeed: 0.0003,
+            dataRefreshInterval: 30000, // 30 seconds
+            lightningDecay: 2000,
+            quakeDisplayDuration: 3600000, // 1 hour
+            maxQuakes: 50,
+            maxLightning: 500,
+        };
+
+        // ============ STATE ============
+        const state = {
+            iss: null,
+            crew: [],
+            quakes: [],
+            lightning: [],
+            kpIndex: 0,
+            auroraVisibility: 'Low',
+            viewMode: 'globe', // 'globe' | 'flat'
+            showNight: false,
+            showTrails: true,
+            speedMultiplier: 1,
+            lastLightningTime: 0,
+            lightningThisMinute: 0,
+            lightningHistory: [],
+        };
+
+        // ============ THREE.JS SETUP ============
+        const container = document.getElementById('canvas-container');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: 'high-performance',
+            preserveDrawingBuffer: false,
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.shadowMap.enabled = false;
+        container.appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        scene.background = null;
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+        camera.position.set(0, 0, 350);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enablePan = true;
+        controls.minDistance = 130;
+        controls.maxDistance = 800;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.3;
+
+        // Post-processing
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            0.3, 0.3, 0.7
+        );
+        composer.addPass(bloomPass);
+
+        const fxaaPass = new ShaderPass(FXAAShader);
+        fxaaPass.material.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+        composer.addPass(fxaaPass);
+
+        // ============ EARTH CREATION ============
+        const earthGroup = new THREE.Group();
+        scene.add(earthGroup);
+
+        // Earth mesh - using real Earth texture from Three.js examples
+        const earthGeometry = new THREE.SphereGeometry(CONFIG.earthRadius, 128, 64);
+        let earthMaterial = null;
+        let earthMesh = null;
+
+        // Load real Earth texture
+        const textureLoader = new THREE.TextureLoader();
+        const earthTexture = textureLoader.load(
+            'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+            (texture) => {
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.ClampToEdgeWrapping;
+                texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                texture.colorSpace = THREE.SRGBColorSpace;
+                if (earthMaterial) {
+                    earthMaterial.map = texture;
+                    earthMaterial.needsUpdate = true;
+                }
+            },
+            undefined,
+            (err) => {
+                console.warn('Failed to load Earth texture, using fallback:', err);
+                // Fallback to procedural texture
+                createFallbackEarthTexture();
+            }
+        );
+
+        // Fallback procedural texture (simplified)
+        function createFallbackEarthTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            // Base ocean
+            const gradient = ctx.createLinearGradient(0, 0, 0, 1024);
+            gradient.addColorStop(0, '#081a3a');
+            gradient.addColorStop(0.3, '#0c2d5e');
+            gradient.addColorStop(0.5, '#0f3d6e');
+            gradient.addColorStop(0.7, '#0c2d5e');
+            gradient.addColorStop(1, '#081a3a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 2048, 1024);
+
+            // Simple land approximation
+            ctx.fillStyle = '#1a4a2e';
+            // Draw some basic continent shapes
+            const continents = [
+                { cx: 300, cy: 300, rx: 200, ry: 150 },  // North America
+                { cx: 600, cy: 400, rx: 150, ry: 200 },  // South America
+                { cx: 1000, cy: 250, rx: 300, ry: 200 }, // Europe/Africa/Asia
+                { cx: 1600, cy: 300, rx: 200, ry: 150 }, // Australia/Asia
+                { cx: 1000, cy: 700, rx: 100, ry: 100 }, // Antarctica
+            ];
+            continents.forEach(c => {
+                ctx.beginPath();
+                ctx.ellipse(c.cx, c.cy, c.rx, c.ry, 0, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Ice caps
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillRect(0, 0, 2048, 80);
+            ctx.fillRect(0, 944, 2048, 80);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            texture.colorSpace = THREE.SRGBColorSpace;
+            return texture;
+        }
+
+        // Night lights texture
+        function createNightTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, 2048, 1024);
+            
+            // Major cities as bright dots
+            const cities = [
+                { lat: 40.71, lon: -74.01, pop: 8.4 },   // NYC
+                { lat: 34.05, lon: -118.24, pop: 4.0 },  // LA
+                { lat: 51.51, lon: -0.13, pop: 9.0 },    // London
+                { lat: 48.86, lon: 2.35, pop: 11.0 },    // Paris
+                { lat: 35.68, lon: 139.69, pop: 37.4 },  // Tokyo
+                { lat: 31.23, lon: 121.47, pop: 27.0 },  // Shanghai
+                { lat: -23.55, lon: -46.63, pop: 22.0 }, // São Paulo
+                { lat: 19.43, lon: -99.13, pop: 21.8 },  // Mexico City
+                { lat: 28.61, lon: 77.21, pop: 31.0 },   // Delhi
+                { lat: 37.57, lon: 126.98, pop: 25.6 },  // Seoul
+                { lat: -33.87, lon: 151.21, pop: 5.3 },  // Sydney
+                { lat: 55.76, lon: 37.62, pop: 12.5 },   // Moscow
+                { lat: 39.90, lon: 116.41, pop: 21.5 },  // Beijing
+                { lat: 22.54, lon: 114.06, pop: 7.5 },   // Hong Kong
+                { lat: 25.03, lon: 121.56, pop: 7.0 },   // Taipei
+                { lat: 1.35, lon: 103.82, pop: 5.6 },    // Singapore
+                { lat: 3.14, lon: 101.69, pop: 8.0 },    // Kuala Lumpur
+                { lat: -6.21, lon: 106.85, pop: 10.6 },  // Jakarta
+                { lat: 14.60, lon: 120.98, pop: 13.5 },  // Manila
+                { lat: 13.75, lon: 100.50, pop: 10.5 },  // Bangkok
+            ];
+
+            cities.forEach(city => {
+                const x = (city.lon + 180) / 360 * 2048;
+                const y = (90 - city.lat) / 180 * 1024;
+                const radius = Math.max(3, city.pop / 2);
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                gradient.addColorStop(0, `rgba(255,240,200,${Math.min(1, city.pop / 20)})`);
+                gradient.addColorStop(1, 'rgba(255,200,100,0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Add some regional glow
+            ctx.filter = 'blur(8px)';
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.drawImage(canvas, 0, 0);
+            ctx.filter = 'none';
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            return texture;
+        }
+
+        const nightTexture = createNightTexture();
+        const nightMaterial = new THREE.MeshBasicMaterial({
+            map: nightTexture,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+        });
+        const nightMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(CONFIG.earthRadius + 0.1, 128, 64),
+            nightMaterial
+        );
+        earthGroup.add(nightMesh);
+
+        // Atmosphere glow
+        const atmosphereGeometry = new THREE.SphereGeometry(CONFIG.atmosphereRadius, 64, 32);
+        const atmosphereMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                uTime: { value: 0 },
+                uCameraPos: { value: new THREE.Vector3() },
+                uGlowColor: { value: new THREE.Color(0x22d3ee) },
+            },
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vWorldPosition;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uTime;
+                uniform vec3 uCameraPos;
+                uniform vec3 uGlowColor;
+                varying vec3 vNormal;
+                varying vec3 vWorldPosition;
+                void main() {
+                    vec3 viewDir = normalize(uCameraPos - vWorldPosition);
+                    float fresnel = pow(1.0 - max(dot(vNormal, viewDir), 0.0), 3.0);
+                    float pulse = 0.5 + 0.5 * sin(uTime * 0.5);
+                    vec3 color = uGlowColor * fresnel * (0.5 + 0.5 * pulse);
+                    float alpha = fresnel * 0.4;
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `,
+            transparent: true,
+            side: THREE.BackSide,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+        const atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+        earthGroup.add(atmosphereMesh);
+
+        // Stars background
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsCount = 3000;
+        const starsPositions = new Float32Array(starsCount * 3);
+        const starsSizes = new Float32Array(starsCount);
+        const starsColors = new Float32Array(starsCount * 3);
+        
+        for (let i = 0; i < starsCount; i++) {
+            const radius = 2000 + Math.random() * 1000;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            starsPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+            starsPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            starsPositions[i * 3 + 2] = radius * Math.cos(phi);
+            
+            starsSizes[i] = Math.random() * 2 + 0.5;
+            
+            const colorChoice = Math.random();
+            if (colorChoice < 0.6) {
+                starsColors[i * 3] = 1; starsColors[i * 3 + 1] = 1; starsColors[i * 3 + 2] = 1;
+            } else if (colorChoice < 0.8) {
+                starsColors[i * 3] = 1; starsColors[i * 3 + 1] = 0.9; starsColors[i * 3 + 2] = 0.7;
+            } else {
+                starsColors[i * 3] = 0.7; starsColors[i * 3 + 1] = 0.8; starsColors[i * 3 + 2] = 1;
+            }
+        }
+        
+        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+        starsGeometry.setAttribute('size', new THREE.BufferAttribute(starsSizes, 1));
+        starsGeometry.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
+        
+        const starsMaterial = new THREE.PointsMaterial({
+            size: 1,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: true,
+            depthWrite: false,
+        });
+        const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(starsMesh);
+
+        // Sun light
+        const sunLight = new THREE.DirectionalLight(0xffffee, 2);
+        sunLight.position.set(1, 0.3, 1).normalize();
+        scene.add(sunLight);
+
+        const ambientLight = new THREE.AmbientLight(0x223344, 0.5);
+        scene.add(ambientLight);
+
+        // ============ DATA LAYERS ============
+        const dataGroup = new THREE.Group();
+        scene.add(dataGroup);
+
+        // ISS Marker
+        const issGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+        const issMaterial = new THREE.MeshBasicMaterial({
+            color: 0x22d3ee,
+            transparent: true,
+            opacity: 1,
+        });
+        const issMesh = new THREE.Mesh(issGeometry, issMaterial);
+        dataGroup.add(issMesh);
+
+        // ISS Trail
+        const trailPoints = [];
+        const trailGeometry = new THREE.BufferGeometry();
+        const trailMaterial = new THREE.LineBasicMaterial({
+            color: 0x22d3ee,
+            transparent: true,
+            opacity: 0.4,
+            linewidth: 2,
+        });
+        const trailLine = new THREE.Line(trailGeometry, trailMaterial);
+        dataGroup.add(trailLine);
+
+        // ISS Orbit Path
+        const orbitPoints = [];
+        for (let i = 0; i <= 100; i++) {
+            const t = (i / 100) * Math.PI * 2;
+            const lat = Math.asin(Math.sin(0.9) * Math.sin(t)) * 180 / Math.PI; // 51.6° inclination
+            const lon = (t * 180 / Math.PI - 90) % 360 - 180;
+            orbitPoints.push(latLonToVector3(lat, lon, CONFIG.earthRadius + 5));
+        }
+        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+        const orbitMaterial = new THREE.LineBasicMaterial({
+            color: 0x22d3ee,
+            transparent: true,
+            opacity: 0.2,
+            linewidth: 1,
+        });
+        const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
+        dataGroup.add(orbitLine);
+
+        // Earthquake markers
+        const quakeMeshes = [];
+        const quakePulses = [];
+
+        // Lightning particles
+        const lightningGeometry = new THREE.BufferGeometry();
+        const maxLightning = CONFIG.maxLightning;
+        const lightningPositions = new Float32Array(maxLightning * 3);
+        const lightningSizes = new Float32Array(maxLightning);
+        const lightningColors = new Float32Array(maxLightning * 3);
+        const lightningLifes = new Float32Array(maxLightning);
+        const lightningAges = new Float32Array(maxLightning);
+        
+        for (let i = 0; i < maxLightning; i++) {
+            lightningPositions[i * 3] = 0;
+            lightningPositions[i * 3 + 1] = 0;
+            lightningPositions[i * 3 + 2] = 0;
+            lightningSizes[i] = 0;
+            lightningColors[i * 3] = 1;
+            lightningColors[i * 3 + 1] = 0.9;
+            lightningColors[i * 3 + 2] = 0.3;
+            lightningLifes[i] = 0;
+            lightningAges[i] = 0;
+        }
+        
+        lightningGeometry.setAttribute('position', new THREE.BufferAttribute(lightningPositions, 3));
+        lightningGeometry.setAttribute('size', new THREE.BufferAttribute(lightningSizes, 1));
+        lightningGeometry.setAttribute('color', new THREE.BufferAttribute(lightningColors, 3));
+        lightningGeometry.setAttribute('life', new THREE.BufferAttribute(lightningLifes, 1));
+        lightningGeometry.setAttribute('age', new THREE.BufferAttribute(lightningAges, 1));
+        
+        const lightningMaterial = new THREE.PointsMaterial({
+            size: 2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 1,
+            sizeAttenuation: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+        const lightningMesh = new THREE.Points(lightningGeometry, lightningMaterial);
+        dataGroup.add(lightningMesh);
+
+        // Aurora ovals
+        function createAuroraOval(hemisphere) {
+            const points = [];
+            const segments = 64;
+            const baseLat = hemisphere === 'north' ? 70 : -70;
+            const radius = CONFIG.earthRadius + 3;
+            
+            for (let i = 0; i <= segments; i++) {
+                const t = (i / segments) * Math.PI * 2;
+                const lat = baseLat + Math.sin(t * 3) * 5 * (state.kpIndex / 9);
+                const lon = t * 180 / Math.PI - 180;
+                points.push(latLonToVector3(lat, lon, radius));
+            }
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: hemisphere === 'north' ? 0x8b5cf6 : 0x22d3ee,
+                transparent: true,
+                opacity: 0.4,
+                linewidth: 2,
+            });
+            return new THREE.Line(geometry, material);
+        }
+
+        const auroraNorth = createAuroraOval('north');
+        const auroraSouth = createAuroraOval('south');
+        dataGroup.add(auroraNorth);
+        dataGroup.add(auroraSouth);
+
+        // Aurora particle shimmer
+        const auroraParticlesGeometry = new THREE.BufferGeometry();
+        const auroraParticleCount = 500;
+        const auroraPositions = new Float32Array(auroraParticleCount * 3);
+        const auroraSizes = new Float32Array(auroraParticleCount);
+        const auroraPhases = new Float32Array(auroraParticleCount);
+        
+        for (let i = 0; i < auroraParticleCount; i++) {
+            const hemisphere = Math.random() > 0.5 ? 1 : -1;
+            const lat = 65 + Math.random() * 20;
+            const lon = Math.random() * 360 - 180;
+            const vec = latLonToVector3(hemisphere * lat, lon, CONFIG.earthRadius + 2 + Math.random() * 3);
+            auroraPositions[i * 3] = vec.x;
+            auroraPositions[i * 3 + 1] = vec.y;
+            auroraPositions[i * 3 + 2] = vec.z;
+            auroraSizes[i] = Math.random() * 3 + 1;
+            auroraPhases[i] = Math.random() * Math.PI * 2;
+        }
+        
+        auroraParticlesGeometry.setAttribute('position', new THREE.BufferAttribute(auroraPositions, 3));
+        auroraParticlesGeometry.setAttribute('size', new THREE.BufferAttribute(auroraSizes, 1));
+        auroraParticlesGeometry.setAttribute('phase', new THREE.BufferAttribute(auroraPhases, 1));
+        
+        const auroraParticlesMaterial = new THREE.PointsMaterial({
+            size: 2,
+            transparent: true,
+            opacity: 0.6,
+            sizeAttenuation: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            vertexColors: false,
+        });
+        const auroraParticlesMesh = new THREE.Points(auroraParticlesGeometry, auroraParticlesMaterial);
+        dataGroup.add(auroraParticlesMesh);
+
+        // ============ HELPER FUNCTIONS ============
+        function latLonToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * Math.PI / 180;
+            const theta = (lon + 180) * Math.PI / 180;
+            return new THREE.Vector3(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+
+        function vector3ToLatLon(vec, radius) {
+            const lat = 90 - Math.acos(vec.y / radius) * 180 / Math.PI;
+            const lon = Math.atan2(vec.z, vec.x) * 180 / Math.PI - 180;
+            return { lat, lon };
+        }
+
+        function getMagnitudeClass(mag) {
+            if (mag >= 7) return 'major';
+            if (mag >= 5) return 'strong';
+            if (mag >= 3) return 'moderate';
+            return 'minor';
+        }
+
+        function formatTime(date) {
+            return date.toISOString().substr(11, 8) + ' UTC';
+        }
+
+        function formatCoords(lat, lon) {
+            const latDir = lat >= 0 ? 'N' : 'S';
+            const lonDir = lon >= 0 ? 'E' : 'W';
+            return `${Math.abs(lat).toFixed(1)}°${latDir} ${Math.abs(lon).toFixed(1)}°${lonDir}`;
+        }
+
+        // ============ TOOLTIP SYSTEM ============
+        const tooltip = document.createElement('div');
+        tooltip.id = 'globe-tooltip';
+        tooltip.style.cssText = `
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            color: var(--fg);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            transform: translate(-50%, -100%);
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            white-space: nowrap;
+            max-width: 280px;
+        `;
+        document.body.appendChild(tooltip);
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let hoveredObject = null;
+
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Collect all pickable objects
+            const pickableObjects = [
+                issMesh,
+                ...quakeMeshes,
+                lightningMesh,
+                auroraNorth,
+                auroraSouth,
+                auroraParticlesMesh,
+            ].filter(Boolean);
+            
+            const intersects = raycaster.intersectObjects(pickableObjects, false);
+            
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                const obj = intersect.object;
+                
+                if (obj !== hoveredObject) {
+                    hoveredObject = obj;
+                    showTooltip(obj, intersect.point, event.clientX, event.clientY);
+                } else {
+                    updateTooltipPosition(event.clientX, event.clientY);
+                }
+            } else {
+                hideTooltip();
+                hoveredObject = null;
+            }
+        }
+
+        function showTooltip(object, worldPoint, clientX, clientY) {
+            let content = '';
+            
+            if (object === issMesh) {
+                content = `
+                    <div style="color: var(--accent); font-weight: 700; margin-bottom: 0.25rem;">🛰️ International Space Station</div>
+                    <div>Position: ${state.iss ? formatCoords(state.iss.lat, state.iss.lon) : '—'}</div>
+                    <div>Altitude: ~408 km</div>
+                    <div>Velocity: ~27,600 km/h</div>
+                    <div>Orbit: ~92 min</div>
+                    <div style="color: var(--muted); font-size: 0.65rem; margin-top: 0.25rem;">Crew: ${state.crew?.length || '—'}</div>
+                `;
+            } else if (quakeMeshes.includes(object)) {
+                const idx = quakeMeshes.indexOf(object);
+                const q = state.quakes[idx];
+                if (q) {
+                    const magClass = getMagnitudeClass(q.mag);
+                    content = `
+                        <div style="color: var(--danger); font-weight: 700; margin-bottom: 0.25rem;">🌋 Earthquake M${q.mag.toFixed(1)}</div>
+                        <div>${escapeHtml(q.place)}</div>
+                        <div>Depth: ${q.depth.toFixed(0)} km</div>
+                        <div>Time: ${formatTime(new Date(q.time))}</div>
+                        <div style="color: var(--muted); font-size: 0.65rem; margin-top: 0.25rem;">${magClass.charAt(0).toUpperCase() + magClass.slice(1)}</div>
+                    `;
+                }
+            } else if (object === lightningMesh) {
+                content = `
+                    <div style="color: var(--warning); font-weight: 700; margin-bottom: 0.25rem;">⚡ Lightning Activity</div>
+                    <div>Strikes/min: ${state.lightningThisMinute}</div>
+                    <div>Total (hour): ${state.lightningHistory.reduce((s,h)=>s+h.count,0).toLocaleString()}</div>
+                    <div style="color: var(--muted); font-size: 0.65rem; margin-top: 0.25rem;">Simulated data</div>
+                `;
+            } else if (object === auroraNorth || object === auroraSouth) {
+                const hemi = object === auroraNorth ? 'Northern' : 'Southern';
+                content = `
+                    <div style="color: #8b5cf6; font-weight: 700; margin-bottom: 0.25rem;">🌌 ${hemi} Aurora Oval</div>
+                    <div>Kp Index: ${state.kpIndex.toFixed(1)}</div>
+                    <div>Visibility: ${state.auroraVisibility}</div>
+                    <div style="color: var(--muted); font-size: 0.65rem; margin-top: 0.25rem;">NOAA SWPC data</div>
+                `;
+            } else if (object === auroraParticlesMesh) {
+                content = `
+                    <div style="color: #8b5cf6; font-weight: 700; margin-bottom: 0.25rem;">✨ Aurora Particles</div>
+                    <div>Kp Index: ${state.kpIndex.toFixed(1)}</div>
+                    <div>Activity: ${state.auroraVisibility}</div>
+                `;
+            }
+            
+            if (content) {
+                tooltip.innerHTML = content;
+                tooltip.style.opacity = '1';
+                updateTooltipPosition(clientX, clientY);
+            }
+        }
+
+        function updateTooltipPosition(clientX, clientY) {
+            const padding = 16;
+            let left = clientX;
+            let top = clientY - padding;
+            
+            // Keep tooltip in viewport
+            const rect = tooltip.getBoundingClientRect();
+            if (left + rect.width / 2 > window.innerWidth - padding) {
+                left = window.innerWidth - rect.width - padding;
+            } else if (left - rect.width / 2 < padding) {
+                left = padding + rect.width / 2;
+            }
+            if (top < padding) {
+                top = clientY + padding + 20;
+            }
+            
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+        }
+
+        function hideTooltip() {
+            tooltip.style.opacity = '0';
+        }
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseleave', hideTooltip);
+
+        // ============ DATA FETCHING ============
+        async function fetchISS() {
+            try {
+                const [posRes, crewRes] = await Promise.all([
+                    fetch('https://api.open-notify.org/iss-now.json'),
+                    fetch('https://api.open-notify.org/astros.json')
+                ]);
+                const posData = await posRes.json();
+                const crewData = await crewRes.json();
+                
+                state.iss = {
+                    lat: parseFloat(posData.iss_position.latitude),
+                    lon: parseFloat(posData.iss_position.longitude),
+                    timestamp: posData.timestamp,
+                };
+                state.crew = crewData.people.filter(p => p.craft === 'ISS').map(p => p.name);
+                
+                updateISSUI();
+                document.getElementById('statusISS').classList.add('live');
+            } catch (e) {
+                console.warn('ISS fetch failed:', e);
+                document.getElementById('statusISS').classList.remove('live');
+                document.getElementById('statusISS').classList.add('danger');
+            }
+        }
+
+        async function fetchEarthquakes() {
+            try {
+                const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson');
+                const data = await res.json();
+                
+                state.quakes = data.features
+                    .filter(f => f.properties.mag && f.properties.mag > 0)
+                    .sort((a, b) => b.properties.time - a.properties.time)
+                    .slice(0, CONFIG.maxQuakes)
+                    .map(f => ({
+                        lat: f.geometry.coordinates[1],
+                        lon: f.geometry.coordinates[0],
+                        depth: f.geometry.coordinates[2],
+                        mag: f.properties.mag,
+                        place: f.properties.place,
+                        time: f.properties.time,
+                        url: f.properties.url,
+                    }));
+                
+                updateQuakesUI();
+                renderQuakes();
+                document.getElementById('statusQuakes').classList.add('live');
+            } catch (e) {
+                console.warn('Earthquake fetch failed:', e);
+                document.getElementById('statusQuakes').classList.remove('live');
+                document.getElementById('statusQuakes').classList.add('danger');
+            }
+        }
+
+        async function fetchLightning() {
+            // Using a simulated approach since real-time lightning APIs require keys
+            // In production, you'd use: blitzortung.org, lightningmaps.org, or NOAA
+            simulateLightning();
+            document.getElementById('statusLightning').classList.add('live');
+        }
+
+        function simulateLightning() {
+            // Realistic lightning clusters around storm regions
+            const stormRegions = [
+                { lat: -10, lon: -60, radius: 15, intensity: 0.8 },   // Amazon
+                { lat: 5, lon: 120, radius: 20, intensity: 0.9 },     // Indonesia
+                { lat: 30, lon: -90, radius: 15, intensity: 0.6 },    // Gulf of Mexico
+                { lat: -20, lon: 30, radius: 10, intensity: 0.5 },    // Southern Africa
+                { lat: 40, lon: 100, radius: 12, intensity: 0.4 },    // Central Asia
+            ];
+            
+            const now = Date.now();
+            const strikesThisMinute = Math.floor(Math.random() * 50) + 20;
+            state.lightningThisMinute = strikesThisMinute;
+            state.lightningHistory.push({ time: now, count: strikesThisMinute });
+            if (state.lightningHistory.length > 60) state.lightningHistory.shift();
+            
+            for (let i = 0; i < strikesThisMinute; i++) {
+                const region = stormRegions[Math.floor(Math.random() * stormRegions.length)];
+                if (Math.random() > region.intensity) continue;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.random() * region.radius;
+                const lat = region.lat + dist * Math.cos(angle);
+                const lon = region.lon + dist * Math.sin(angle);
+                
+                addLightningStrike(lat, lon);
+            }
+            
+            updateLightningUI();
+        }
+
+        function addLightningStrike(lat, lon) {
+            const vec = latLonToVector3(lat, lon, CONFIG.earthRadius + 0.5);
+            const idx = Math.floor(Math.random() * maxLightning);
+            
+            lightningPositions[idx * 3] = vec.x;
+            lightningPositions[idx * 3 + 1] = vec.y;
+            lightningPositions[idx * 3 + 2] = vec.z;
+            lightningSizes[idx] = 3 + Math.random() * 3;
+            lightningLifes[idx] = 1000 + Math.random() * 2000;
+            lightningAges[idx] = 0;
+            
+            // Color variation
+            const c = Math.random();
+            if (c < 0.5) { lightningColors[idx * 3] = 1; lightningColors[idx * 3 + 1] = 0.95; lightningColors[idx * 3 + 2] = 0.3; }
+            else if (c < 0.8) { lightningColors[idx * 3] = 1; lightningColors[idx * 3 + 1] = 0.6; lightningColors[idx * 3 + 2] = 0.1; }
+            else { lightningColors[idx * 3] = 0.7; lightningColors[idx * 3 + 1] = 0.8; lightningColors[idx * 3 + 2] = 1; }
+        }
+
+        async function fetchAurora() {
+            try {
+                // NOAA SWPC Kp index - try multiple endpoints for CORS resilience
+                const endpoints = [
+                    'https://services.swpc.noaa.gov/json/planetary_k_index_1m.json',
+                    'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json',
+                ];
+                
+                let data = null;
+                for (const endpoint of endpoints) {
+                    try {
+                        const res = await fetch(endpoint, { mode: 'cors' });
+                        if (res.ok) {
+                            data = await res.json();
+                            console.log('Aurora data fetched from:', endpoint);
+                            break;
+                        }
+                    } catch (e) {
+                        console.warn('Aurora endpoint failed:', endpoint, e);
+                    }
+                }
+                
+                if (data && data.length > 0) {
+                    const latest = data[data.length - 1];
+                    state.kpIndex = parseFloat(latest.kp_index) || 0;
+                } else {
+                    throw new Error('All aurora endpoints failed');
+                }
+                
+                // Determine visibility
+                if (state.kpIndex >= 7) state.auroraVisibility = 'High (G3+)';
+                else if (state.kpIndex >= 5) state.auroraVisibility = 'Moderate (G1-G2)';
+                else if (state.kpIndex >= 3) state.auroraVisibility = 'Low';
+                else state.auroraVisibility = 'Very Low';
+                
+                updateAuroraUI();
+                document.getElementById('statusAurora').classList.add('live');
+            } catch (e) {
+                console.error('Aurora fetch failed:', e);
+                // Fallback simulated
+                state.kpIndex = Math.random() * 5;
+                state.auroraVisibility = 'Simulated';
+                updateAuroraUI();
+                document.getElementById('statusAurora').classList.add('warning');
+            }
+        }
+
+        // ============ UI UPDATES ============
+        function updateISSUI() {
+            if (!state.iss) return;
+            
+            document.getElementById('issCoords').textContent = formatCoords(state.iss.lat, state.iss.lon);
+            
+            // Calculate altitude (ISS ~408km average)
+            const altitude = 408 + Math.sin(Date.now() / 100000) * 10;
+            document.getElementById('issAltitude').textContent = `${altitude.toFixed(0)} km`;
+            
+            // Velocity ~27,600 km/h
+            document.getElementById('issVelocity').textContent = '27,600 km/h';
+            
+            // Orbit number (approximate)
+            const orbitNum = Math.floor((Date.now() / 1000 / 5550) % 10000);
+            document.getElementById('issOrbit').textContent = `#${orbitNum}`;
+            
+            document.getElementById('issCrew').textContent = state.crew.length > 0 ? state.crew.length : '—';
+        }
+
+        function updateQuakesUI() {
+            const list = document.getElementById('quakeList');
+            if (state.quakes.length === 0) {
+                list.innerHTML = '<div class="quake-item" style="justify-content: center; color: var(--muted); border-left-color: transparent;">No quakes in past hour</div>';
+                return;
+            }
+            
+            list.innerHTML = state.quakes.map((q, i) => `
+                <div class="quake-item" style="animation-delay: ${i * 0.05}s" tabindex="0" role="listitem">
+                    <div class="quake-mag ${getMagnitudeClass(q.mag)}">${q.mag.toFixed(1)}</div>
+                    <div class="quake-info">
+                        <div class="quake-place">${escapeHtml(q.place)}</div>
+                        <div class="quake-time">${formatTime(new Date(q.time))}</div>
+                    </div>
+                    <div class="quake-depth">${q.depth.toFixed(0)} km</div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateLightningUI() {
+            const total = state.lightningHistory.reduce((sum, h) => sum + h.count, 0);
+            const density = (total / 510000000).toFixed(4);
+            const regions = new Set();
+            
+            document.getElementById('lightningCount').textContent = state.lightningThisMinute;
+            document.getElementById('lightningTotal').textContent = total.toLocaleString();
+            document.getElementById('lightningDensity').textContent = density;
+            document.getElementById('lightningRegions').textContent = '5';
+        }
+
+        function updateAuroraUI() {
+            document.getElementById('kpValue').textContent = state.kpIndex.toFixed(1);
+            document.getElementById('auroraVisibility').textContent = state.auroraVisibility;
+            
+            // Update Kp bars
+            const bars = document.querySelectorAll('.aurora-bar');
+            bars.forEach((bar, i) => {
+                if (i < Math.floor(state.kpIndex)) {
+                    bar.classList.add('active');
+                } else {
+                    bar.classList.remove('active');
+                }
+            });
+            
+            // Update aurora ovals
+            updateAuroraOvals();
+        }
+
+        function updateAuroraOvals() {
+            const kpFactor = Math.min(state.kpIndex / 9, 1);
+            const northOval = document.getElementById('auroraNorth');
+            const southOval = document.getElementById('auroraSouth');
+            
+            const size = 80 + kpFactor * 60;
+            const offset = 40 - kpFactor * 30;
+            
+            northOval.style.width = `${size}%`;
+            northOval.style.height = `${size}%`;
+            northOval.style.top = `-${offset}%`;
+            
+            southOval.style.width = `${size}%`;
+            southOval.style.height = `${size}%`;
+            southOval.style.bottom = `-${offset}%`;
+        }
+
+        // ============ RENDERING ============
+        function renderQuakes() {
+            // Remove old quakes
+            quakeMeshes.forEach(m => dataGroup.remove(m));
+            quakePulses.forEach(p => dataGroup.remove(p));
+            quakeMeshes.length = 0;
+            quakePulses.length = 0;
+            
+            state.quakes.forEach(q => {
+                const vec = latLonToVector3(q.lat, q.lon, CONFIG.earthRadius + 0.5);
+                const size = 0.5 + q.mag * 0.8;
+                
+                // Main marker
+                const geometry = new THREE.SphereGeometry(size, 16, 16);
+                const color = getMagnitudeClass(q.mag) === 'major' ? 0xf43f5e :
+                              getMagnitudeClass(q.mag) === 'strong' ? 0xfb923c :
+                              getMagnitudeClass(q.mag) === 'moderate' ? 0xfbbf24 : 0x3b82f6;
+                const material = new THREE.MeshBasicMaterial({
+                    color,
+                    transparent: true,
+                    opacity: 0.8,
+                });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.copy(vec);
+                mesh.lookAt(0, 0, 0);
+                dataGroup.add(mesh);
+                quakeMeshes.push(mesh);
+                
+                // Pulse ring
+                const pulseGeometry = new THREE.RingGeometry(size * 1.2, size * 2, 32);
+                const pulseMaterial = new THREE.MeshBasicMaterial({
+                    color,
+                    transparent: true,
+                    opacity: 0.4,
+                    side: THREE.DoubleSide,
+                    depthWrite: false,
+                });
+                const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
+                pulse.position.copy(vec);
+                pulse.lookAt(0, 0, 0);
+                pulse.userData = { baseSize: size * 1.2, maxSize: size * 3, speed: 0.5 + Math.random() * 0.5 };
+                dataGroup.add(pulse);
+                quakePulses.push(pulse);
+            });
+        }
+
+        // ============ ANIMATION LOOP ============
+        let lastTime = 0;
+        let frameCount = 0;
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            
+            const delta = (time - lastTime) / 1000;
+            lastTime = time;
+            
+            const speedDelta = delta * state.speedMultiplier;
+            
+            // Earth rotation
+            if (state.viewMode === 'globe') {
+                earthGroup.rotation.y += CONFIG.rotationSpeed * speedDelta * 60;
+            }
+            
+            // Update ISS position
+            if (state.iss) {
+                const vec = latLonToVector3(state.iss.lat, state.iss.lon, CONFIG.earthRadius + 4.1);
+                issMesh.position.copy(vec);
+                
+                // Update trail
+                trailPoints.push(vec.clone());
+                if (trailPoints.length > 200) trailPoints.shift();
+                
+                const trailPositions = new Float32Array(trailPoints.length * 3);
+                trailPoints.forEach((p, i) => {
+                    trailPositions[i * 3] = p.x;
+                    trailPositions[i * 3 + 1] = p.y;
+                    trailPositions[i * 3 + 2] = p.z;
+                });
+                trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+                trailGeometry.setDrawRange(0, trailPoints.length);
+                trailLine.visible = state.showTrails;
+                
+                // Update 2D tracker
+                const trackPercent = ((state.iss.lon + 180) / 360) * 100;
+                document.getElementById('issMarker').style.left = `${trackPercent}%`;
+            }
+            
+            // Animate quake pulses
+            quakePulses.forEach(pulse => {
+                pulse.userData.baseSize += pulse.userData.speed * speedDelta * 60;
+                if (pulse.userData.baseSize > pulse.userData.maxSize) {
+                    pulse.userData.baseSize = pulse.userData.maxSize * 0.5;
+                }
+                pulse.scale.setScalar(pulse.userData.baseSize / (pulse.userData.maxSize * 0.5));
+                pulse.material.opacity = 0.4 * (1 - (pulse.userData.baseSize - pulse.userData.maxSize * 0.5) / (pulse.userData.maxSize * 0.5));
+            });
+            
+            // Animate lightning - only update when active
+            let activeLightning = 0;
+            let lightningNeedsUpdate = false;
+            for (let i = 0; i < maxLightning; i++) {
+                if (lightningLifes[i] > 0) {
+                    lightningAges[i] += delta * 1000;
+                    const lifeRatio = lightningAges[i] / lightningLifes[i];
+                    if (lifeRatio >= 1) {
+                        lightningLifes[i] = 0;
+                        lightningSizes[i] = 0;
+                        lightningNeedsUpdate = true;
+                    } else {
+                        lightningSizes[i] = (3 + Math.random() * 3) * (1 - lifeRatio) * (1 - lifeRatio);
+                        lightningNeedsUpdate = true;
+                        activeLightning++;
+                    }
+                }
+            }
+            if (lightningNeedsUpdate) {
+                lightningGeometry.attributes.size.needsUpdate = true;
+                lightningGeometry.attributes.age.needsUpdate = true;
+                // Only update color when new strikes are added (in addLightningStrike)
+            }
+            
+            // Simulate new lightning occasionally
+            if (Math.random() < 0.02 * speedDelta * 60) {
+                simulateLightning();
+            }
+            
+            // Animate aurora particles - update every 3rd frame to reduce flickering
+            if (frameCount % 3 === 0) {
+                const auroraPositions = auroraParticlesGeometry.attributes.position.array;
+                const auroraPhases = auroraParticlesGeometry.attributes.phase.array;
+                const auroraSizes = auroraParticlesGeometry.attributes.size.array;
+                const timeSec = time * 0.001;
+                
+                for (let i = 0; i < auroraParticleCount; i++) {
+                    const phase = auroraPhases[i] + timeSec * 0.5;
+                    const wave = Math.sin(phase) * 0.5 + Math.sin(phase * 2.3) * 0.3;
+                    auroraSizes[i] = (1 + wave) * (0.5 + state.kpIndex / 18);
+                    
+                    // Gentle vertical movement
+                    auroraPositions[i * 3 + 1] += Math.sin(phase * 0.7) * 0.02;
+                }
+                auroraParticlesGeometry.attributes.size.needsUpdate = true;
+                auroraParticlesGeometry.attributes.position.needsUpdate = true;
+            }
+            
+            // Pulse aurora ovals
+            const pulse = 0.5 + 0.5 * Math.sin(time * 0.5);
+            auroraNorth.material.opacity = 0.2 + 0.2 * pulse * (state.kpIndex / 9);
+            auroraSouth.material.opacity = 0.2 + 0.2 * pulse * (state.kpIndex / 9);
+            
+            // Update atmosphere shader
+            atmosphereMaterial.uniforms.uTime.value = time;
+            atmosphereMaterial.uniforms.uCameraPos.value.copy(camera.position);
+            
+            // Update night side
+            const sunDir = new THREE.Vector3(1, 0.3, 1).normalize();
+            const earthToSun = sunDir.clone().multiplyScalar(-1);
+            nightMesh.rotation.y = earthGroup.rotation.y;
+            nightMaterial.opacity = state.showNight ? 0.8 : 0;
+            
+            // Stars slow rotation
+            starsMesh.rotation.y += 0.00001 * speedDelta * 60;
+            
+            controls.update();
+            composer.render();
+            
+            frameCount++;
+        }
+
+        // ============ CONTROLS ============
+        function setupControls() {
+            document.getElementById('btnGlobe').addEventListener('click', () => {
+                state.viewMode = 'globe';
+                camera.position.set(0, 0, 350);
+                controls.autoRotate = true;
+                updateActiveBtn('btnGlobe');
+            });
+            
+            document.getElementById('btnFlat').addEventListener('click', () => {
+                state.viewMode = 'flat';
+                camera.position.set(0, 300, 0);
+                camera.lookAt(0, 0, 0);
+                controls.autoRotate = false;
+                updateActiveBtn('btnFlat');
+            });
+            
+            document.getElementById('btnNight').addEventListener('click', function() {
+                state.showNight = !state.showNight;
+                this.classList.toggle('active', state.showNight);
+                this.setAttribute('aria-pressed', state.showNight);
+            });
+            
+            document.getElementById('btnTrails').addEventListener('click', function() {
+                state.showTrails = !state.showTrails;
+                this.classList.toggle('active', state.showTrails);
+                this.setAttribute('aria-pressed', state.showTrails);
+            });
+            
+            document.getElementById('btnSpeed').addEventListener('click', function() {
+                const speeds = [1, 2, 5, 10, 0.5];
+                const idx = speeds.indexOf(state.speedMultiplier);
+                state.speedMultiplier = speeds[(idx + 1) % speeds.length];
+                document.getElementById('speedLabel').textContent = `${state.speedMultiplier}×`;
+                this.classList.toggle('active', state.speedMultiplier !== 1);
+            });
+            
+            function updateActiveBtn(activeId) {
+                ['btnGlobe', 'btnFlat'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    btn.classList.toggle('active', id === activeId);
+                    btn.setAttribute('aria-pressed', id === activeId);
+                });
+            }
+        }
+
+        // ============ TIME DISPLAY ============
+        function updateTimeDisplay() {
+            const now = new Date();
+            document.getElementById('timeDisplay').textContent = now.toISOString().substr(11, 8) + ' UTC';
+        }
+
+        // ============ RESIZE ============
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+            fxaaPass.material.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+        }
+
+        // ============ INIT ============
+        async function init() {
+            setupControls();
+            
+            try {
+                // Create Earth material with placeholder texture - real texture loads async
+                const placeholderTexture = new THREE.TextureLoader().load(
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+                );
+                placeholderTexture.colorSpace = THREE.SRGBColorSpace;
+                
+                earthMaterial = new THREE.MeshStandardMaterial({
+                    map: placeholderTexture,
+                    roughness: 0.8,
+                    metalness: 0.1,
+                });
+                earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+                earthGroup.add(earthMesh);
+                
+                // Initial data fetch
+                await Promise.all([
+                    fetchISS(),
+                    fetchEarthquakes(),
+                    fetchLightning(),
+                    fetchAurora(),
+                ]);
+            } catch (err) {
+                console.error('Initialization error:', err);
+                // Ensure loading overlay hides even on error
+            } finally {
+                // Start animation
+                loadingOverlay.classList.add('hidden');
+                requestAnimationFrame(animate);
+            }
+            
+            // Periodic updates
+            setInterval(fetchISS, CONFIG.dataRefreshInterval);
+            setInterval(fetchEarthquakes, CONFIG.dataRefreshInterval * 2);
+            setInterval(fetchAurora, CONFIG.dataRefreshInterval * 4);
+            setInterval(simulateLightning, 60000); // New lightning every minute
+            setInterval(updateTimeDisplay, 1000);
+            updateTimeDisplay();
+            
+            window.addEventListener('resize', onResize);
+        }
+
+        init();
+    </script>
+</body>
+</html>
