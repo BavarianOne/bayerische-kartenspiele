@@ -1,0 +1,40 @@
+{
+  "name": "Rhythm Quest: Beat Kingdom",
+  "short_name": "Rhythm Quest",
+  "description": "Rhythmustraining für Kinder - Hilf Melody dem Musikdrachen, den Rhythmus zurückzubringen!",
+  "start_url": "rhythm-quest.html",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "de",
+  "categories": ["education", "games", "music"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Schnellstart",
+      "short_name": "Schnellstart",
+      "description": "Sofort ein zufälliges Level spielen",
+      "url": "rhythm-quest.html#quick",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>", "sizes": "96x96" }]
+    },
+    {
+      "name": "Übungs-Modus",
+      "short_name": "Üben",
+      "description": "Bestimmte Rhythmen in deinem Tempo üben",
+      "url": "rhythm-quest.html#practice",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}
