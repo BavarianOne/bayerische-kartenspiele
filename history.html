@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historische Orte Entdecken - Repariert</title>
+    <title>Historische Orte - Mit Zeitleiste</title>
     
     <!-- Leaflet CSS für die Karte -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -63,27 +63,21 @@
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background-color: #34495e;
         }
 
         .map-wrapper {
             position: relative;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         #map {
             width: 100%;
-            height: 450px;
+            height: 400px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             z-index: 1;
         }
 
-        /* Schwebender Button auf der Karte */
         .map-search-btn {
             position: absolute;
             top: 20px;
@@ -98,11 +92,35 @@
             background-color: #c0392b;
         }
 
-        .gallery-title {
-            color: var(--primary-color);
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 8px;
-            margin-bottom: 20px;
+        /* Zeitleisten-Bereich */
+        .timeline-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .timeline-slider {
+            width: 80%;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin: 0 auto;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .current-year-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
         }
 
         .gallery {
@@ -116,11 +134,6 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
         }
 
         .card img {
@@ -139,18 +152,16 @@
             font-size: 14px;
             font-weight: bold;
             margin-bottom: 8px;
-            line-height: 1.4;
-            word-break: break-word;
         }
 
-        .card-meta {
+        .badge-year {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
             font-size: 12px;
-            color: #7f8c8d;
-        }
-
-        .card-meta a {
-            color: #3498db;
-            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 8px;
         }
 
         .status-message {
@@ -159,14 +170,6 @@
             color: #7f8c8d;
             grid-column: 1 / -1;
             padding: 40px 0;
-        }
-
-        .popup-img {
-            max-width: 150px;
-            max-height: 150px;
-            display: block;
-            margin-top: 5px;
-            border-radius: 4px;
         }
 
         .loader {
@@ -180,47 +183,57 @@
             display: none;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Zeitreise-Karte</h1>
-        <p>Suche einen Ort oder bewege die Karte und klicke auf den roten Button, um alte Bilder zu laden.</p>
+        <h1>Interaktive Zeitreise</h1>
+        <p>Ort suchen, Ausschnitt wählen und mit der Zeitleiste durch die Jahrzehnte springen.</p>
     </header>
 
     <div class="search-box">
-        <input type="text" id="location-input" placeholder="Ort eingeben (z.B. München, Landshut...)" onkeypress="if(event.key === 'Enter') searchLocation()">
+        <input type="text" id="location-input" placeholder="Ort eingeben (z.B. Berlin, München...)" onkeypress="if(event.key === 'Enter') searchLocation()">
         <button onclick="searchLocation()">Suchen</button>
     </div>
 
     <div class="map-wrapper">
-        <button class="map-search-btn" onclick="triggerSearchFromMap()">➔ Hier nach alten Bildern suchen</button>
+        <button class="map-search-btn" onclick="triggerSearchFromMap()">➔ Bilder für diesen Ausschnitt laden</button>
         <div id="map"></div>
     </div>
 
-    <h2 class="gallery-title">Historische Funde</h2>
+    <!-- Die neue Zeitleiste -->
+    <div class="timeline-container">
+        <div>Zeige Bilder bis zum Jahr: <span id="year-val" class="current-year-display">1950</span></div>
+        <input type="range" min="1850" max="1990" value="1950" class="timeline-slider" id="time-slider" oninput="updateTimelineFilter(this.value)">
+        <div class="timeline-labels">
+            <span>1850</span>
+            <span>1900</span>
+            <span>1930</span>
+            <span>1950</span>
+            <span>1970</span>
+            <span>1990</span>
+        </div>
+    </div>
+
     <div id="loader" class="loader"></div>
     <div id="gallery" class="gallery">
-        <div class="status-message">Nutze die Suche oder klicke auf den roten Button auf der Karte.</div>
+        <div class="status-message">Klicke auf den roten Button auf der Karte, um die Zeitleiste zu füttern.</div>
     </div>
 </div>
 
-<!-- Leaflet JS für die Karte -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
     let map;
     let markerLayer;
+    let allFetchedImages = []; // Speicher für alle aktuell geladenen Bilder
 
     window.onload = function() {
-        // Startet standardmäßig direkt in München/Bayern
-        map = L.map('map').setView([48.1351, 11.5820], 13);
+        // Startet standardmäßig in Berlin Mitte
+        map = L.map('map').setView([52.5162, 13.3777], 14);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -228,8 +241,6 @@
         }).addTo(map);
 
         markerLayer = L.layerGroup().addTo(map);
-        
-        // Erste Initialsuche beim Laden starten
         triggerSearchFromMap();
     };
 
@@ -243,25 +254,28 @@
             const data = await response.json();
 
             if (data.length === 0) {
-                alert("Ort wurde leider nicht gefunden.");
+                alert("Ort nicht gefunden.");
                 return;
             }
 
-            const lat = parseFloat(data[0].lat);
-            const lon = parseFloat(data[0].lon);
-
-            map.setView([lat, lon], 14);
-            
-            // Kleine Verzögerung, damit die Karte Zeit zum Ausrichten hat
+            map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 14);
             setTimeout(() => { triggerSearchFromMap(); }, 400);
         } catch (error) {
-            console.error("Fehler bei der Ortssuche:", error);
+            console.error(error);
         }
     }
 
     function triggerSearchFromMap() {
         const center = map.getCenter();
         loadImagesForCoords(center.lat, center.lng);
+    }
+
+    // Hilfsfunktion: Versucht radikal eine echte Jahreszahl (1600-1990) aus dem Text zu ziehen
+    function extractYear(text) {
+        if (!text) return null;
+        // Findet vierstellige Zahlen, die mit 16, 17, 18 oder 19 beginnen
+        const match = text.match(/\b(16|17|18|19)\d{2}\b/);
+        return match ? parseInt(match[0], 10) : null;
     }
 
     async function loadImagesForCoords(lat, lon) {
@@ -271,21 +285,19 @@
         gallery.innerHTML = '';
         loader.style.display = 'block';
         markerLayer.clearLayers();
+        allFetchedImages = []; // Cache leeren
 
         try {
-            // Radius berechnen (in Metern) anhand des Zoomlevels
             const zoom = map.getZoom();
-            const radius = zoom >= 14 ? 2000 : (20 - zoom) * 2000;
+            const radius = zoom >= 14 ? 2500 : (20 - zoom) * 2000;
 
-            // Schritt 1: Geosearch über Wikimedia Commons (Keine Custom Header im Browser-Fetch!)
-            const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=geosearch&gsradius=${radius}&gscoord=${lat}%7C${lon}&gslimit=100&format=json&origin=*`;
-            
+            // 1. Geosearch
+            const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=geosearch&gsradius=${radius}&gscoord=${lat}%7C${lon}&gslimit=150&format=json&origin=*`;
             const wikiResponse = await fetch(wikiUrl);
             const wikiData = await wikiResponse.json();
 
-            // Falls die API einen Fehler wirft oder nichts findet
-            if (wikiData.error || !wikiData.query || !wikiData.query.geosearch || wikiData.query.geosearch.length === 0) {
-                gallery.innerHTML = `<div class="status-message">Keine georeferenzierten Bilder im Umkreis von ${Math.round(radius/1000)} km gefunden. Schiebe die Karte ein Stück weiter.</div>`;
+            if (!wikiData.query || !wikiData.query.geosearch || wikiData.query.geosearch.length === 0) {
+                gallery.innerHTML = `<div class="status-message">Keine Bilder in diesem Ausschnitt gefunden.</div>`;
                 loader.style.display = 'none';
                 return;
             }
@@ -293,26 +305,14 @@
             const pageIds = wikiData.query.geosearch.map(item => item.pageid);
             const slicedIds = pageIds.slice(0, 50).join('|');
 
-            // Schritt 2: Detaildaten für die Bild-IDs holen
+            // 2. Details holen
             const detailsUrl = `https://commons.wikimedia.org/w/api.php?action=query&pageids=${slicedIds}&prop=pageimages|imageinfo&iiprop=url|extmetadata&pithumbsize=400&format=json&origin=*`;
-            
             const detailsResponse = await fetch(detailsUrl);
             const detailsData = await detailsResponse.json();
-            
-            if (!detailsData.query || !detailsData.query.pages) {
-                gallery.innerHTML = `<div class="status-message">Fehler beim Laden der Bilddetails.</div>`;
-                loader.style.display = 'none';
-                return;
-            }
 
             const pages = detailsData.query.pages;
-            let htmlContent = '';
-            let imageCount = 0;
-
             const geoLookup = {};
-            wikiData.query.geosearch.forEach(item => {
-                geoLookup[item.pageid] = { lat: item.lat, lon: item.lon };
-            });
+            wikiData.query.geosearch.forEach(item => { geoLookup[item.pageid] = { lat: item.lat, lon: item.lon }; });
 
             for (const id in pages) {
                 const page = pages[id];
@@ -320,77 +320,94 @@
 
                 const title = page.title.replace('File:', '');
                 let description = '';
-                let date = 'Unbekannt';
+                let rawDate = '';
                 
                 if (page.imageinfo && page.imageinfo[0] && page.imageinfo[0].extmetadata) {
                     const meta = page.imageinfo[0].extmetadata;
                     description = meta.ImageDescription ? meta.ImageDescription.value : '';
-                    date = meta.DateTimeOriginal ? meta.DateTimeOriginal.value : 'Unbekannt';
+                    rawDate = meta.DateTimeOriginal ? meta.DateTimeOriginal.value : '';
                 }
 
-                const searchString = (title + " " + description).toLowerCase();
-                // Breiter gefasster Filter für historische Treffer
-                const isHistoric = /historisch|history|18\d{2}|19\d{2}|altes|old|postcard|postkarte|ansichtskarte|damals|krieg|schloss|bahnhof|kirche|jahrhundert|vintage|monument/i.test(searchString);
+                // Jahreszahl-Erkennung über alle verfügbaren Textfelder herbeiführen
+                let detectedYear = extractYear(rawDate) || extractYear(title) || extractYear(description);
 
-                if (isHistoric) {
-                    imageCount++;
-                    const imgSrc = page.thumbnail.source;
-                    const originalUrl = (page.imageinfo && page.imageinfo[0]) ? page.imageinfo[0].descriptionurl : '#';
-                    const cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 90) + "...";
-                    const itemLat = geoLookup[id].lat;
-                    const itemLon = geoLookup[id].lon;
-
-                    // Marker auf die Karte setzen
-                    const marker = L.marker([itemLat, itemLon]);
-                    marker.bindPopup(`
-                        <div style="max-width: 160px;">
-                            <strong>${title.substring(0, 25)}...</strong><br>
-                            <img src="${imgSrc}" class="popup-img" style="width:100%; max-height:120px; object-fit:cover; margin:5px 0;"><br>
-                            <a href="${originalUrl}" target="_blank" style="font-size:11px;">Commons-Link ↗</a>
-                        </div>
-                    `);
-                    markerLayer.addLayer(marker);
-
-                    // Karte für die Galerie bauen
-                    htmlContent += `
-                        <div class="card">
-                            <img src="${imgSrc}" alt="${title}" loading="lazy" onclick="zoomToMarker(${itemLat}, ${itemLon})">
-                            <div class="card-content">
-                                <div class="card-title">${title.substring(0, 45)}...</div>
-                                <div class="card-meta">
-                                    <p>${description ? cleanDesc : 'Keine Beschreibung verfügbar.'}</p>
-                                    <p><strong>Jahr/Datum:</strong> ${date.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 20)}</p>
-                                    <p><a href="${originalUrl}" target="_blank">Originaldatei ansehen ↗</a></p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                // Wenn KEINE Jahreszahl gefunden wurde, filtern wir es rigoros aus (Schutz vor modernen Bildern)
+                if (detectedYear && detectedYear <= 1995) {
+                    allFetchedImages.push({
+                        id: id,
+                        title: title,
+                        year: detectedYear,
+                        imgSrc: page.thumbnail.source,
+                        originalUrl: page.imageinfo[0].descriptionurl,
+                        description: description.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 90) + "...",
+                        lat: geoLookup[id].lat,
+                        lon: geoLookup[id].lon
+                    });
                 }
             }
+
+            // Chronologisch sortieren (Älteste zuerst)
+            allFetchedImages.sort((a, b) => a.year - b.year);
 
             loader.style.display = 'none';
-
-            if (imageCount === 0) {
-                gallery.innerHTML = `<div class="status-message">Keine explizit historischen Fotos direkt in diesem Ausschnitt gefunden. Verschiebe die Karte z.B. näher zum Marienplatz oder Hauptbahnhof!</div>`;
-            } else {
-                gallery.innerHTML = htmlContent;
-            }
+            
+            // Aktuellen Slider-Wert nutzen, um Galerie initial zu rendern
+            const currentSliderVal = document.getElementById('time-slider').value;
+            updateTimelineFilter(currentSliderVal);
 
         } catch (error) {
-            console.error("Fehler:", error);
+            console.error(error);
             loader.style.display = 'none';
-            gallery.innerHTML = `<div class="status-message">API-Verbindungsfehler. Bitte lade die Seite einmal neu.</div>`;
+            gallery.innerHTML = `<div class="status-message">Fehler beim Laden der Zeitleiste.</div>`;
         }
     }
 
-    function zoomToMarker(lat, lon) {
-        map.setView([lat, lon], 16);
-        markerLayer.eachLayer(function(layer) {
-            if (layer.getLatLng().lat === lat && layer.getLatLng().lng === lon) {
-                layer.openPopup();
-            }
+    // Filtert und rendert die Ansicht live, wenn der Slider bewegt wird
+    function updateTimelineFilter(selectedYear) {
+        document.getElementById('year-val').innerText = selectedYear;
+        const gallery = document.getElementById('gallery');
+        
+        // Alte Marker von der Karte löschen, wir bauen sie passend zum Jahr neu
+        markerLayer.clearLayers();
+        
+        // Nur Bilder filtern, deren Jahr KLEINER ODER GLEICH dem ausgewählten Slider-Jahr ist
+        const filtered = allFetchedImages.filter(img => img.year <= parseInt(selectedYear, 10));
+
+        if (filtered.length === 0) {
+            gallery.innerHTML = `<div class="status-message">Keine historischen Bilder bis zum Jahr ${selectedYear} in diesem Bereich gefunden. Schiebe den Regler weiter nach rechts.</div>`;
+            return;
+        }
+
+        let htmlContent = '';
+        filtered.forEach(img => {
+            // Marker auf Karte setzen
+            const marker = L.marker([img.lat, img.lon]);
+            marker.bindPopup(`
+                <div style="max-width: 160px;">
+                    <span style="background:#2c3e50; color:white; padding:2px 5px; border-radius:3px; font-size:10px;">Jahr: ${img.year}</span><br>
+                    <img src="${img.imgSrc}" style="width:100%; max-height:120px; object-fit:cover; margin:5px 0;"><br>
+                    <a href="${img.originalUrl}" target="_blank" style="font-size:11px;">Original öffnen ↗</a>
+                </div>
+            `);
+            markerLayer.addLayer(marker);
+
+            // Galerie-Card erstellen
+            htmlContent += `
+                <div class="card">
+                    <img src="${img.imgSrc}" alt="${img.title}" onclick="map.setView([${img.lat}], [${img.lon}], 16)">
+                    <div class="card-content">
+                        <span class="badge-year">Jahr: ${img.year}</span>
+                        <div class="card-title">${img.title.substring(0, 45)}...</div>
+                        <div class="card-meta">
+                            <p>${img.description}</p>
+                            <p><a href="${img.originalUrl}" target="_blank">Originaldatei ansehen ↗</a></p>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
-        window.scrollTo({ top: 200, behavior: 'smooth' });
+
+        gallery.innerHTML = htmlContent;
     }
 </script>
 
