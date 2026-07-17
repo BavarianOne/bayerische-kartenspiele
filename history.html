@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historische Orte Entdecken - Stabil</title>
+    <title>Historische Orte Entdecken - Repariert</title>
     
     <!-- Leaflet CSS für die Karte -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -195,7 +195,7 @@
     </header>
 
     <div class="search-box">
-        <input type="text" id="location-input" placeholder="Ort eingeben (z.B. Landshut, Regensburg...)" onkeypress="if(event.key === 'Enter') searchLocation()">
+        <input type="text" id="location-input" placeholder="Ort eingeben (z.B. München, Landshut...)" onkeypress="if(event.key === 'Enter') searchLocation()">
         <button onclick="searchLocation()">Suchen</button>
     </div>
 
@@ -219,8 +219,8 @@
     let markerLayer;
 
     window.onload = function() {
-        // Startet standardmäßig in Bayern/Süddeutschland
-        map = L.map('map').setView([48.5442, 12.1461], 12);
+        // Startet standardmäßig direkt in München/Bayern
+        map = L.map('map').setView([48.1351, 11.5820], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -239,9 +239,7 @@
 
         try {
             const osmUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
-            const response = await fetch(osmUrl, {
-                headers: { 'User-Agent': 'HistoricMapApp/1.1 (contact: admin@example.com)' }
-            });
+            const response = await fetch(osmUrl);
             const data = await response.json();
 
             if (data.length === 0) {
@@ -254,8 +252,8 @@
 
             map.setView([lat, lon], 14);
             
-            // Sofortige Suche nach dem Zentrieren ausführen
-            setTimeout(() => { triggerSearchFromMap(); }, 500);
+            // Kleine Verzögerung, damit die Karte Zeit zum Ausrichten hat
+            setTimeout(() => { triggerSearchFromMap(); }, 400);
         } catch (error) {
             console.error("Fehler bei der Ortssuche:", error);
         }
@@ -275,38 +273,34 @@
         markerLayer.clearLayers();
 
         try {
-            // Radius anpassen: Bei hohem Zoom kleinerer Radius (1,5km), sonst bis zu 8km
+            // Radius berechnen (in Metern) anhand des Zoomlevels
             const zoom = map.getZoom();
             const radius = zoom >= 14 ? 2000 : (20 - zoom) * 2000;
 
-            // Schritt 1: Geosearch über Wikimedia Commons
-            const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=geosearch&gsradius=${radius}&gscoord=${lat}|${lon}&gslimit=100&format=json&origin=*`;
+            // Schritt 1: Geosearch über Wikimedia Commons (Keine Custom Header im Browser-Fetch!)
+            const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=geosearch&gsradius=${radius}&gscoord=${lat}%7C${lon}&gslimit=100&format=json&origin=*`;
             
-            const wikiResponse = await fetch(wikiUrl, {
-                headers: { 'User-Agent': 'HistoricMapApp/1.1 (contact: admin@example.com)' }
-            });
+            const wikiResponse = await fetch(wikiUrl);
             const wikiData = await wikiResponse.json();
 
-            if (!wikiData.query || !wikiData.query.geosearch || wikiData.query.geosearch.length === 0) {
-                gallery.innerHTML = `<div class="status-message">Keine georeferenzierten Bilder im Umkreis von ${radius/1000} km gefunden. Verschiebe die Karte z.B. auf ein Stadtzentrum.</div>`;
+            // Falls die API einen Fehler wirft oder nichts findet
+            if (wikiData.error || !wikiData.query || !wikiData.query.geosearch || wikiData.query.geosearch.length === 0) {
+                gallery.innerHTML = `<div class="status-message">Keine georeferenzierten Bilder im Umkreis von ${Math.round(radius/1000)} km gefunden. Schiebe die Karte ein Stück weiter.</div>`;
                 loader.style.display = 'none';
                 return;
             }
 
-            // IDs extrahieren
             const pageIds = wikiData.query.geosearch.map(item => item.pageid);
-            
-            // Da die API max 50 IDs auf einmal packt, splitten wir zur Sicherheit oder nehmen die ersten 50
             const slicedIds = pageIds.slice(0, 50).join('|');
 
-            // Schritt 2: Bild-Details abfragen (Sicherer Aufbau der Query)
+            // Schritt 2: Detaildaten für die Bild-IDs holen
             const detailsUrl = `https://commons.wikimedia.org/w/api.php?action=query&pageids=${slicedIds}&prop=pageimages|imageinfo&iiprop=url|extmetadata&pithumbsize=400&format=json&origin=*`;
             
             const detailsResponse = await fetch(detailsUrl);
             const detailsData = await detailsResponse.json();
             
             if (!detailsData.query || !detailsData.query.pages) {
-                gallery.innerHTML = `<div class="status-message">Fehler beim Verarbeiten der Bilddetails von Wikimedia.</div>`;
+                gallery.innerHTML = `<div class="status-message">Fehler beim Laden der Bilddetails.</div>`;
                 loader.style.display = 'none';
                 return;
             }
@@ -315,7 +309,6 @@
             let htmlContent = '';
             let imageCount = 0;
 
-            // Geo-Lookup Map bauen
             const geoLookup = {};
             wikiData.query.geosearch.forEach(item => {
                 geoLookup[item.pageid] = { lat: item.lat, lon: item.lon };
@@ -323,11 +316,9 @@
 
             for (const id in pages) {
                 const page = pages[id];
-                if (!page.thumbnail) continue; // Überspringe Dateien ohne Vorschaubild (z.B. PDFs/Audios)
+                if (!page.thumbnail) continue;
 
                 const title = page.title.replace('File:', '');
-                
-                // Extrem robuster Schutz gegen fehlende Metadaten-Felder
                 let description = '';
                 let date = 'Unbekannt';
                 
@@ -337,21 +328,19 @@
                     date = meta.DateTimeOriginal ? meta.DateTimeOriginal.value : 'Unbekannt';
                 }
 
-                // Suchbegriffe für den historischen Filter
                 const searchString = (title + " " + description).toLowerCase();
-                const isHistoric = /historisch|history|18\d{2}|190\d|191\d|192\d|193\d|194\d|195\d|196\d|197\d|198\d|altes|old|postcard|postkarte|ansichtskarte|damals|krieg|schloss|befreiung|bahnhof|kirche|jahrhundert|vintage/i.test(searchString);
+                // Breiter gefasster Filter für historische Treffer
+                const isHistoric = /historisch|history|18\d{2}|19\d{2}|altes|old|postcard|postkarte|ansichtskarte|damals|krieg|schloss|bahnhof|kirche|jahrhundert|vintage|monument/i.test(searchString);
 
                 if (isHistoric) {
                     imageCount++;
                     const imgSrc = page.thumbnail.source;
                     const originalUrl = (page.imageinfo && page.imageinfo[0]) ? page.imageinfo[0].descriptionurl : '#';
-                    
-                    // HTML Tags säubern
                     const cleanDesc = description.replace(/<\/?[^>]+(>|$)/g, "").substring(0, 90) + "...";
                     const itemLat = geoLookup[id].lat;
                     const itemLon = geoLookup[id].lon;
 
-                    // Marker auf Karte setzen
+                    // Marker auf die Karte setzen
                     const marker = L.marker([itemLat, itemLon]);
                     marker.bindPopup(`
                         <div style="max-width: 160px;">
@@ -362,7 +351,7 @@
                     `);
                     markerLayer.addLayer(marker);
 
-                    // Galerie-Karte bauen
+                    // Karte für die Galerie bauen
                     htmlContent += `
                         <div class="card">
                             <img src="${imgSrc}" alt="${title}" loading="lazy" onclick="zoomToMarker(${itemLat}, ${itemLon})">
@@ -382,15 +371,15 @@
             loader.style.display = 'none';
 
             if (imageCount === 0) {
-                gallery.innerHTML = `<div class="status-message">In diesem Bereich wurden keine eindeutig historischen Fotos gefunden. Versuche es bei einer größeren Stadt oder einem Schloss/Burg in der Nähe!</div>`;
+                gallery.innerHTML = `<div class="status-message">Keine explizit historischen Fotos direkt in diesem Ausschnitt gefunden. Verschiebe die Karte z.B. näher zum Marienplatz oder Hauptbahnhof!</div>`;
             } else {
                 gallery.innerHTML = htmlContent;
             }
 
         } catch (error) {
-            console.error("Detaillierter Fehler:", error);
+            console.error("Fehler:", error);
             loader.style.display = 'none';
-            gallery.innerHTML = `<div class="status-message">Fehler beim Abrufen der API-Daten. Bitte lade die Seite neu.</div>`;
+            gallery.innerHTML = `<div class="status-message">API-Verbindungsfehler. Bitte lade die Seite einmal neu.</div>`;
         }
     }
 
