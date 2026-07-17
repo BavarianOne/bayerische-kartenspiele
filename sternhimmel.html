@@ -67,7 +67,11 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;b
 
   <div id="left" class="panel slider-wrap">
     <label>Zeit</label>
-    <input id="timeSlider" type="range" min="-43200" max="43200" value="0" step="60" title="±12 Stunden">
+    <div class="row" style="gap:6px;align-items:center">
+      <button id="btnTimeBack" class="small" title="1 Stunde zurück">⏪</button>
+      <input id="timeSlider" type="range" min="-43200" max="43200" value="0" step="60" title="±12 Stunden" style="flex:1">
+      <button id="btnTimeFwd" class="small" title="1 Stunde vorwärts">⏩</button>
+    </div>
     <span id="timeDisplay" style="min-width:80px;color:var(--gold);font-variant-numeric:tabular-nums;font-size:0.85rem">Jetzt</span>
     <button id="btnNow" class="small">Jetzt</button>
     <button id="btnPlay" class="small">▶</button>
@@ -574,7 +578,7 @@ function resize(){
 }
 addEventListener('resize',resize); resize()
 
-let cam = {az:0, alt:45*D2R, fov:60*D2R, targetAlt:45*D2R, targetAz:0}
+let cam = {az:0.2, alt:0.37, fov:60*D2R, targetAlt:0.37, targetAz:0.2}
 let showConstell=true, showNames=true, showPlanets=true, showGrid=true, showMW=true, showCompass=true
 let animating=false, animDir=1, animSpeed=1
 let observer = {lat:48.1374*D2R, lon:11.5755*D2R, name:'München, Deutschland'}
@@ -598,11 +602,15 @@ function projectStar(ra, dec, lst){
 
 function drawBackground(){
   // Dunkler Nachthimmel mit subtiler Vignette
-  const grad = ctx.createRadialGradient(W/(2*DPR), H/(2*DPR), 0, W/(2*DPR), H/(2*DPR), Math.max(W,H)/DPR)
-  grad.addColorStop(0, '#080818')
-  grad.addColorStop(1, '#020208')
-  ctx.fillStyle = grad
-  ctx.fillRect(0,0,W/DPR,H/DPR)
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)/2);
+  grad.addColorStop(0, '#080818');
+  grad.addColorStop(1, '#020208');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+  console.log('drawBackground executed, canvas[0,0]:', ctx.getImageData(0,0,1,1).data);
 }
 
 function drawMilkyWay(lst){
@@ -694,26 +702,26 @@ function drawStars(lst){
     const p = projectStar(s.ra, s.dec, lst)
     if(p){
       // Größe basierend auf Magnitude
-      const baseSize = Math.max(1.5, 6 - s.mag*1.2)
-      const size = baseSize * (0.5 + 0.5*p.dist) * (60/cam.fov*R2D)
-      visible.push({...s, ...p, size})
+            const baseSize = Math.max(2, 8 - s.mag*1.5)
+            const size = baseSize * (0.5 + 0.5*p.dist) * (60/cam.fov*R2D)
+            visible.push({...s, ...p, size})
     }
   }
   visible.sort((a,b)=>b.mag - a.mag)
 
   for(const s of visible){
-    const brightness = Math.pow(2.512, -s.mag) * s.dist
-    const alpha = Math.min(1, brightness * 1.5)
-    const twinkle = 0.8 + 0.2*Math.sin(Date.now()*0.001 + s.ra*100)
+      const brightness = Math.pow(2.512, -s.mag) * s.dist
+      const alpha = Math.min(1, brightness * 3)
+      const twinkle = 0.8 + 0.2*Math.sin(Date.now()*0.001 + s.ra*100)
     
-    ctx.beginPath()
-    ctx.arc(s.x, s.y, Math.max(1, s.size*twinkle), 0, TAU)
-    ctx.fillStyle = `rgba(255,255,255,${alpha*twinkle})`
-    ctx.shadowBlur = s.size*3
-    ctx.shadowColor = `rgba(255,255,255,${alpha*0.5})`
-    ctx.fill()
-    ctx.shadowBlur = 0
-  }
+      ctx.beginPath()
+      ctx.arc(s.x, s.y, Math.max(1.5, s.size*twinkle), 0, TAU)
+      ctx.fillStyle = `rgba(255,255,255,${alpha*twinkle})`
+      ctx.shadowBlur = s.size*4
+      ctx.shadowColor = `rgba(255,255,255,${alpha*0.6})`
+      ctx.fill()
+      ctx.shadowBlur = 0
+    }
   return visible
 }
 
@@ -1065,6 +1073,20 @@ function updateTimeDisplay(){
 document.getElementById('btnNow').addEventListener('click', function(){
   timeOffset = 0
   document.getElementById('timeSlider').value = 0
+  updateTimeDisplay()
+})
+
+document.getElementById('btnTimeBack').addEventListener('click', function(){
+  timeOffset -= 3600
+  if(timeOffset < -43200) timeOffset = 43200
+  document.getElementById('timeSlider').value = timeOffset
+  updateTimeDisplay()
+})
+
+document.getElementById('btnTimeFwd').addEventListener('click', function(){
+  timeOffset += 3600
+  if(timeOffset > 43200) timeOffset = -43200
+  document.getElementById('timeSlider').value = timeOffset
   updateTimeDisplay()
 })
 
