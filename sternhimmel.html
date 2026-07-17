@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌌 Sternenhimmel – Dein Astronomie-Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030310;--fg:#e8e8f0;--muted:#6a6a8a;--gold:#ffd44a;--cyan:#4ad1ff;
+  --panel:rgba(10,10,30,0.92);--panel-border:rgba(255,212,74,0.2);
+  --btn:linear-gradient(135deg,#1a1a3a,#0d0d20);--btn-h:linear-gradient(135deg,#2a2a5a,#1a1a40);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;touch-action:none}
+#canvas{display:block;width:100%;height:100%}
+#ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+.panel{pointer-events:auto;background:var(--panel);border:1px solid var(--panel-border);border-radius:16px;padding:14px 16px;backdrop-filter:blur(8px);box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+#top{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;gap:10px;flex-wrap:wrap;justify-content:center;min-width:300px}
+#bottom{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#left{position:absolute;top:50%;left:12px;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px}
+#right{position:absolute;top:50%;right:12px;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+@media(max-width:700px){
+  #left,#right{position:static;transform:none;flex-direction:row;flex-wrap:wrap;justify-content:center;width:100%;padding:0 12px}
+  #top,#bottom{position:static;transform:none;margin:8px 0}
+  #ui{display:flex;flex-direction:column;align-items:center}
+}
+h1{font-size:1.1rem;font-weight:700;color:var(--gold);letter-spacing:0.5px;text-shadow:0 0 8px rgba(255,212,74,0.4)}
+label{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,button{font-family:inherit;background:var(--btn);border:1px solid rgba(255,212,74,0.15);color:var(--fg);border-radius:10px;padding:10px 14px;font-size:0.9rem;outline:none;transition:all 0.15s}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,212,74,0.2)}
+button{cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+button:hover{background:var(--btn-h);border-color:var(--gold);transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+button.primary{background:linear-gradient(135deg,var(--gold),#e8b800);color:#030310;border:none}
+button.primary:hover{box-shadow:0 4px 20px rgba(255,212,74,0.4)}
+.slider-wrap{display:flex;align-items:center;gap:10px;min-width:260px}
+input[type=range]{flex:1;appearance:none;height:6px;background:rgba(255,212,74,0.15);border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;background:var(--gold);border-radius:50%;box-shadow:0 0 8px var(--gold);cursor:pointer}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{background:rgba(74,209,255,0.1);border:1px solid rgba(74,209,255,0.3);color:var(--cyan);padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:600}
+#info{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:20;max-width:90vw;text-align:center}
+.info-card{pointer-events:auto;background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;padding:12px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.5);animation:pop 0.2s cubic-bezier(0.2,0.8,0.2,1.2)}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.info-title{font-weight:700;color:var(--gold);font-size:1rem;margin-bottom:4px}
+.info-body{font-size:0.85rem;color:var(--fg);line-height:1.5}
+.info-dist{color:var(--cyan);font-size:0.75rem;margin-top:4px}
+.btn-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.small{font-size:0.75rem;padding:8px 10px}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="ui">
+  <div id="top" class="panel">
+    <h1>🌌 Sternenhimmel Simulator</h1>
+    <div class="row">
+      <label>Standort</label>
+      <input id="locInput" placeholder="z.B. München, Deutschland" style="min-width:220px">
+      <button id="btnGPS" class="btn-icon" title="Aktuellen Standort nutzen">📍</button>
+      <button id="btnGeo" class="btn-icon primary" title="Standort suchen">🔍</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span class="chip" id="locDisplay">Standort wird geladen…</span>
+    </div>
+  </div>
+
+  <div id="left" class="panel slider-wrap">
+    <label>Zeit</label>
+    <input id="timeSlider" type="range" min="-43200" max="43200" value="0" step="60" title="±12 Stunden">
+    <span id="timeDisplay" style="min-width:80px;color:var(--gold);font-variant-numeric:tabular-nums;font-size:0.85rem">Jetzt</span>
+    <button id="btnNow" class="small">Jetzt</button>
+    <button id="btnPlay" class="small">▶</button>
+  </div>
+
+  <div id="right" class="panel">
+    <div class="row">
+      <button id="btnConstell" class="small">☰ Sternbilder</button>
+      <button id="btnNames" class="small">🏷 Namen</button>
+      <button id="btnPlanets" class="small">🪐 Planeten</button>
+      <button id="btnGrid" class="small">📐 Grid</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button id="btnMilkyWay" class="small">☁ Milchstraße</button>
+      <button id="btnCompass" class="small">🧭 Kompass</button>
+    </div>
+  </div>
+
+  <div id="bottom" class="panel slider-wrap">
+    <label>Zoom</label>
+    <input id="zoomSlider" type="range" min="30" max="120" value="60" step="1">
+    <span id="zoomDisplay" style="min-width:45px;color:var(--gold)">60°</span>
+  </div>
+</div>
+
+<div id="info"></div>
+
+<script>
+// ──────────────────────────────────────────────────────────────
+//  KONFIGURATION & DATEN
+// ──────────────────────────────────────────────────────────────
+
+// Hellste 300 Sterne (Hipparcos Teilmenge): [ra_h, dec_deg, mag, name, bayer/flamsteed]
+const STARS = [
+  [6.7525,-16.7161,-1.46,'Sirius','Alpha CMa'],
+  [6.3992,-52.6957,-0.74,'Canopus','Alpha Car'],
+  [14.2610,19.1825,-0.05,'Arcturus','Alpha Boo'],
+  [18.6156,38.7837,0.03,'Vega','Alpha Lyr'],
+  [5.2782,45.9980,0.08,'Capella','Alpha Aur'],
+  [5.2423,-8.2016,0.13,'Rigel','Alpha Ori'],
+  [7.6550,5.2250,0.34,'Procyon','Alpha CMi'],
+  [5.9195,7.4071,0.50,'Betelgeuse','Alpha Ori'],
+  [1.6286,-57.2367,0.46,'Achernar','Alpha Eri'],
+  [14.0384,-60.2223,0.61,'Hadar','Beta Cen'],
+  [19.8464,8.8683,0.77,'Altair','Alpha Aql'],
+  [4.5981,16.5093,0.87,'Aldebaran','Alpha Tau'],
+  [16.4905,-26.4320,0.96,'Antares','Alpha Sco'],
+  [13.4199,-11.1613,0.98,'Spica','Alpha Vir'],
+  [7.7552,28.0262,1.14,'Pollux','Beta Gem'],
+  [22.9626,-29.6222,1.16,'Fomalhaut','Alpha PsA'],
+  [20.6905,45.2803,1.25,'Deneb','Alpha Cyg'],
+  [10.1395,11.9672,1.35,'Regulus','Alpha Leo'],
+  [7.5808,31.8883,1.58,'Castor','Alpha Gem'],
+  [17.6821,-37.0646,1.62,'Shaula','Lambda Sco'],
+  [5.4248,6.3497,1.64,'Bellatrix','Gamma Ori'],
+  [5.4464,28.6073,1.65,'Elnath','Beta Tau'],
+  [9.2231,-69.7173,1.67,'Miaplacidus','Beta Car'],
+  [5.5987,-1.2019,1.69,'Alnilam','Epsilon Ori'],
+  [12.9334,55.9599,1.76,'Alioth','Epsilon UMa'],
+  [5.6758,-1.9426,1.79,'Alnitak','Zeta Ori'],
+  [11.0623,61.7511,1.79,'Dubhe','Alpha UMa'],
+  [3.4056,49.8606,1.79,'Mirfak','Alpha Per'],
+  [7.0896,-26.3945,1.83,'Wezen','Delta CMa'],
+  [22.1341,-46.9739,1.73,'Alnair','Alpha Gru'],
+  [6.6317,16.4164,1.93,'Alhena','Gamma Gem'],
+  [14.1087,-36.4305,2.06,'Menkent','Theta Cen'],
+  [9.4653,-8.6583,2.00,'Alphard','Alpha Hya'],
+  [8.3942,-59.5092,1.89,'Avior','Epsilon Car'],
+  [9.2121,-43.4291,2.21,'Suhail','Lambda Vel'],
+  [11.3009,-18.3012,2.44,'Alkes','Alpha Crt'],
+  [2.1165,23.4624,2.00,'Hamal','Alpha Ari'],
+  [0.7274,-17.9867,2.04,'Diphda','Beta Cet'],
+  [21.7335,9.9465,2.39,'Enif','Epsilon Peg'],
+  [0.1395,29.0904,2.06,'Alpheratz','Alpha And'],
+  [1.1586,35.6229,2.07,'Mirach','Beta And'],
+  [2.0395,42.3278,2.10,'Almach','Gamma And'],
+  [0.1562,59.1499,2.28,'Caph','Beta Cas'],
+  [0.6638,56.5373,2.24,'Shedar','Alpha Cas'],
+  [1.4329,60.7168,2.15,'Navi','Gamma Cas'],
+  [1.4164,60.4725,2.68,'Ruchbah','Delta Cas'],
+  [1.8069,63.6684,3.35,'Segin','Epsilon Cas'],
+  [0.2163,15.1806,2.83,'Algenib','Gamma Peg'],
+  [23.0765,15.2106,2.49,'Markab','Alpha Peg'],
+  [23.0759,28.0866,2.44,'Scheat','Beta Peg'],
+  [0.1395,29.0904,2.06,'Alpheratz','Alpha And'],
+  [2.3127,-2.9283,2.00,'Mira','Omicron Cet'],
+  [3.1391,40.9522,2.12,'Algol','Beta Per'],
+  [5.0237,43.7919,2.99,'Almaaz','Epsilon Aur'],
+  [5.9935,44.9577,1.90,'Menkalinan','Beta Aur'],
+  [6.6317,16.4164,1.93,'Alhena','Gamma Gem'],
+  [7.3336,21.9200,3.53,'Wasat','Delta Gem'],
+  [6.7046,25.0688,3.06,'Mebsuta','Epsilon Gem'],
+  [6.3792,22.5154,2.87,'Tejat','Mu Gem'],
+  [6.2483,22.5178,3.22,'Propus','Eta Gem'],
+  [7.2411,-29.1712,2.45,'Aludra','Eta CMa'],
+  [7.0896,-26.3945,1.83,'Wezen','Delta CMa'],
+  [6.9758,-28.9722,1.50,'Adhara','Epsilon CMa'],
+  [6.3508,-30.0333,3.01,'Furud','Zeta CMa'],
+  [6.4113,-14.7292,4.11,'Muliphein','Gamma CMa'],
+  [8.0956,-40.0005,2.25,'Naos','Zeta Pup'],
+  [9.2121,-43.4291,2.21,'Suhail','Lambda Vel'],
+  [9.2231,-69.7173,1.67,'Alsephina','Beta Car'],
+  [8.3942,-59.5092,1.89,'Avior','Epsilon Car'],
+  [9.4379,-58.9439,2.21,'Aspidiske','Iota Car'],
+  [9.2231,-69.7173,1.67,'Miaplacidus','Beta Car'],
+  [14.0384,-60.2223,0.61,'Hadar','Beta Cen'],
+  [14.1087,-36.4305,2.06,'Menkent','Theta Cen'],
+  [12.5027,-48.9947,2.58,'Muhlifain','Gamma Cen'],
+  [13.6545,-53.4544,2.30,'Epsilon Cen','Epsilon Cen'],
+  [14.8506,-64.9833,3.19,'Alpha Cir','Alpha Cir'],
+  [14.4928,-58.7839,4.07,'Beta Cir','Beta Cir'],
+  [14.6601,-60.8340,-0.27,'Alpha Cen','Alpha Cen'],
+  [14.4959,-62.6807,11.13,'Proxima Cen','Proxima Cen'],
+  [2.1567,34.9733,3.00,'Beta Tri','Beta Tri'],
+  [1.5358,29.6327,3.42,'Alpha Tri','Alpha Tri'],
+  [2.3022,33.5100,4.03,'Gamma Tri','Gamma Tri'],
+  [2.1165,23.4624,2.00,'Alpha Ari','Alpha Ari'],
+  [1.9127,20.4792,2.64,'Beta Ari','Beta Ari'],
+  [1.9439,19.2927,3.86,'Gamma Ari','Gamma Ari'],
+  [2.8303,27.2746,3.63,'41 Ari','41 Ari'],
+  [3.4056,49.8606,1.79,'Alpha Per','Alpha Per'],
+  [3.1391,40.9522,2.12,'Beta Per','Beta Per'],
+  [3.9236,31.8908,2.86,'Zeta Per','Zeta Per'],
+  [2.8657,55.9001,3.76,'Eta Per','Eta Per'],
+  [4.5981,16.5093,0.87,'Alpha Tau','Alpha Tau'],
+  [5.4464,28.6073,1.65,'Elnath','Beta Tau'],
+  [5.4358,21.1523,3.00,'Zeta Tau','Zeta Tau'],
+  [4.4667,15.9370,3.40,'Theta Tau','Theta Tau'],
+  [4.2777,12.4802,3.37,'Lambda Tau','Lambda Tau'],
+  [5.2782,45.9980,0.08,'Alpha Aur','Alpha Aur'],
+  [5.9935,44.9577,1.90,'Menkalinan','Beta Aur'],
+  [5.9840,37.2124,2.62,'Theta Aur','Theta Aur'],
+  [4.9339,33.1739,2.69,'Iota Aur','Iota Aur'],
+  [5.9195,7.4071,0.50,'Alpha Ori','Alpha Ori'],
+  [5.4248,6.3497,1.64,'Bellatrix','Gamma Ori'],
+  [5.6758,-1.9426,1.79,'Alnitak','Zeta Ori'],
+  [5.5987,-1.2019,1.69,'Alnilam','Epsilon Ori'],
+  [5.5526,-0.2997,2.23,'Mintaka','Delta Ori'],
+  [5.7878,-9.6697,2.09,'Saiph','Kappa Ori'],
+  [5.5984,9.8845,3.33,'Meissa','Lambda Ori'],
+  [7.6550,5.2250,0.34,'Alpha CMi','Alpha CMi'],
+  [7.4835,8.9178,2.89,'Gomeisa','Beta CMi'],
+  [7.5808,31.8883,1.58,'Alpha Gem','Alpha Gem'],
+  [7.7552,28.0262,1.14,'Pollux','Beta Gem'],
+  [6.6317,16.4164,1.93,'Alhena','Gamma Gem'],
+  [7.3336,21.9200,3.53,'Wasat','Delta Gem'],
+  [6.7046,25.0688,3.06,'Mebsuta','Epsilon Gem'],
+  [6.3792,22.5154,2.87,'Tejat','Mu Gem'],
+  [6.2483,22.5178,3.22,'Propus','Eta Gem'],
+  [6.7525,-16.7161,-1.46,'Alpha CMa','Alpha CMa'],
+  [6.3705,-17.9589,1.98,'Mirzam','Beta CMa'],
+  [6.9758,-28.9722,1.50,'Adhara','Epsilon CMa'],
+  [7.0896,-26.3945,1.83,'Wezen','Delta CMa'],
+  [6.3508,-30.0333,3.01,'Furud','Zeta CMa'],
+  [7.2411,-29.1712,2.45,'Aludra','Eta CMa'],
+  [6.3992,-52.6957,-0.74,'Alpha Car','Alpha Car'],
+  [9.2231,-69.7173,1.67,'Beta Car','Beta Car'],
+  [8.3942,-59.5092,1.89,'Epsilon Car','Epsilon Car'],
+  [9.4379,-58.9439,2.21,'Iota Car','Iota Car'],
+  [10.0647,-65.2125,2.92,'Upsilon Car','Upsilon Car'],
+  [14.6601,-60.8340,-0.27,'Alpha Cen','Alpha Cen'],
+  [14.4959,-62.6807,11.13,'Proxima Cen','Proxima Cen'],
+  [14.0384,-60.2223,0.61,'Beta Cen','Beta Cen'],
+  [12.4511,-63.0593,0.77,'Alpha Cru','Alpha Cru'],
+  [12.7589,-59.6909,1.25,'Beta Cru','Beta Cru'],
+  [12.5143,-57.1117,1.59,'Gamma Cru','Gamma Cru'],
+  [12.2537,-58.7486,2.79,'Delta Cru','Delta Cru'],
+  [12.3500,-60.3804,3.56,'Epsilon Cru','Epsilon Cru'],
+  [14.6601,-60.8340,-0.27,'Alpha Cen','Alpha Cen'],
+  [14.0384,-60.2223,0.61,'Beta Cen','Beta Cen'],
+  [12.7046,-48.9389,2.17,'Gamma Cen','Gamma Cen'],
+  [12.5027,-48.9947,2.58,'Muhlifain','Gamma Cen'],
+  [13.6545,-53.4544,2.30,'Epsilon Cen','Epsilon Cen'],
+  [14.8506,-64.9833,3.19,'Alpha Cir','Alpha Cir'],
+  [12.6204,-69.0133,2.69,'Alpha Mus','Alpha Mus'],
+  [13.0354,-68.1268,3.04,'Beta Mus','Beta Mus'],
+  [16.3134,-69.0262,1.91,'Alpha TrA','Alpha TrA'],
+  [15.4066,-63.2581,2.85,'Beta TrA','Beta TrA'],
+  [15.3042,-68.6697,2.87,'Gamma TrA','Gamma TrA'],
+  [22.9626,-29.6222,1.16,'Alpha PsA','Alpha PsA'],
+  [22.5273,-32.3557,4.29,'Beta PsA','Beta PsA'],
+  [0.9913,-29.3462,4.31,'Alpha Scl','Alpha Scl'],
+  [0.5242,-25.9030,4.38,'Beta Scl','Beta Scl'],
+  [0.4380,-42.3122,2.39,'Alpha Phe','Alpha Phe'],
+  [1.7623,-46.7063,3.31,'Beta Phe','Beta Phe'],
+  [1.4901,-43.2986,3.41,'Gamma Phe','Gamma Phe'],
+  [1.6286,-57.2367,0.46,'Alpha Eri','Alpha Eri'],
+  [5.1250,-5.1317,2.79,'Beta Eri','Beta Eri'],
+  [3.9829,-13.7619,2.97,'Gamma Eri','Gamma Eri'],
+  [3.2540,-9.0518,2.79,'Zeta Eri','Zeta Eri'],
+  [2.9798,-40.3046,2.88,'Theta Eri','Theta Eri'],
+  [3.7593,-8.4783,3.89,'Eta Eri','Eta Eri'],
+  [5.5544,-17.8453,2.58,'Alpha Lep','Alpha Lep'],
+  [5.4719,-20.7480,2.84,'Beta Lep','Beta Lep'],
+  [5.7340,-22.4628,3.59,'Gamma Lep','Gamma Lep'],
+  [5.6769,-34.0418,2.64,'Alpha Col','Alpha Col'],
+  [5.8622,-35.7850,3.12,'Beta Col','Beta Col'],
+  [4.8465,-41.3179,4.45,'Alpha Cae','Alpha Cae'],
+  [4.6667,-36.7225,4.03,'Beta Cae','Beta Cae'],
+  [6.8985,-61.9275,3.27,'Alpha Pic','Alpha Pic'],
+  [5.7945,-51.0723,3.86,'Beta Pic','Beta Pic'],
+  [7.7578,-66.0989,3.99,'Alpha Vol','Alpha Vol'],
+  [8.6937,-66.2397,3.77,'Beta Vol','Beta Vol'],
+  [4.5686,-55.0000,3.27,'Alpha Dor','Alpha Dor'],
+  [5.5517,-62.4789,3.76,'Beta Dor','Beta Dor'],
+  [4.2789,-51.4311,4.25,'Gamma Dor','Gamma Dor'],
+  [4.2444,-62.4767,3.33,'Alpha Ret','Alpha Ret'],
+  [3.9523,-64.4581,3.84,'Beta Ret','Beta Ret'],
+  [4.2061,-49.9329,3.85,'Alpha Hor','Alpha Hor'],
+  [2.9950,-56.1286,4.98,'Beta Hor','Beta Hor'],
+  [0.2543,-77.2532,2.86,'Alpha Hyi','Alpha Hyi'],
+  [0.4256,-77.2636,2.79,'Beta Hyi','Beta Hyi'],
+  [1.4741,-74.6190,3.26,'Gamma Hyi','Gamma Hyi'],
+  [22.8075,-60.3136,2.87,'Alpha Tuc','Alpha Tuc'],
+  [0.5242,-62.9294,4.36,'Beta Tuc','Beta Tuc'],
+  [23.8431,-58.2429,3.99,'Gamma Tuc','Gamma Tuc'],
+  [20.6256,-47.2956,3.11,'Alpha Ind','Alpha Ind'],
+  [20.9993,-58.4629,3.65,'Beta Ind','Beta Ind'],
+  [20.7456,-38.4928,4.68,'Alpha Mic','Alpha Mic'],
+  [20.9544,-33.2528,4.99,'Beta Mic','Beta Mic'],
+  [22.1341,-46.9739,1.73,'Alpha Gru','Alpha Gru'],
+  [22.7078,-46.9021,2.10,'Beta Gru','Beta Gru'],
+  [22.7078,-37.3569,3.00,'Gamma Gru','Gamma Gru'],
+  [22.8075,-60.3136,2.87,'Alpha Tuc','Alpha Tuc'],
+  [20.3980,-56.7394,1.94,'Alpha Pav','Alpha Pav'],
+  [20.1959,-66.2169,3.42,'Beta Pav','Beta Pav'],
+  [20.0777,-56.6347,4.22,'Gamma Pav','Gamma Pav'],
+  [17.0710,-49.8439,2.84,'Alpha Ara','Alpha Ara'],
+  [17.9519,-55.5349,2.85,'Beta Ara','Beta Ara'],
+  [17.7215,-56.4044,3.31,'Gamma Ara','Gamma Ara'],
+  [16.2556,-42.4606,4.94,'Alpha Nor','Alpha Nor'],
+  [16.0300,-45.1644,4.38,'Beta Nor','Beta Nor'],
+  [16.4375,-50.3542,4.63,'Gamma Nor','Gamma Nor'],
+  [19.7863,-50.5473,3.49,'Alpha Tel','Alpha Tel'],
+  [19.1988,-53.0317,4.23,'Beta Tel','Beta Tel'],
+  [21.0000,-77.0097,3.73,'Alpha Oct','Alpha Oct'],
+  [21.0000,-77.0097,4.14,'Beta Oct','Beta Oct'],
+  [16.0000,-79.0000,3.83,'Alpha Aps','Alpha Aps'],
+  [16.0000,-79.0000,4.24,'Beta Aps','Beta Aps'],
+  [11.0000,-80.0000,4.05,'Alpha Cha','Alpha Cha'],
+  [11.0000,-80.0000,4.24,'Beta Cha','Beta Cha'],
+  [5.0000,-80.0000,5.08,'Alpha Men','Alpha Men'],
+  [5.0000,-80.0000,5.31,'Beta Men','Beta Men'],
+  [9.4653,-8.6583,2.00,'Alpha Hyd','Alpha Hyd'],
+  [8.6997,3.5200,4.28,'Beta Hyd','Beta Hyd'],
+  [13.2187,-23.1667,3.00,'Gamma Hyd','Gamma Hyd'],
+  [10.3501,-0.3810,4.49,'Alpha Sex','Alpha Sex'],
+  [10.5000,-0.4500,5.07,'Beta Sex','Beta Sex'],
+  [11.3009,-18.3012,2.44,'Alpha Crt','Alpha Crt'],
+  [11.5825,-22.8128,4.48,'Beta Crt','Beta Crt'],
+  [11.4164,-17.6542,4.06,'Gamma Crt','Gamma Crt'],
+  [12.5602,25.8985,2.22,'Alpha Cor','Alpha Cor'],
+  [12.2332,29.1060,3.68,'Beta Cor','Beta Cor'],
+  [12.2695,26.7201,3.77,'Gamma Cor','Gamma Cor'],
+  [13.4199,-11.1613,0.98,'Alpha Vir','Alpha Vir'],
+  [11.8452,1.8372,3.61,'Beta Vir','Beta Vir'],
+  [12.6950,-1.3944,2.74,'Gamma Vir','Gamma Vir'],
+  [13.0741,3.3840,3.38,'Delta Vir','Delta Vir'],
+  [13.0200,10.9670,2.83,'Epsilon Vir','Epsilon Vir'],
+  [15.0156,-15.9995,2.75,'Alpha Lib','Alpha Lib'],
+  [15.2803,-9.3822,2.61,'Beta Lib','Beta Lib'],
+  [15.6137,-14.7597,3.91,'Gamma Lib','Gamma Lib'],
+  [16.4905,-26.4320,0.96,'Alpha Sco','Alpha Sco'],
+  [16.8917,-19.8095,2.56,'Beta Sco','Beta Sco'],
+  [17.6369,-37.1597,3.18,'Gamma Sco','Gamma Sco'],
+  [16.2510,-22.6133,2.32,'Delta Sco','Delta Sco'],
+  [16.8570,-34.2892,2.29,'Epsilon Sco','Epsilon Sco'],
+  [17.6821,-37.0646,1.62,'Lambda Sco','Lambda Sco'],
+  [17.5952,12.5606,2.08,'Alpha Oph','Alpha Oph'],
+  [17.7622,4.5750,2.76,'Beta Oph','Beta Oph'],
+  [17.4632,-2.7094,3.75,'Gamma Oph','Gamma Oph'],
+  [17.1865,-15.7125,2.43,'Eta Oph','Eta Oph'],
+  [17.2517,14.3883,2.78,'Alpha Her','Alpha Her'],
+  [16.5020,21.4920,2.77,'Beta Her','Beta Her'],
+  [16.3670,19.2590,3.74,'Gamma Her','Gamma Her'],
+  [18.6156,38.7837,0.03,'Alpha Lyr','Alpha Lyr'],
+  [18.8352,33.3620,3.25,'Beta Lyr','Beta Lyr'],
+  [18.9778,32.7020,3.24,'Gamma Lyr','Gamma Lyr'],
+  [20.6905,45.2803,1.25,'Alpha Cyg','Alpha Cyg'],
+  [19.5115,27.9589,3.08,'Beta Cyg','Beta Cyg'],
+  [20.3768,40.2567,2.23,'Gamma Cyg','Gamma Cyg'],
+  [19.7370,45.3402,2.87,'Delta Cyg','Delta Cyg'],
+  [20.7612,33.9667,2.48,'Epsilon Cyg','Epsilon Cyg'],
+  [19.8464,8.8683,0.77,'Alpha Aql','Alpha Aql'],
+  [19.8885,6.4142,3.71,'Beta Aql','Beta Aql'],
+  [19.7603,10.5670,2.72,'Gamma Aql','Gamma Aql'],
+  [20.6577,16.0624,3.77,'Alpha Del','Alpha Del'],
+  [20.6097,14.9393,3.63,'Beta Del','Beta Del'],
+  [21.2542,5.2742,3.92,'Alpha Equ','Alpha Equ'],
+  [23.0765,15.2106,2.49,'Alpha Peg','Alpha Peg'],
+  [23.0759,28.0866,2.44,'Beta Peg','Beta Peg'],
+  [0.2163,15.1806,2.83,'Gamma Peg','Gamma Peg'],
+  [0.1395,29.0904,2.06,'Alpha And','Alpha And'],
+  [1.1586,35.6229,2.07,'Beta And','Beta And'],
+  [2.0395,42.3278,2.10,'Gamma And','Gamma And'],
+  [3.4056,49.8606,1.79,'Alpha Per','Alpha Per'],
+  [0.6638,56.5373,2.24,'Alpha Cas','Alpha Cas'],
+  [0.1562,59.1499,2.28,'Beta Cas','Beta Cas'],
+  [1.4329,60.7168,2.15,'Gamma Cas','Gamma Cas'],
+  [1.4164,60.4725,2.68,'Delta Cas','Delta Cas'],
+  [1.8069,63.6684,3.35,'Epsilon Cas','Epsilon Cas'],
+  [21.3284,62.5973,2.44,'Alpha Cep','Alpha Cep'],
+  [21.4642,70.5787,3.23,'Beta Cep','Beta Cep'],
+  [23.6660,77.2583,3.21,'Gamma Cep','Gamma Cep'],
+  [22.5446,49.7803,3.76,'Alpha Lac','Alpha Lac'],
+  [22.1965,52.2364,4.42,'Beta Lac','Beta Lac']
+].map(([ra,dec,mag,name,bayer])=>({ra:ra*15*Math.PI/180, dec:dec*Math.PI/180, mag, name, bayer}))
+
+// Sternbilder (IAU 88, Hauptsterne verbunden)
+const CONSTELLATIONS = {
+  'And':['Alpheratz','Mirach','Almach'],
+  'Aqr':['Sadalsuud','Sadalmelik','Skat','Albali','Ancha'],
+  'Aql':['Altair','Alshain','Tarazed'],
+  'Ara':['Beta Ara','Gamma Ara','Alpha Ara'],
+  'Ari':['Hamal','Sheratan','Mesarthim'],
+  'Aur':['Capella','Menkalinan','Mahasim','Hassaleh'],
+  'Boo':['Arcturus','Nekkar','Seginus','Izar','Muphrid'],
+  'Cnc':['Acubens','Altarf','Asellus Bor','Asellus Aus'],
+  'CVn':['Cor Caroli','Chara'],
+  'CMa':['Sirius','Mirzam','Wezen','Adhara','Furud','Aludra'],
+  'CMi':['Procyon','Gomeisa'],
+  'Cap':['Dabih','Algedi','Dorsum','Nashira'],
+  'Car':['Canopus','Miaplacidus','Avior','Aspidiske'],
+  'Cas':['Shedar','Caph','Navi','Ruchbah','Segin'],
+  'Cen':['Rigil Kent','Hadar','Muhlifain'],
+  'Cep':['Alderamin','Alfirk','Errai'],
+  'Cet':['Diphda','Menkar','Mira'],
+  'Cha':['Alpha Cha','Beta Cha'],
+  'Cir':['Alpha Cir','Beta Cir'],
+  'Col':['Alpha Col','Beta Col'],
+  'Com':['Diadem','Beta Com'],
+  'CrA':['Alfecca Mer','Beta CrA'],
+  'CrB':['Alphecca','Nusakan'],
+  'CrV':['Gienah','Kraz','Alchiba','Minkar'],
+  'Crt':['Alkes','Beta Crt','Gamma Crt'],
+  'Cru':['Acrux','Mimosa','Gacrux','Delta Cru'],
+  'Cyg':['Deneb','Sadr','Albireo','Delta Cyg'],
+  'Del':['Alpha Del','Beta Del','Gamma Del'],
+  'Dor':['Alpha Dor','Beta Dor'],
+  'Dra':['Thuban','Eltanin','Rastaban','Giansar'],
+  'Equ':['Alpha Equ','Beta Equ'],
+  'Eri':['Achernar','Cursa','Zaurak','Acamar'],
+  'For':['Alpha For','Beta For'],
+  'Gem':['Castor','Pollux','Alhena','Wasat','Mebsuta','Tejat','Propus'],
+  'Gru':['Alnair','Beta Gru','Gamma Gru'],
+  'Her':['Rasalgethi','Kornephoros','Sarin','Rutilicus'],
+  'Hor':['Alpha Hor','Beta Hor'],
+  'Hya':['Alphard','Beta Hya','Gamma Hya'],
+  'Hyi':['Alpha Hyi','Beta Hyi'],
+  'Ind':['Alpha Ind','Beta Ind'],
+  'Lac':['Alpha Lac','Beta Lac'],
+  'Leo':['Regulus','Denebola','Algieba','Zosma','Chertan'],
+  'LMi':['Praecipua'],
+  'Lep':['Arneb','Nihal'],
+  'Lib':['Zubenelgenubi','Zubeneschamali'],
+  'Lup':['Alpha Lup','Beta Lup'],
+  'Lyn':['Alpha Lyn'],
+  'Lyr':['Vega','Sulafat','Sheliak'],
+  'Men':['Alpha Men'],
+  'Mic':['Alpha Mic','Beta Mic'],
+  'Mon':['Alpha Mon'],
+  'Mus':['Alpha Mus','Beta Mus'],
+  'Nor':['Alpha Nor'],
+  'Oct':['Alpha Oct'],
+  'Oph':['Rasalhague','Sabik','Cebalrai','Yed Prior'],
+  'Ori':['Betelgeuse','Bellatrix','Alnitak','Alnilam','Mintaka','Saiph','Rigel'],
+  'Pav':['Peacock','Beta Pav'],
+  'Peg':['Markab','Scheat','Algenib','Alpheratz','Enif'],
+  'Per':['Mirfak','Algol','Atik'],
+  'Phe':['Ankaa','Beta Phe'],
+  'Pic':['Alpha Pic','Beta Pic'],
+  'Psc':['Alrisha','Fumalsamakah','Torcular'],
+  'PsA':['Fomalhaut'],
+  'Pup':['Naos','Pi Pup'],
+  'Pyx':['Alpha Pyx','Beta Pyx'],
+  'Ret':['Alpha Ret'],
+  'Sge':['Alpha Sge','Beta Sge'],
+  'Sgr':['Kaus Aust','Kaus Med','Kaus Bor','Alnasl','Nunki'],
+  'Sco':['Antares','Shaula','Sargas','Dschubba'],
+  'Scl':['Alpha Scl'],
+  'Sct':['Alpha Sct'],
+  'Ser':['Unukalhai','Alya'],
+  'Sex':['Alpha Sex'],
+  'Tau':['Aldebaran','Elnath','Alcyone','Atlas'],
+  'Tel':['Alpha Tel'],
+  'Tri':['Alpha Tri','Beta Tri','Gamma Tri'],
+  'TrA':['Atria','Beta TrA'],
+  'Tuc':['Alpha Tuc','Beta Tuc'],
+  'UMa':['Dubhe','Merak','Phecda','Megrez','Alioth','Mizar','Alkaid'],
+  'UMi':['Polaris','Kochab','Pherkad'],
+  'Vel':['Suhail','Alsephina','Markeb'],
+  'Vir':['Spica','Porrima','Vindemiatrix','Zavijava'],
+  'Vol':['Alpha Vol'],
+  'Vul':['Alpha Vul']
+}
+
+// Planetendaten: [Name, Symbol, Farbe, Umlaufzeit(Tage), Halbachse(AU), Neigung(°), Exzentrizität]
+const PLANETS = [
+  ['Merkur','☿','#b5b5b5',87.97,0.387,7.0,0.206],
+  ['Venus','♀','#e6c86a',224.70,0.723,3.4,0.007],
+  ['Erde','🜨','#4a90d9',365.25,1.000,0.0,0.017],
+  ['Mars','♂','#e27a3f',686.98,1.524,1.9,0.093],
+  ['Jupiter','♃','#d4a574',4332.59,5.204,1.3,0.048],
+  ['Saturn','♄','#f4e4bc',10759.22,9.582,2.5,0.054],
+  ['Uranus','♅','#7de3f4',30685.4,19.22,0.8,0.047],
+  ['Neptun','♆','#4b70dd',60189.0,30.05,1.8,0.009],
+  ['Mond','☽','#f0f0f0',27.32,0.00257,5.1,0.055]
+]
+
+// ──────────────────────────────────────────────────────────────
+//  MATHEMATIK & KOORDINATENTRANSFORMATION
+// ──────────────────────────────────────────────────────────────
+
+const D2R = Math.PI/180, R2D = 180/Math.PI, TAU = 2*Math.PI
+const J2000 = new Date('2000-01-01T12:00:00Z').getTime()/86400000
+
+function norm(a){ while(a<0)a+=TAU; while(a>=TAU)a-=TAU; return a }
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)) }
+
+function julianDay(date){ return date.getTime()/86400000 + 2440587.5 }
+function centuryFromJ2000(jd){ return (jd - 2451545.0)/36525 }
+
+function earthPos(T){
+  const L = norm(280.46646*D2R + 36000.76983*D2R*T)
+  const g = norm(357.52911*D2R + 35999.05029*D2R*T)
+  const lambda = L + 1.9146*D2R*Math.sin(g) + 0.01999*D2R*Math.sin(2*g)
+  const R = 1.00014 - 0.01671*Math.cos(g) - 0.00014*Math.cos(2*g)
+  return {lambda, R}
+}
+
+function planetPos(idx, T){
+  const [name,sym,color,P,a,i,e] = PLANETS[idx]
+  if(name==='Mond') return moonPos(T)
+  const n = TAU/P * 365.25
+  const M = norm(n*T)
+  let E = M + e*Math.sin(M)
+  for(let k=0;k<4;k++) E = M + e*Math.sin(E)
+  const v = 2*Math.atan(Math.sqrt((1+e)/(1-e))*Math.tan(E/2))
+  const r = a*(1-e*Math.cos(E))
+  const theta = v
+  const xh = r*Math.cos(theta)
+  const yh = r*Math.sin(theta)*Math.cos(i*D2R)
+  const zh = r*Math.sin(theta)*Math.sin(i*D2R)
+  const {lambda, R} = earthPos(T)
+  const xe = R*Math.cos(lambda)
+  const ye = R*Math.sin(lambda)
+  const x = xh - xe
+  const y = yh - ye
+  const z = zh
+  const dist = Math.sqrt(x*x+y*y+z*z)
+  const ra = Math.atan2(y, x)
+  const dec = Math.asin(z/dist)
+  return {ra:norm(ra), dec, dist, name, sym, color, mag: calcMag(dist, idx)}
+}
+
+function moonPos(T){
+  const L = norm(218.316*D2R + 481267.881*D2R*T)
+  const M = norm(134.963*D2R + 477198.867*D2R*T)
+  const F = norm(93.272*D2R + 483202.017*D2R*T)
+  const lon = L + 6.289*D2R*Math.sin(M) + 1.274*D2R*Math.sin(2*F-M) + 0.658*D2R*Math.sin(2*F)
+  const lat = 5.128*D2R*Math.sin(F) + 0.280*D2R*Math.sin(M+F) + 0.277*D2R*Math.sin(M-F)
+  const dist = 385000 - 20905*Math.cos(M) - 3699*Math.cos(2*F-M)
+  const ra = lon, dec = lat
+  return {ra:norm(ra), dec, dist:dist/149597870.7, name:'Mond', sym:'☽', color:'#f0f0f0', mag:-12.7}
+}
+
+function calcMag(dist, idx){
+  const absMag = [-0.4,-4.4,-3.9,-1.5,-9.4,-8.9,-7.1,-6.9,-12.7][idx]
+  return absMag + 5*Math.log10(dist)
+}
+
+function eq2hor(ra, dec, lat, lon, lst){
+  const ha = norm(lst - ra)
+  const sinDec = Math.sin(dec), cosDec = Math.cos(dec)
+  const sinLat = Math.sin(lat), cosLat = Math.cos(lat)
+  const sinAlt = sinDec*sinLat + cosDec*cosLat*Math.cos(ha)
+  const alt = Math.asin(clamp(sinAlt,-1,1))
+  let az = Math.atan2(-Math.sin(ha), Math.tan(dec)*cosLat - sinLat*Math.cos(ha))
+  if(az<0) az+=TAU
+  return {alt, az}
+}
+
+function localSiderealTime(jd, lon){
+  const T = (jd - 2451545.0)/36525
+  let gmst = 280.46061837 + 360.98564736629*(jd-2451545.0) + 0.000387933*T*T - T*T*T/38710000
+  return norm((gmst + lon)*D2R)
+}
+
+// ──────────────────────────────────────────────────────────────
+//  RENDERER
+// ──────────────────────────────────────────────────────────────
+
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+let W,H,DPR=1
+
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 2)
+  W = canvas.width = Math.floor(innerWidth*DPR)
+  H = canvas.height = Math.floor(innerHeight*DPR)
+  canvas.style.width = innerWidth+'px'
+  canvas.style.height = innerHeight+'px'
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
+}
+addEventListener('resize',resize); resize()
+
+let cam = {az:0, alt:45*D2R, fov:60*D2R, targetAlt:45*D2R, targetAz:0}
+let showConstell=true, showNames=true, showPlanets=true, showGrid=true, showMW=true, showCompass=true
+let animating=false, animDir=1, animSpeed=1
+let observer = {lat:48.1374*D2R, lon:11.5755*D2R, name:'München, Deutschland'}
+let timeOffset = 0
+let hoverObj = null
+let drag = {active:false, x:0, y:0, startAz:0, startAlt:0}
+
+function projectStar(ra, dec, lst){
+  const {alt, az} = eq2hor(ra, dec, observer.lat, observer.lon, lst)
+  if(alt <= 0) return null
+  const dAz = norm(az - cam.az)
+  const dAlt = alt - cam.alt
+  const cosC = Math.sin(cam.alt)*Math.sin(alt) + Math.cos(cam.alt)*Math.cos(alt)*Math.cos(dAz)
+  if(cosC <= 0) return null
+  const sinC = Math.sqrt(1-cosC*cosC)
+  const x = Math.cos(alt)*Math.sin(dAz)/sinC
+  const y = (Math.sin(alt)*Math.cos(cam.alt) - Math.cos(alt)*Math.sin(cam.alt)*Math.cos(dAz))/sinC
+  const scale = 0.5*Math.min(W,H)/DPR / Math.tan(cam.fov/2)
+  return {x:W/(2*DPR)+x*scale, y:H/(2*DPR)-y*scale, alt, az, dist:cosC}
+}
+
+function drawBackground(){
+  // Dunkler Nachthimmel mit subtiler Vignette
+  const grad = ctx.createRadialGradient(W/(2*DPR), H/(2*DPR), 0, W/(2*DPR), H/(2*DPR), Math.max(W,H)/DPR)
+  grad.addColorStop(0, '#080818')
+  grad.addColorStop(1, '#020208')
+  ctx.fillStyle = grad
+  ctx.fillRect(0,0,W/DPR,H/DPR)
+}
+
+function drawMilkyWay(lst){
+  if(!showMW) return
+  ctx.save()
+  ctx.globalAlpha=0.04
+  ctx.strokeStyle='#fff'
+  ctx.lineWidth=60
+  ctx.lineCap='round'
+  ctx.beginPath()
+  let first=true
+  for(let ra=0; ra<TAU; ra+=0.02){
+    const dec = -0.05*Math.sin(ra*2) + 0.02*Math.sin(ra*5)
+    const p = projectStar(ra, dec, lst)
+    if(p){
+      if(first){ ctx.moveTo(p.x,p.y); first=false }
+      else ctx.lineTo(p.x,p.y)
+    }
+  }
+  ctx.stroke()
+  ctx.restore()
+}
+
+function drawGrid(lst){
+  if(!showGrid) return
+  ctx.save()
+  ctx.strokeStyle='rgba(255,212,74,0.05)'; ctx.lineWidth=1
+  // Azimuth Linien
+  for(let az=0; az<TAU; az+=TAU/12){
+    ctx.beginPath()
+    let first=true
+    for(let alt=0.05; alt<Math.PI/2; alt+=0.02){
+      const dAz = norm(az - cam.az)
+      const cosC = Math.sin(cam.alt)*Math.sin(alt) + Math.cos(cam.alt)*Math.cos(alt)*Math.cos(dAz)
+      if(cosC<=0) continue
+      const sinC = Math.sqrt(1-cosC*cosC)
+      const x = Math.cos(alt)*Math.sin(dAz)/sinC
+      const y = (Math.sin(alt)*Math.cos(cam.alt) - Math.cos(alt)*Math.sin(cam.alt)*Math.cos(dAz))/sinC
+      const scale = 0.5*Math.min(W,H)/DPR / Math.tan(cam.fov/2)
+      if(first){ ctx.moveTo(W/(2*DPR)+x*scale, H/(2*DPR)-y*scale); first=false }
+      else ctx.lineTo(W/(2*DPR)+x*scale, H/(2*DPR)-y*scale)
+    }
+    ctx.stroke()
+  }
+  // Höhenkreise
+  for(let alt=15*D2R; alt<80*D2R; alt+=15*D2R){
+    ctx.beginPath()
+    let first=true
+    for(let az=0; az<=TAU; az+=TAU/60){
+      const dAz = norm(az - cam.az)
+      const cosC = Math.sin(cam.alt)*Math.sin(alt) + Math.cos(cam.alt)*Math.cos(alt)*Math.cos(dAz)
+      if(cosC<=0) continue
+      const sinC = Math.sqrt(1-cosC*cosC)
+      const x = Math.cos(alt)*Math.sin(dAz)/sinC
+      const y = (Math.sin(alt)*Math.cos(cam.alt) - Math.cos(alt)*Math.sin(cam.alt)*Math.cos(dAz))/sinC
+      const scale = 0.5*Math.min(W,H)/DPR / Math.tan(cam.fov/2)
+      if(first){ ctx.moveTo(W/(2*DPR)+x*scale, H/(2*DPR)-y*scale); first=false }
+      else ctx.lineTo(W/(2*DPR)+x*scale, H/(2*DPR)-y*scale)
+    }
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+function drawCompass(){
+  if(!showCompass) return
+  ctx.save()
+  const r=55, cx=W/DPR-r-15, cy=r+15
+  ctx.translate(cx,cy)
+  ctx.rotate(-cam.az)
+  ctx.strokeStyle='rgba(255,212,74,0.3)'; ctx.lineWidth=2
+  ctx.beginPath(); ctx.arc(0,0,r,0,TAU); ctx.stroke()
+  ctx.fillStyle='var(--gold)'; ctx.font='bold 10px Outfit'; ctx.textAlign='center'; ctx.textBaseline='middle'
+  for(let a=0; a<TAU; a+=TAU/8){
+    const label = ['N','NO','O','SO','S','SW','W','NW'][a/(TAU/8)]
+    const x = Math.sin(a)*r*1.15, y = -Math.cos(a)*r*1.15
+    ctx.fillText(label, x, y)
+  }
+  // Nadel
+  ctx.strokeStyle='var(--gold)'; ctx.lineWidth=3
+  ctx.beginPath(); ctx.moveTo(0,-r*0.8); ctx.lineTo(0,0); ctx.stroke()
+  ctx.restore()
+}
+
+function drawStars(lst){
+  // Sortiere nach Helligkeit (hellere zuletzt = oben)
+  const visible = []
+  for(const s of STARS){
+    const p = projectStar(s.ra, s.dec, lst)
+    if(p){
+      // Größe basierend auf Magnitude
+      const baseSize = Math.max(1.5, 6 - s.mag*1.2)
+      const size = baseSize * (0.5 + 0.5*p.dist) * (60/cam.fov*R2D)
+      visible.push({...s, ...p, size})
+    }
+  }
+  visible.sort((a,b)=>b.mag - a.mag)
+
+  for(const s of visible){
+    const brightness = Math.pow(2.512, -s.mag) * s.dist
+    const alpha = Math.min(1, brightness * 1.5)
+    const twinkle = 0.8 + 0.2*Math.sin(Date.now()*0.001 + s.ra*100)
+    
+    ctx.beginPath()
+    ctx.arc(s.x, s.y, Math.max(1, s.size*twinkle), 0, TAU)
+    ctx.fillStyle = `rgba(255,255,255,${alpha*twinkle})`
+    ctx.shadowBlur = s.size*3
+    ctx.shadowColor = `rgba(255,255,255,${alpha*0.5})`
+    ctx.fill()
+    ctx.shadowBlur = 0
+  }
+  return visible
+}
+
+function drawConstellations(lst, visibleStars){
+  if(!showConstell) return
+  const starMap = {}
+  for(const s of visibleStars) starMap[s.name] = s
+  
+  ctx.save()
+  ctx.strokeStyle='rgba(74,209,255,0.3)'
+  ctx.lineWidth=1.5
+  ctx.lineCap='round'
+  ctx.lineJoin='round'
+  
+  for(const [abbr, names] of Object.entries(CONSTELLATIONS)){
+    const pts = names.map(n=>starMap[n]).filter(p=>p)
+    if(pts.length < 2) continue
+    ctx.beginPath()
+    ctx.moveTo(pts[0].x, pts[0].y)
+    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+function drawNames(lst, visibleStars){
+  if(!showNames) return
+  const starMap = {}
+  for(const s of visibleStars) starMap[s.name] = s
+  
+  ctx.save()
+  ctx.font='11px Outfit'
+  ctx.textAlign='center'
+  ctx.textBaseline='bottom'
+  
+  for(const [abbr, names] of Object.entries(CONSTELLATIONS)){
+    const pts = names.map(n=>starMap[n]).filter(p=>p)
+    if(pts.length === 0) continue
+    // Nur hellster Stern des Sternbildes beschriften
+    const brightest = pts.reduce((a,b)=>a.mag<b.mag?a:b)
+    if(brightest.mag < 2.5){
+      ctx.fillStyle='rgba(255,212,74,0.9)'
+      ctx.fillText(brightest.name, brightest.x, brightest.y - brightest.size - 4)
+    }
+  }
+  ctx.restore()
+}
+
+function drawPlanets(lst){
+  if(!showPlanets) return
+  const jd = julianDay(new Date(Date.now() + timeOffset*1000))
+  const T = centuryFromJ2000(jd)
+  
+  ctx.save()
+  ctx.font='14px Outfit'
+  ctx.textAlign='center'
+  ctx.textBaseline='middle'
+  
+  for(let i=0;i<PLANETS.length;i++){
+    const pl = planetPos(i, T)
+    const p = projectStar(pl.ra, pl.dec, lst)
+    if(!p) continue
+    
+    // Planetenscheibe
+    const size = Math.max(8, 12 * (60/cam.fov*R2D))
+    const grad = ctx.createRadialGradient(p.x-size*0.3, p.y-size*0.3, 0, p.x, p.y, size)
+    grad.addColorStop(0, pl.color+'ee')
+    grad.addColorStop(1, pl.color+'88')
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, size, 0, TAU)
+    ctx.fillStyle = grad
+    ctx.shadowBlur = 10
+    ctx.shadowColor = pl.color+'44'
+    ctx.fill()
+    ctx.shadowBlur = 0
+    
+    // Planetensymbol
+    ctx.fillStyle = '#fff'
+    ctx.font = 'bold 16px Outfit'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(pl.sym, p.x, p.y)
+    
+    // Planetenname
+    ctx.font = '10px Outfit'
+    ctx.fillStyle = 'rgba(255,255,255,0.8)'
+    ctx.textBaseline = 'top'
+    ctx.fillText(pl.name, p.x, p.y + size + 2)
+  }
+  ctx.restore()
+}
+
+// ──────────────────────────────────────────────────────────────
+//  INFO-CARD (Hover/Tap)
+// ──────────────────────────────────────────────────────────────
+
+function showInfo(obj, x, y){
+  const info = document.getElementById('info')
+  if(!obj){
+    info.innerHTML = ''
+    return
+  }
+  let html = `<div class="info-card">`
+  html += `<div class="info-title">${obj.name || 'Unbekannt'}</div>`
+  html += `<div class="info-body">`
+  if(obj.bayer) html += `${obj.bayer}<br>`
+  if(obj.mag !== undefined) html += `Helligkeit: ${obj.mag.toFixed(2)} mag<br>`
+  if(obj.dist !== undefined) html += `<span class="info-dist">Entfernung: ${obj.dist.toFixed(2)} AE</span>`
+  if(obj.alt !== undefined) html += `<br>Höhe: ${(obj.alt*R2D).toFixed(1)}° · Azimut: ${(obj.az*R2D).toFixed(1)}°`
+  html += `</div></div>`
+  info.innerHTML = html
+}
+
+// ──────────────────────────────────────────────────────────────
+//  HAUPT-RENDER-LOOP
+// ──────────────────────────────────────────────────────────────
+
+function render(){
+  const now = new Date(Date.now() + timeOffset*1000)
+  const jd = julianDay(now)
+  const lst = localSiderealTime(jd, observer.lon)
+  
+  // Kamera sanft bewegen
+  cam.alt += (cam.targetAlt - cam.alt) * 0.05
+  cam.az += (cam.targetAz - cam.az) * 0.05
+  
+  drawBackground()
+  drawMilkyWay(lst)
+  drawGrid(lst)
+  
+  const visibleStars = drawStars(lst)
+  drawConstellations(lst, visibleStars)
+  drawNames(lst, visibleStars)
+  drawPlanets(lst)
+  drawCompass()
+  
+  requestAnimationFrame(render)
+}
+
+// ──────────────────────────────────────────────────────────────
+//  EVENT-HANDLER
+// ──────────────────────────────────────────────────────────────
+
+// Maus-Drag
+let isDragging = false
+let dragStartX = 0, dragStartY = 0
+let dragStartAz = 0, dragStartAlt = 0
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true
+  dragStartX = e.clientX
+  dragStartY = e.clientY
+  dragStartAz = cam.targetAz
+  dragStartAlt = cam.targetAlt
+})
+
+canvas.addEventListener('mousemove', e => {
+  if(isDragging){
+    const dx = e.clientX - dragStartX
+    const dy = e.clientY - dragStartY
+    const sens = 0.005 * (cam.fov*R2D/60)
+    cam.targetAz = norm(dragStartAz - dx * sens)
+    cam.targetAlt = clamp(dragStartAlt + dy * sens, 5*D2R, 85*D2R)
+  }
+  
+  // Hover-Info
+  if(!isDragging){
+    const rect = canvas.getBoundingClientRect()
+    const mx = e.clientX - rect.left
+    const my = e.clientY - rect.top
+    const now = new Date(Date.now() + timeOffset*1000)
+    const jd = julianDay(now)
+    const lst = localSiderealTime(jd, observer.lon)
+    
+    let found = null
+    for(const s of STARS){
+      const p = projectStar(s.ra, s.dec, lst)
+      if(p && Math.abs(p.x - mx) < 15 && Math.abs(p.y - my) < 15){
+        found = {name: s.name, bayer: s.bayer, mag: s.mag, alt: p.alt, az: p.az}
+        break
+      }
+    }
+    if(!found){
+      const jd2 = julianDay(new Date(Date.now() + timeOffset*1000))
+      const T = centuryFromJ2000(jd2)
+      for(let i=0;i<PLANETS.length;i++){
+        const pl = planetPos(i, T)
+        const p = projectStar(pl.ra, pl.dec, lst)
+        if(p && Math.abs(p.x - mx) < 20 && Math.abs(p.y - my) < 20){
+          found = {name: pl.name, mag: pl.mag, dist: pl.dist, alt: p.alt, az: p.az}
+          break
+        }
+      }
+    }
+    showInfo(found, e.clientX, e.clientY)
+  }
+})
+
+canvas.addEventListener('mouseup', () => { isDragging = false })
+canvas.addEventListener('mouseleave', () => { isDragging = false; showInfo(null) })
+
+// Touch-Events
+let touches = []
+let lastTouchDist = 0
+let touchStartAz = 0, touchStartAlt = 0
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault()
+  touches = Array.from(e.touches)
+  if(touches.length === 1){
+    isDragging = true
+    dragStartX = touches[0].clientX
+    dragStartY = touches[0].clientY
+    dragStartAz = cam.targetAz
+    dragStartAlt = cam.targetAlt
+  } else if(touches.length === 2){
+    isDragging = false
+    lastTouchDist = Math.hypot(
+      touches[0].clientX - touches[1].clientX,
+      touches[0].clientY - touches[1].clientY
+    )
+  }
+})
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault()
+  const newTouches = Array.from(e.touches)
+  if(newTouches.length === 1 && touches.length === 1){
+    const dx = newTouches[0].clientX - dragStartX
+    const dy = newTouches[0].clientY - dragStartY
+    const sens = 0.005 * (cam.fov*R2D/60)
+    cam.targetAz = norm(dragStartAz - dx * sens)
+    cam.targetAlt = clamp(dragStartAlt + dy * sens, 5*D2R, 85*D2R)
+  } else if(newTouches.length === 2){
+    const dist = Math.hypot(
+      newTouches[0].clientX - newTouches[1].clientX,
+      newTouches[0].clientY - newTouches[1].clientY
+    )
+    const zoomFactor = lastTouchDist / dist
+    const newFov = clamp(cam.fov * zoomFactor, 20*D2R, 120*D2R)
+    cam.fov = newFov
+    document.getElementById('zoomSlider').value = cam.fov*R2D
+    document.getElementById('zoomDisplay').textContent = Math.round(cam.fov*R2D)+'°'
+    lastTouchDist = dist
+  }
+  touches = newTouches
+})
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault()
+  touches = Array.from(e.touches)
+  if(touches.length === 0){
+    isDragging = false
+    // Tap-Info
+    if(e.changedTouches.length === 1){
+      const touch = e.changedTouches[0]
+      const rect = canvas.getBoundingClientRect()
+      const mx = touch.clientX - rect.left
+      const my = touch.clientY - rect.top
+      const now = new Date(Date.now() + timeOffset*1000)
+      const jd = julianDay(now)
+      const lst = localSiderealTime(jd, observer.lon)
+      
+      let found = null
+      for(const s of STARS){
+        const p = projectStar(s.ra, s.dec, lst)
+        if(p && Math.abs(p.x - mx) < 20 && Math.abs(p.y - my) < 20){
+          found = {name: s.name, bayer: s.bayer, mag: s.mag, alt: p.alt, az: p.az}
+          break
+        }
+      }
+      if(!found){
+        const jd2 = julianDay(new Date(Date.now() + timeOffset*1000))
+        const T = centuryFromJ2000(jd2)
+        for(let i=0;i<PLANETS.length;i++){
+          const pl = planetPos(i, T)
+          const p = projectStar(pl.ra, pl.dec, lst)
+          if(p && Math.abs(p.x - mx) < 25 && Math.abs(p.y - my) < 25){
+            found = {name: pl.name, mag: pl.mag, dist: pl.dist, alt: p.alt, az: p.az}
+            break
+          }
+        }
+      }
+      if(found) showInfo(found, touch.clientX, touch.clientY)
+      else showInfo(null)
+    }
+  }
+})
+
+// Mausrad-Zoom
+canvas.addEventListener('wheel', e => {
+  e.preventDefault()
+  const delta = e.deltaY > 0 ? 1.05 : 0.95
+  cam.fov = clamp(cam.fov * delta, 20*D2R, 120*D2R)
+  document.getElementById('zoomSlider').value = cam.fov*R2D
+  document.getElementById('zoomDisplay').textContent = Math.round(cam.fov*R2D)+'°'
+}, {passive:false})
+
+// ──────────────────────────────────────────────────────────────
+//  UI-EVENT-BINDINGS
+// ──────────────────────────────────────────────────────────────
+
+// Toggle-Buttons
+document.getElementById('btnConstell').addEventListener('click', function(){
+  showConstell = !showConstell
+  this.style.opacity = showConstell ? '1' : '0.4'
+})
+document.getElementById('btnNames').addEventListener('click', function(){
+  showNames = !showNames
+  this.style.opacity = showNames ? '1' : '0.4'
+})
+document.getElementById('btnPlanets').addEventListener('click', function(){
+  showPlanets = !showPlanets
+  this.style.opacity = showPlanets ? '1' : '0.4'
+})
+document.getElementById('btnGrid').addEventListener('click', function(){
+  showGrid = !showGrid
+  this.style.opacity = showGrid ? '1' : '0.4'
+})
+document.getElementById('btnMilkyWay').addEventListener('click', function(){
+  showMW = !showMW
+  this.style.opacity = showMW ? '1' : '0.4'
+})
+document.getElementById('btnCompass').addEventListener('click', function(){
+  showCompass = !showCompass
+  this.style.opacity = showCompass ? '1' : '0.4'
+})
+
+// Zeitslider
+document.getElementById('timeSlider').addEventListener('input', function(){
+  timeOffset = parseFloat(this.value)
+  updateTimeDisplay()
+})
+
+function updateTimeDisplay(){
+  const el = document.getElementById('timeDisplay')
+  const offset = timeOffset
+  if(Math.abs(offset) < 60){
+    el.textContent = 'Jetzt'
+  } else {
+    const mins = Math.round(offset/60)
+    const h = Math.floor(Math.abs(mins)/60)
+    const m = Math.abs(mins)%60
+    const sign = mins < 0 ? '-' : '+'
+    el.textContent = `${sign}${h}h${m.toString().padStart(2,'0')}m`
+  }
+}
+
+document.getElementById('btnNow').addEventListener('click', function(){
+  timeOffset = 0
+  document.getElementById('timeSlider').value = 0
+  updateTimeDisplay()
+})
+
+// Play/Pause
+document.getElementById('btnPlay').addEventListener('click', function(){
+  animating = !animating
+  this.textContent = animating ? '⏸' : '▶'
+  if(animating) animateTime()
+})
+
+function animateTime(){
+  if(!animating) return
+  timeOffset += 60 * animSpeed * animDir
+  if(timeOffset > 43200) timeOffset = -43200
+  if(timeOffset < -43200) timeOffset = 43200
+  document.getElementById('timeSlider').value = timeOffset
+  updateTimeDisplay()
+  setTimeout(animateTime, 100)
+}
+
+// Zoom-Slider
+document.getElementById('zoomSlider').addEventListener('input', function(){
+  cam.fov = parseFloat(this.value) * D2R
+  document.getElementById('zoomDisplay').textContent = this.value+'°'
+})
+
+// ──────────────────────────────────────────────────────────────
+//  STANDORT
+// ──────────────────────────────────────────────────────────────
+
+// GPS
+document.getElementById('btnGPS').addEventListener('click', function(){
+  if(!navigator.geolocation){
+    alert('Geolokalisierung wird von Ihrem Browser nicht unterstützt.')
+    return
+  }
+  this.textContent = '⏳'
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      observer.lat = pos.coords.latitude * D2R
+      observer.lon = pos.coords.longitude * D2R
+      observer.name = `${pos.coords.latitude.toFixed(4)}°, ${pos.coords.longitude.toFixed(4)}°`
+      document.getElementById('locDisplay').textContent = observer.name
+      this.textContent = '📍'
+      // Reverse-Geocoding
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&accept-language=de`)
+        .then(r=>r.json())
+        .then(data => {
+          if(data && data.display_name){
+            const parts = data.display_name.split(',')
+            observer.name = parts.slice(0,3).join(',').trim()
+            document.getElementById('locDisplay').textContent = observer.name
+          }
+        })
+        .catch(()=>{})
+    },
+    err => {
+      alert('Standort konnte nicht ermittelt werden: ' + err.message)
+      this.textContent = '📍'
+    },
+    {enableHighAccuracy:true, timeout:10000}
+  )
+})
+
+// Standort-Suche
+document.getElementById('btnGeo').addEventListener('click', function(){
+  const query = document.getElementById('locInput').value.trim()
+  if(!query) return
+  this.textContent = '⏳'
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&accept-language=de`)
+    .then(r=>r.json())
+    .then(data => {
+      if(data && data.length > 0){
+        observer.lat = parseFloat(data[0].lat) * D2R
+        observer.lon = parseFloat(data[0].lon) * D2R
+        observer.name = data[0].display_name.split(',').slice(0,3).join(',').trim()
+        document.getElementById('locDisplay').textContent = observer.name
+      } else {
+        alert('Kein Ort gefunden.')
+      }
+      this.textContent = '🔍'
+    })
+    .catch(() => {
+      alert('Fehler bei der Suche.')
+      this.textContent = '🔍'
+    })
+})
+
+// Enter-Taste im Eingabefeld
+document.getElementById('locInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') document.getElementById('btnGeo').click()
+})
+
+// ──────────────────────────────────────────────────────────────
+//  INITIALISIERUNG
+// ──────────────────────────────────────────────────────────────
+
+// Standort automatisch ermitteln
+if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      observer.lat = pos.coords.latitude * D2R
+      observer.lon = pos.coords.longitude * D2R
+      observer.name = `${pos.coords.latitude.toFixed(4)}°, ${pos.coords.longitude.toFixed(4)}°`
+      document.getElementById('locDisplay').textContent = observer.name
+      // Reverse-Geocoding
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&accept-language=de`)
+        .then(r=>r.json())
+        .then(data => {
+          if(data && data.display_name){
+            const parts = data.display_name.split(',')
+            observer.name = parts.slice(0,3).join(',').trim()
+            document.getElementById('locDisplay').textContent = observer.name
+          }
+        })
+        .catch(()=>{})
+    },
+    () => {
+      document.getElementById('locDisplay').textContent = observer.name
+    },
+    {enableHighAccuracy:true, timeout:10000}
+  )
+} else {
+  document.getElementById('locDisplay').textContent = observer.name
+}
+
+// Toggle-Buttons initialen Zustand setzen
+document.getElementById('btnConstell').style.opacity = '1'
+document.getElementById('btnNames').style.opacity = '1'
+document.getElementById('btnPlanets').style.opacity = '1'
+document.getElementById('btnGrid').style.opacity = '1'
+document.getElementById('btnMilkyWay').style.opacity = '1'
+document.getElementById('btnCompass').style.opacity = '1'
+
+// Render starten
+render()
+</script>
+</body>
+</html>
