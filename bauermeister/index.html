@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Baumeister - Häuser, Schlösser & Burgen</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 40%, #90EE90 40%, #228B22 100%);
+            min-height: 100vh; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #5D4037, #3E2723);
+            color: #FFD54F; padding: 8px 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; min-height: 48px; z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3); gap: 8px; flex-wrap: wrap;
+        }
+        header h1 { font-size: clamp(1rem, 3vw, 1.4rem); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); white-space: nowrap; }
+        .header-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .header-btn {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,213,79,0.3);
+            color: #FFD54F; padding: 4px 10px; border-radius: 6px;
+            font-size: clamp(0.7rem, 1.8vw, 0.85rem); cursor: pointer;
+            transition: all 0.2s; white-space: nowrap; font-weight: 600;
+        }
+        .header-btn:hover, .header-btn:active { background: rgba(255,213,79,0.2); border-color: #FFD54F; }
+        .mode-indicator {
+            background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 12px;
+            font-size: clamp(0.7rem, 1.8vw, 0.85rem); color: #FFD54F; font-weight: 600;
+        }
+        .game-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        .canvas-wrapper {
+            flex: 1; position: relative; overflow: hidden; background: #8FBC8F;
+            background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+        .palette {
+            width: clamp(180px, 22vw, 260px);
+            background: linear-gradient(180deg, #5D4037, #4E342E);
+            border-left: 2px solid #3E2723; display: flex; flex-direction: column;
+            flex-shrink: 0; z-index: 50; transition: transform 0.3s ease;
+        }
+        .palette-header {
+            padding: 8px 10px; background: rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .palette-header h2 { font-size: clamp(0.8rem, 2vw, 1rem); color: #FFD54F; }
+        .palette-toggle { display: none; background: none; border: none; color: #FFD54F; font-size: 1.5rem; cursor: pointer; padding: 4px; }
+        .palette-categories {
+            display: flex; gap: 2px; padding: 6px 8px; overflow-x: auto;
+            flex-shrink: 0; background: rgba(0,0,0,0.15);
+        }
+        .cat-btn {
+            padding: 4px 10px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05); color: #D7CCC8; border-radius: 4px;
+            cursor: pointer; font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+            white-space: nowrap; transition: all 0.2s; font-weight: 600;
+        }
+        .cat-btn:hover, .cat-btn:active { background: rgba(255,255,255,0.15); }
+        .cat-btn.active { background: #FFD54F; color: #3E2723; border-color: #FFD54F; }
+        .palette-items {
+            flex: 1; overflow-y: auto; padding: 6px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 6px; align-content: start;
+        }
+        .palette-item {
+            background: rgba(255,255,255,0.08); border: 2px solid transparent;
+            border-radius: 8px; padding: 6px 4px; text-align: center;
+            cursor: pointer; transition: all 0.2s; min-height: 60px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+        }
+        .palette-item:hover, .palette-item:active { background: rgba(255,255,255,0.15); border-color: rgba(255,213,79,0.3); }
+        .palette-item.selected { background: rgba(255,213,79,0.2); border-color: #FFD54F; box-shadow: 0 0 12px rgba(255,213,79,0.3); }
+        .palette-item .block-preview { font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1; }
+        .palette-item .block-name { font-size: clamp(0.55rem, 1.2vw, 0.7rem); color: #D7CCC8; line-height: 1.2; }
+        .palette-item .block-cost { font-size: clamp(0.5rem, 1vw, 0.6rem); color: #A5D6A7; }
+        .toolbar {
+            background: linear-gradient(0deg, #3E2723, #5D4037);
+            padding: 6px 12px; display: flex; align-items: center;
+            justify-content: center; gap: 8px; flex-shrink: 0; z-index: 100;
+            flex-wrap: wrap; border-top: 2px solid #3E2723;
+        }
+        .tool-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            color: #D7CCC8; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+            font-size: clamp(0.75rem, 1.8vw, 0.9rem); transition: all 0.2s;
+            font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap;
+        }
+        .tool-btn:hover, .tool-btn:active { background: rgba(255,255,255,0.2); color: #FFD54F; }
+        .tool-btn.active { background: #FFD54F; color: #3E2723; border-color: #FFD54F; }
+        .tool-btn .icon { font-size: 1.1em; }
+        .tool-separator { width: 1px; height: 24px; background: rgba(255,255,255,0.15); }
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px); display: flex; align-items: center;
+            justify-content: center; z-index: 1000; padding: 20px;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .overlay.show { opacity: 1; pointer-events: all; }
+        .modal {
+            background: linear-gradient(135deg, #5D4037, #3E2723);
+            border: 2px solid #FFD54F; border-radius: 16px;
+            padding: clamp(20px, 4vw, 40px); max-width: 500px; width: 100%;
+            text-align: center; color: #FFF;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto;
+        }
+        .modal h2 { font-size: clamp(1.3rem, 4vw, 2rem); color: #FFD54F; margin-bottom: 8px; }
+        .modal p { font-size: clamp(0.9rem, 2.5vw, 1.1rem); color: #D7CCC8; margin-bottom: 16px; line-height: 1.5; }
+        .modal .emoji-big { font-size: clamp(3rem, 8vw, 5rem); display: block; margin-bottom: 10px; }
+        .modal-btn {
+            padding: 10px 24px; font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-weight: 700; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s; margin: 4px; min-width: 120px;
+        }
+        .modal-btn.primary { background: linear-gradient(135deg, #FFD54F, #FFB300); color: #3E2723; box-shadow: 0 4px 15px rgba(255,213,79,0.3); }
+        .modal-btn.secondary { background: rgba(255,255,255,0.15); color: #D7CCC8; border: 1px solid rgba(255,255,255,0.2); }
+        .modal-btn:hover { transform: scale(1.05); }
+        .modal-btn:active { transform: scale(0.95); }
+        .blueprint-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 12px 0; }
+        .blueprint-card {
+            background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 12px 8px; cursor: pointer; transition: all 0.2s;
+        }
+        .blueprint-card:hover, .blueprint-card:active { background: rgba(255,255,255,0.15); border-color: #FFD54F; }
+        .blueprint-card .bp-icon { font-size: 2.5rem; display: block; margin-bottom: 4px; }
+        .blueprint-card .bp-name { font-size: 0.9rem; font-weight: 600; color: #FFD54F; }
+        .blueprint-card .bp-desc { font-size: 0.75rem; color: #A5D6A7; }
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.85); color: #FFF; padding: 10px 20px;
+            border-radius: 8px; font-size: 0.9rem; z-index: 500;
+            opacity: 0; transition: opacity 0.3s ease; pointer-events: none; text-align: center; max-width: 90vw;
+        }
+        .toast.show { opacity: 1; }
+        @media (max-width: 768px) {
+            .palette { position: absolute; right: 0; top: 0; bottom: 0; width: clamp(160px, 50vw, 240px); transform: translateX(100%); box-shadow: -4px 0 20px rgba(0,0,0,0.3); }
+            .palette.open { transform: translateX(0); }
+            .palette-toggle { display: block; }
+            .palette-items { grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); gap: 4px; }
+            .palette-item { min-height: 50px; padding: 4px 2px; }
+            .palette-item .block-preview { font-size: 1.3rem; }
+            .palette-item .block-name { font-size: 0.55rem; }
+            .toolbar { padding: 4px 8px; gap: 4px; }
+            .tool-btn { padding: 4px 8px; font-size: 0.75rem; }
+            .tool-btn .label { display: none; }
+            .blueprint-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            header h1 { font-size: 0.9rem; }
+            .header-btn { padding: 3px 6px; font-size: 0.7rem; }
+            .mode-indicator { font-size: 0.65rem; padding: 2px 8px; }
+        }
+        .palette-items::-webkit-scrollbar { width: 4px; }
+        .palette-items::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        .palette-items::-webkit-scrollbar-thumb { background: rgba(255,213,79,0.3); border-radius: 2px; }
+        @media print { header, .palette, .toolbar, .overlay, .toast { display: none !important; } .canvas-wrapper { position: absolute; inset: 0; } }
+    </style>
+</head>
+<body>
+<header>
+    <h1>🏗️ Baumeister</h1>
+    <div class="header-controls">
+        <span class="mode-indicator" id="modeIndicator">🎨 Freier Modus</span>
+        <button class="header-btn" onclick="showBlueprintModal()">📋 Baupläne</button>
+        <button class="header-btn" onclick="saveGame()">💾 Speichern</button>
+        <button class="header-btn" onclick="loadGame()">📂 Laden</button>
+        <button class="header-btn" onclick="exportScreenshot()">📸 Foto</button>
+        <button class="header-btn" onclick="showHelp()">❓ Hilfe</button>
+    </div>
+</header>
+<div class="game-container">
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    <div class="palette" id="palette">
+        <div class="palette-header">
+            <h2>🧱 Bausteine</h2>
+            <button class="palette-toggle" onclick="togglePalette()">✕</button>
+        </div>
+        <div class="palette-categories" id="categoryTabs"></div>
+        <div class="palette-items" id="paletteItems"></div>
+    </div>
+</div>
+    <div class="toolbar">
+    <button class="tool-btn active" onclick="setTool('place')" id="toolPlace"><span class="icon">👆</span><span class="label">Platzieren</span></button>
+    <button class="tool-btn" onclick="setTool('delete')" id="toolDelete"><span class="icon">🗑️</span><span class="label">Löschen</span></button>
+    <button class="tool-btn" onclick="setTool('move')" id="toolMove"><span class="icon">✋</span><span class="label">Verschieben</span></button>
+    <div class="tool-separator"></div>
+    <button class="tool-btn" onclick="rotateBlock()"><span class="icon">🔄</span><span class="label">Drehen</span></button>
+    <button class="tool-btn" onclick="undoAction()"><span class="icon">↩️</span><span class="label">Rückgängig</span></button>
+    <button class="tool-btn" onclick="redoAction()"><span class="icon">↪️</span><span class="label">Wiederholen</span></button>
+    <div class="tool-separator"></div>
+    <button class="tool-btn" onclick="clearAll()"><span class="icon">🧹</span><span class="label">Alles löschen</span></button>
+    <button class="tool-btn" onclick="togglePalette()" id="paletteToggleBtn"><span class="icon">📦</span><span class="label">Bausteine</span></button>
+</div>
+<div class="overlay" id="overlay"><div class="modal" id="modalContent"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+    // ============================================================
+    //  BAUMEISTER - HAUPTSPIEL (MIT STOCKWERK-SUPPORT)
+    // ============================================================
+
+    // ===== BLOCK DEFINITIONS =====
+    // z = Stockwerk (0=EG, 1=1.OG, 2=2.OG, 3=Dachgeschoss, -1=Keller)
+    // height = wie viele Stockwerke hoch der Block ist
+    const BLOCK_TYPES = {
+        // WÄNDE (height=1 pro Stockwerk)
+        wall_wood: { id: 'wall_wood', name: 'Holzwand', category: 'walls', icon: '🪵', color: '#8D6E63', w: 1, h: 1, height: 1, cost: 5, support: true },
+        wall_stone: { id: 'wall_stone', name: 'Steinmauer', category: 'walls', icon: '🧱', color: '#78909C', w: 1, h: 1, height: 1, cost: 10, support: true },
+        wall_brick: { id: 'wall_brick', name: 'Ziegelmauer', category: 'walls', icon: '🧱', color: '#D84315', w: 1, h: 1, height: 1, cost: 15, support: true },
+        wall_plaster: { id: 'wall_plaster', name: 'Putzfassade', category: 'walls', icon: '🏛️', color: '#FFCCBC', w: 1, h: 1, height: 1, cost: 12, support: true },
+        wall_glass: { id: 'wall_glass', name: 'Glaswand', category: 'walls', icon: '🪟', color: '#81D4FA', w: 1, h: 1, height: 1, cost: 20, support: false },
+        wall_timber: { id: 'wall_timber', name: 'Fachwerk', category: 'walls', icon: '🏚️', color: '#A1887F', w: 1, h: 1, height: 1, cost: 8, support: true },
+        wall_castle: { id: 'wall_castle', name: 'Burgmauer', category: 'walls', icon: '🏰', color: '#616161', w: 1, h: 2, height: 1, cost: 25, support: true },
+        
+        // DÄCHER (meist height=1, auf oberstem Stockwerk)
+        roof_red: { id: 'roof_red', name: 'Ziegeldach', category: 'roofs', icon: '🏠', color: '#C62828', w: 2, h: 1, height: 1, cost: 20, support: false, roof: true },
+        roof_gray: { id: 'roof_gray', name: 'Schieferdach', category: 'roofs', icon: '🏠', color: '#546E7A', w: 2, h: 1, height: 1, cost: 25, support: false, roof: true },
+        roof_straw: { id: 'roof_straw', name: 'Strohdach', category: 'roofs', icon: '🌾', color: '#FFB74D', w: 2, h: 1, height: 1, cost: 15, support: false, roof: true },
+        roof_green: { id: 'roof_green', name: 'Kupferdach', category: 'roofs', icon: '🏠', color: '#388E3C', w: 2, h: 1, height: 1, cost: 30, support: false, roof: true },
+        roof_tower: { id: 'roof_tower', name: 'Turmspitze', category: 'roofs', icon: '🔺', color: '#37474F', w: 1, h: 1, height: 1, cost: 35, support: false, roof: true },
+        roof_dome: { id: 'roof_dome', name: 'Kuppel', category: 'roofs', icon: '🕌', color: '#4DB6AC', w: 2, h: 2, height: 1, cost: 50, support: false, roof: true },
+        
+        // ÖFFNUNGEN (Fenster/Türen - height=1, brauchen Wand darunter)
+        window_small: { id: 'window_small', name: 'Kleines Fenster', category: 'openings', icon: '🪟', color: '#81D4FA', w: 1, h: 1, height: 1, cost: 8, support: false, opening: true },
+        window_big: { id: 'window_big', name: 'Großes Fenster', category: 'openings', icon: '🪟', color: '#4FC3F7', w: 2, h: 1, height: 1, cost: 15, support: false, opening: true },
+        window_arch: { id: 'window_arch', name: 'Bogenfenster', category: 'openings', icon: '⛪', color: '#29B6F6', w: 1, h: 2, height: 2, cost: 18, support: false, opening: true },
+        door_wood: { id: 'door_wood', name: 'Holztür', category: 'openings', icon: '🚪', color: '#6D4C41', w: 1, h: 2, height: 1, cost: 12, support: false, opening: true },
+        door_arch: { id: 'door_arch', name: 'Bogentor', category: 'openings', icon: '🚪', color: '#4E342E', w: 2, h: 2, height: 2, cost: 25, support: false, opening: true },
+        door_gate: { id: 'door_gate', name: 'Fallgatter', category: 'openings', icon: '⚔️', color: '#455A64', w: 2, h: 3, height: 3, cost: 40, support: false, opening: true },
+        
+        // TÜRME (mehrere Stockwerke hoch)
+        tower_round: { id: 'tower_round', name: 'Rundturm', category: 'towers', icon: '🏰', color: '#757575', w: 2, h: 3, height: 3, cost: 60, support: true },
+        tower_square: { id: 'tower_square', name: 'Eckturm', category: 'towers', icon: '🏰', color: '#616161', w: 2, h: 3, height: 3, cost: 55, support: true },
+        tower_keep: { id: 'tower_keep', name: 'Bergfried', category: 'towers', icon: '🏯', color: '#546E7A', w: 3, h: 4, height: 4, cost: 100, support: true },
+        tower_erker: { id: 'tower_erker', name: 'Erkerturm', category: 'towers', icon: '🏰', color: '#8D6E63', w: 1, h: 2, height: 2, cost: 35, support: true },
+        
+        // DEKO (meist height=1)
+        flag: { id: 'flag', name: 'Fahne', category: 'deco', icon: '🚩', color: '#F44336', w: 1, h: 1, height: 1, cost: 5, support: false },
+        lantern: { id: 'lantern', name: 'Laterne', category: 'deco', icon: '🏮', color: '#FFB300', w: 1, h: 1, height: 1, cost: 8, support: false },
+        flowerbox: { id: 'flowerbox', name: 'Blumenkasten', category: 'deco', icon: '🌸', color: '#E91E63', w: 1, h: 1, height: 1, cost: 6, support: false },
+        battlement: { id: 'battlement', name: 'Zinnen', category: 'deco', icon: '🏰', color: '#78909C', w: 1, h: 1, height: 1, cost: 20, support: false },
+        chimney: { id: 'chimney', name: 'Schornstein', category: 'deco', icon: '🏭', color: '#795548', w: 1, h: 1, height: 2, cost: 10, support: false },
+        drawbridge: { id: 'drawbridge', name: 'Zugbrücke', category: 'deco', icon: '🌉', color: '#5D4037', w: 3, h: 1, height: 1, cost: 50, support: false },
+    };
+
+    const CATEGORIES = {
+        walls: { name: 'Wände', icon: '🧱' },
+        roofs: { name: 'Dächer', icon: '🏠' },
+        openings: { name: 'Öffnungen', icon: '🚪' },
+        towers: { name: 'Türme', icon: '🏰' },
+        deco: { name: 'Deko', icon: '🎨' },
+    };
+
+
+    const BLUEPRINTS = [
+        {
+            id: 'cottage', name: '🏡 Bauernhaus', desc: 'Ein gemütliches Haus mit Garten', icon: '🏡', difficulty: 'Einfach',
+            blocks: [
+                // Erdgeschoss
+                { type: 'wall_wood', x: 2, y: 2, rot: 0 }, { type: 'wall_wood', x: 3, y: 2, rot: 0 }, { type: 'wall_wood', x: 4, y: 2, rot: 0 },
+                { type: 'wall_wood', x: 2, y: 3, rot: 0 }, { type: 'wall_wood', x: 4, y: 3, rot: 0 },
+                { type: 'wall_wood', x: 2, y: 4, rot: 0 }, { type: 'wall_wood', x: 3, y: 4, rot: 0 }, { type: 'wall_wood', x: 4, y: 4, rot: 0 },
+                { type: 'door_wood', x: 3, y: 3, rot: 0 }, { type: 'window_small', x: 2, y: 3, rot: 0 }, { type: 'window_small', x: 4, y: 3, rot: 0 },
+                { type: 'flowerbox', x: 2, y: 2, rot: 0 },
+                // 1. Obergeschoss (wird automatisch auf EG gestapelt)
+                { type: 'wall_wood', x: 2, y: 2, rot: 0 }, { type: 'wall_wood', x: 3, y: 2, rot: 0 }, { type: 'wall_wood', x: 4, y: 2, rot: 0 },
+                { type: 'wall_wood', x: 2, y: 3, rot: 0 }, { type: 'wall_wood', x: 4, y: 3, rot: 0 },
+                { type: 'wall_wood', x: 2, y: 4, rot: 0 }, { type: 'wall_wood', x: 3, y: 4, rot: 0 }, { type: 'wall_wood', x: 4, y: 4, rot: 0 },
+                { type: 'window_small', x: 2, y: 3, rot: 0 }, { type: 'window_small', x: 4, y: 3, rot: 0 },
+                // Dach (wird automatisch auf 1.OG gestapelt)
+                { type: 'roof_red', x: 1, y: 1, rot: 0 }, { type: 'roof_red', x: 3, y: 1, rot: 0 },
+                { type: 'chimney', x: 4, y: 1, rot: 0 },
+            ]
+        },
+        {
+            id: 'castle', name: '🏰 Schloss', desc: 'Ein prächtiges Schloss mit Türmen', icon: '🏰', difficulty: 'Mittel',
+            blocks: [
+                // Erdgeschoss
+                { type: 'wall_stone', x: 2, y: 2, rot: 0 }, { type: 'wall_stone', x: 3, y: 2, rot: 0 }, { type: 'wall_stone', x: 4, y: 2, rot: 0 },
+                { type: 'wall_stone', x: 5, y: 2, rot: 0 }, { type: 'wall_stone', x: 6, y: 2, rot: 0 },
+                { type: 'wall_stone', x: 2, y: 3, rot: 0 }, { type: 'wall_stone', x: 6, y: 3, rot: 0 },
+                { type: 'wall_stone', x: 2, y: 4, rot: 0 }, { type: 'wall_stone', x: 3, y: 4, rot: 0 }, { type: 'wall_stone', x: 4, y: 4, rot: 0 },
+                { type: 'wall_stone', x: 5, y: 4, rot: 0 }, { type: 'wall_stone', x: 6, y: 4, rot: 0 },
+                { type: 'door_arch', x: 4, y: 3, rot: 0 }, { type: 'window_arch', x: 3, y: 3, rot: 0 }, { type: 'window_arch', x: 5, y: 3, rot: 0 },
+                { type: 'tower_round', x: 1, y: 2, rot: 0 }, { type: 'tower_round', x: 7, y: 2, rot: 0 },
+                { type: 'tower_round', x: 1, y: 4, rot: 0 }, { type: 'tower_round', x: 7, y: 4, rot: 0 },
+                // 1. Obergeschoss - Türme weiter
+                { type: 'tower_round', x: 1, y: 2, rot: 0 }, { type: 'tower_round', x: 7, y: 2, rot: 0 },
+                { type: 'tower_round', x: 1, y: 4, rot: 0 }, { type: 'tower_round', x: 7, y: 4, rot: 0 },
+                // 2. Obergeschoss - Türme weiter + Dach
+                { type: 'tower_round', x: 1, y: 2, rot: 0 }, { type: 'tower_round', x: 7, y: 2, rot: 0 },
+                { type: 'tower_round', x: 1, y: 4, rot: 0 }, { type: 'tower_round', x: 7, y: 4, rot: 0 },
+                { type: 'roof_gray', x: 2, y: 1, rot: 0 }, { type: 'roof_gray', x: 4, y: 1, rot: 0 },
+                { type: 'roof_tower', x: 1, y: 1, rot: 0 }, { type: 'roof_tower', x: 7, y: 1, rot: 0 },
+                { type: 'flag', x: 1, y: 1, rot: 0 }, { type: 'flag', x: 7, y: 1, rot: 0 },
+                { type: 'battlement', x: 2, y: 1, rot: 0 }, { type: 'battlement', x: 3, y: 1, rot: 0 },
+                { type: 'battlement', x: 5, y: 1, rot: 0 }, { type: 'battlement', x: 6, y: 1, rot: 0 },
+            ]
+        },
+        {
+            id: 'fortress', name: '🏯 Burg', desc: 'Eine uneinnehmbare Festung', icon: '🏯', difficulty: 'Schwer',
+            blocks: [
+                // Erdgeschoss - Mauern
+                { type: 'wall_castle', x: 2, y: 2, rot: 0 }, { type: 'wall_castle', x: 4, y: 2, rot: 0 }, { type: 'wall_castle', x: 6, y: 2, rot: 0 },
+                { type: 'wall_castle', x: 8, y: 2, rot: 0 }, { type: 'wall_castle', x: 2, y: 4, rot: 0 }, { type: 'wall_castle', x: 4, y: 4, rot: 0 },
+                { type: 'wall_castle', x: 6, y: 4, rot: 0 }, { type: 'wall_castle', x: 8, y: 4, rot: 0 },
+                { type: 'wall_castle', x: 2, y: 6, rot: 0 }, { type: 'wall_castle', x: 4, y: 6, rot: 0 }, { type: 'wall_castle', x: 6, y: 6, rot: 0 },
+                { type: 'wall_castle', x: 8, y: 6, rot: 0 },
+                { type: 'tower_keep', x: 3, y: 3, rot: 0 }, { type: 'tower_keep', x: 7, y: 3, rot: 0 },
+                { type: 'tower_keep', x: 3, y: 5, rot: 0 }, { type: 'tower_keep', x: 7, y: 5, rot: 0 },
+                { type: 'tower_square', x: 1, y: 2, rot: 0 }, { type: 'tower_square', x: 9, y: 2, rot: 0 },
+                { type: 'tower_square', x: 1, y: 6, rot: 0 }, { type: 'tower_square', x: 9, y: 6, rot: 0 },
+                { type: 'door_gate', x: 5, y: 5, rot: 0 },
+                // 1. Obergeschoss - Türme weiter
+                { type: 'tower_keep', x: 3, y: 3, rot: 0 }, { type: 'tower_keep', x: 7, y: 3, rot: 0 },
+                { type: 'tower_keep', x: 3, y: 5, rot: 0 }, { type: 'tower_keep', x: 7, y: 5, rot: 0 },
+                { type: 'tower_square', x: 1, y: 2, rot: 0 }, { type: 'tower_square', x: 9, y: 2, rot: 0 },
+                { type: 'tower_square', x: 1, y: 6, rot: 0 }, { type: 'tower_square', x: 9, y: 6, rot: 0 },
+                // 2. Obergeschoss - Türme weiter
+                { type: 'tower_keep', x: 3, y: 3, rot: 0 }, { type: 'tower_keep', x: 7, y: 3, rot: 0 },
+                { type: 'tower_keep', x: 3, y: 5, rot: 0 }, { type: 'tower_keep', x: 7, y: 5, rot: 0 },
+                { type: 'tower_square', x: 1, y: 2, rot: 0 }, { type: 'tower_square', x: 9, y: 2, rot: 0 },
+                { type: 'tower_square', x: 1, y: 6, rot: 0 }, { type: 'tower_square', x: 9, y: 6, rot: 0 },
+                // 3. Obergeschoss - Türme weiter + Dach
+                { type: 'tower_keep', x: 3, y: 3, rot: 0 }, { type: 'tower_keep', x: 7, y: 3, rot: 0 },
+                { type: 'tower_keep', x: 3, y: 5, rot: 0 }, { type: 'tower_keep', x: 7, y: 5, rot: 0 },
+                { type: 'tower_square', x: 1, y: 2, rot: 0 }, { type: 'tower_square', x: 9, y: 2, rot: 0 },
+                { type: 'tower_square', x: 1, y: 6, rot: 0 }, { type: 'tower_square', x: 9, y: 6, rot: 0 },
+                { type: 'roof_tower', x: 3, y: 1, rot: 0 }, { type: 'roof_tower', x: 7, y: 1, rot: 0 },
+                { type: 'roof_tower', x: 1, y: 1, rot: 0 }, { type: 'roof_tower', x: 9, y: 1, rot: 0 },
+                { type: 'flag', x: 3, y: 1, rot: 0 }, { type: 'flag', x: 7, y: 1, rot: 0 },
+                { type: 'battlement', x: 2, y: 1, rot: 0 }, { type: 'battlement', x: 4, y: 1, rot: 0 },
+                { type: 'battlement', x: 6, y: 1, rot: 0 }, { type: 'battlement', x: 8, y: 1, rot: 0 },
+                { type: 'lantern', x: 1, y: 3, rot: 0 }, { type: 'lantern', x: 9, y: 3, rot: 0 },
+                { type: 'lantern', x: 1, y: 5, rot: 0 }, { type: 'lantern', x: 9, y: 5, rot: 0 },
+                { type: 'drawbridge', x: 4, y: 7, rot: 0 }, { type: 'drawbridge', x: 5, y: 7, rot: 0 }, { type: 'drawbridge', x: 6, y: 7, rot: 0 },
+            ]
+        }
+    ];
+
+    // ===== GAME STATE =====
+    const state = {
+        blocks: [],
+        gridSize: 20,
+        tileSize: 40,
+        camera: { x: 0, y: 0, zoom: 1 },
+        selectedBlockType: null,
+        selectedCategory: 'walls',
+        tool: 'place',
+        rotation: 0,
+        mode: 'free',
+        activeBlueprint: null,
+        history: [],
+        historyIndex: -1,
+        isDragging: false,
+        dragStart: { x: 0, y: 0 },
+        dragCameraStart: { x: 0, y: 0 },
+        isPanning: false,
+        lastTouchDist: 0,
+        paletteOpen: window.innerWidth > 768,
+        toastTimeout: null,
+        hoverGrid: null,
+    };
+
+    // ===== CANVAS SETUP =====
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const wrapper = document.getElementById('canvasWrapper');
+
+    function resizeCanvas() {
+        canvas.width = wrapper.clientWidth;
+        canvas.height = wrapper.clientHeight;
+        render();
+    }
+
+    // ===== ISO COORDINATES (3D) =====
+    function gridToIso(gx, gy, gz) {
+        gz = gz || 0;
+        const tx = state.tileSize * state.camera.zoom;
+        const cx = canvas.width / 2 + (gx - gy) * tx * 0.5 + state.camera.x;
+        const cy = canvas.height / 2 + (gx + gy) * tx * 0.25 - gz * tx * 0.5 + state.camera.y;
+        return { x: cx, y: cy };
+    }
+
+    function screenToGrid(sx, sy) {
+        const tx = state.tileSize * state.camera.zoom;
+        const cx = canvas.width / 2 + state.camera.x;
+        const cy = canvas.height / 2 + state.camera.y;
+        const dx = sx - cx;
+        const dy = sy - cy;
+        const gx = (dx / (tx * 0.5) + dy / (tx * 0.25)) / 2;
+        const gy = (dy / (tx * 0.25) - dx / (tx * 0.5)) / 2;
+        return { x: Math.round(gx), y: Math.round(gy) };
+    }
+
+    // ===== RENDER =====
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+        
+        // Blöcke sortieren nach (x+y+z) für korrekte Überlagerung
+        const sortedBlocks = [...state.blocks].sort((a, b) => (a.x + a.y + (a.z||0)) - (b.x + b.y + (b.z||0)));
+        
+        sortedBlocks.forEach(block => drawBlock(block));
+        
+        // Preview für auto-stacking Position
+        if (state.tool === 'place' && state.selectedBlockType && state.hoverGrid) {
+            // Berechne Z-Position für Preview (auto-stacking)
+            const type = BLOCK_TYPES[state.selectedBlockType];
+            const dims = getRotatedDimensions(type, state.rotation);
+            let maxZ = -1;
+            for (let dx = 0; dx < dims.w; dx++) {
+                for (let dy = 0; dy < dims.h; dy++) {
+                    const zAt = getMaxZAt(state.hoverGrid.x + dx, state.hoverGrid.y + dy);
+                    if (zAt > maxZ) maxZ = zAt;
+                }
+            }
+            const previewZ = maxZ + 1;
+            drawBlockPreview(state.hoverGrid.x, state.hoverGrid.y, previewZ, state.selectedBlockType, state.rotation);
+        }
+        if ((state.tool === 'delete' || state.tool === 'move') && state.hoverGrid) {
+            // Bei delete/move: obersten Block an Position hervorheben
+            const topBlock = getTopBlockAt(state.hoverGrid.x, state.hoverGrid.y);
+            if (topBlock) drawBlockHighlight(topBlock, state.tool === 'delete' ? '#FF5252' : '#FFD54F');
+        }
+    }
+
+    function drawGrid() {
+        const tx = state.tileSize * state.camera.zoom;
+        // Grid zeichnen (Boden auf z=0)
+        for (let y = 0; y < state.gridSize; y++) {
+            for (let x = 0; x < state.gridSize; x++) {
+                const iso = gridToIso(x, y, 0);
+                if (iso.x < -tx || iso.x > canvas.width + tx || iso.y < -tx || iso.y > canvas.height + tx) continue;
+                const hw = tx * 0.5, hh = tx * 0.25;
+                ctx.beginPath();
+                ctx.moveTo(iso.x, iso.y - hh);
+                ctx.lineTo(iso.x + hw, iso.y);
+                ctx.lineTo(iso.x, iso.y + hh);
+                ctx.lineTo(iso.x - hw, iso.y);
+                ctx.closePath();
+                ctx.fillStyle = ((x + y) % 2 === 0) ? '#7CB342' : '#8BC34A';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+        }
+    }
+
+
+    function drawBlock(block) {
+        const type = BLOCK_TYPES[block.type];
+        if (!type) return;
+        const bz = block.z || 0;
+        const rot = block.rot || 0;
+        const dims = getRotatedDimensions(type, rot);
+        const tx = state.tileSize * state.camera.zoom;
+        const iso = gridToIso(block.x, block.y, bz);
+        const bw = dims.w * tx * 0.5;
+        const bh = dims.h * tx * 0.25;
+        const bheight = type.height * tx * 0.3;
+        const color = type.color;
+
+        // Top face
+        ctx.beginPath();
+        ctx.moveTo(iso.x, iso.y - bheight);
+        ctx.lineTo(iso.x + bw, iso.y - bheight + bh);
+        ctx.lineTo(iso.x, iso.y - bheight + bh * 2);
+        ctx.lineTo(iso.x - bw, iso.y - bheight + bh);
+        ctx.closePath();
+        ctx.fillStyle = lightenColor(color, 30);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+
+        // Left face
+        ctx.beginPath();
+        ctx.moveTo(iso.x - bw, iso.y - bheight + bh);
+        ctx.lineTo(iso.x - bw, iso.y + bh);
+        ctx.lineTo(iso.x, iso.y + bh * 2);
+        ctx.lineTo(iso.x, iso.y - bheight + bh * 2);
+        ctx.closePath();
+        ctx.fillStyle = darkenColor(color, 20);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+
+        // Right face
+        ctx.beginPath();
+        ctx.moveTo(iso.x + bw, iso.y - bheight + bh);
+        ctx.lineTo(iso.x + bw, iso.y + bh);
+        ctx.lineTo(iso.x, iso.y + bh * 2);
+        ctx.lineTo(iso.x, iso.y - bheight + bh * 2);
+        ctx.closePath();
+        ctx.fillStyle = darkenColor(color, 40);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+
+        // Icon
+        ctx.font = `${tx * 0.3}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(type.icon, iso.x, iso.y - bheight + bh);
+    }
+
+    function drawBlockPreview(gx, gy, gz, typeId, rot) {
+        const type = BLOCK_TYPES[typeId];
+        if (!type) return;
+        const dims = getRotatedDimensions(type, rot);
+        const tx = state.tileSize * state.camera.zoom;
+        const iso = gridToIso(gx, gy, gz);
+        const bw = dims.w * tx * 0.5;
+        const bh = dims.h * tx * 0.25;
+        const bheight = type.height * tx * 0.3;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(iso.x, iso.y - bheight);
+        ctx.lineTo(iso.x + bw, iso.y - bheight + bh);
+        ctx.lineTo(iso.x, iso.y - bheight + bh * 2);
+        ctx.lineTo(iso.x - bw, iso.y - bheight + bh);
+        ctx.closePath();
+        ctx.fillStyle = '#FFD54F';
+        ctx.fill();
+        ctx.strokeStyle = '#FFD54F';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    }
+
+    function drawBlockHighlight(block, color) {
+        const type = BLOCK_TYPES[block.type];
+        if (!type) return;
+        const bz = block.z || 0;
+        const tx = state.tileSize * state.camera.zoom;
+        const iso = gridToIso(block.x, block.y, bz);
+        const bw = type.w * tx * 0.5;
+        const bh = type.h * tx * 0.25;
+        const bheight = type.height * tx * 0.3;
+        ctx.beginPath();
+        ctx.moveTo(iso.x, iso.y - bheight);
+        ctx.lineTo(iso.x + bw, iso.y - bheight + bh);
+        ctx.lineTo(iso.x, iso.y - bheight + bh * 2);
+        ctx.lineTo(iso.x - bw, iso.y - bheight + bh);
+        ctx.closePath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    // ===== COLOR HELPERS =====
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : { r: 128, g: 128, b: 128 };
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join('');
+    }
+
+    function lightenColor(hex, percent) {
+        const rgb = hexToRgb(hex);
+        const factor = 1 + percent / 100;
+        return rgbToHex(rgb.r * factor, rgb.g * factor, rgb.b * factor);
+    }
+
+    function darkenColor(hex, percent) {
+        const rgb = hexToRgb(hex);
+        const factor = 1 - percent / 100;
+        return rgbToHex(rgb.r * factor, rgb.g * factor, rgb.b * factor);
+    }
+
+    // ===== ROTATION HELPER =====
+    function getRotatedDimensions(type, rot) {
+        rot = ((rot || 0) % 360 + 360) % 360;
+        if (rot === 90 || rot === 270) {
+            return { w: type.h, h: type.w };
+        }
+        return { w: type.w, h: type.h };
+    }
+
+    function getRotatedCells(type, rot) {
+        // Returns array of {dx, dy} cells occupied by rotated block
+        const dims = getRotatedDimensions(type, rot);
+        const cells = [];
+        for (let dx = 0; dx < dims.w; dx++) {
+            for (let dy = 0; dy < dims.h; dy++) {
+                cells.push({ dx, dy });
+            }
+        }
+        return cells;
+    }
+
+    // ===== BLOCK OPERATIONS (STACKING SYSTEM) =====
+    // Blöcke werden automatisch auf den höchsten existierenden Block an (x,y) gestapelt
+    
+    function getTopBlockAt(x, y) {
+        // Gibt den höchsten Block an Position (x,y) zurück
+        const blocksAt = state.blocks.filter(b => b.x === x && b.y === y);
+        if (blocksAt.length === 0) return null;
+        return blocksAt.reduce((highest, b) => (b.z || 0) > (highest.z || 0) ? b : highest);
+    }
+
+    function getBlockAt(x, y, z) {
+        z = z || 0;
+        return state.blocks.find(b => b.x === x && b.y === y && (b.z || 0) === z);
+    }
+
+    function getBlocksAt(x, y) {
+        return state.blocks.filter(b => b.x === x && b.y === y);
+    }
+
+    function getMaxZAt(x, y) {
+        // Gibt die höchste belegte Z-Position an (x,y) zurück, oder -1 wenn leer
+        const blocksAt = state.blocks.filter(b => b.x === x && b.y === y);
+        if (blocksAt.length === 0) return -1;
+        return Math.max(...blocksAt.map(b => b.z || 0));
+    }
+
+    function hasSupport(x, y, z) {
+        if (z <= 0) return true; // Boden (z=0) braucht keine Stütze
+        // Prüfen ob direkt darunter (z-1) ein tragender Block ist
+        const below = getBlockAt(x, y, z - 1);
+        if (below) {
+            const type = BLOCK_TYPES[below.type];
+            return type && type.support;
+        }
+        return false;
+    }
+
+    function canPlaceBlock(typeId, x, y, z, rot) {
+        const type = BLOCK_TYPES[typeId];
+        if (!type) return false;
+        
+        // Rotierte Dimensionen holen
+        const dims = getRotatedDimensions(type, rot);
+        
+        // Prüfen ob Platz frei ist (für alle Zellen die der Block einnimmt)
+        for (let dx = 0; dx < dims.w; dx++) {
+            for (let dy = 0; dy < dims.h; dy++) {
+                for (let dz = 0; dz < type.height; dz++) {
+                    if (getBlockAt(x + dx, y + dy, z + dz)) return false;
+                }
+            }
+        }
+        
+        // Stütz-Prüfung: Wände/Türme brauchen Untergrund direkt darunter
+        if (type.support && z > 0) {
+            let hasAnySupport = false;
+            for (let dx = 0; dx < dims.w; dx++) {
+                for (let dy = 0; dy < dims.h; dy++) {
+                    if (hasSupport(x + dx, y + dy, z)) {
+                        hasAnySupport = true;
+                    }
+                }
+            }
+            if (!hasAnySupport) return false;
+        }
+        
+        // Öffnungen (Fenster/Türen) brauchen Wand darunter
+        if (type.opening && z > 0) {
+            let hasAnySupport = false;
+            for (let dx = 0; dx < dims.w; dx++) {
+                for (let dy = 0; dy < dims.h; dy++) {
+                    if (hasSupport(x + dx, y + dy, z)) {
+                        hasAnySupport = true;
+                    }
+                }
+            }
+            if (!hasAnySupport) return false;
+        }
+        
+        // Dächer brauchen Untergrund (Wände/Türme)
+        if (type.roof) {
+            let hasBase = false;
+            for (let dx = 0; dx < dims.w; dx++) {
+                for (let dy = 0; dy < dims.h; dy++) {
+                    const below = getBlockAt(x + dx, y + dy, z - 1);
+                    if (below) {
+                        const belowType = BLOCK_TYPES[below.type];
+                        if (belowType && (belowType.support || belowType.category === 'towers')) {
+                            hasBase = true;
+                        }
+                    }
+                }
+            }
+            if (!hasBase && z > 0) return false;
+        }
+        
+        return true;
+    }
+
+    function placeBlock(typeId, x, y, z, rot) {
+        // Auto-Stacking: Wenn z nicht angegeben, auf höchsten Block an (x,y) stapeln
+        if (z === undefined || z === null) {
+            let maxZ = -1;
+            const dims = getRotatedDimensions(BLOCK_TYPES[typeId], rot);
+            for (let dx = 0; dx < dims.w; dx++) {
+                for (let dy = 0; dy < dims.h; dy++) {
+                    const zAt = getMaxZAt(x + dx, y + dy);
+                    if (zAt > maxZ) maxZ = zAt;
+                }
+            }
+            z = maxZ + 1;
+        }
+        
+        if (!canPlaceBlock(typeId, x, y, z, rot)) {
+            showToast('❌ Kann nicht platzieren (kein Halt/Platz besetzt)');
+            return false;
+        }
+        const block = { type: typeId, x, y, z, rot: rot || 0, id: Date.now() + Math.random() };
+        state.blocks.push(block);
+        saveHistory();
+        render();
+        return true;
+    }
+
+    function deleteBlock(x, y, z) {
+        // Wenn z nicht angegeben, obersten Block an (x,y) löschen
+        if (z === undefined || z === null) {
+            const topBlock = getTopBlockAt(x, y);
+            if (!topBlock) return false;
+            z = topBlock.z;
+        }
+        
+        const idx = state.blocks.findIndex(b => b.x === x && b.y === y && (b.z || 0) === z);
+        if (idx !== -1) {
+            const block = state.blocks[idx];
+            const type = BLOCK_TYPES[block.type];
+            const rot = block.rot || 0;
+            const dims = getRotatedDimensions(type, rot);
+            
+            // Prüfen ob Blöcke *darauf* stehen (nicht im Stockwerk drüber, sondern direkt auf diesem Block)
+            if (type && type.support) {
+                for (let dx = 0; dx < dims.w; dx++) {
+                    for (let dy = 0; dy < dims.h; dy++) {
+                        const above = getBlockAt(x + dx, y + dy, z + 1);
+                        if (above) {
+                            const aboveType = BLOCK_TYPES[above.type];
+                            if (aboveType && aboveType.support) {
+                                showToast('⚠️ Block trägt anderen Block!');
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            state.blocks.splice(idx, 1);
+            saveHistory();
+            render();
+            return true;
+        }
+        return false;
+    }
+
+    function moveBlock(fromX, fromY, fromZ, toX, toY, toZ) {
+        const block = getBlockAt(fromX, fromY, fromZ);
+        if (!block) return false;
+        // Auto-stacking für Ziel-Z wenn nicht angegeben
+        if (toZ === undefined || toZ === null) {
+            let maxZ = -1;
+            const dims = getRotatedDimensions(BLOCK_TYPES[block.type], block.rot);
+            for (let dx = 0; dx < dims.w; dx++) {
+                for (let dy = 0; dy < dims.h; dy++) {
+                    const zAt = getMaxZAt(toX + dx, toY + dy);
+                    if (zAt > maxZ) maxZ = zAt;
+                }
+            }
+            toZ = maxZ + 1;
+        }
+        if (canPlaceBlock(block.type, toX, toY, toZ)) {
+            block.x = toX;
+            block.y = toY;
+            block.z = toZ;
+            saveHistory();
+            render();
+            return true;
+        }
+        return false;
+    }
+
+    function rotateBlock() {
+        if (!state.selectedBlockType) return;
+        state.rotation = (state.rotation + 90) % 360;
+        render();
+        showToast('🔄 Gedreht: ' + state.rotation + '°');
+    }
+
+    // ===== HISTORY =====
+    function saveHistory() {
+        state.history = state.history.slice(0, state.historyIndex + 1);
+        state.history.push(JSON.parse(JSON.stringify(state.blocks)));
+        state.historyIndex = state.history.length - 1;
+        if (state.history.length > 50) {
+            state.history.shift();
+            state.historyIndex--;
+        }
+    }
+
+    function undoAction() {
+        if (state.historyIndex > 0) {
+            state.historyIndex--;
+            state.blocks = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+            render();
+            showToast('↩️ Rückgängig');
+        }
+    }
+
+    function redoAction() {
+        if (state.historyIndex < state.history.length - 1) {
+            state.historyIndex++;
+            state.blocks = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+            render();
+            showToast('↪️ Wiederholt');
+        }
+    }
+
+
+    // ===== UI =====
+    function initPalette() {
+        const tabs = document.getElementById('categoryTabs');
+        tabs.innerHTML = '';
+        Object.entries(CATEGORIES).forEach(([key, cat]) => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn' + (key === state.selectedCategory ? ' active' : '');
+            btn.textContent = cat.icon + ' ' + cat.name;
+            btn.onclick = () => selectCategory(key);
+            tabs.appendChild(btn);
+        });
+        renderPaletteItems();
+    }
+
+    function selectCategory(cat) {
+        state.selectedCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.cat-btn')[Object.keys(CATEGORIES).indexOf(cat)]?.classList.add('active');
+        renderPaletteItems();
+    }
+
+    function renderPaletteItems() {
+        const container = document.getElementById('paletteItems');
+        container.innerHTML = '';
+        Object.values(BLOCK_TYPES)
+            .filter(b => b.category === state.selectedCategory)
+            .forEach(block => {
+                const item = document.createElement('div');
+                item.className = 'palette-item' + (state.selectedBlockType === block.id ? ' selected' : '');
+                const heightInfo = block.height > 1 ? ` <span style="font-size:0.5rem;color:#FFD54F;">${block.height}🏠</span>` : '';
+                item.innerHTML = `
+                    <span class="block-preview">${block.icon}</span>
+                    <span class="block-name">${block.name}${heightInfo}</span>
+                    <span class="block-cost">${block.cost} 💰</span>
+                `;
+                item.onclick = () => selectBlock(block.id);
+                container.appendChild(item);
+            });
+    }
+
+    function selectBlock(typeId) {
+        state.selectedBlockType = typeId;
+        state.tool = 'place';
+        updateToolButtons();
+        renderPaletteItems();
+        showToast('🧱 ' + BLOCK_TYPES[typeId].name + ' ausgewählt');
+    }
+
+    function updateToolButtons() {
+        document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+        const toolMap = { place: 'toolPlace', delete: 'toolDelete', move: 'toolMove' };
+        const activeBtn = document.getElementById(toolMap[state.tool]);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function setTool(tool) {
+        state.tool = tool;
+        updateToolButtons();
+        if (tool === 'place' && !state.selectedBlockType) {
+            const firstBlock = Object.values(BLOCK_TYPES).find(b => b.category === state.selectedCategory);
+            if (firstBlock) selectBlock(firstBlock.id);
+        }
+        render();
+    }
+
+    function togglePalette() {
+        state.paletteOpen = !state.paletteOpen;
+        document.getElementById('palette').classList.toggle('open', state.paletteOpen);
+    }
+
+    function clearAll() {
+        if (confirm('Wirklich alles löschen?')) {
+            state.blocks = [];
+            saveHistory();
+            render();
+            showToast('🧹 Alles gelöscht');
+        }
+    }
+
+    // ===== BLUEPRINTS =====
+    function showBlueprintModal() {
+        const modal = document.getElementById('modalContent');
+        modal.innerHTML = `
+            <span class="emoji-big">📋</span>
+            <h2>Baupläne</h2>
+            <p>Wähle einen Bauplan zum Platzieren oder als Inspiration</p>
+            <div class="blueprint-grid">
+                ${BLUEPRINTS.map(bp => `
+                    <div class="blueprint-card" onclick="placeBlueprint('${bp.id}')">
+                        <span class="bp-icon">${bp.icon}</span>
+                        <span class="bp-name">${bp.name}</span>
+                        <span class="bp-desc">${bp.difficulty} • ${bp.blocks.length} Bausteine</span>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="modal-btn secondary" onclick="closeModal()">Schließen</button>
+        `;
+        document.getElementById('overlay').classList.add('show');
+    }
+
+    function placeBlueprint(bpId) {
+        const bp = BLUEPRINTS.find(b => b.id === bpId);
+        if (!bp) return;
+        const centerX = Math.floor(state.gridSize / 2) - 5;
+        const centerY = Math.floor(state.gridSize / 2) - 3;
+        bp.blocks.forEach(b => {
+            placeBlock(b.type, centerX + b.x, centerY + b.y, b.z || 0, b.rot);
+        });
+        state.activeBlueprint = bpId;
+        document.getElementById('modeIndicator').textContent = '📋 ' + bp.name;
+        closeModal();
+        showToast('📋 ' + bp.name + ' platziert!');
+    }
+
+    // ===== SAVE/LOAD =====
+    function saveGame() {
+        const data = {
+            blocks: state.blocks,
+            camera: state.camera,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('bauermeister_save', JSON.stringify(data));
+        showToast('💾 Spiel gespeichert!');
+    }
+
+    function loadGame() {
+        const data = localStorage.getItem('bauermeister_save');
+        if (data) {
+            const parsed = JSON.parse(data);
+            state.blocks = parsed.blocks || [];
+            state.camera = parsed.camera || { x: 0, y: 0, zoom: 1 };
+            saveHistory();
+            render();
+            showToast('📂 Spiel geladen!');
+        } else {
+            showToast('❌ Kein Speicherstand gefunden');
+        }
+    }
+
+    // ===== EXPORT =====
+    function exportScreenshot() {
+        const link = document.createElement('a');
+        link.download = 'bauermeister-' + Date.now() + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('📸 Screenshot gespeichert!');
+    }
+
+    // ===== HELP =====
+    function showHelp() {
+        const modal = document.getElementById('modalContent');
+        modal.innerHTML = `
+            <span class="emoji-big">❓</span>
+            <h2>Hilfe</h2>
+            <p style="text-align:left; line-height:1.8;">
+                <b>👆 Platzieren:</b> Wähle einen Baustein links und tippe auf das Grid<br>
+                <b>🗑️ Löschen:</b> Tippe auf einen platzierten Block (entfernt obersten Block)<br>
+                <b>✋ Verschieben:</b> Ziehe einen Block an neue Position<br>
+                <b>🔄 Drehen:</b> Dreht den ausgewählten Block<br>
+                <b>↩️/↪️:</b> Rückgängig/Wiederholen<br>
+                <b>📋 Baupläne:</b> Fertige Gebäude platzieren (werden automatisch gestapelt!)<br>
+                <b>💾/📂:</b> Speichern/Laden im LocalStorage<br>
+                <b>📸 Foto:</b> Screenshot als PNG<br>
+                <b>Touch:</b> Ein Finger = platzieren/löschen, Zwei Finger = verschieben/zoomen<br>
+                <b>Physik:</b> Wände/Türme brauchen Halt darunter. Dächer nur auf Wänden.<br>
+                <b>Stapeln:</b> Blöcke werden automatisch auf den höchsten Block an der Position gestapelt.
+            </p>
+            <button class="modal-btn primary" onclick="closeModal()">Verstanden</button>
+        `;
+        document.getElementById('overlay').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').classList.remove('show');
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(state.toastTimeout);
+        state.toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // ===== INPUT HANDLING =====
+    function getEventPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length > 0) {
+            return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    function getTouchDist(e) {
+        if (e.touches.length < 2) return 0;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function getTouchCenter(e) {
+        if (e.touches.length < 2) return { x: 0, y: 0 };
+        return {
+            x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+            y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+        };
+    }
+
+    canvas.addEventListener('mousedown', e => {
+        const pos = getEventPos(e);
+        state.isDragging = true;
+        state.dragStart = pos;
+        state.dragCameraStart = { x: state.camera.x, y: state.camera.y };
+        state.hoverGrid = screenToGrid(pos.x, pos.y);
+        handleAction(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('mousemove', e => {
+        const pos = getEventPos(e);
+        state.hoverGrid = screenToGrid(pos.x, pos.y);
+        if (state.isDragging && !state.isPanning) {
+            const dx = pos.x - state.dragStart.x;
+            const dy = pos.y - state.dragStart.y;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                state.isPanning = true;
+            }
+        }
+        if (state.isPanning) {
+            state.camera.x = state.dragCameraStart.x + (pos.x - state.dragStart.x);
+            state.camera.y = state.dragCameraStart.y + (pos.y - state.dragStart.y);
+        }
+        render();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        state.isDragging = false;
+        state.isPanning = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        state.isDragging = false;
+        state.isPanning = false;
+        state.hoverGrid = null;
+        render();
+    });
+
+    canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        const newZoom = Math.max(0.3, Math.min(3, state.camera.zoom * zoomFactor));
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const gridBefore = screenToGrid(mx, my);
+        state.camera.zoom = newZoom;
+        const gridAfter = screenToGrid(mx, my);
+        state.camera.x += (gridAfter.x - gridBefore.x) * state.tileSize * state.camera.zoom * 0.5;
+        state.camera.y += (gridAfter.y - gridBefore.y) * state.tileSize * state.camera.zoom * 0.25;
+        render();
+    }, { passive: false });
+
+    canvas.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+            const pos = getEventPos(e);
+            state.isDragging = true;
+            state.dragStart = pos;
+            state.dragCameraStart = { x: state.camera.x, y: state.camera.y };
+            state.hoverGrid = screenToGrid(pos.x, pos.y);
+            handleAction(pos.x, pos.y);
+        } else if (e.touches.length === 2) {
+            state.isDragging = false;
+            state.lastTouchDist = getTouchDist(e);
+        }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (e.touches.length === 1 && state.isDragging) {
+            const pos = getEventPos(e);
+            state.hoverGrid = screenToGrid(pos.x, pos.y);
+            if (!state.isPanning) {
+                const dx = pos.x - state.dragStart.x;
+                const dy = pos.y - state.dragStart.y;
+                if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                    state.isPanning = true;
+                }
+            }
+            if (state.isPanning) {
+                state.camera.x = state.dragCameraStart.x + (pos.x - state.dragStart.x);
+                state.camera.y = state.dragCameraStart.y + (pos.y - state.dragStart.y);
+            }
+        } else if (e.touches.length === 2) {
+            const dist = getTouchDist(e);
+            if (state.lastTouchDist > 0) {
+                const zoomFactor = dist / state.lastTouchDist;
+                const newZoom = Math.max(0.3, Math.min(3, state.camera.zoom * zoomFactor));
+                const center = getTouchCenter(e);
+                const rect = canvas.getBoundingClientRect();
+                const mx = center.x - rect.left;
+                const my = center.y - rect.top;
+                const gridBefore = screenToGrid(mx, my);
+                state.camera.zoom = newZoom;
+                const gridAfter = screenToGrid(mx, my);
+                state.camera.x += (gridAfter.x - gridBefore.x) * state.tileSize * state.camera.zoom * 0.5;
+                state.camera.y += (gridAfter.y - gridBefore.y) * state.tileSize * state.camera.zoom * 0.25;
+            }
+            state.lastTouchDist = dist;
+        }
+        render();
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', e => {
+        state.isDragging = false;
+        state.isPanning = false;
+        state.lastTouchDist = 0;
+        if (e.touches.length === 0) {
+            state.hoverGrid = null;
+        }
+        render();
+    });
+
+    function handleAction(x, y) {
+        const grid = screenToGrid(x, y);
+        if (state.tool === 'place' && state.selectedBlockType) {
+            placeBlock(state.selectedBlockType, grid.x, grid.y, undefined, state.rotation);
+        } else if (state.tool === 'delete') {
+            deleteBlock(grid.x, grid.y, undefined);
+        } else if (state.tool === 'move') {
+            // Move handled on mouseup with drag
+        }
+    }
+
+    // ===== INIT =====
+    function init() {
+        window.addEventListener('resize', resizeCanvas);
+        initPalette();
+        resizeCanvas();
+        // Center camera
+        state.camera.x = 0;
+        state.camera.y = -state.gridSize * state.tileSize * 0.25;
+        render();
+        showToast('🏗️ Willkommen bei Baumeister!');
+    }
+
+    init();
+</script>
+</body>
+</html>
