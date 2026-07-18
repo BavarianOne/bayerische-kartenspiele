@@ -84,19 +84,29 @@
         .toolbar {
             background: linear-gradient(0deg, #3E2723, #5D4037);
             padding: 6px 12px; display: flex; align-items: center;
-            justify-content: center; gap: 8px; flex-shrink: 0; z-index: 100;
-            flex-wrap: wrap; border-top: 2px solid #3E2723;
+            justify-content: center; gap: 6px; flex-shrink: 0; z-index: 100;
+            flex-wrap: wrap; border-bottom: 2px solid #3E2723;
+            overflow-x: auto; /* Allow horizontal scrolling on small screens */
+            -webkit-overflow-scrolling: touch;
         }
         .tool-btn {
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
-            color: #D7CCC8; padding: 6px 12px; border-radius: 6px; cursor: pointer;
-            font-size: clamp(0.75rem, 1.8vw, 0.9rem); transition: all 0.2s;
+            color: #D7CCC8; padding: 6px 10px; border-radius: 6px; cursor: pointer;
+            font-size: clamp(0.7rem, 1.8vw, 0.85rem); transition: all 0.2s;
             font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap;
+            flex-shrink: 0; /* Prevent buttons from shrinking */
         }
         .tool-btn:hover, .tool-btn:active { background: rgba(255,255,255,0.2); color: #FFD54F; }
         .tool-btn.active { background: #FFD54F; color: #3E2723; border-color: #FFD54F; }
         .tool-btn .icon { font-size: 1.1em; }
-        .tool-separator { width: 1px; height: 24px; background: rgba(255,255,255,0.15); }
+        .tool-separator { width: 1px; height: 24px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+        
+        @media (max-width: 768px) {
+            .toolbar { padding: 4px 8px; gap: 4px; }
+            .tool-btn { padding: 4px 8px; font-size: 0.7rem; }
+            .tool-btn .label { display: none; }
+            .tool-separator { height: 20px; }
+        }
         .overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8);
             backdrop-filter: blur(4px); display: flex; align-items: center;
@@ -175,19 +185,6 @@
         <button class="header-btn" onclick="showHelp()">❓ Hilfe</button>
     </div>
 </header>
-<div class="game-container">
-    <div class="canvas-wrapper" id="canvasWrapper">
-        <canvas id="gameCanvas"></canvas>
-    </div>
-    <div class="palette" id="palette">
-        <div class="palette-header">
-            <h2>🧱 Bausteine</h2>
-            <button class="palette-toggle" onclick="togglePalette()">✕</button>
-        </div>
-        <div class="palette-categories" id="categoryTabs"></div>
-        <div class="palette-items" id="paletteItems"></div>
-    </div>
-</div>
     <div class="toolbar">
     <button class="tool-btn active" onclick="setTool('place')" id="toolPlace"><span class="icon">👆</span><span class="label">Platzieren</span></button>
     <button class="tool-btn" onclick="setTool('delete')" id="toolDelete"><span class="icon">🗑️</span><span class="label">Löschen</span></button>
@@ -200,6 +197,19 @@
     <div class="tool-separator"></div>
     <button class="tool-btn" onclick="clearAll()"><span class="icon">🧹</span><span class="label">Alles löschen</span></button>
     <button class="tool-btn" onclick="togglePalette()" id="paletteToggleBtn"><span class="icon">📦</span><span class="label">Bausteine</span></button>
+</div>
+<div class="game-container">
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    <div class="palette" id="palette">
+        <div class="palette-header">
+            <h2>🧱 Bausteine</h2>
+            <button class="palette-toggle" onclick="togglePalette()">✕</button>
+        </div>
+        <div class="palette-categories" id="categoryTabs"></div>
+        <div class="palette-items" id="paletteItems"></div>
+    </div>
 </div>
 <div class="overlay" id="overlay"><div class="modal" id="modalContent"></div></div>
 <div class="toast" id="toast"></div>
@@ -821,7 +831,26 @@
     }
 
     function rotateCamera() {
-        state.camera.rotation = (state.camera.rotation + 90) % 360;
+        // Rotate camera around screen center to avoid jumping
+        const oldRot = state.camera.rotation;
+        const newRot = (oldRot + 90) % 360;
+        
+        // Rotate camera offset around screen center
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const dx = state.camera.x;
+        const dy = state.camera.y;
+        
+        // Rotate camera offset by 90 degrees
+        let ndx = dx, ndy = dy;
+        if (newRot === 90) { ndx = -dy; ndy = dx; }
+        else if (newRot === 180) { ndx = -dx; ndy = -dy; }
+        else if (newRot === 270) { ndx = dy; ndy = -dx; }
+        
+        state.camera.rotation = newRot;
+        state.camera.x = ndx;
+        state.camera.y = ndy;
+        
         render();
         showToast('🔃 Kamera gedreht: ' + state.camera.rotation + '°');
     }
