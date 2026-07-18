@@ -193,7 +193,8 @@
     <button class="tool-btn" onclick="setTool('delete')" id="toolDelete"><span class="icon">🗑️</span><span class="label">Löschen</span></button>
     <button class="tool-btn" onclick="setTool('move')" id="toolMove"><span class="icon">✋</span><span class="label">Verschieben</span></button>
     <div class="tool-separator"></div>
-    <button class="tool-btn" onclick="rotateBlock()"><span class="icon">🔄</span><span class="label">Drehen</span></button>
+    <button class="tool-btn" onclick="rotateBlock()"><span class="icon">🔄</span><span class="label">Block drehen</span></button>
+    <button class="tool-btn" onclick="rotateCamera()"><span class="icon">🔃</span><span class="label">Kamera drehen</span></button>
     <button class="tool-btn" onclick="undoAction()"><span class="icon">↩️</span><span class="label">Rückgängig</span></button>
     <button class="tool-btn" onclick="redoAction()"><span class="icon">↪️</span><span class="label">Wiederholen</span></button>
     <div class="tool-separator"></div>
@@ -352,7 +353,7 @@
         blocks: [],
         gridSize: 20,
         tileSize: 40,
-        camera: { x: 0, y: 0, zoom: 1 },
+        camera: { x: 0, y: 0, zoom: 1, rotation: 0 },
         selectedBlockType: null,
         selectedCategory: 'walls',
         tool: 'place',
@@ -386,19 +387,35 @@
     function gridToIso(gx, gy, gz) {
         gz = gz || 0;
         const tx = state.tileSize * state.camera.zoom;
-        const cx = canvas.width / 2 + (gx - gy) * tx * 0.5 + state.camera.x;
-        const cy = canvas.height / 2 + (gx + gy) * tx * 0.25 - gz * tx * 0.5 + state.camera.y;
+        const rot = state.camera.rotation || 0;
+        
+        // Apply rotation (90° steps)
+        let rx = gx, ry = gy;
+        if (rot === 90) { rx = -gy; ry = gx; }
+        else if (rot === 180) { rx = -gx; ry = -gy; }
+        else if (rot === 270) { rx = gy; ry = -gx; }
+        
+        const cx = canvas.width / 2 + (rx - ry) * tx * 0.5 + state.camera.x;
+        const cy = canvas.height / 2 + (rx + ry) * tx * 0.25 - gz * tx * 0.5 + state.camera.y;
         return { x: cx, y: cy };
     }
 
     function screenToGrid(sx, sy) {
         const tx = state.tileSize * state.camera.zoom;
+        const rot = state.camera.rotation || 0;
         const cx = canvas.width / 2 + state.camera.x;
         const cy = canvas.height / 2 + state.camera.y;
         const dx = sx - cx;
         const dy = sy - cy;
-        const gx = (dx / (tx * 0.5) + dy / (tx * 0.25)) / 2;
-        const gy = (dy / (tx * 0.25) - dx / (tx * 0.5)) / 2;
+        
+        // Reverse rotation
+        let rdx = dx, rdy = dy;
+        if (rot === 90) { rdx = dy; rdy = -dx; }
+        else if (rot === 180) { rdx = -dx; rdy = -dy; }
+        else if (rot === 270) { rdx = -dy; rdy = dx; }
+        
+        const gx = (rdx / (tx * 0.5) + rdy / (tx * 0.25)) / 2;
+        const gy = (rdy / (tx * 0.25) - rdx / (tx * 0.5)) / 2;
         return { x: Math.round(gx), y: Math.round(gy) };
     }
 
@@ -468,7 +485,7 @@
         const iso = gridToIso(block.x, block.y, bz);
         const bw = dims.w * tx * 0.5;
         const bh = dims.h * tx * 0.25;
-        const bheight = type.height * tx * 0.3;
+        const bheight = type.height * tx * 0.5;
         const color = type.color;
 
         // Top face
@@ -800,7 +817,13 @@
         if (!state.selectedBlockType) return;
         state.rotation = (state.rotation + 90) % 360;
         render();
-        showToast('🔄 Gedreht: ' + state.rotation + '°');
+        showToast('🔄 Block gedreht: ' + state.rotation + '°');
+    }
+
+    function rotateCamera() {
+        state.camera.rotation = (state.camera.rotation + 90) % 360;
+        render();
+        showToast('🔃 Kamera gedreht: ' + state.camera.rotation + '°');
     }
 
     // ===== HISTORY =====
@@ -1165,6 +1188,24 @@
         }
     }
 
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', e => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.key === 'r' || e.key === 'R') {
+            rotateCamera();
+        } else if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+            e.preventDefault();
+            undoAction();
+        } else if (e.key === 'y' && (e.ctrlKey || e.metaKey) || (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey)) {
+            e.preventDefault();
+            redoAction();
+        } else if (e.key === 'Delete' || e.key === 'Backspace') {
+            if (state.tool === 'delete' && state.hoverGrid) {
+                deleteBlock(state.hoverGrid.x, state.hoverGrid.y, undefined);
+            }
+        }
+    });
+
     // ===== INIT =====
     function init() {
         window.addEventListener('resize', resizeCanvas);
@@ -1174,7 +1215,7 @@
         state.camera.x = 0;
         state.camera.y = -state.gridSize * state.tileSize * 0.25;
         render();
-        showToast('🏗️ Willkommen bei Baumeister!');
+        showToast('🏗️ Willkommen bei Baumeister! Drücke R für Kameradrehung');
     }
 
     init();
