@@ -124,7 +124,29 @@
 
         <!-- Screen: World Map -->
         <section id="screen-map" class="screen" role="region" aria-label="Adventure Map">
-            <div id="map-container" class="map-container"></div>
+            <header class="map-header">
+                <h2 class="world-name" id="map-world-name">Ocean Cove</h2>
+                <div class="world-progress">
+                    <span id="map-world-progress">0/10</span>
+                    <div class="progress-bar" id="map-progress-bar"><div class="progress-fill"></div></div>
+                </div>
+            </header>
+            <div class="map-resources">
+                <span class="resource" id="map-coins">💰 0</span>
+                <span class="resource" id="map-hearts">❤️ 5</span>
+            </div>
+            <div id="map-container" class="map-container">
+                <div id="map-scene" class="map-scene">
+                    <svg id="map-path" class="map-path" viewBox="0 0 320 500" preserveAspectRatio="none"></svg>
+                    <div id="map-decorations" class="map-decorations"></div>
+                    <div id="map-levels" class="map-levels"></div>
+                </div>
+            </div>
+            <div class="map-navigation">
+                <button class="nav-btn" id="btn-prev-world" aria-label="Previous World">‹</button>
+                <button class="nav-btn" id="btn-next-world" aria-label="Next World">›</button>
+            </div>
+            <button class="btn-back" id="btn-map-back" data-action="change-screen" data-value="menu" aria-label="Back to Menu">Back</button>
         </section>
 
         <!-- Screen: Challenge -->

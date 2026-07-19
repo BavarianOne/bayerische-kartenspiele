@@ -120,7 +120,7 @@ const Audio = (function() {
         pentatonic: [0, 2, 4, 7, 9]
     };
 
-    // Initialize audio system
+    // Initialize audio system - non-blocking, handles user gesture requirement
     async function init(userSettings = null) {
         if (isInitialized) return;
 
@@ -143,13 +143,32 @@ const Audio = (function() {
             musicGain.gain.value = settings.musicVolume || 0.5;
             sfxGain.gain.value = settings.soundVolume || 0.7;
 
-            // Resume context if suspended (browser policy)
+            // Don't await resume here - let it happen on first user interaction
+            // This prevents blocking initialization
             if (audioContext.state === 'suspended') {
-                await audioContext.resume();
+                // Set up one-time user interaction handler to resume audio context
+                const resumeAudio = async () => {
+                    if (audioContext && audioContext.state === 'suspended') {
+                        try {
+                            await audioContext.resume();
+                            console.log('Audio context resumed on user interaction');
+                        } catch (e) {
+                            console.warn('Failed to resume audio context:', e);
+                        }
+                    }
+                    // Remove listeners after first interaction
+                    document.removeEventListener('click', resumeAudio);
+                    document.removeEventListener('keydown', resumeAudio);
+                    document.removeEventListener('touchstart', resumeAudio);
+                };
+                
+                document.addEventListener('click', resumeAudio, { once: true, passive: true });
+                document.addEventListener('keydown', resumeAudio, { once: true, passive: true });
+                document.addEventListener('touchstart', resumeAudio, { once: true, passive: true });
             }
 
             isInitialized = true;
-            console.log('Audio system initialized');
+            console.log('Audio system initialized (awaiting user interaction for audio context)');
         } catch (e) {
             console.warn('Web Audio API not supported:', e);
             isInitialized = false;

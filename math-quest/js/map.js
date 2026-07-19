@@ -78,6 +78,7 @@ const Map = (function() {
     function init() {
         cacheElements();
         bindEvents();
+        renderMap();
         console.log('Map module initialized');
     }
 
@@ -97,6 +98,12 @@ const Map = (function() {
             btnNext: document.getElementById('btn-next-world'),
             btnBack: document.getElementById('btn-map-back')
         };
+        
+        // Verify critical elements exist
+        const missing = Object.entries(elements).filter(([key, el]) => !el);
+        if (missing.length > 0) {
+            console.warn('Map: Missing DOM elements:', missing.map(([k]) => k).join(', '));
+        }
     }
 
     // Bind events

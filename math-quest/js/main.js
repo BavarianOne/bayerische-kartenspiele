@@ -15,44 +15,104 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Math Quest: Number Kingdom - Starting...');
     
+    // Safety timeout: force hide loading screen after 10 seconds
+    const loadingTimeout = setTimeout(() => {
+        console.warn('Initialization timeout - forcing loading screen to hide');
+        const loadingScreen = document.getElementById('loading-screen');
+        const app = document.getElementById('app');
+        if (loadingScreen) loadingScreen.classList.add('hidden');
+        if (app) app.hidden = false;
+    }, 10000);
+    
     try {
         // Initialize all modules in order
         await initializeGame();
         
         console.log('Game initialized successfully!');
+        clearTimeout(loadingTimeout);
     } catch (error) {
         console.error('Failed to initialize game:', error);
+        clearTimeout(loadingTimeout);
         showErrorScreen(error);
     }
 });
 
 async function initializeGame() {
     // 1. Initialize storage first (loads saved data)
-    Storage.init();
+    try {
+        Storage.init();
+        console.log('Storage initialized');
+    } catch (e) {
+        console.error('Storage init failed:', e);
+        throw new Error('Failed to initialize storage: ' + e.message);
+    }
     
     // 2. Initialize UI (animations, styles)
-    UI.init();
+    try {
+        UI.init();
+        console.log('UI initialized');
+    } catch (e) {
+        console.error('UI init failed:', e);
+        throw new Error('Failed to initialize UI: ' + e.message);
+    }
     
-    // 3. Initialize audio (needs user interaction for autoplay)
-    await Audio.init(Storage.getSettings());
+    // 3. Initialize audio (non-blocking, doesn't throw on failure)
+    try {
+        Audio.init(Storage.getSettings());
+        console.log('Audio initialized');
+    } catch (e) {
+        console.warn('Audio init failed (non-fatal):', e);
+        // Audio failure is non-fatal, continue without sound
+    }
     
     // 4. Initialize map
-    Map.init();
+    try {
+        Map.init();
+        console.log('Map initialized');
+    } catch (e) {
+        console.error('Map init failed:', e);
+        throw new Error('Failed to initialize map: ' + e.message);
+    }
     
-    // 5. Initialize game (core logic, binds events)
-    await Game.init();
+    // 5. Challenges module is a pure utility/data module - no initialization needed
+    console.log('Challenges module loaded (no init required)');
     
     // 6. Setup global error handling
-    setupErrorHandling();
+    try {
+        setupErrorHandling();
+    } catch (e) {
+        console.warn('Error handling setup failed:', e);
+    }
     
     // 7. Setup service worker for offline support
-    registerServiceWorker();
+    try {
+        registerServiceWorker();
+    } catch (e) {
+        console.warn('Service worker registration failed:', e);
+    }
     
     // 8. Handle first visit
-    handleFirstVisit();
+    try {
+        handleFirstVisit();
+    } catch (e) {
+        console.warn('First visit handling failed:', e);
+    }
     
     // 9. Start update loop for time-based events
-    startUpdateLoop();
+    try {
+        startUpdateLoop();
+    } catch (e) {
+        console.warn('Update loop failed:', e);
+    }
+    
+    // 10. Initialize game (core logic, binds events, shows menu)
+    try {
+        await Game.init();
+        console.log('Game initialized');
+    } catch (e) {
+        console.error('Game init failed:', e);
+        throw new Error('Failed to initialize game: ' + e.message);
+    }
 }
 
 function setupErrorHandling() {
@@ -174,7 +234,7 @@ function startUpdateLoop() {
 }
 
 function showErrorScreen(error) {
-    const loadingScreen = document.getElementById('screen-loading');
+    const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
         loadingScreen.innerHTML = `
             <div class="loading-content error">

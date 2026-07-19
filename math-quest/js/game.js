@@ -49,10 +49,6 @@ const Game = (function() {
     async function init() {
         console.log('Initializing game...');
         
-        // Load saved data
-        Storage.init();
-        Audio.init(Storage.getSettings());
-        
         // Cache DOM elements
         cacheElements();
         
@@ -70,9 +66,13 @@ const Game = (function() {
         
         // Hide loading screen and show app
         const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) loadingScreen.hidden = true;
+        if (loadingScreen) loadingScreen.classList.add('hidden');
         const app = document.getElementById('app');
         if (app) app.hidden = false;
+        
+        // Also hide the loading-screen element if it exists (for compatibility)
+        const loadingScreenCompat = document.getElementById('loading-screen');
+        if (loadingScreenCompat) loadingScreenCompat.hidden = true;
         
         // Start menu music
         Audio.playMusic('menu');
@@ -84,7 +84,7 @@ const Game = (function() {
     function cacheElements() {
         // Screens
         elements.screens = {
-            loading: document.getElementById('screen-loading'),
+            loading: document.getElementById('loading-screen'),
             menu: document.getElementById('screen-menu'),
             map: document.getElementById('screen-map'),
             challenge: document.getElementById('screen-challenge'),
@@ -96,10 +96,10 @@ const Game = (function() {
 
         // Menu elements
         elements.menu = {
-            profileName: document.getElementById('menu-profile-name'),
-            profileAvatar: document.getElementById('menu-profile-avatar'),
-            profileLevel: document.getElementById('menu-profile-level'),
-            profileXP: document.getElementById('menu-profile-xp'),
+            profileName: document.getElementById('menu-name'),
+            profileAvatar: document.getElementById('menu-avatar'),
+            profileLevel: document.getElementById('menu-level'),
+            profileXP: document.getElementById('menu-xp'),
             profileXPBar: document.getElementById('menu-profile-xp-bar'),
             coins: document.getElementById('menu-coins'),
             hearts: document.getElementById('menu-hearts'),
@@ -130,16 +130,16 @@ const Game = (function() {
 
         // Challenge elements
         elements.challenge = {
-            worldName: document.getElementById('challenge-world-name'),
-            levelName: document.getElementById('challenge-level-name'),
+            worldName: document.getElementById('challenge-world'),
+            levelName: document.getElementById('challenge-level'),
             questionCounter: document.getElementById('challenge-counter'),
-            timerRing: document.getElementById('timer-ring'),
-            timerProgress: document.getElementById('timer-progress'),
-            timerText: document.getElementById('timer-text'),
+            timerRing: document.querySelector('.timer-ring'),
+            timerProgress: document.querySelector('.timer-progress'),
+            timerText: document.querySelector('.timer-text'),
             questionType: document.getElementById('question-type'),
             questionText: document.getElementById('question-text'),
             questionVisual: document.getElementById('question-visual'),
-            answersGrid: document.getElementById('answers-grid'),
+            answersGrid: document.getElementById('answer-area'),
             numberInput: document.getElementById('number-input-container'),
             numberDisplay: document.getElementById('number-display'),
             numberKeypad: document.getElementById('number-keypad'),
@@ -149,26 +149,19 @@ const Game = (function() {
             hearts: document.getElementById('hearts-display'),
             streak: document.getElementById('streak-display'),
             progressBar: document.getElementById('progress-bar'),
-            btnHint: document.getElementById('btn-hint'),
-            btnPause: document.getElementById('btn-pause')
+            btnHint: document.querySelector('[data-action="use-hint"]'),
+            btnPause: document.getElementById('pause-modal')
         };
 
-        // Results elements
+        // Results elements (created dynamically in showResults)
         elements.results = {
             container: document.getElementById('results-container'),
-            content: document.getElementById('results-content'),
-            icon: document.getElementById('result-icon'),
-            title: document.getElementById('result-title'),
-            subtitle: document.getElementById('result-subtitle'),
-            stats: document.getElementById('results-stats'),
-            stars: document.getElementById('results-stars'),
-            rewards: document.getElementById('results-rewards'),
-            actions: document.getElementById('results-actions')
+            content: document.getElementById('results-content')
         };
 
         // Modals
         elements.modals = {
-            pause: document.getElementById('modal-pause'),
+            pause: document.getElementById('pause-modal'),
             settings: document.getElementById('modal-settings'),
             daily: document.getElementById('modal-daily'),
             shop: document.getElementById('modal-shop'),
@@ -395,7 +388,7 @@ const Game = (function() {
         }
         
         // Progress bar
-        const completed = Challenges.getCompletedCount(state.currentWorld);
+        const completed = Storage.getCompletedCount(state.currentWorld);
         const total = world.levels;
         const percent = (completed / total) * 100;
         
@@ -1264,11 +1257,11 @@ const Game = (function() {
         
         const checks = [
             { id: 'first_steps', condition: progress.totalLevelsCompleted >= 1 },
-            { id: 'math_novice', condition: Challenges.getCompletedCount(1) >= 10 },
-            { id: 'math_explorer', condition: Challenges.getCompletedCount(2) >= 10 },
-            { id: 'math_scholar', condition: Challenges.getCompletedCount(3) >= 10 },
-            { id: 'math_master', condition: Challenges.getCompletedCount(4) >= 10 },
-            { id: 'math_legend', condition: Challenges.getCompletedCount(5) >= 10 },
+            { id: 'math_novice', condition: Storage.getCompletedCount(1) >= 10 },
+            { id: 'math_explorer', condition: Storage.getCompletedCount(2) >= 10 },
+            { id: 'math_scholar', condition: Storage.getCompletedCount(3) >= 10 },
+            { id: 'math_master', condition: Storage.getCompletedCount(4) >= 10 },
+            { id: 'math_legend', condition: Storage.getCompletedCount(5) >= 10 },
             { id: 'perfect_10', condition: stats.perfectLevels >= 10 },
             { id: 'streak_10', condition: maxStreak >= 10 },
             { id: 'streak_20', condition: maxStreak >= 20 },
