@@ -127,7 +127,38 @@ const Storage = (function() {
         // Migrate old data if needed
         migrateData();
         
-        // Ensure all keys exist
+        // Clean up and ensure all keys have valid data
+        // This handles corrupted localStorage from previous versions
+        const keysToValidate = [
+            { key: STORAGE_KEYS.PROFILE, default: DEFAULT_PROFILE, validator: getProfile },
+            { key: STORAGE_KEYS.PROGRESS, default: DEFAULT_PROGRESS, validator: getProgress },
+            { key: STORAGE_KEYS.SETTINGS, default: DEFAULT_SETTINGS, validator: getSettings },
+            { key: STORAGE_KEYS.STATS, default: DEFAULT_STATS, validator: getStats },
+            { key: STORAGE_KEYS.ACHIEVEMENTS, default: DEFAULT_ACHIEVEMENTS, validator: getAchievements },
+            { key: STORAGE_KEYS.DAILY, default: DEFAULT_DAILY, validator: getDaily }
+        ];
+        
+        keysToValidate.forEach(({ key, default: def, validator }) => {
+            const stored = localStorage.getItem(key);
+            // Check if key doesn't exist or has invalid data
+            if (!stored || stored === "undefined" || stored === "null" || stored === "") {
+                console.warn(`Storage: Resetting corrupted/missing key: ${key}`);
+                localStorage.removeItem(key);
+            }
+            // Validate the data can be parsed correctly
+            try {
+                const data = validator();
+                if (!data || typeof data !== 'object') {
+                    console.warn(`Storage: Invalid data structure for key: ${key}`);
+                    localStorage.removeItem(key);
+                }
+            } catch (e) {
+                console.warn(`Storage: Error validating key ${key}, resetting:`, e.message);
+                localStorage.removeItem(key);
+            }
+        });
+        
+        // Ensure all keys exist with valid data
         if (!localStorage.getItem(STORAGE_KEYS.PROFILE)) {
             saveProfile(DEFAULT_PROFILE);
         }
@@ -164,19 +195,60 @@ const Storage = (function() {
         localStorage.setItem('mathquest_version', currentVersion);
     }
 
-    // Generic get/set helpers
-    function get(key, defaultValue = null) {
+    // Helper to validate if data is valid JSON object
+    function isValidJSON(data) {
+        if (data === null || data === undefined || data === "undefined" || data === "") {
+            return false;
+        }
         try {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : defaultValue;
+            const parsed = JSON.parse(data);
+            return typeof parsed === 'object' && parsed !== null;
         } catch (e) {
-            console.error('Storage get error:', e);
-            return defaultValue;
+            return false;
         }
     }
 
+// Generic get/set helpers
+function get(key, defaultValue = null) {
+  try {
+    const data = localStorage.getItem(key);
+    // Handle null, undefined, or the string "undefined"
+    if (data === null || data === undefined || data === "undefined" || data === "") {
+      return defaultValue;
+    }
+    // Try to parse - if it fails, return default
+    try {
+      const parsed = JSON.parse(data);
+      // Ensure parsed data is an object (not array, string, number, etc.)
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+        console.warn('Storage: Invalid data type for key:', key, '- resetting to default');
+        return defaultValue;
+      }
+      return parsed;
+    } catch (parseError) {
+      console.warn('Storage: JSON parse error for key:', key, '- resetting to default. Error:', parseError.message);
+      // Clean up corrupted data
+      localStorage.removeItem(key);
+      return defaultValue;
+    }
+  } catch (e) {
+    console.error('Storage get error:', e);
+    return defaultValue;
+  }
+}
+
     function set(key, value) {
         try {
+            // Don't store undefined values - they become the string "undefined"
+            if (value === undefined) {
+                console.warn('Attempted to store undefined value for key:', key);
+                return false;
+            }
+            // Don't store null values - they become "null" string
+            if (value === null) {
+                console.warn('Attempted to store null value for key:', key);
+                return false;
+            }
             localStorage.setItem(key, JSON.stringify(value));
             return true;
         } catch (e) {
@@ -577,6 +649,29 @@ const Storage = (function() {
         return getDaily().streak;
     }
 
+    // Heart recovery (called periodically)
+    function recoverHearts() {
+        const profile = getProfile();
+        const now = Date.now();
+        const lastPlayed = profile.lastPlayed ? new Date(profile.lastPlayed).getTime() : 0;
+        const hoursSinceLastPlay = (now - lastPlayed) / (1000 * 60 * 60);
+        
+        // Recover 1 heart per hour, up to max
+        const heartsToRecover = Math.floor(hoursSinceLastPlay);
+        if (heartsToRecover > 0 && profile.hearts < profile.maxHearts) {
+            profile.hearts = Math.min(profile.maxHearts, profile.hearts + heartsToRecover);
+            saveProfile(profile);
+        }
+    }
+
+    // Reset daily claim (for testing or manual reset)
+    function resetDailyClaim() {
+        const daily = getDaily();
+        daily.lastClaimed = null;
+        daily.claimedToday = false;
+        saveDaily(daily);
+    }
+
     // Shop/Inventory methods
     function purchaseAvatar(avatar) {
         const profile = getProfile();
@@ -694,6 +789,8 @@ const Storage = (function() {
         canClaimDaily,
         claimDaily,
         getDailyStreak,
+        recoverHearts,
+        resetDailyClaim,
         purchaseAvatar,
         equipAvatar,
         purchaseTheme,

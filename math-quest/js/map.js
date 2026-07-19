@@ -255,8 +255,18 @@ const Map = (function() {
     // Render map for current world
     function renderMap() {
         const world = WORLD_THEMES[state.currentWorld];
-        const progress = Storage.getProgress();
-        const worldProgress = progress.worlds[state.currentWorld] || { levels: {} };
+        let progress;
+        let worldProgress;
+        
+        // Get progress with error handling
+        try {
+            progress = Storage.getProgress();
+            worldProgress = progress?.worlds?.[state.currentWorld] || { levels: {} };
+        } catch (e) {
+            console.error('Map: Error getting progress, using defaults:', e);
+            progress = { worlds: {} };
+            worldProgress = { levels: {} };
+        }
         
         if (!elements.scene) return;
         
@@ -458,15 +468,21 @@ const Map = (function() {
         }
         node.appendChild(starsEl);
         
-        // Perfect badge
-        const levelData = Storage.getProgress().worlds[world.id]?.levels[level];
-        if (levelData?.perfect) {
-            const badge = document.createElement('span');
-            badge.className = 'perfect-badge';
-            badge.textContent = '✨';
-            badge.setAttribute('aria-label', 'Perfect level');
-            node.appendChild(badge);
-        }
+// Perfect badge - with error handling
+let levelData = null;
+try {
+  const progress = Storage.getProgress();
+  levelData = progress?.worlds?.[world.id]?.levels[level];
+} catch (e) {
+  console.error('Map: Error getting level data for perfect badge:', e);
+}
+if (levelData?.perfect) {
+  const badge = document.createElement('span');
+  badge.className = 'perfect-badge';
+  badge.textContent = '✨';
+  badge.setAttribute('aria-label', 'Perfect level');
+  node.appendChild(badge);
+}
         
         // Click handler
         if (unlocked && !completed) {

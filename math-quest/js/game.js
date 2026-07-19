@@ -303,11 +303,25 @@ const Game = (function() {
 
     // Load game data from storage
     function loadGameData() {
-        const profile = Storage.getProfile();
-        const progress = Storage.getProgress();
+        let profile;
+        let progress;
         
-        state.currentWorld = progress.currentWorld;
-        state.currentLevel = progress.currentLevel;
+        try {
+            profile = Storage.getProfile();
+        } catch (e) {
+            console.error('Game: Error loading profile, using defaults:', e);
+            profile = { name: 'Young Mathematician', level: 1, coins: 0, hearts: 3, maxHearts: 3, streak: 0, xp: 0, xpToNext: 100, equippedAvatar: '🧙‍♂️' };
+        }
+        
+        try {
+            progress = Storage.getProgress();
+        } catch (e) {
+            console.error('Game: Error loading progress, using defaults:', e);
+            progress = { currentWorld: 1, currentLevel: 1, totalLevelsCompleted: 0, totalStars: 0, worlds: {} };
+        }
+        
+        state.currentWorld = progress.currentWorld || 1;
+        state.currentLevel = progress.currentLevel || 1;
         
         updateMenuUI(profile);
         updateMapUI();
@@ -379,17 +393,42 @@ const Game = (function() {
 
     // Update map UI
     function updateMapUI() {
-        const world = Challenges.getWorld(state.currentWorld);
-        const progress = Storage.getProgress();
-        const worldProgress = progress.worlds[state.currentWorld];
+        let world;
+        let progress;
+        let worldProgress;
+        let profile;
+        let completed;
+        
+        // Get world with error handling
+        try {
+            world = Challenges.getWorld(state.currentWorld);
+        } catch (e) {
+            console.error('Game: Error getting world, using defaults:', e);
+            world = { id: state.currentWorld, name: `World ${state.currentWorld}`, levels: 10 };
+        }
+        
+        // Get progress with error handling
+        try {
+            progress = Storage.getProgress();
+            worldProgress = progress?.worlds?.[state.currentWorld] || { levels: {} };
+        } catch (e) {
+            console.error('Game: Error getting progress, using defaults:', e);
+            progress = { worlds: {} };
+            worldProgress = { levels: {} };
+        }
         
         if (elements.map.worldName) {
             elements.map.worldName.textContent = world.name;
         }
         
         // Progress bar
-        const completed = Storage.getCompletedCount(state.currentWorld);
-        const total = world.levels;
+        try {
+            completed = Storage.getCompletedCount(state.currentWorld);
+        } catch (e) {
+            console.error('Game: Error getting completed count:', e);
+            completed = 0;
+        }
+        const total = world.levels || 10;
         const percent = (completed / total) * 100;
         
         if (elements.map.worldProgress) {
@@ -400,7 +439,12 @@ const Game = (function() {
         }
         
         // Stats
-        const profile = Storage.getProfile();
+        try {
+            profile = Storage.getProfile();
+        } catch (e) {
+            console.error('Game: Error getting profile, using defaults:', e);
+            profile = { coins: 0, hearts: 3, maxHearts: 3 };
+        }
         if (elements.map.mapCoins) elements.map.mapCoins.textContent = profile.coins;
         if (elements.map.mapHearts) elements.map.mapHearts.textContent = `${profile.hearts}/${profile.maxHearts}`;
         
@@ -412,7 +456,8 @@ const Game = (function() {
             elements.map.btnPrevWorld.disabled = state.currentWorld === 1;
         }
         if (elements.map.btnNextWorld) {
-            elements.map.btnNextWorld.disabled = state.currentWorld === 5 || !progress.worlds[state.currentWorld + 1]?.unlocked;
+            const nextUnlocked = progress?.worlds?.[state.currentWorld + 1]?.unlocked;
+            elements.map.btnNextWorld.disabled = state.currentWorld === 5 || !nextUnlocked;
         }
     }
 
@@ -582,14 +627,20 @@ const Game = (function() {
         }
         node.appendChild(starsEl);
         
-        // Perfect badge
-        const levelData = Storage.getProgress().worlds[world.id]?.levels[level];
-        if (levelData?.perfect) {
-            const badge = document.createElement('span');
-            badge.className = 'perfect-badge';
-            badge.textContent = '✨';
-            node.appendChild(badge);
-        }
+// Perfect badge - with error handling
+let levelData = null;
+try {
+  const progress = Storage.getProgress();
+  levelData = progress?.worlds?.[world.id]?.levels[level];
+} catch (e) {
+  console.error('Game: Error getting level data for perfect badge:', e);
+}
+if (levelData?.perfect) {
+  const badge = document.createElement('span');
+  badge.className = 'perfect-badge';
+  badge.textContent = '✨';
+  node.appendChild(badge);
+}
         
         // Click handler
         if (unlocked && !completed) {
