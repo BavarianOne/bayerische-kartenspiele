@@ -322,8 +322,22 @@
     <div id="action-bar">
       <button class="action-btn primary" id="simulate-btn">▶️ Simulation starten</button>
       <button class="action-btn secondary" id="reset-btn">🔄 Zurücksetzen</button>
+      <button class="action-btn secondary" id="bridge-btn">🌉 Brücke</button>
       <button class="action-btn danger" id="clear-btn">🗑️ Alles löschen</button>
       <button class="action-btn secondary" id="info-btn">ℹ️ Info</button>
+    </div>
+    
+    <div id="bridge-control" style="display: none; padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <label style="color: #a0a0b8; font-size: 0.8rem;">🌉 Brückenhöhe:</label>
+        <input type="range" id="bridge-height-slider" min="0.5" max="3" value="1.5" step="0.1" style="flex: 1;">
+        <span id="bridge-height-value" style="color: #e8e8f0; font-size: 0.85rem; font-weight: 600; min-width: 40px;">1.5m</span>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="action-btn secondary" id="place-bridge-start">📍 Start setzen</button>
+        <button class="action-btn secondary" id="place-bridge-end">📍 Ende setzen</button>
+        <button class="action-btn danger" id="cancel-bridge">✖ Abbrechen</button>
+      </div>
     </div>
   </div>
 </div>
@@ -367,6 +381,17 @@ const DOMINO_TYPES = {
 };
 
 const TYPE_KEYS = Object.keys(DOMINO_TYPES);
+
+// Bridge state
+let bridgeMeshes = [];
+let bridgeBodies = [];
+let currentBridgeHeight = 1.5; // Default bridge height
+let isBuildingBridge = false;
+let bridgeStartPoint = null;
+let bridgePreviewMesh = null;
+const BRIDGE_WIDTH = 2.0;
+const BRIDGE_THICKNESS = 0.2;
+const BRIDGE_LENGTH = 4.0;
 
 // STATE
 let mode = 'build';
@@ -782,6 +807,155 @@ document.getElementById('info-btn').addEventListener('click', () => {
   document.getElementById('info-panel').classList.toggle('visible');
 });
 
+// BRIDGE BUILDING
+const bridgeBtn = document.getElementById('bridge-btn');
+const bridgeControl = document.getElementById('bridge-control');
+const bridgeHeightSlider = document.getElementById('bridge-height-slider');
+const bridgeHeightValue = document.getElementById('bridge-height-value');
+const placeBridgeStartBtn = document.getElementById('place-bridge-start');
+const placeBridgeEndBtn = document.getElementById('place-bridge-end');
+const cancelBridgeBtn = document.getElementById('cancel-bridge');
+
+bridgeBtn.addEventListener('click', () => {
+  isBuildingBridge = !isBuildingBridge;
+  bridgeControl.style.display = isBuildingBridge ? 'block' : 'none';
+  bridgeBtn.classList.toggle('active', isBuildingBridge);
+  if (!isBuildingBridge) {
+    bridgeStartPoint = null;
+    if (bridgePreviewMesh) {
+      scene.remove(bridgePreviewMesh);
+      bridgePreviewMesh = null;
+    }
+  }
+});
+
+bridgeHeightSlider.addEventListener('input', (e) => {
+  currentBridgeHeight = parseFloat(e.target.value);
+  bridgeHeightValue.textContent = currentBridgeHeight.toFixed(1) + 'm';
+});
+
+placeBridgeStartBtn.addEventListener('click', () => {
+  // Set bridge start point on click
+  const rect = renderer.domElement.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const point = getGroundIntersection(centerX, centerY);
+  if (point) {
+    bridgeStartPoint = point.clone();
+    bridgeStartPoint.y = currentBridgeHeight;
+    placeBridgeStartBtn.textContent = '📍 Start: ✓';
+    placeBridgeStartBtn.classList.add('active');
+  }
+});
+
+placeBridgeEndBtn.addEventListener('click', () => {
+  if (!bridgeStartPoint) {
+    alert('Bitte zuerst Startpunkt setzen!');
+    return;
+  }
+  // Set bridge end point on click
+  const rect = renderer.domElement.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const point = getGroundIntersection(centerX, centerY);
+  if (point) {
+    const endPoint = point.clone();
+    endPoint.y = currentBridgeHeight;
+    createBridge(bridgeStartPoint, endPoint);
+    bridgeStartPoint = null;
+    placeBridgeStartBtn.textContent = '📍 Start setzen';
+    placeBridgeStartBtn.classList.remove('active');
+  }
+});
+
+cancelBridgeBtn.addEventListener('click', () => {
+  isBuildingBridge = false;
+  bridgeControl.style.display = 'none';
+  bridgeBtn.classList.remove('active');
+  bridgeStartPoint = null;
+  if (bridgePreviewMesh) {
+    scene.remove(bridgePreviewMesh);
+    bridgePreviewMesh = null;
+  }
+  placeBridgeStartBtn.textContent = '📍 Start setzen';
+  placeBridgeStartBtn.classList.remove('active');
+});
+
+function createBridge(start, end) {
+  const bridgeMaterial = new THREE.MeshStandardMaterial({
+    color: 0x4a5568,
+    roughness: 0.8,
+    metalness: 0.2
+  });
+  
+  // Calculate bridge length and angle
+  const dx = end.x - start.x;
+  const dz = end.z - start.z;
+  const length = Math.sqrt(dx * dx + dz * dz);
+  const angle = Math.atan2(dx, dz);
+  
+  // Create bridge platform
+  const bridgeGeometry = new THREE.BoxGeometry(length, BRIDGE_THICKNESS, BRIDGE_WIDTH);
+  const bridgeMesh = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
+  bridgeMesh.position.set(
+    (start.x + end.x) / 2,
+    start.y,
+    (start.z + end.z) / 2
+  );
+  bridgeMesh.rotation.y = angle;
+  bridgeMesh.castShadow = true;
+  bridgeMesh.receiveShadow = true;
+  scene.add(bridgeMesh);
+  bridgeMeshes.push(bridgeMesh);
+  
+  // Create physics body for bridge
+  const bridgeShape = new CANNON.Box(new CANNON.Vec3(length/2, BRIDGE_THICKNESS/2, BRIDGE_WIDTH/2));
+  const bridgeBody = new CANNON.Body({
+    mass: 0, // Static body
+    shape: bridgeShape,
+    position: new CANNON.Vec3(bridgeMesh.position.x, bridgeMesh.position.y, bridgeMesh.position.z),
+    material: new CANNON.Material('bridge')
+  });
+  bridgeBody.quaternion.setFromEuler(0, angle, 0);
+  world.addBody(bridgeBody);
+  bridgeBodies.push(bridgeBody);
+  
+  // Create supports (pillars)
+  const supportGeometry = new THREE.BoxGeometry(0.3, start.y, 0.3);
+  const supportMaterial = new THREE.MeshStandardMaterial({
+    color: 0x718096,
+    roughness: 0.9,
+    metalness: 0.1
+  });
+  
+  // Support at start
+  const support1 = new THREE.Mesh(supportGeometry, supportMaterial);
+  support1.position.set(start.x, start.y / 2, start.z);
+  support1.castShadow = true;
+  support1.receiveShadow = true;
+  scene.add(support1);
+  bridgeMeshes.push(support1);
+  
+  // Support at end
+  const support2 = new THREE.Mesh(supportGeometry, supportMaterial);
+  support2.position.set(end.x, end.y / 2, end.z);
+  support2.castShadow = true;
+  support2.receiveShadow = true;
+  scene.add(support2);
+  bridgeMeshes.push(support2);
+  
+  // Physics for supports
+  const supportShape = new CANNON.Box(new CANNON.Vec3(0.15, start.y / 2, 0.15));
+  const supportBody1 = new CANNON.Body({ mass: 0, shape: supportShape, position: new CANNON.Vec3(start.x, start.y / 2, start.z) });
+  const supportBody2 = new CANNON.Body({ mass: 0, shape: supportShape, position: new CANNON.Vec3(end.x, end.y / 2, end.z) });
+  world.addBody(supportBody1);
+  world.addBody(supportBody2);
+  bridgeBodies.push(supportBody1);
+  bridgeBodies.push(supportBody2);
+  
+  if (navigator.vibrate) navigator.vibrate(50);
+}
+
 // TOUCH / MOUSE INTERACTION
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -801,8 +975,18 @@ function getGroundIntersection(clientX, clientY) {
   pointer.x = (clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
-  const intersects = raycaster.intersectObject(groundMesh);
-  return intersects.length > 0 ? intersects[0].point : null;
+  
+  // Check bridges first
+  if (bridgeMeshes.length > 0) {
+    const bridgeIntersects = raycaster.intersectObjects(bridgeMeshes);
+    if (bridgeIntersects.length > 0) {
+      return bridgeIntersects[0].point;
+    }
+  }
+  
+  // Then check ground
+  const groundIntersects = raycaster.intersectObject(groundMesh);
+  return groundIntersects.length > 0 ? groundIntersects[0].point : null;
 }
 
 function updatePreview(clientX, clientY) {
