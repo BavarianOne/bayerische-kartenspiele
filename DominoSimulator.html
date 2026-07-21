@@ -218,7 +218,7 @@
     </div>
   </div>
   
-  <div id="info-panel" id="info-panel">
+  <div id="info-panel">
     <h4>📊 Statistiken</h4>
     <div class="info-row"><span class="info-label">Dominosteine:</span><span class="info-value" id="stat-count">0</span></div>
     <div class="info-row"><span class="info-label">Gefallen:</span><span class="info-value" id="stat-fallen">0</span></div>
@@ -239,205 +239,26 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/",
+    "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+  }
+}
+</script>
 
 <script type="module">
-// Wait for scripts to load
-if (typeof THREE === 'undefined' || typeof CANNON === 'undefined') {
-  document.getElementById('canvas-container').innerHTML = `
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#e8e8f0;font-family:sans-serif;padding:40px;background:rgba(26,26,46,0.95);border-radius:20px;border:1px solid rgba(255,255,255,0.1);max-width:90vw;">
-      <div style="font-size:3rem;margin-bottom:16px;">🎲</div>
-      <h2 style="margin:0 0 12px 0;color:#ef4444;">3D-Bibliotheken konnten nicht geladen werden</h2>
-      <p style="color:#a0a0b8;margin:0 0 20px 0;font-size:0.9rem;">Bitte überprüfen Sie Ihre Internetverbindung und aktualisieren Sie die Seite.</p>
-      <button onclick="location.reload()" style="padding:12px 24px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:10px;cursor:pointer;font-size:1rem;">🔄 Erneut versuchen</button>
-    </div>
-  `;
-  throw new Error('Libraries not loaded');
-}
-
-// OrbitControls as inline class (simplified version)
-class OrbitControls {
-  constructor(camera, domElement) {
-    this.camera = camera;
-    this.domElement = domElement;
-    this.target = new THREE.Vector3(0, 1, 0);
-    this.enableDamping = true;
-    this.dampingFactor = 0.05;
-    this.enablePan = true;
-    this.minDistance = 3;
-    this.maxDistance = 80;
-    this.maxPolarAngle = Math.PI / 2 - 0.05;
-    this.enabled = true;
-    this.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
-    
-    this._rotateStart = new THREE.Vector2();
-    this._rotateEnd = new THREE.Vector2();
-    this._rotateDelta = new THREE.Vector2();
-    this._panStart = new THREE.Vector2();
-    this._panEnd = new THREE.Vector2();
-    this._panDelta = new THREE.Vector2();
-    this._dollyStart = new THREE.Vector2();
-    this._dollyEnd = new THREE.Vector2();
-    this._dollyDelta = new THREE.Vector2();
-    
-    const scope = this;
-    domElement.addEventListener('mousedown', onMouseDown);
-    domElement.addEventListener('mousemove', onMouseMove);
-    domElement.addEventListener('mouseup', onMouseUp);
-    domElement.addEventListener('wheel', onMouseWheel);
-    domElement.addEventListener('touchstart', onTouchStart, { passive: false });
-    domElement.addEventListener('touchmove', onTouchMove, { passive: false });
-    domElement.addEventListener('touchend', onTouchEnd);
-    
-    function onMouseDown(e) {
-      if (!scope.enabled) return;
-      if (e.button === 0) {
-        scope._rotateStart.set(e.clientX, e.clientY);
-      } else if (e.button === 2) {
-        scope._panStart.set(e.clientX, e.clientY);
-      }
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    }
-    
-    function onMouseMove(e) {
-      if (!scope.enabled) return;
-      if (scope._rotateStart.length() > 0) {
-        scope._rotateEnd.set(e.clientX, e.clientY);
-        scope._rotateDelta.subVectors(scope._rotateEnd, scope._rotateStart);
-        const element = scope.domElement;
-        scope._rotateStart.copy(scope._rotateEnd);
-        scope.rotateLeft(scope._rotateDelta.x * 0.005);
-        scope.rotateUp(scope._rotateDelta.y * 0.005);
-      }
-      if (scope._panStart.length() > 0) {
-        scope._panEnd.set(e.clientX, e.clientY);
-        scope._panDelta.subVectors(scope._panEnd, scope._panStart);
-        scope.pan(scope._panDelta.x * 0.01, scope._panDelta.y * 0.01);
-        scope._panStart.copy(scope._panEnd);
-      }
-    }
-    
-    function onMouseUp() {
-      scope._rotateStart.set(0, 0);
-      scope._panStart.set(0, 0);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    }
-    
-    function onMouseWheel(e) {
-      if (!scope.enabled) return;
-      e.preventDefault();
-      if (e.deltaY < 0) scope.dollyIn(1.1);
-      else scope.dollyOut(1.1);
-    }
-    
-    let _touchStart = [], _touchEnd = [], _touchMove = [];
-    
-    function onTouchStart(e) {
-      if (!scope.enabled) return;
-      e.preventDefault();
-      _touchStart = [];
-      _touchEnd = [];
-      for (let i = 0; i < e.touches.length; i++) {
-        _touchStart.push({ x: e.touches[i].clientX, y: e.touches[i].clientY });
-        _touchEnd.push({ x: e.touches[i].clientX, y: e.touches[i].clientY });
-      }
-    }
-    
-    function onTouchMove(e) {
-      if (!scope.enabled) return;
-      e.preventDefault();
-      _touchEnd = [];
-      for (let i = 0; i < e.touches.length; i++) {
-        _touchEnd.push({ x: e.touches[i].clientX, y: e.touches[i].clientY });
-      }
-      if (e.touches.length === 1 && _touchStart.length === 1) {
-        const dx = _touchEnd[0].x - _touchStart[0].x;
-        const dy = _touchEnd[0].y - _touchStart[0].y;
-        scope.rotateLeft(dx * 0.005);
-        scope.rotateUp(dy * 0.005);
-        _touchStart[0] = _touchEnd[0];
-      } else if (e.touches.length === 2 && _touchStart.length === 2) {
-        const dist = Math.hypot(_touchEnd[0].x - _touchEnd[1].x, _touchEnd[0].y - _touchEnd[1].y);
-        const prevDist = Math.hypot(_touchStart[0].x - _touchStart[1].x, _touchStart[0].y - _touchStart[1].y);
-        if (dist > prevDist) scope.dollyIn(1.05);
-        else scope.dollyOut(1.05);
-        _touchStart = [..._touchEnd];
-      }
-    }
-    
-    function onTouchEnd(e) {
-      _touchStart = [];
-      _touchEnd = [];
-    }
-  }
-  
-  rotateLeft(angle) {
-    this.camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), -angle);
-    this.camera.position.sub(this.target);
-    this.camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
-    this.camera.position.add(this.target);
-  }
-  
-  rotateUp(angle) {
-    const offset = new THREE.Vector3();
-    offset.copy(this.camera.position).sub(this.target);
-    const radius = offset.length();
-    offset.normalize();
-    const theta = Math.atan2(offset.x, offset.z);
-    const phi = Math.acos(offset.y);
-    const newPhi = Math.max(0.1, Math.min(Math.PI - 0.1, phi - angle));
-    offset.x = Math.sin(newPhi) * Math.sin(theta);
-    offset.y = Math.cos(newPhi);
-    offset.z = Math.sin(newPhi) * Math.cos(theta);
-    offset.multiplyScalar(radius);
-    this.camera.position.copy(this.target).add(offset);
-  }
-  
-  dollyIn(scale) {
-    const offset = new THREE.Vector3();
-    offset.copy(this.camera.position).sub(this.target);
-    const distance = offset.length();
-    if (distance > this.minDistance) {
-      offset.normalize().multiplyScalar(distance / scale);
-      this.camera.position.copy(this.target).add(offset);
-    }
-  }
-  
-  dollyOut(scale) {
-    const offset = new THREE.Vector3();
-    offset.copy(this.camera.position).sub(this.target);
-    const distance = offset.length();
-    if (distance < this.maxDistance) {
-      offset.normalize().multiplyScalar(distance * scale);
-      this.camera.position.copy(this.target).add(offset);
-    }
-  }
-  
-  pan(x, y) {
-    const offset = new THREE.Vector3();
-    this.camera.getWorldDirection(offset);
-    offset.cross(this.camera.up).normalize();
-    offset.multiplyScalar(x);
-    const up = new THREE.Vector3(0, 1, 0).multiplyScalar(-y);
-    this.target.add(offset).add(up);
-  }
-  
-  update() {
-    this.camera.lookAt(this.target);
-  }
-}
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as CANNON from 'cannon-es';
 
 // ════════════════════════════════════════════════════════════════
 // DOMINO SIMULATOR 3D - Three.js + Cannon-es Physics
-// Touch-optimized for tablets
 // ════════════════════════════════════════════════════════════════
 
-// ════════════════════════════════════════════════════════════════
 // CONFIG & CONSTANTS
-// ════════════════════════════════════════════════════════════════
 const DOMINO_WIDTH = 0.4;
 const DOMINO_HEIGHT = 1.8;
 const DOMINO_DEPTH = 0.8;
@@ -458,10 +279,8 @@ const DOMINO_TYPES = {
 
 const TYPE_KEYS = Object.keys(DOMINO_TYPES);
 
-// ════════════════════════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════════════════════
-let mode = 'build'; // build, simulate, camera
+let mode = 'build';
 let currentDominoType = 'standard';
 let dominoMeshes = [];
 let dominoBodies = [];
@@ -473,16 +292,12 @@ let lastFrameTime = performance.now();
 let fps = 60;
 let touchHintShown = false;
 
-// Touch handling
 let touchStartPos = { x: 0, y: 0 };
 let touchStartTime = 0;
 let isMultiTouch = false;
 let lastTouchDistance = 0;
-let lastTouchCenter = { x: 0, y: 0 };
 
-// ════════════════════════════════════════════════════════════════
 // THREE.JS SETUP
-// ════════════════════════════════════════════════════════════════
 const container = document.getElementById('canvas-container');
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -514,9 +329,7 @@ controls.touches = {
   TWO: THREE.TOUCH.DOLLY_PAN
 };
 
-// ════════════════════════════════════════════════════════════════
 // CANNON-ES PHYSICS WORLD
-// ════════════════════════════════════════════════════════════════
 const world = new CANNON.World({
   gravity: new CANNON.Vec3(0, GRAVITY, 0)
 });
@@ -527,7 +340,6 @@ world.allowSleep = true;
 world.sleepSpeedLimit = 0.5;
 world.sleepTimeLimit = 0.5;
 
-// Ground body
 const groundBody = new CANNON.Body({
   mass: 0,
   shape: new CANNON.Box(new CANNON.Vec3(GROUND_SIZE/2, 0.5, GROUND_SIZE/2)),
@@ -536,7 +348,6 @@ const groundBody = new CANNON.Body({
 });
 world.addBody(groundBody);
 
-// Domino material
 const dominoMaterial = new CANNON.Material('domino');
 const groundDominoContact = new CANNON.ContactMaterial(groundBody.material, dominoMaterial, {
   friction: 0.6,
@@ -554,9 +365,7 @@ const dominoContact = new CANNON.ContactMaterial(dominoMaterial, dominoMaterial,
 });
 world.addContactMaterial(dominoContact);
 
-// ════════════════════════════════════════════════════════════════
 // LIGHTING
-// ════════════════════════════════════════════════════════════════
 const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
 scene.add(ambientLight);
 
@@ -582,11 +391,8 @@ const rimLight = new THREE.DirectionalLight(0xffeecc, 0.3);
 rimLight.position.set(0, -5, -20);
 scene.add(rimLight);
 
-// ════════════════════════════════════════════════════════════════
 // GROUND MESH
-// ════════════════════════════════════════════════════════════════
 const groundGeometry = new THREE.PlaneGeometry(GROUND_SIZE, GROUND_SIZE, 50, 50);
-// Add subtle vertex displacement for visual interest
 const posAttr = groundGeometry.attributes.position;
 for (let i = 0; i < posAttr.count; i++) {
   const x = posAttr.getX(i);
@@ -609,12 +415,10 @@ groundMesh.position.y = -0.5;
 groundMesh.receiveShadow = true;
 scene.add(groundMesh);
 
-// Grid helper
 const gridHelper = new THREE.GridHelper(GROUND_SIZE, GROUND_SIZE, 0x334155, 0x1e293b);
 gridHelper.position.y = -0.49;
 scene.add(gridHelper);
 
-// Center marker
 const centerGeo = new THREE.RingGeometry(0.3, 0.6, 32);
 const centerMat = new THREE.MeshBasicMaterial({ 
   color: 0x6366f1, 
@@ -627,14 +431,11 @@ centerMarker.rotation.x = -Math.PI / 2;
 centerMarker.position.y = -0.48;
 scene.add(centerMarker);
 
-// ════════════════════════════════════════════════════════════════
-// DOMINO CREATION
-// ════════════════════════════════════════════════════════════════
-function createDominoMesh(type) {
+// DOMINO CREATION - using let instead of function to allow reassignment
+let createDominoMesh = function(type) {
   const t = DOMINO_TYPES[type];
   const geometry = new THREE.BoxGeometry(DOMINO_WIDTH, DOMINO_HEIGHT, DOMINO_DEPTH, 2, 4, 1);
   
-  // Round edges slightly via vertex manipulation
   const pos = geometry.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = Math.abs(pos.getX(i));
@@ -661,9 +462,9 @@ function createDominoMesh(type) {
   mesh.receiveShadow = true;
   mesh.userData.type = type;
   return mesh;
-}
+};
 
-function createDominoBody(position, rotation, type) {
+let createDominoBody = function(position, rotation, type) {
   const shape = new CANNON.Box(new CANNON.Vec3(DOMINO_WIDTH/2, DOMINO_HEIGHT/2, DOMINO_DEPTH/2));
   const body = new CANNON.Body({
     mass: DOMINO_MASS,
@@ -677,9 +478,10 @@ function createDominoBody(position, rotation, type) {
   body.angularDamping = 0.3;
   body.linearDamping = 0.1;
   return body;
-}
+};
 
-function placeDomino(x, z, rotation, type = currentDominoType) {
+// Core addDomino function
+let addDominoCore = function(x, z, rotation, type) {
   const y = DOMINO_HEIGHT / 2;
   const mesh = createDominoMesh(type);
   mesh.position.set(x, y, z);
@@ -694,11 +496,16 @@ function placeDomino(x, z, rotation, type = currentDominoType) {
   dominoTypes.push(type);
   updateStats();
   return { mesh, body };
-}
+};
 
-// ════════════════════════════════════════════════════════════════
+// Wrapped addDomino with auto-save
+let addDomino = function(x, z, rotation, type) {
+  const result = addDominoCore(x, z, rotation, type);
+  saveLayout();
+  return result;
+};
+
 // TOOL PALETTE
-// ════════════════════════════════════════════════════════════════
 const paletteContainer = document.getElementById('tool-palette');
 TYPE_KEYS.forEach((type, i) => {
   const t = DOMINO_TYPES[type];
@@ -717,9 +524,7 @@ TYPE_KEYS.forEach((type, i) => {
   paletteContainer.appendChild(btn);
 });
 
-// ════════════════════════════════════════════════════════════════
 // MODE SWITCHING
-// ════════════════════════════════════════════════════════════════
 function setMode(newMode) {
   mode = newMode;
   document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -738,7 +543,6 @@ function setMode(newMode) {
     if (isSimulating) pauseSimulation();
   }
   
-  // Show/hide palette
   paletteContainer.style.display = (newMode === 'build') ? 'flex' : 'none';
   document.getElementById('simulate-btn').style.display = (newMode === 'build') ? 'inline-flex' : 'none';
   document.getElementById('reset-btn').style.display = isSimulating ? 'inline-flex' : 'none';
@@ -750,22 +554,18 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => setMode(btn.dataset.mode));
 });
 
-// ════════════════════════════════════════════════════════════════
 // SIMULATION CONTROL
-// ════════════════════════════════════════════════════════════════
 function startSimulation() {
   if (isSimulating || dominoBodies.length === 0) return;
   isSimulating = true;
   simulationTime = 0;
   fallenCount = 0;
   
-  // Wake up all bodies
   dominoBodies.forEach(body => {
     body.sleepState = 0;
     body.wakeUp();
   });
   
-  // Push the first domino
   if (dominoBodies.length > 0) {
     const first = dominoBodies[0];
     const force = new CANNON.Vec3(
@@ -820,14 +620,11 @@ document.getElementById('simulate-btn').addEventListener('click', () => {
 document.getElementById('reset-btn').addEventListener('click', resetSimulation);
 document.getElementById('clear-btn').addEventListener('click', clearAll);
 
-// Info panel toggle
 document.getElementById('info-btn').addEventListener('click', () => {
   document.getElementById('info-panel').classList.toggle('visible');
 });
 
-// ════════════════════════════════════════════════════════════════
-// TOUCH / MOUSE INTERACTION - BUILD MODE
-// ════════════════════════════════════════════════════════════════
+// TOUCH / MOUSE INTERACTION
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let placeRotation = 0;
@@ -860,7 +657,6 @@ function updatePreview(clientX, clientY) {
     scene.add(previewMesh);
   }
   
-  // Snap to grid (0.5 units)
   const snap = 0.5;
   point.x = Math.round(point.x / snap) * snap;
   point.z = Math.round(point.z / snap) * snap;
@@ -870,7 +666,6 @@ function updatePreview(clientX, clientY) {
   previewMesh.rotation.y = placeRotation;
   previewMesh.visible = true;
   
-  // Check collision with existing dominoes
   let collision = false;
   const previewBox = new THREE.Box3().setFromObject(previewMesh);
   for (const mesh of dominoMeshes) {
@@ -889,7 +684,6 @@ function placeDominoAt(clientX, clientY) {
   point.x = Math.round(point.x / snap) * snap;
   point.z = Math.round(point.z / snap) * snap;
   
-  // Check collision
   const tempMesh = createDominoMesh(currentDominoType);
   tempMesh.position.set(point.x, DOMINO_HEIGHT/2, point.z);
   tempMesh.rotation.y = placeRotation;
@@ -899,14 +693,13 @@ function placeDominoAt(clientX, clientY) {
   
   for (const mesh of dominoMeshes) {
     const box = new THREE.Box3().setFromObject(mesh);
-    if (box.intersectsBox(newBox)) return; // Block placement
+    if (box.intersectsBox(newBox)) return;
   }
   
-  const placed = placeDomino(point.x, point.z, placeRotation, currentDominoType);
+  const placed = addDomino(point.x, point.z, placeRotation, currentDominoType);
   placed.mesh.userData.originalPos = new CANNON.Vec3(placed.body.position.x, placed.body.position.y, placed.body.position.z);
   placed.mesh.userData.originalQuat = new CANNON.Quaternion(placed.body.quaternion.x, placed.body.quaternion.y, placed.body.quaternion.z, placed.body.quaternion.w);
   
-  // Haptic feedback
   if (navigator.vibrate) navigator.vibrate(30);
 }
 
@@ -920,22 +713,12 @@ function handleTouchStart(e) {
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     lastTouchDistance = Math.hypot(dx, dy);
-    lastTouchCenter = { x: (e.touches[0].clientX + e.touches[1].clientX) / 2, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 };
   }
 }
 
 function handleTouchMove(e) {
   if (e.touches.length === 1 && !isMultiTouch && mode === 'build') {
     updatePreview(e.touches[0].clientX, e.touches[0].clientY);
-  } else if (e.touches.length === 2 && mode === 'camera') {
-    const dx = e.touches[0].clientX - e.touches[1].clientX;
-    const dy = e.touches[0].clientY - e.touches[1].clientY;
-    const dist = Math.hypot(dx, dy);
-    if (lastTouchDistance > 0) {
-      const scale = dist / lastTouchDistance;
-      controls.dollyIn(scale);
-    }
-    lastTouchDistance = dist;
   }
 }
 
@@ -947,17 +730,15 @@ function handleTouchEnd(e) {
     const dy = touch.clientY - touchStartPos.y;
     const dist = Math.hypot(dx, dy);
     
-    // Tap to place (not drag)
     if (dt < 300 && dist < 20) {
       placeDominoAt(touch.clientX, touch.clientY);
       if (!touchHintShown) {
         document.getElementById('touch-hint').style.animation = 'none';
-        document.getElementById('touch-hint').offsetHeight; // reflow
+        document.getElementById('touch-hint').offsetHeight;
         document.getElementById('touch-hint').style.animation = 'fadeInOut 4s ease-in-out';
         touchHintShown = true;
       }
     }
-    // Drag to rotate preview
     else if (dist > 20) {
       placeRotation = Math.atan2(dx, -dy);
       updatePreview(touch.clientX, touch.clientY);
@@ -971,7 +752,6 @@ renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: 
 renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: true });
 renderer.domElement.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-// Mouse for desktop
 renderer.domElement.addEventListener('mousemove', e => {
   if (mode === 'build') updatePreview(e.clientX, e.clientY);
 });
@@ -984,7 +764,6 @@ renderer.domElement.addEventListener('contextmenu', e => {
   updatePreview(e.clientX, e.clientY);
 });
 
-// Keyboard rotation
 window.addEventListener('keydown', e => {
   if (mode !== 'build') return;
   if (e.key === 'r' || e.key === 'R') placeRotation += Math.PI / 8;
@@ -995,9 +774,7 @@ window.addEventListener('keydown', e => {
   if (previewMesh) updatePreview(pointer.x * 0.5 * window.innerWidth + window.innerWidth/2, -pointer.y * 0.5 * window.innerHeight + window.innerHeight/2);
 });
 
-// ════════════════════════════════════════════════════════════════
 // ANIMATION LOOP
-// ════════════════════════════════════════════════════════════════
 let lastFpsUpdate = 0;
 let frameCount = 0;
 
@@ -1008,7 +785,6 @@ function animate() {
   const dt = Math.min((now - lastFrameTime) / 1000, 1/30);
   lastFrameTime = now;
   
-  // FPS counter
   frameCount++;
   if (now - lastFpsUpdate > 500) {
     fps = Math.round(frameCount * 1000 / (now - lastFpsUpdate));
@@ -1016,29 +792,24 @@ function animate() {
     frameCount = 0;
   }
   
-  // Physics step
   if (isSimulating) {
     world.step(1/60, dt, 3);
     simulationTime += dt;
     
-    // Sync meshes to bodies
     fallenCount = 0;
     dominoBodies.forEach((body, i) => {
       const mesh = dominoMeshes[i];
       mesh.position.copy(body.position);
       mesh.quaternion.copy(body.quaternion);
-      // Count fallen (tilted > 45 deg)
       const up = new THREE.Vector3(0,1,0).applyQuaternion(body.quaternion);
       if (up.y < 0.7) fallenCount++;
     });
     updateStats();
   }
   
-  // Animate center marker
   centerMarker.rotation.z += 0.002;
   centerMarker.material.opacity = 0.2 + Math.sin(now * 0.003) * 0.1;
   
-  // Gentle camera drift in simulate mode
   if (isSimulating && dominoBodies.length > 0) {
     const avgPos = new THREE.Vector3();
     dominoMeshes.forEach(m => avgPos.add(m.position));
@@ -1052,9 +823,7 @@ function animate() {
 
 animate();
 
-// ════════════════════════════════════════════════════════════════
 // STATS & UI UPDATES
-// ════════════════════════════════════════════════════════════════
 function updateStats() {
   document.getElementById('stat-count').textContent = dominoMeshes.length;
   document.getElementById('stat-fallen').textContent = fallenCount;
@@ -1067,18 +836,14 @@ function updateStats() {
   resetBtn.style.display = (isSimulating || fallenCount > 0) ? 'inline-flex' : 'none';
 }
 
-// ════════════════════════════════════════════════════════════════
 // RESIZE HANDLER
-// ════════════════════════════════════════════════════════════════
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ════════════════════════════════════════════════════════════════
-// SAVE/LOAD (localStorage for persistence)
-// ════════════════════════════════════════════════════════════════
+// SAVE/LOAD
 function saveLayout() {
   const data = dominoMeshes.map((m, i) => ({
     x: m.position.x, z: m.position.z, r: m.rotation.y, t: dominoTypes[i]
@@ -1087,21 +852,17 @@ function saveLayout() {
 }
 
 function loadLayout() {
-  const data = JSON.parse(localStorage.getItem('dominoLayout') || '[]');
-  clearAll();
-  data.forEach(d => {
-    const placed = placeDomino(d.x, d.z, d.r, d.t);
-    placed.mesh.userData.originalPos = new CANNON.Vec3(placed.body.position.x, placed.body.position.y, placed.body.position.z);
-    placed.mesh.userData.originalQuat = new CANNON.Quaternion(placed.body.quaternion.x, placed.body.quaternion.y, placed.body.quaternion.z, placed.body.quaternion.w);
-  });
-}
-
-// Auto-save on placement
-const originalPlaceDomino = placeDomino;
-function placeDomino(x, z, rotation, type) {
-  const result = originalPlaceDomino(x, z, rotation, type);
-  saveLayout();
-  return result;
+  try {
+    const data = JSON.parse(localStorage.getItem('dominoLayout') || '[]');
+    clearAll();
+    data.forEach(d => {
+      const placed = addDomino(d.x, d.z, d.r, d.t);
+      placed.mesh.userData.originalPos = new CANNON.Vec3(placed.body.position.x, placed.body.position.y, placed.body.position.z);
+      placed.mesh.userData.originalQuat = new CANNON.Quaternion(placed.body.quaternion.x, placed.body.quaternion.y, placed.body.quaternion.z, placed.body.quaternion.w);
+    });
+  } catch (e) {
+    console.warn('Could not load layout:', e);
+  }
 }
 
 // Load on start
@@ -1110,15 +871,12 @@ if (dominoMeshes.length > 0) {
   document.getElementById('clear-btn').style.display = 'inline-flex';
 }
 
-// ════════════════════════════════════════════════════════════════
 // PREVENT CONTEXT MENU / ZOOM ON DOUBLE TAP
-// ════════════════════════════════════════════════════════════════
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('gesturechange', e => e.preventDefault());
 document.addEventListener('gestureend', e => e.preventDefault());
 
-// Touch-action for canvas
 renderer.domElement.style.touchAction = 'none';
 
 console.log('🎲 Domino Simulator 3D geladen!');
