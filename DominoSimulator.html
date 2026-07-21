@@ -239,20 +239,196 @@
   </div>
 </div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
-    "three/addons/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/controls/OrbitControls.js",
-    "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
-  }
-}
-</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
 
 <script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as CANNON from 'cannon-es';
+// Wait for scripts to load
+if (typeof THREE === 'undefined' || typeof CANNON === 'undefined') {
+  document.getElementById('canvas-container').innerHTML = `
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#e8e8f0;font-family:sans-serif;padding:40px;background:rgba(26,26,46,0.95);border-radius:20px;border:1px solid rgba(255,255,255,0.1);max-width:90vw;">
+      <div style="font-size:3rem;margin-bottom:16px;">🎲</div>
+      <h2 style="margin:0 0 12px 0;color:#ef4444;">3D-Bibliotheken konnten nicht geladen werden</h2>
+      <p style="color:#a0a0b8;margin:0 0 20px 0;font-size:0.9rem;">Bitte überprüfen Sie Ihre Internetverbindung und aktualisieren Sie die Seite.</p>
+      <button onclick="location.reload()" style="padding:12px 24px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:10px;cursor:pointer;font-size:1rem;">🔄 Erneut versuchen</button>
+    </div>
+  `;
+  throw new Error('Libraries not loaded');
+}
+
+// OrbitControls as inline class (simplified version)
+class OrbitControls {
+  constructor(camera, domElement) {
+    this.camera = camera;
+    this.domElement = domElement;
+    this.target = new THREE.Vector3(0, 1, 0);
+    this.enableDamping = true;
+    this.dampingFactor = 0.05;
+    this.enablePan = true;
+    this.minDistance = 3;
+    this.maxDistance = 80;
+    this.maxPolarAngle = Math.PI / 2 - 0.05;
+    this.enabled = true;
+    this.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+    
+    this._rotateStart = new THREE.Vector2();
+    this._rotateEnd = new THREE.Vector2();
+    this._rotateDelta = new THREE.Vector2();
+    this._panStart = new THREE.Vector2();
+    this._panEnd = new THREE.Vector2();
+    this._panDelta = new THREE.Vector2();
+    this._dollyStart = new THREE.Vector2();
+    this._dollyEnd = new THREE.Vector2();
+    this._dollyDelta = new THREE.Vector2();
+    
+    const scope = this;
+    domElement.addEventListener('mousedown', onMouseDown);
+    domElement.addEventListener('mousemove', onMouseMove);
+    domElement.addEventListener('mouseup', onMouseUp);
+    domElement.addEventListener('wheel', onMouseWheel);
+    domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+    domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+    domElement.addEventListener('touchend', onTouchEnd);
+    
+    function onMouseDown(e) {
+      if (!scope.enabled) return;
+      if (e.button === 0) {
+        scope._rotateStart.set(e.clientX, e.clientY);
+      } else if (e.button === 2) {
+        scope._panStart.set(e.clientX, e.clientY);
+      }
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    }
+    
+    function onMouseMove(e) {
+      if (!scope.enabled) return;
+      if (scope._rotateStart.length() > 0) {
+        scope._rotateEnd.set(e.clientX, e.clientY);
+        scope._rotateDelta.subVectors(scope._rotateEnd, scope._rotateStart);
+        const element = scope.domElement;
+        scope._rotateStart.copy(scope._rotateEnd);
+        scope.rotateLeft(scope._rotateDelta.x * 0.005);
+        scope.rotateUp(scope._rotateDelta.y * 0.005);
+      }
+      if (scope._panStart.length() > 0) {
+        scope._panEnd.set(e.clientX, e.clientY);
+        scope._panDelta.subVectors(scope._panEnd, scope._panStart);
+        scope.pan(scope._panDelta.x * 0.01, scope._panDelta.y * 0.01);
+        scope._panStart.copy(scope._panEnd);
+      }
+    }
+    
+    function onMouseUp() {
+      scope._rotateStart.set(0, 0);
+      scope._panStart.set(0, 0);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+    
+    function onMouseWheel(e) {
+      if (!scope.enabled) return;
+      e.preventDefault();
+      if (e.deltaY < 0) scope.dollyIn(1.1);
+      else scope.dollyOut(1.1);
+    }
+    
+    let _touchStart = [], _touchEnd = [], _touchMove = [];
+    
+    function onTouchStart(e) {
+      if (!scope.enabled) return;
+      e.preventDefault();
+      _touchStart = [];
+      _touchEnd = [];
+      for (let i = 0; i < e.touches.length; i++) {
+        _touchStart.push({ x: e.touches[i].clientX, y: e.touches[i].clientY });
+        _touchEnd.push({ x: e.touches[i].clientX, y: e.touches[i].clientY });
+      }
+    }
+    
+    function onTouchMove(e) {
+      if (!scope.enabled) return;
+      e.preventDefault();
+      _touchEnd = [];
+      for (let i = 0; i < e.touches.length; i++) {
+        _touchEnd.push({ x: e.touches[i].clientX, y: e.touches[i].clientY });
+      }
+      if (e.touches.length === 1 && _touchStart.length === 1) {
+        const dx = _touchEnd[0].x - _touchStart[0].x;
+        const dy = _touchEnd[0].y - _touchStart[0].y;
+        scope.rotateLeft(dx * 0.005);
+        scope.rotateUp(dy * 0.005);
+        _touchStart[0] = _touchEnd[0];
+      } else if (e.touches.length === 2 && _touchStart.length === 2) {
+        const dist = Math.hypot(_touchEnd[0].x - _touchEnd[1].x, _touchEnd[0].y - _touchEnd[1].y);
+        const prevDist = Math.hypot(_touchStart[0].x - _touchStart[1].x, _touchStart[0].y - _touchStart[1].y);
+        if (dist > prevDist) scope.dollyIn(1.05);
+        else scope.dollyOut(1.05);
+        _touchStart = [..._touchEnd];
+      }
+    }
+    
+    function onTouchEnd(e) {
+      _touchStart = [];
+      _touchEnd = [];
+    }
+  }
+  
+  rotateLeft(angle) {
+    this.camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), -angle);
+    this.camera.position.sub(this.target);
+    this.camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
+    this.camera.position.add(this.target);
+  }
+  
+  rotateUp(angle) {
+    const offset = new THREE.Vector3();
+    offset.copy(this.camera.position).sub(this.target);
+    const radius = offset.length();
+    offset.normalize();
+    const theta = Math.atan2(offset.x, offset.z);
+    const phi = Math.acos(offset.y);
+    const newPhi = Math.max(0.1, Math.min(Math.PI - 0.1, phi - angle));
+    offset.x = Math.sin(newPhi) * Math.sin(theta);
+    offset.y = Math.cos(newPhi);
+    offset.z = Math.sin(newPhi) * Math.cos(theta);
+    offset.multiplyScalar(radius);
+    this.camera.position.copy(this.target).add(offset);
+  }
+  
+  dollyIn(scale) {
+    const offset = new THREE.Vector3();
+    offset.copy(this.camera.position).sub(this.target);
+    const distance = offset.length();
+    if (distance > this.minDistance) {
+      offset.normalize().multiplyScalar(distance / scale);
+      this.camera.position.copy(this.target).add(offset);
+    }
+  }
+  
+  dollyOut(scale) {
+    const offset = new THREE.Vector3();
+    offset.copy(this.camera.position).sub(this.target);
+    const distance = offset.length();
+    if (distance < this.maxDistance) {
+      offset.normalize().multiplyScalar(distance * scale);
+      this.camera.position.copy(this.target).add(offset);
+    }
+  }
+  
+  pan(x, y) {
+    const offset = new THREE.Vector3();
+    this.camera.getWorldDirection(offset);
+    offset.cross(this.camera.up).normalize();
+    offset.multiplyScalar(x);
+    const up = new THREE.Vector3(0, 1, 0).multiplyScalar(-y);
+    this.target.add(offset).add(up);
+  }
+  
+  update() {
+    this.camera.lookAt(this.target);
+  }
+}
 
 // ════════════════════════════════════════════════════════════════
 // DOMINO SIMULATOR 3D - Three.js + Cannon-es Physics
