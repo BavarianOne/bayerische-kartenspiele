@@ -350,18 +350,18 @@ world.addBody(groundBody);
 
 const dominoMaterial = new CANNON.Material('domino');
 const groundDominoContact = new CANNON.ContactMaterial(groundBody.material, dominoMaterial, {
-  friction: 0.5,
-  restitution: 0.1, // Slight bounce
-  contactEquationStiffness: 1e7,
-  contactEquationRelaxation: 2
+  friction: 0.4, // Lower friction so dominoes slide
+  restitution: 0.05, // Less bounce on ground
+  contactEquationStiffness: 1e8,
+  contactEquationRelaxation: 3
 });
 world.addContactMaterial(groundDominoContact);
 
 const dominoContact = new CANNON.ContactMaterial(dominoMaterial, dominoMaterial, {
-  friction: 0.3,
-  restitution: 0.15, // More bounce for chain reactions
-  contactEquationStiffness: 1e7,
-  contactEquationRelaxation: 2
+  friction: 0.2, // Very low friction - dominoes slide and hit each other
+  restitution: 0.1, // Slight bounce when dominoes collide
+  contactEquationStiffness: 1e8,
+  contactEquationRelaxation: 3
 });
 world.addContactMaterial(dominoContact);
 
@@ -592,19 +592,21 @@ function pushDomino(index) {
   ));
   const facingAngle = euler.y;
   
-  // Calculate push direction (perpendicular to the domino face)
-  const pushForce = 4.0; // Strong push
+  // Calculate push direction - push in the direction the domino is facing
+  // This makes it fall forward into the next domino
+  const pushForce = 1.5; // Gentle push - just enough to start falling
   const forceX = Math.cos(facingAngle) * pushForce;
   const forceZ = -Math.sin(facingAngle) * pushForce;
   
-  // Apply impulse at the top of the domino for realistic toppling
+  // Apply impulse at the TOP of the domino for realistic toppling
+  // This creates a torque that makes it fall forward
   const impulsePoint = new CANNON.Vec3(
-    body.position.x + forceX * 0.15,
-    body.position.y + DOMINO_HEIGHT * 0.45,
-    body.position.z + forceZ * 0.15
+    body.position.x + forceX * 0.2,
+    body.position.y + DOMINO_HEIGHT * 0.4, // Top portion
+    body.position.z + forceZ * 0.2
   );
   
-  body.applyImpulse(new CANNON.Vec3(forceX, 0, forceZ), impulsePoint);
+  body.applyImpulse(new CANNON.Vec3(forceX * 0.3, 0, forceZ * 0.3), impulsePoint);
   
   if (navigator.vibrate) navigator.vibrate(50);
 }
