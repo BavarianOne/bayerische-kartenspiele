@@ -329,16 +329,16 @@ controls.touches = {
   TWO: THREE.TOUCH.DOLLY_PAN
 };
 
-// CANNON-ES PHYSICS WORLD
+// CANNON-ES PHYSICS WORLD - Optimized for domino chain reactions
 const world = new CANNON.World({
   gravity: new CANNON.Vec3(0, GRAVITY, 0)
 });
 world.broadphase = new CANNON.NaiveBroadphase();
-world.solver.iterations = 10;
-world.solver.tolerance = 0.0001;
+world.solver.iterations = 20; // More iterations for stability
+world.solver.tolerance = 0.001;
 world.allowSleep = true;
-world.sleepSpeedLimit = 0.5;
-world.sleepTimeLimit = 0.5;
+world.sleepSpeedLimit = 0.2; // Lower = bodies sleep faster when still
+world.sleepTimeLimit = 0.3;
 
 const groundBody = new CANNON.Body({
   mass: 0,
@@ -350,46 +350,54 @@ world.addBody(groundBody);
 
 const dominoMaterial = new CANNON.Material('domino');
 const groundDominoContact = new CANNON.ContactMaterial(groundBody.material, dominoMaterial, {
-  friction: 0.6,
-  restitution: 0.05,
-  contactEquationStiffness: 1e8,
-  contactEquationRelaxation: 3
+  friction: 0.5,
+  restitution: 0.1, // Slight bounce
+  contactEquationStiffness: 1e7,
+  contactEquationRelaxation: 2
 });
 world.addContactMaterial(groundDominoContact);
 
 const dominoContact = new CANNON.ContactMaterial(dominoMaterial, dominoMaterial, {
-  friction: 0.4,
-  restitution: 0.02,
-  contactEquationStiffness: 1e8,
-  contactEquationRelaxation: 3
+  friction: 0.3,
+  restitution: 0.15, // More bounce for chain reactions
+  contactEquationStiffness: 1e7,
+  contactEquationRelaxation: 2
 });
 world.addContactMaterial(dominoContact);
 
-// LIGHTING
-const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
+// LIGHTING - Much brighter for visibility
+const ambientLight = new THREE.AmbientLight(0x8888aa, 1.2);
 scene.add(ambientLight);
 
-const sunLight = new THREE.DirectionalLight(0xffffee, 1.5);
-sunLight.position.set(20, 30, 15);
+// Main sun light - brighter
+const sunLight = new THREE.DirectionalLight(0xffffff, 2.0);
+sunLight.position.set(20, 40, 20);
 sunLight.castShadow = true;
 sunLight.shadow.mapSize.set(2048, 2048);
 sunLight.shadow.camera.near = 1;
-sunLight.shadow.camera.far = 100;
-sunLight.shadow.camera.left = -25;
-sunLight.shadow.camera.right = 25;
-sunLight.shadow.camera.top = 25;
-sunLight.shadow.camera.bottom = -25;
+sunLight.shadow.camera.far = 150;
+sunLight.shadow.camera.left = -40;
+sunLight.shadow.camera.right = 40;
+sunLight.shadow.camera.top = 40;
+sunLight.shadow.camera.bottom = -40;
 sunLight.shadow.bias = -0.0005;
 sunLight.shadow.normalBias = 0.02;
 scene.add(sunLight);
 
-const fillLight = new THREE.DirectionalLight(0x8899ff, 0.4);
-fillLight.position.set(-15, 10, -10);
+// Fill light - brighter
+const fillLight = new THREE.DirectionalLight(0xaabbff, 0.8);
+fillLight.position.set(-20, 20, -15);
 scene.add(fillLight);
 
-const rimLight = new THREE.DirectionalLight(0xffeecc, 0.3);
-rimLight.position.set(0, -5, -20);
+// Rim light for better visibility
+const rimLight = new THREE.DirectionalLight(0xffeedd, 0.6);
+rimLight.position.set(0, 10, -30);
 scene.add(rimLight);
+
+// Additional point lights for better illumination
+const pointLight1 = new THREE.PointLight(0xffffff, 0.5, 50);
+pointLight1.position.set(0, 15, 0);
+scene.add(pointLight1);
 
 // GROUND MESH
 const groundGeometry = new THREE.PlaneGeometry(GROUND_SIZE, GROUND_SIZE, 50, 50);
@@ -566,17 +574,39 @@ function startSimulation() {
     body.wakeUp();
   });
   
-  if (dominoBodies.length > 0) {
-    const first = dominoBodies[0];
-    const force = new CANNON.Vec3(
-      -Math.sin(first.quaternion.y * 2) * 2,
-      0,
-      -Math.cos(first.quaternion.y * 2) * 2
-    );
-    first.applyImpulse(force, first.position);
-  }
-  
+  // Don't auto-push - let user click on dominoes manually
   setMode('simulate');
+}
+
+// Push a specific domino to start chain reaction
+function pushDomino(index) {
+  if (!isSimulating || index < 0 || index >= dominoBodies.length) return;
+  
+  const body = dominoBodies[index];
+  body.sleepState = 0;
+  body.wakeUp();
+  
+  // Get the domino's facing direction
+  const euler = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(
+    body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w
+  ));
+  const facingAngle = euler.y;
+  
+  // Calculate push direction (perpendicular to the domino face)
+  const pushForce = 4.0; // Strong push
+  const forceX = Math.cos(facingAngle) * pushForce;
+  const forceZ = -Math.sin(facingAngle) * pushForce;
+  
+  // Apply impulse at the top of the domino for realistic toppling
+  const impulsePoint = new CANNON.Vec3(
+    body.position.x + forceX * 0.15,
+    body.position.y + DOMINO_HEIGHT * 0.45,
+    body.position.z + forceZ * 0.15
+  );
+  
+  body.applyImpulse(new CANNON.Vec3(forceX, 0, forceZ), impulsePoint);
+  
+  if (navigator.vibrate) navigator.vibrate(50);
 }
 
 function pauseSimulation() {
@@ -723,7 +753,7 @@ function handleTouchMove(e) {
 }
 
 function handleTouchEnd(e) {
-  if (!isMultiTouch && mode === 'build' && e.changedTouches.length === 1) {
+  if (!isMultiTouch && e.changedTouches.length === 1) {
     const touch = e.changedTouches[0];
     const dt = Date.now() - touchStartTime;
     const dx = touch.clientX - touchStartPos.x;
@@ -731,15 +761,23 @@ function handleTouchEnd(e) {
     const dist = Math.hypot(dx, dy);
     
     if (dt < 300 && dist < 20) {
-      placeDominoAt(touch.clientX, touch.clientY);
-      if (!touchHintShown) {
-        document.getElementById('touch-hint').style.animation = 'none';
-        document.getElementById('touch-hint').offsetHeight;
-        document.getElementById('touch-hint').style.animation = 'fadeInOut 4s ease-in-out';
-        touchHintShown = true;
+      if (mode === 'build') {
+        placeDominoAt(touch.clientX, touch.clientY);
+        if (!touchHintShown) {
+          document.getElementById('touch-hint').style.animation = 'none';
+          document.getElementById('touch-hint').offsetHeight;
+          document.getElementById('touch-hint').style.animation = 'fadeInOut 4s ease-in-out';
+          touchHintShown = true;
+        }
+      } else if (isSimulating) {
+        // Tap on domino to push it during simulation
+        const index = getDominoIntersection(touch.clientX, touch.clientY);
+        if (index >= 0) {
+          pushDomino(index);
+        }
       }
     }
-    else if (dist > 20) {
+    else if (dist > 20 && mode === 'build') {
       placeRotation = Math.atan2(dx, -dy);
       updatePreview(touch.clientX, touch.clientY);
     }
@@ -752,11 +790,33 @@ renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: 
 renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: true });
 renderer.domElement.addEventListener('touchend', handleTouchEnd, { passive: true });
 
+// Get domino intersection for clicking
+function getDominoIntersection(clientX, clientY) {
+  pointer.x = (clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(dominoMeshes);
+  if (intersects.length > 0) {
+    const mesh = intersects[0].object;
+    const index = dominoMeshes.indexOf(mesh);
+    return index;
+  }
+  return -1;
+}
+
 renderer.domElement.addEventListener('mousemove', e => {
   if (mode === 'build') updatePreview(e.clientX, e.clientY);
 });
 renderer.domElement.addEventListener('click', e => {
-  if (mode === 'build') placeDominoAt(e.clientX, e.clientY);
+  if (mode === 'build') {
+    placeDominoAt(e.clientX, e.clientY);
+  } else if (isSimulating) {
+    // Click on domino to push it
+    const index = getDominoIntersection(e.clientX, e.clientY);
+    if (index >= 0) {
+      pushDomino(index);
+    }
+  }
 });
 renderer.domElement.addEventListener('contextmenu', e => {
   e.preventDefault();
