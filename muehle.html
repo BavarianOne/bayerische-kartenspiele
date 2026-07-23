@@ -804,22 +804,46 @@ function drawBoard() {
         ctx.strokeRect(pad + sq.offset, pad + sq.offset, sq.size, sq.size);
     });
 
-    // Connecting lines (cross) - connect midpoints of each square
+    // Connecting lines (cross) - connect midpoints of each square side
+    // Standard Nine Men's Morris: lines connect midpoints of corresponding sides
+    // Top: outer → middle → inner → (center) → inner → middle → outer (bottom)
+    // Left: outer → middle → inner → (center) → inner → middle → outer (right)
     ctx.beginPath();
-    // Vertical lines
-    ctx.moveTo(s / 2, pad + squares[0].offset);                           // top outer to top middle
+    
+    // Vertical line (top to bottom through center)
+    // Top outer midpoint → Top middle midpoint
+    ctx.moveTo(s / 2, pad + squares[0].offset);
     ctx.lineTo(s / 2, pad + squares[1].offset);
-    ctx.moveTo(s / 2, pad + squares[1].offset + squares[1].size);         // bottom middle to bottom inner
+    // Top middle midpoint → Top inner midpoint
+    ctx.moveTo(s / 2, pad + squares[1].offset);
+    ctx.lineTo(s / 2, pad + squares[2].offset);
+    // Top inner midpoint → Bottom inner midpoint (through center)
+    ctx.moveTo(s / 2, pad + squares[2].offset);
     ctx.lineTo(s / 2, pad + squares[2].offset + squares[2].size);
-    ctx.moveTo(s / 2, pad + squares[2].offset + squares[2].size);         // bottom inner to bottom outer
+    // Bottom inner midpoint → Bottom middle midpoint
+    ctx.moveTo(s / 2, pad + squares[2].offset + squares[2].size);
+    ctx.lineTo(s / 2, pad + squares[1].offset + squares[1].size);
+    // Bottom middle midpoint → Bottom outer midpoint
+    ctx.moveTo(s / 2, pad + squares[1].offset + squares[1].size);
     ctx.lineTo(s / 2, s - pad);
-    // Horizontal lines
-    ctx.moveTo(pad + squares[0].offset, s / 2);                           // left outer to left middle
+    
+    // Horizontal line (left to right through center)
+    // Left outer midpoint → Left middle midpoint
+    ctx.moveTo(pad + squares[0].offset, s / 2);
     ctx.lineTo(pad + squares[1].offset, s / 2);
-    ctx.moveTo(pad + squares[1].offset + squares[1].size, s / 2);         // right middle to right inner
+    // Left middle midpoint → Left inner midpoint
+    ctx.moveTo(pad + squares[1].offset, s / 2);
+    ctx.lineTo(pad + squares[2].offset, s / 2);
+    // Left inner midpoint → Right inner midpoint (through center)
+    ctx.moveTo(pad + squares[2].offset, s / 2);
     ctx.lineTo(pad + squares[2].offset + squares[2].size, s / 2);
-    ctx.moveTo(pad + squares[2].offset + squares[2].size, s / 2);         // right inner to right outer
+    // Right inner midpoint → Right middle midpoint
+    ctx.moveTo(pad + squares[2].offset + squares[2].size, s / 2);
+    ctx.lineTo(pad + squares[1].offset + squares[1].size, s / 2);
+    // Right middle midpoint → Right outer midpoint
+    ctx.moveTo(pad + squares[1].offset + squares[1].size, s / 2);
     ctx.lineTo(s - pad, s / 2);
+    
     ctx.stroke();
 
     // Position dots
@@ -924,13 +948,28 @@ function render() {
 }
 
 // ---------- EVENT HANDLERS ----------
-canvas.addEventListener('click', e => {
+function handleCanvasInteraction(e) {
     if (gameOver) return;
     const pos = posFromCoords(...Object.values(getCursorPos(e)));
     if (pos === -1) return;
     if (mustRemove) handleRemovalClick(pos);
     else handleBoardClick(pos);
-});
+}
+
+canvas.addEventListener('click', handleCanvasInteraction);
+canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    // Use the first touch point for touchend
+    const touch = e.changedTouches[0];
+    const fakeEvent = {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        touches: [{ clientX: touch.clientX, clientY: touch.clientY }],
+        changedTouches: [{ clientX: touch.clientX, clientY: touch.clientY }],
+        preventDefault: () => {}
+    };
+    handleCanvasInteraction(fakeEvent);
+}, { passive: false });
 
 canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
 
