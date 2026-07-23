@@ -787,27 +787,38 @@ function drawBoard() {
     const pad = s * 0.06;
     const inner = s - 2 * pad;
 
-    // Draw three squares
+    // Draw three squares - correct positions from POS_COORDS
+    // Outer: 1/12, Middle: 2/9, Inner: 13/36 from edge
+    const squares = [
+        { offset: inner / 12, size: inner * 10 / 12 },      // outer (0.0833, 0.8333)
+        { offset: inner * 2 / 9, size: inner * 5 / 9 },      // middle (0.2222, 0.5556)
+        { offset: inner * 13 / 36, size: inner * 10 / 36 }   // inner (0.3611, 0.2778)
+    ];
+
     ctx.strokeStyle = '#8b7355';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    [0, 1, 2].forEach(level => {
-        const offset = (inner / 3) * level;
-        const size = inner - 2 * offset;
-        ctx.strokeRect(pad + offset, pad + offset, size, size);
+    squares.forEach(sq => {
+        ctx.strokeRect(pad + sq.offset, pad + sq.offset, sq.size, sq.size);
     });
 
-    // Connecting lines (cross)
+    // Connecting lines (cross) - connect midpoints of each square
     ctx.beginPath();
-    ctx.moveTo(s / 2, pad);
-    ctx.lineTo(s / 2, pad + inner / 3);
-    ctx.moveTo(s / 2, pad + inner * 2 / 3);
+    // Vertical lines
+    ctx.moveTo(s / 2, pad + squares[0].offset);                           // top outer to top middle
+    ctx.lineTo(s / 2, pad + squares[1].offset);
+    ctx.moveTo(s / 2, pad + squares[1].offset + squares[1].size);         // bottom middle to bottom inner
+    ctx.lineTo(s / 2, pad + squares[2].offset + squares[2].size);
+    ctx.moveTo(s / 2, pad + squares[2].offset + squares[2].size);         // bottom inner to bottom outer
     ctx.lineTo(s / 2, s - pad);
-    ctx.moveTo(pad, s / 2);
-    ctx.lineTo(pad + inner / 3, s / 2);
-    ctx.moveTo(pad + inner * 2 / 3, s / 2);
+    // Horizontal lines
+    ctx.moveTo(pad + squares[0].offset, s / 2);                           // left outer to left middle
+    ctx.lineTo(pad + squares[1].offset, s / 2);
+    ctx.moveTo(pad + squares[1].offset + squares[1].size, s / 2);         // right middle to right inner
+    ctx.lineTo(pad + squares[2].offset + squares[2].size, s / 2);
+    ctx.moveTo(pad + squares[2].offset + squares[2].size, s / 2);         // right inner to right outer
     ctx.lineTo(s - pad, s / 2);
     ctx.stroke();
 
