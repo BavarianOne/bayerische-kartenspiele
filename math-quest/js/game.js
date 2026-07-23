@@ -45,6 +45,41 @@ const Game = (function() {
     const BASE_TIME_PER_QUESTION = 15000; // 15 seconds
     const HEART_RECOVERY_TIME = 300000; // 5 minutes
 
+    const TRANSLATIONS = {
+        en: {
+            menuPlay: 'Adventure Map',
+            menuShop: 'Shop',
+            menuProfile: 'Profile',
+            menuSettings: 'Settings',
+            menuMute: 'Mute',
+            menuUnmute: 'Unmute',
+            menuSubtitle: 'Learn math through adventure!',
+            dailyReward: 'Daily Reward',
+            shopTitle: '🏪 Kingdom Shop',
+            settingsTitle: '⚙️ Settings',
+            pauseTitle: '⏸️ Paused',
+            pauseContinue: 'Continue',
+            pauseSettings: 'Settings',
+            pauseQuit: 'Quit Level'
+        },
+        de: {
+            menuPlay: 'Abenteuer',
+            menuShop: 'Shop',
+            menuProfile: 'Profil',
+            menuSettings: 'Einstellungen',
+            menuMute: 'Ton aus',
+            menuUnmute: 'Ton an',
+            menuSubtitle: 'Lerne Mathe auf deiner Abenteuerreise!',
+            dailyReward: 'Tägliche Belohnung',
+            shopTitle: '🏪 Königreichs-Shop',
+            settingsTitle: '⚙️ Einstellungen',
+            pauseTitle: '⏸️ Pausiert',
+            pauseContinue: 'Weiter',
+            pauseSettings: 'Einstellungen',
+            pauseQuit: 'Level verlassen'
+        }
+    };
+
     // Initialize game
     async function init() {
         console.log('Initializing game...');
@@ -63,6 +98,8 @@ const Game = (function() {
         
         // Show menu
         showScreen('menu');
+        applyLocalization();
+        applyMuteButton();
         
         // Hide loading screen and show app
         const loadingScreen = document.getElementById('loading-screen');
@@ -104,11 +141,12 @@ const Game = (function() {
             coins: document.getElementById('menu-coins'),
             hearts: document.getElementById('menu-hearts'),
             streak: document.getElementById('menu-streak'),
-            btnPlay: document.getElementById('btn-play'),
-            btnShop: document.getElementById('btn-shop'),
-            btnProfile: document.getElementById('btn-profile'),
-            btnSettings: document.getElementById('btn-settings'),
-            btnDaily: document.getElementById('btn-daily'),
+            btnPlay: document.getElementById('btn-play') || document.querySelector('[data-action="change-screen"][data-value="map"]'),
+            btnShop: document.getElementById('btn-shop') || document.querySelector('[data-action="change-screen"][data-value="shop"]'),
+            btnProfile: document.getElementById('btn-profile') || document.querySelector('[data-action="change-screen"][data-value="profile"]'),
+            btnSettings: document.getElementById('btn-settings') || document.querySelector('[data-action="change-screen"][data-value="settings"]'),
+            btnMute: document.getElementById('btn-mute'),
+            btnDaily: document.getElementById('btn-daily') || document.querySelector('[data-action="claim-daily"]'),
             dailyStreak: document.getElementById('daily-streak')
         };
 
@@ -224,6 +262,7 @@ const Game = (function() {
         elements.menu.btnShop?.addEventListener('click', () => showScreen('shop'));
         elements.menu.btnProfile?.addEventListener('click', () => showScreen('profile'));
         elements.menu.btnSettings?.addEventListener('click', () => showScreen('settings'));
+        elements.menu.btnMute?.addEventListener('click', toggleMute);
         elements.menu.btnDaily?.addEventListener('click', claimDailyReward);
 
         // Map buttons
@@ -251,6 +290,9 @@ const Game = (function() {
 
         // Keyboard support
         document.addEventListener('keydown', handleKeydown);
+
+        // Mute / tablet audio controls
+        applyMuteButton();
 
         // Visibility change (pause when tab hidden)
         document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -1704,6 +1746,7 @@ if (levelData?.perfect) {
         } else if (screenId === 'settings') {
             applySettingsToUI();
         }
+        applyLocalization();
     }
 
     // Render shop
@@ -1919,6 +1962,56 @@ if (levelData?.perfect) {
                 }
             }
         });
+        applyMuteButton();
+    }
+
+    function translateText(key) {
+        const settings = Storage.getSettings();
+        const lang = settings.language || 'en';
+        return TRANSLATIONS[lang] && TRANSLATIONS[lang][key] ? TRANSLATIONS[lang][key] : TRANSLATIONS.en[key] || key;
+    }
+
+    function applyLocalization() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.dataset.i18n;
+            const translated = translateText(key);
+            if (translated) {
+                el.textContent = translated;
+            }
+        });
+
+        if (elements.menu.btnMute) {
+            const settings = Storage.getSettings();
+            const isMuted = !settings.soundEnabled && !settings.musicEnabled;
+            const btnText = elements.menu.btnMute.querySelector('.btn-text');
+            if (btnText) {
+                btnText.textContent = translateText(isMuted ? 'menuUnmute' : 'menuMute');
+            }
+            elements.menu.btnMute.setAttribute('aria-label', isMuted ? 'Ton einschalten' : 'Stummschalten');
+        }
+    }
+
+    function applyMuteButton() {
+        const settings = Storage.getSettings();
+        const isMuted = !settings.soundEnabled && !settings.musicEnabled;
+        if (elements.menu.btnMute) {
+            elements.menu.btnMute.classList.toggle('muted', isMuted);
+            const btnText = elements.menu.btnMute.querySelector('.btn-text');
+            if (btnText) {
+                btnText.textContent = translateText(isMuted ? 'menuUnmute' : 'menuMute');
+            }
+            elements.menu.btnMute.setAttribute('aria-label', isMuted ? 'Ton einschalten' : 'Stummschalten');
+        }
+    }
+
+    function toggleMute() {
+        const settings = Storage.getSettings();
+        const mute = settings.soundEnabled || settings.musicEnabled;
+        Storage.updateSetting('soundEnabled', !mute);
+        Storage.updateSetting('musicEnabled', !mute);
+        Audio.updateSettings(Storage.getSettings());
+        applySettingsToUI();
+        applyLocalization();
     }
 
     // Confirm reset progress
@@ -2109,6 +2202,11 @@ if (levelData?.perfect) {
         getState: () => state
     };
 })();
+
+// Export for browser global usage
+if (typeof window !== 'undefined') {
+    window.Game = Game;
+}
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {

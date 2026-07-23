@@ -106,6 +106,10 @@ const Map = (function() {
         }
     }
 
+    function getGame() {
+        return (typeof window !== 'undefined' && window.Game) ? window.Game : null;
+    }
+
     // Bind events
     function bindEvents() {
         if (elements.btnPrev) {
@@ -115,7 +119,10 @@ const Map = (function() {
             elements.btnNext.addEventListener('click', () => changeWorld(1));
         }
         if (elements.btnBack) {
-            elements.btnBack.addEventListener('click', () => Game.showScreen('menu'));
+            elements.btnBack.addEventListener('click', () => {
+                const Game = getGame();
+                if (Game) Game.showScreen('menu');
+            });
         }
 
         // Keyboard navigation
@@ -138,7 +145,8 @@ const Map = (function() {
 
     // Handle keydown
     function handleKeydown(e) {
-        if (Game.getState().currentScreen !== 'map') return;
+        const Game = getGame();
+        if (!Game || Game.getState().currentScreen !== 'map') return;
         
         if (e.key === 'ArrowLeft') {
             changeWorld(-1);
@@ -298,8 +306,10 @@ const Map = (function() {
             const unlocked = i === 1 || (worldProgress.levels[i - 1]?.completed || false);
             const completed = levelData.completed || false;
             const stars = levelData.stars || 0;
-            const isCurrent = (Game.getState().currentLevel === i && 
-                              Game.getState().currentWorld === world.id && 
+            const game = getGame();
+            const currentState = game ? game.getState() : { currentLevel: 1, currentWorld: 1 };
+            const isCurrent = (currentState.currentLevel === i && 
+                              currentState.currentWorld === world.id && 
                               !completed);
             
             createLevelNode(i, unlocked, completed, stars, isCurrent, world);
@@ -536,6 +546,8 @@ if (levelData?.perfect) {
         
         // Start level after brief delay
         setTimeout(() => {
+            const Game = getGame();
+            if (!Game) return;
             Game.getState().currentLevel = level;
             Game.startLevel();
         }, 200);
@@ -580,7 +592,10 @@ if (levelData?.perfect) {
 
     // Show map screen
     function show() {
-        state.currentWorld = Game.getState().currentWorld;
+        const Game = getGame();
+        if (Game) {
+            state.currentWorld = Game.getState().currentWorld;
+        }
         renderMap();
         updateMapUI();
     }
@@ -602,6 +617,10 @@ if (levelData?.perfect) {
         WORLD_THEMES
     };
 })();
+
+if (typeof window !== 'undefined') {
+    window.Map = Map;
+}
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {

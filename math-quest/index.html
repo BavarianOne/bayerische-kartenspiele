@@ -63,7 +63,7 @@
             
             <header class="menu-header">
                 <h1>Math Quest: <span class="highlight">Number Kingdom</span></h1>
-                <p class="menu-subtitle">Learn math through adventure!</p>
+                <p class="menu-subtitle" id="menu-subtitle" data-i18n="menuSubtitle">Lerne Mathe auf deiner Abenteuerreise!</p>
             </header>
             
             <div class="menu-profile" id="menu-profile">
@@ -90,34 +90,38 @@
             </div>
             
             <nav class="menu-nav" role="navigation" aria-label="Main navigation">
-                <button class="nav-btn btn-primary" data-action="change-screen" data-value="map">
+                <button id="btn-play" class="nav-btn btn-primary" data-action="change-screen" data-value="map">
                     <span class="btn-icon">🗺️</span>
-                    <span class="btn-text">Adventure Map</span>
+                    <span class="btn-text" data-i18n="menuPlay">Abenteuer</span>
                 </button>
-                <button class="nav-btn btn-secondary" data-action="change-screen" data-value="shop">
+                <button id="btn-shop" class="nav-btn btn-secondary" data-action="change-screen" data-value="shop">
                     <span class="btn-icon">🏪</span>
-                    <span class="btn-text">Shop</span>
+                    <span class="btn-text" data-i18n="menuShop">Shop</span>
                 </button>
-                <button class="nav-btn btn-secondary" data-action="change-screen" data-value="profile">
+                <button id="btn-profile" class="nav-btn btn-secondary" data-action="change-screen" data-value="profile">
                     <span class="btn-icon">👤</span>
-                    <span class="btn-text">Profile</span>
+                    <span class="btn-text" data-i18n="menuProfile">Profil</span>
                 </button>
-                <button class="nav-btn btn-secondary" data-action="change-screen" data-value="settings">
+                <button id="btn-settings" class="nav-btn btn-secondary" data-action="change-screen" data-value="settings">
                     <span class="btn-icon">⚙️</span>
-                    <span class="btn-text">Settings</span>
+                    <span class="btn-text" data-i18n="menuSettings">Einstellungen</span>
+                </button>
+                <button id="btn-mute" class="nav-btn btn-secondary" type="button" aria-label="Stummschalten">
+                    <span class="btn-icon">🔇</span>
+                    <span class="btn-text" data-i18n="menuMute">Ton aus</span>
                 </button>
             </nav>
             
             <div class="menu-daily" id="menu-daily">
-                <button class="btn-daily" id="btn-daily" data-action="claim-daily" aria-label="Claim daily reward">
+                <button class="btn-daily" id="btn-daily" data-action="claim-daily" aria-label="Tägliche Belohnung">
                     <span class="daily-icon">🎁</span>
-                    <span class="daily-text">Daily Reward</span>
+                    <span class="daily-text" data-i18n="dailyReward">Tägliche Belohnung</span>
                     <span class="daily-streak">🔥 0</span>
                 </button>
             </div>
             
             <footer class="menu-footer">
-                <p>Made with ❤️ for young mathematicians</p>
+                <p>Gemacht mit ❤️ für junge Mathematiker</p>
                 <p class="version">v1.0.0</p>
             </footer>
         </section>
@@ -146,7 +150,7 @@
                 <button class="nav-btn" id="btn-prev-world" aria-label="Previous World">‹</button>
                 <button class="nav-btn" id="btn-next-world" aria-label="Next World">›</button>
             </div>
-            <button class="btn-back" id="btn-map-back" data-action="change-screen" data-value="menu" aria-label="Back to Menu">Back</button>
+            <button class="btn-back" id="btn-map-back" data-action="change-screen" data-value="menu" aria-label="Zurück zum Menü">Zurück</button>
         </section>
 
         <!-- Screen: Challenge -->
@@ -193,17 +197,17 @@
                 <div class="progress-container">
                     <div class="progress-bar" id="progress-bar"></div>
                 </div>
-                <button class="btn btn-hint" data-action="use-hint" aria-label="Get a hint">💡 Hint</button>
+                <button class="btn btn-hint" data-action="use-hint" aria-label="Hinweis">💡 Hinweis</button>
             </footer>
             
             <!-- Pause Modal -->
             <div id="pause-modal" class="modal pause-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">
                 <div class="modal-content">
-                    <h2 id="pause-title">⏸️ Paused</h2>
+                    <h2 id="pause-title" data-i18n="pauseTitle">⏸️ Pausiert</h2>
                     <div class="pause-menu">
-                        <button class="btn btn-primary" data-action="resume">Continue</button>
-                        <button class="btn btn-secondary" data-action="change-screen" data-value="settings">Settings</button>
-                        <button class="btn btn-danger" data-action="quit-level">Quit Level</button>
+                        <button class="btn btn-primary" id="btn-resume" data-i18n="pauseContinue">Weiter</button>
+                        <button class="btn btn-secondary" data-action="change-screen" data-value="settings" data-i18n="pauseSettings">Einstellungen</button>
+                        <button class="btn btn-danger" id="btn-quit" data-i18n="pauseQuit">Level verlassen</button>
                     </div>
                 </div>
             </div>
@@ -221,8 +225,8 @@
         <!-- Screen: Shop -->
         <section id="screen-shop" class="screen" role="region" aria-label="Shop">
             <header class="screen-header">
-                <button class="btn btn-icon" data-action="change-screen" data-value="menu" aria-label="Back">←</button>
-                <h1>🏪 Kingdom Shop</h1>
+                <button class="btn btn-icon" data-action="change-screen" data-value="menu" aria-label="Zurück">←</button>
+                <h1 id="shop-title" data-i18n="shopTitle">🏪 Königreichs-Shop</h1>
                 <div class="header-coins">
                     <span id="shop-coins">0</span> 💰
                 </div>
@@ -233,14 +237,184 @@
         </section>
 
         <!-- Screen: Settings -->
-        <section id="screen-settings" class="screen" role="region" aria-label="Settings">
+        <section id="screen-settings" class="screen" role="region" aria-label="Einstellungen">
             <header class="screen-header">
-                <button class="btn btn-icon" data-action="change-screen" data-value="menu" aria-label="Back">←</button>
-                <h1>⚙️ Settings</h1>
+                <button class="btn btn-icon" data-action="change-screen" data-value="menu" aria-label="Zurück">←</button>
+                <h1 id="settings-title" data-i18n="settingsTitle">⚙️ Einstellungen</h1>
                 <div></div>
             </header>
             <main class="settings-content" id="settings-content">
-                <!-- Settings form rendered dynamically -->
+                <section class="settings-section">
+                    <h2>Audio</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Soundeffekte</span>
+                            <span class="setting-desc">Schalte alle Spielgeräusche ein oder aus.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-sound">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Musik</span>
+                            <span class="setting-desc">Hintergrundmusik während des Spiels.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-music">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Lautstärke Effekte</span>
+                            <span class="setting-desc">Passen Sie die Lautstärke der Soundeffekte an.</span>
+                        </div>
+                        <div class="setting-control">
+                            <input type="range" id="setting-sound-volume" min="0" max="1" step="0.05" value="0.7" aria-label="Soundeffekte Lautstärke">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Lautstärke Musik</span>
+                            <span class="setting-desc">Passen Sie die Lautstärke der Hintergrundmusik an.</span>
+                        </div>
+                        <div class="setting-control">
+                            <input type="range" id="setting-music-volume" min="0" max="1" step="0.05" value="0.5" aria-label="Musik Lautstärke">
+                        </div>
+                    </div>
+                </section>
+                <section class="settings-section">
+                    <h2>Spiel & Barrierefreiheit</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Sprache</span>
+                            <span class="setting-desc">Wähle Deutsch oder Englisch.</span>
+                        </div>
+                        <div class="setting-control select-wrapper">
+                            <select id="setting-language">
+                                <option value="de">Deutsch</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Hinweise anzeigen</span>
+                            <span class="setting-desc">Zeige zusätzliche Tipps während der Aufgaben.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-hints">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Automatisch fortfahren</span>
+                            <span class="setting-desc">Nächstes Rätsel starten, sobald du fertig bist.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-auto-advance">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Schwierigkeit</span>
+                            <span class="setting-desc">Wählt die Aufgabenstufe.</span>
+                        </div>
+                        <div class="setting-control select-wrapper">
+                            <select id="setting-difficulty">
+                                <option value="easy">Einfach</option>
+                                <option value="adaptive">Normal</option>
+                                <option value="hard">Schwer</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                <section class="settings-section">
+                    <h2>Barrierefreiheit</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Vibration</span>
+                            <span class="setting-desc">Erlaubt Haptik-Unterstützung auf Tablets.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-haptics">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Reduzierte Bewegung</span>
+                            <span class="setting-desc">Verringert Animationen für beruhigteres Spielen.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-reduced-motion">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Hoher Kontrast</span>
+                            <span class="setting-desc">Verbessert die Lesbarkeit bei hellem oder dunklem Licht.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-high-contrast">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Dyslexie-Schrift</span>
+                            <span class="setting-desc">Schaltet eine lesefreundlichere Schrift ein.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-dyslexic-font">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Farbfilter</span>
+                            <span class="setting-desc">Wähle eine Unterstützung bei Farbsehstörung.</span>
+                        </div>
+                        <div class="setting-control select-wrapper">
+                            <select id="setting-colorblind">
+                                <option value="none">Keine</option>
+                                <option value="protanopia">Protanopie</option>
+                                <option value="deuteranopia">Deuteranopie</option>
+                                <option value="tritanopia">Tritanopie</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                <section class="settings-section">
+                    <h2>Speichern & Daten</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Fortschritt zurücksetzen</span>
+                            <span class="setting-desc">Löscht gespeicherte Daten und startet das Spiel neu.</span>
+                        </div>
+                        <button class="btn btn-danger" id="btn-reset-progress">Zurücksetzen</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Daten exportieren</span>
+                            <span class="setting-desc">Sichere deine Spielstände als Datei.</span>
+                        </div>
+                        <button class="btn btn-secondary" id="btn-export-data">Exportieren</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Daten importieren</span>
+                            <span class="setting-desc">Lade zuvor gespeicherte Spielstände hoch.</span>
+                        </div>
+                        <button class="btn btn-secondary" id="btn-import-data">Importieren</button>
+                        <input type="file" id="import-file" accept="application/json" hidden>
+                    </div>
+                </section>
             </main>
         </section>
 

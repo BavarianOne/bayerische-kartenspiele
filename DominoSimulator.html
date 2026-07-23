@@ -365,7 +365,7 @@ import * as CANNON from 'cannon-es';
 const DOMINO_WIDTH = 0.4;
 const DOMINO_HEIGHT = 1.8;
 const DOMINO_DEPTH = 0.8;
-const DOMINO_MASS = 0.15; // Lighter for better chain reactions
+const DOMINO_MASS = 0.12; // Slightly lighter for better chain reactions
 const GROUND_SIZE = 50;
 const GRAVITY = -9.82;
 
@@ -405,6 +405,7 @@ let fallenCount = 0;
 let lastFrameTime = performance.now();
 let fps = 60;
 let touchHintShown = false;
+let simulationTarget = null;
 
 let touchStartPos = { x: 0, y: 0 };
 let touchStartTime = 0;
@@ -448,11 +449,11 @@ const world = new CANNON.World({
   gravity: new CANNON.Vec3(0, GRAVITY, 0)
 });
 world.broadphase = new CANNON.NaiveBroadphase();
-world.solver.iterations = 20; // More iterations for stability
-world.solver.tolerance = 0.001;
-world.allowSleep = true;
-world.sleepSpeedLimit = 0.2; // Lower = bodies sleep faster when still
-world.sleepTimeLimit = 0.3;
+world.solver.iterations = 40; // More iterations for stability
+world.solver.tolerance = 0.0001;
+world.allowSleep = false;
+world.sleepSpeedLimit = 0.01;
+world.sleepTimeLimit = 0.5;
 
 const groundBody = new CANNON.Body({
   mass: 0,
@@ -464,18 +465,18 @@ world.addBody(groundBody);
 
 const dominoMaterial = new CANNON.Material('domino');
 const groundDominoContact = new CANNON.ContactMaterial(groundBody.material, dominoMaterial, {
-  friction: 0.5, // Lower friction so dominoes slide more easily
+  friction: 0.9, // Strong grip so dominoes pivot cleanly on the ground
   restitution: 0.0, // No bounce on ground
-  contactEquationStiffness: 1e8,
-  contactEquationRelaxation: 3
+  contactEquationStiffness: 1e9,
+  contactEquationRelaxation: 1
 });
 world.addContactMaterial(groundDominoContact);
 
 const dominoContact = new CANNON.ContactMaterial(dominoMaterial, dominoMaterial, {
-  friction: 0.6, // Higher friction to prevent bouncing
+  friction: 0.15, // Lower friction between dominoes for smoother transfer
   restitution: 0.0, // No bounce - dominoes should stick together when falling
-  contactEquationStiffness: 1e8,
-  contactEquationRelaxation: 3
+  contactEquationStiffness: 1e9,
+  contactEquationRelaxation: 1
 });
 world.addContactMaterial(dominoContact);
 
@@ -597,16 +598,17 @@ let createDominoMesh = function(type) {
 let createDominoBody = function(position, rotation, type) {
   const shape = new CANNON.Box(new CANNON.Vec3(DOMINO_WIDTH/2, DOMINO_HEIGHT/2, DOMINO_DEPTH/2));
   const body = new CANNON.Body({
-    mass: DOMINO_MASS,
+    mass: 0.1,
     shape,
     position: new CANNON.Vec3(position.x, position.y, position.z),
     material: dominoMaterial,
-    sleepSpeedLimit: 0.1,
-    sleepTimeLimit: 0.2
+    sleepSpeedLimit: 0.01,
+    sleepTimeLimit: 0.5,
+    allowSleep: false
   });
   body.quaternion.setFromEuler(0, rotation, 0);
-  body.angularDamping = 0.05; // Less damping for more natural falling
-  body.linearDamping = 0.01; // Less damping
+  body.angularDamping = 0.01; // Preserve rotational momentum for more realistic tipping
+  body.linearDamping = 0.0; // Minimal damping so impulses carry through the chain
   return body;
 };
 
@@ -688,7 +690,7 @@ function setMode(newMode) {
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === newMode);
   });
-  controls.enabled = (newMode === 'camera');
+  controls.enabled = (newMode !== 'build');
   
   const simBtn = document.getElementById('simulate-btn');
   if (newMode === 'simulate') {
@@ -718,14 +720,21 @@ function startSimulation() {
   isSimulating = true;
   simulationTime = 0;
   fallenCount = 0;
+  simulationTarget = null;
   
   dominoBodies.forEach(body => {
     body.sleepState = 0;
     body.wakeUp();
   });
   
-  // Don't auto-push - let user click on dominoes manually
   setMode('simulate');
+  
+  // Start the chain reaction automatically by pushing the first domino
+  if (dominoBodies.length > 0) {
+    pushDomino(0);
+    const firstBody = dominoBodies[0];
+    simulationTarget = new THREE.Vector3(firstBody.position.x, 1, firstBody.position.z);
+  }
 }
 
 // Push a specific domino to start chain reaction
@@ -735,31 +744,29 @@ function pushDomino(index) {
   const body = dominoBodies[index];
   body.sleepState = 0;
   body.wakeUp();
+  body.velocity.set(0, 0, 0);
+  body.angularVelocity.set(0, 0, 0);
   
-  // Get the domino's facing direction
-  const euler = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(
-    body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w
-  ));
-  const facingAngle = euler.y;
+  // Push along the broad bottom side so the stone tips forward over the long edge.
+  const localImpulse = new CANNON.Vec3(1.4, 0, 0);
+  const localPoint = new CANNON.Vec3(0, DOMINO_HEIGHT * 0.45, 0);
   
-  // Calculate push direction - push in the direction the domino is facing
-  // This makes it fall forward into the next domino
-  const pushForce = 3.0; // Strong push for chain reaction
-  const forceX = Math.cos(facingAngle) * pushForce;
-  const forceZ = -Math.sin(facingAngle) * pushForce;
+  if (typeof body.applyLocalImpulse === 'function') {
+    body.applyLocalImpulse(localImpulse, localPoint);
+  } else {
+    const worldImpulse = body.quaternion.vmult(localImpulse);
+    const worldPoint = body.pointToWorldFrame
+      ? body.pointToWorldFrame(localPoint)
+      : body.position.vadd(new CANNON.Vec3(0, DOMINO_HEIGHT * 0.45, 0));
+    body.applyImpulse(worldImpulse, worldPoint);
+  }
   
-  // Apply impulse at the TOP of the domino for realistic toppling
-  // The offset creates a torque that makes it fall forward
-  const impulsePoint = new CANNON.Vec3(
-    body.position.x + forceX * 0.3,
-    body.position.y + DOMINO_HEIGHT * 0.45, // Near top
-    body.position.z + forceZ * 0.3
-  );
+  // Add tipping rotation around the long bottom edge (local Z axis).
+  const localRotationAxis = new CANNON.Vec3(0, 0, 1);
+  const worldRotationAxis = body.quaternion.vmult(localRotationAxis);
+  body.angularVelocity.copy(worldRotationAxis.scale(2.4));
   
-  // Apply impulse - this creates both linear and angular velocity
-  body.applyImpulse(new CANNON.Vec3(forceX, 0, forceZ), impulsePoint);
-  
-  if (navigator.vibrate) navigator.vibrate(50);
+  if (navigator.vibrate) navigator.vibrate(30);
 }
 
 function pauseSimulation() {
@@ -1059,8 +1066,14 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
-  if (e.touches.length === 1 && !isMultiTouch && mode === 'build') {
-    updatePreview(e.touches[0].clientX, e.touches[0].clientY);
+  if (e.touches.length === 1 && !isMultiTouch) {
+    if (mode === 'build') {
+      updatePreview(e.touches[0].clientX, e.touches[0].clientY);
+    }
+    // Allow camera orbit on single-touch drag outside build preview
+    if (mode === 'simulate' || mode === 'camera') {
+      e.preventDefault();
+    }
   }
 }
 
@@ -1098,8 +1111,8 @@ function handleTouchEnd(e) {
   lastTouchDistance = 0;
 }
 
-renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: true });
-renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: true });
+renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: false });
 renderer.domElement.addEventListener('touchend', handleTouchEnd, { passive: true });
 
 // Get domino intersection for clicking
@@ -1183,10 +1196,19 @@ function animate() {
   centerMarker.material.opacity = 0.2 + Math.sin(now * 0.003) * 0.1;
   
   if (isSimulating && dominoBodies.length > 0) {
-    const avgPos = new THREE.Vector3();
-    dominoMeshes.forEach(m => avgPos.add(m.position));
-    avgPos.divideScalar(dominoMeshes.length);
-    controls.target.lerp(new THREE.Vector3(avgPos.x, 1, avgPos.z), 0.02);
+    let targetPos;
+    if (simulationTarget) {
+      targetPos = simulationTarget;
+    } else {
+      const avgPos = new THREE.Vector3();
+      dominoMeshes.forEach(m => avgPos.add(m.position));
+      avgPos.divideScalar(dominoMeshes.length);
+      targetPos = new THREE.Vector3(avgPos.x, 1, avgPos.z);
+    }
+    controls.target.lerp(targetPos, 0.02);
+    if (controls.target.distanceTo(targetPos) < 0.05) {
+      simulationTarget = null;
+    }
   }
   
   controls.update();

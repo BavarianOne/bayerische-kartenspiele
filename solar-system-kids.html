@@ -2,1403 +2,444 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌞 Unser Sonnensystem 3D - Für Kinder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🌞 Unser Sonnensystem 3D</title>
   <script>p5.disableFriendlyErrors = true;</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { overflow: hidden; height: 100%; font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive; background: #0a0a1a; color: #fff; }
-    canvas { display: block; }
-    #ui { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10; }
-    .panel { pointer-events: auto; background: rgba(10, 10, 30, 0.92); border: 2px solid #ffd700; border-radius: 16px; padding: 14px; box-shadow: 0 0 30px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1); backdrop-filter: blur(10px); }
-    .top-left { position: absolute; top: 16px; left: 16px; min-width: 220px; }
-    .top-right { position: absolute; top: 16px; right: 16px; min-width: 200px; text-align: right; }
-    .bottom-center { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-    h2 { font-size: 1.1rem; margin: 0 0 10px; color: #ffd700; text-shadow: 0 0 10px #ffd700; display: flex; align-items: center; gap: 8px; }
-    h3 { font-size: 0.9rem; margin: 10px 0 6px; color: #ffaa00; }
-    .btn { background: linear-gradient(135deg, #ffd700, #ffaa00); border: none; border-radius: 10px; padding: 10px 16px; font-family: inherit; font-size: 0.9rem; font-weight: bold; color: #1a1a2e; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); pointer-events: auto; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6); }
-    .btn:active { transform: translateY(0); }
-    .btn.active { background: linear-gradient(135deg, #4ecdc4, #44a08d); box-shadow: 0 4px 15px rgba(78, 205, 196, 0.5); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-    .slider-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
-    .slider-row label { min-width: 70px; font-size: 0.85rem; color: #ffd700; }
-    .slider-row input[type="range"] { flex: 1; accent-color: #ffd700; cursor: pointer; }
-    .slider-row span { min-width: 40px; text-align: right; color: #ffd700; font-weight: bold; font-size: 0.85rem; }
-    .planet-btn { background: linear-gradient(135deg, #2a2a4a, #1a1a3a); border: 2px solid #444; color: #fff; }
-    .planet-btn:hover { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
-    .planet-btn.active { border-color: #ffd700; background: linear-gradient(135deg, #3a3a1a, #2a2a1a); box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
-    .info-panel { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: rgba(10, 10, 30, 0.95); border: 2px solid #4ecdc4; border-radius: 16px; padding: 16px; transform: translateY(120%); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; z-index: 20; box-shadow: 0 0 40px rgba(78, 205, 196, 0.3); }
-    .info-panel.open { transform: translateY(0); opacity: 1; }
-    .info-panel h3 { margin: 0 0 10px; color: #4ecdc4; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-    .info-panel .close { position: absolute; top: 8px; right: 12px; background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer; line-height: 1; }
-    .info-panel .close:hover { color: #ffd700; }
-    .fact { background: rgba(78, 205, 196, 0.1); border-left: 3px solid #4ecdc4; padding: 10px 12px; margin: 8px 0; border-radius: 0 8px 8px 0; font-size: 0.9rem; line-height: 1.5; }
-    .fact-title { font-weight: bold; color: #4ecdc4; margin-bottom: 4px; }
-    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; font-size: 0.8rem; color: #aaa; }
-    .stat { background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px; }
-    .stat span { color: #ffd700; }
-    .legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #ccc; }
-    .legend-color { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
-    .title-main { text-align: center; font-size: 1.4rem; text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6b35; animation: glow 3s ease-in-out infinite alternate; }
-    @keyframes glow { from { text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6b35; } to { text-shadow: 0 0 30px #ffd700, 0 0 60px #ff6b35, 0 0 80px #ffd700; } }
-    .speed-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #ffd700; }
-    .speed-bar { width: 80px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
-    .speed-fill { height: 100%; background: linear-gradient(90deg, #4ecdc4, #ffd700, #ff6b35); border-radius: 3px; transition: width 0.3s; }
-    .hint { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(10,10,30,0.9); border: 2px dashed #4ecdc4; border-radius: 12px; padding: 10px 20px; font-size: 0.85rem; color: #4ecdc4; text-align: center; animation: pulse 2s infinite; pointer-events: none; z-index: 5; }
-    @keyframes pulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
-    @media (max-width: 768px) { .top-left, .top-right { min-width: auto; padding: 10px; } .top-right { right: 10px; top: 10px; } .bottom-center { bottom: 10px; } .btn { padding: 8px 12px; font-size: 0.8rem; } h2 { font-size: 1rem; } .title-main { font-size: 1.1rem; } .info-panel { left: 10px; right: 10px; max-width: none; bottom: 10px; } .hint { font-size: 0.75rem; padding: 8px 16px; } }
-    @media (max-width: 480px) { .btn-row { flex-direction: column; } .btn { width: 100%; } .slider-row { flex-direction: column; align-items: stretch; } .slider-row label { min-width: auto; } .stats-row { flex-direction: column; } }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{overflow:hidden;height:100%;font-family:'Comic Sans MS','Chalkboard SE','Comic Neue',cursive;background:#0a0a1a;color:#fff;touch-action:none;-webkit-user-select:none;user-select:none}
+    canvas{display:block}
+    #ui{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:10}
+    .panel{pointer-events:auto;background:rgba(10,10,30,0.92);border:2px solid #ffd700;border-radius:12px;padding:10px;box-shadow:0 0 20px rgba(255,215,0,0.3);backdrop-filter:blur(8px)}
+    .tl{position:absolute;top:10px;left:10px;min-width:160px}
+    .tr{position:absolute;top:10px;right:10px;min-width:150px;text-align:right}
+    .bc{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:95vw}
+    h2{font-size:.95rem;margin:0 0 6px;color:#ffd700;text-shadow:0 0 10px #ffd700}
+    h3{font-size:.8rem;margin:6px 0 4px;color:#ffaa00}
+    .btn{background:linear-gradient(135deg,#ffd700,#ffaa00);border:none;border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.75rem;font-weight:bold;color:#1a1a2e;cursor:pointer;pointer-events:auto;box-shadow:0 3px 10px rgba(255,215,0,0.4)}
+    .btn:active{transform:scale(0.95)}
+    .btn.active{background:linear-gradient(135deg,#4ecdc4,#44a08d);box-shadow:0 3px 10px rgba(78,205,196,0.5)}
+    .btn-row{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+    .slider-row{display:flex;align-items:center;gap:6px;margin:4px 0}
+    .slider-row label{min-width:40px;font-size:.75rem;color:#ffd700}
+    .slider-row input[type="range"]{flex:1;accent-color:#ffd700;height:18px}
+    .slider-row span{min-width:30px;text-align:right;color:#ffd700;font-weight:bold;font-size:.75rem}
+    .pbtn{background:linear-gradient(135deg,#2a2a4a,#1a1a3a);border:2px solid #444;color:#fff;font-size:.7rem;padding:4px 8px}
+    .pbtn:hover{border-color:#ffd700}
+    .info{position:fixed;bottom:10px;left:10px;right:10px;max-width:380px;margin:0 auto;background:rgba(10,10,30,0.95);border:2px solid #4ecdc4;border-radius:12px;padding:14px;transform:translateY(120%);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;z-index:20;max-height:50vh;overflow-y:auto}
+    .info.open{transform:translateY(0);opacity:1}
+    .info h3{margin:0 0 8px;color:#4ecdc4;font-size:1rem}
+    .info .close{position:absolute;top:6px;right:10px;background:none;border:none;color:#aaa;font-size:1.3rem;cursor:pointer}
+    .info .close:hover{color:#ffd700}
+    .fact{background:rgba(78,205,196,0.1);border-left:3px solid #4ecdc4;padding:6px 8px;margin:4px 0;border-radius:0 6px 6px 0;font-size:.8rem;line-height:1.3}
+    .fact-title{font-weight:bold;color:#4ecdc4;margin-bottom:2px}
+    .stats{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:.7rem;color:#aaa}
+    .stat{background:rgba(255,255,255,0.05);padding:3px 6px;border-radius:6px}
+    .stat span{color:#ffd700}
+    .title-main{text-align:center;font-size:1.1rem;text-shadow:0 0 15px #ffd700;animation:glow 3s ease-in-out infinite alternate}
+    @keyframes glow{from{text-shadow:0 0 15px #ffd700}to{text-shadow:0 0 25px #ffd700,0 0 40px #ff6b35}}
+    .hint{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(10,10,30,0.9);border:2px dashed #4ecdc4;border-radius:10px;padding:6px 14px;font-size:.75rem;color:#4ecdc4;text-align:center;animation:pulse 2s infinite;pointer-events:none;z-index:5}
+    @keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
+    #flightBtn{position:fixed;bottom:65px;right:10px;z-index:15;pointer-events:auto;font-size:.7rem;padding:6px 10px}
+    /* Flight joystick area */
+    #joyArea{position:fixed;bottom:0;left:0;right:0;height:35%;pointer-events:auto;z-index:2;opacity:0}
+    /* Speed control for flight */
+    #flightSpeed{position:fixed;bottom:65px;left:10px;z-index:15;pointer-events:auto;background:rgba(10,10,30,0.9);border:2px solid #4ecdc4;border-radius:8px;padding:4px 8px;display:none;align-items:center;gap:6px}
+    #flightSpeed label{color:#4ecdc4;font-size:.7rem}
+    #flightSpeed input{width:60px;accent-color:#4ecdc4}
+    @media(max-width:768px){.tl,.tr{min-width:auto;padding:6px}.tr{right:6px;top:6px}.bc{bottom:6px}.btn{padding:5px 10px;font-size:.7rem}h2{font-size:.85rem}.title-main{font-size:.95rem}.info{left:6px;right:6px;bottom:6px}.hint{font-size:.65rem;padding:4px 10px;bottom:60px}}
   </style>
 </head>
 <body>
   <div id="ui">
-    <div class="panel top-left">
-      <h2 class="title-main">🌞 Unser Sonnensystem 3D</h2>
-      <div class="speed-indicator">
-        <span>⏱️ Tempo:</span>
-        <div class="speed-bar"><div class="speed-fill" id="speedFill" style="width: 30%"></div></div>
-        <span id="speedVal">1×</span>
+    <div class="panel tl">
+      <h2 class="title-main">🌞 Sonnensystem</h2>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+        <span style="font-size:.75rem;color:#ffd700">⏱️</span>
+        <div style="width:60px;height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden">
+          <div style="height:100%;background:linear-gradient(90deg,#4ecdc4,#ffd700,#ff6b35);border-radius:3px;transition:width .3s;width:30%" id="speedFill"></div>
+        </div>
+        <span style="font-size:.75rem;color:#ffd700;font-weight:bold;min-width:30px" id="speedVal">1×</span>
       </div>
     </div>
-    <div class="panel top-right">
-      <h2>🎮 Steuerung</h2>
+    <div class="panel tr">
       <div class="btn-row">
-        <button class="btn" id="btnPause" onclick="togglePause()">⏸️ Pause</button>
-        <button class="btn" id="btnReset" onclick="resetView()">🔄 Reset</button>
+        <button class="btn" id="btnPause" onclick="togglePause()">⏸️</button>
+        <button class="btn" id="btnReset" onclick="resetView()">🔄</button>
       </div>
       <div class="slider-row">
-        <label>🔍 Zoom</label>
+        <label>🔍</label>
         <input type="range" id="zoomSlider" min="30" max="800" value="200" oninput="setZoom(this.value)">
         <span id="zoomVal">200</span>
       </div>
       <div class="slider-row">
-        <label>⏱️ Zeit</label>
+        <label>⏱️</label>
         <input type="range" id="speedSlider" min="0" max="500" value="100" oninput="setSpeed(this.value)">
         <span id="speedVal2">1×</span>
       </div>
-      <div class="slider-row">
-        <label>🔄 Neigung</label>
-        <input type="range" id="tiltSlider" min="0" max="90" value="30" oninput="setTilt(this.value)">
-        <span id="tiltVal">30°</span>
-      </div>
     </div>
-    <div class="panel bottom-center" id="planetButtons">
-      <h3>🪐 Planeten entdecken</h3>
+    <div class="panel bc" id="planetButtons">
+      <h3>🪐 Planeten</h3>
       <div class="btn-row" id="planetBtnContainer"></div>
-      <div class="legend" id="legend"></div>
     </div>
   </div>
 
-  <div class="hint" id="hint">🖱️ Ziehen zum Drehen · 🖱️ Scrollen zum Zoomen · 👆 Klick auf Planeten für Infos</div>
+  <button class="btn" id="flightBtn" onclick="toggleFlight()">🚀 Fliegen</button>
+  <div id="flightSpeed">
+    <label>🚀</label>
+    <input type="range" id="flightSpeedSlider" min="1" max="20" value="5" oninput="document.getElementById('fsVal').textContent=this.value">
+    <span id="fsVal">5</span>
+  </div>
 
-  <div class="info-panel" id="infoPanel">
+  <div class="hint" id="hint">👆 Ziehen = Drehen · Scrollen = Zoom · Klick = Info</div>
+
+  <div class="info" id="infoPanel">
     <button class="close" onclick="closeInfo()">×</button>
     <h3 id="infoTitle">🪐 Planet</h3>
     <div id="infoContent"></div>
-    <div class="stats-row" id="infoStats"></div>
+    <div class="stats" id="infoStats"></div>
   </div>
 
   <script>
-    // ============ KONFIGURATION & DATEN ============
-    const PLANETS = [
-      { name: 'Merkur', emoji: '☿', dist: 0.39, orbitDays: 88, radius: 2440, color: [180, 170, 160], emojiColor: '#b4aaa0', facts: [
-        '🥵 Der sonnennächste Planet – tagsüber 430°C, nachts -180°C!',
-        '📅 Ein Jahr dauert nur 88 Erdtage – du hättest alle 3 Monate Geburtstag!',
-        '🌑 Fast keine Atmosphäre – der Himmel ist immer schwarz, auch am Tag.',
-        '☄️ Voller Krater wie unser Mond, weil keine Atmosphäre Meteoriten abbremst.',
-        '🏃 Der schnellste Planet – rast mit 47 km/s um die Sonne!'
-      ], info: 'Kleinster Planet, keine Monde, extremste Temperaturschwankungen' },
-      { name: 'Venus', emoji: '♀', dist: 0.72, orbitDays: 225, radius: 6052, color: [230, 200, 140], emojiColor: '#e6c88c', facts: [
-        '🔥 Heißester Planet (465°C) – noch heißer als Merkur durch Treibhauseffekt!',
-        '🔄 Dreht sich RÜCKWÄRTS – die Sonne geht im Westen auf!',
-        '☁️ Dicke giftige Wolken aus Schwefelsäure – es regnet Säure!',
-        '🌟 Hellster "Stern" am Abendhimmel – man nennt ihn "Abendstern".',
-        '📅 Ein Tag (243 Erdtage) ist länger als ein Jahr (225 Erdtage)!'
-      ], info: 'Heißester Planet, dichte CO₂-Atmosphäre, rückläufige Rotation, keine Monde' },
-      { name: 'Erde', emoji: '🌍', dist: 1.0, orbitDays: 365, radius: 6371, color: [60, 140, 220], emojiColor: '#3c8cdc', facts: [
-        '🌊 Einziger Planet mit flüssigem Wasser an der Oberfläche – 71% Wasser!',
-        '🛡️ Unser Magnetfeld schützt uns vor gefährlicher Sonnenstrahlung.',
-        '🌙 Unser Mond ist der 5. größte Mond – er stabilisiert unsere Jahreszeiten.',
-        '🌱 Einzige bekannte Welt mit Leben – vielleicht nicht für immer allein!',
-        '🏃 Wir rasen mit 107.000 km/h um die Sonne – du merkst es nicht!'
-      ], info: 'Unser Zuhause – flüssiges Wasser, Atmosphäre mit Sauerstoff, 1 Mond, Leben!' },
-      { name: 'Mars', emoji: '♂', dist: 1.52, orbitDays: 687, radius: 3390, color: [200, 80, 40], emojiColor: '#c85028', facts: [
-        '🏔️ Olympus Mons – der größte Vulkan im Sonnensystem (27 km hoch, 3× Everest)!',
-        '🤖 Wir haben Roboter dort (Curiosity, Perseverance) – sie suchen nach Leben!',
-        '🌪️ Riesige Staubstürme können den ganzen Planeten monatelang bedecken.',
-        '🌅 Sonnenuntergänge sind BLAU – wegen dem feinen Marsstaub in der Luft!',
-        '🚀 Nächstes Ziel für Menschen – vielleicht lebst DU dort eines Tages!'
-      ], info: 'Roter Planet, 2 kleine Monde (Phobos, Deimos), Polkappen aus Eis & CO₂' },
-      { name: 'Jupiter', emoji: '♃', dist: 5.2, orbitDays: 4333, radius: 69911, color: [220, 180, 130], emojiColor: '#dcb482', facts: [
-        '👑 GRÖSSTER Planet – 1300 Erden passen hinein! Aber er ist fast nur Gas.',
-        '👁️ Der "Große Rote Fleck" ist ein Riesensturm – seit 350+ Jahren aktiv!',
-        '🧲 Stärkstes Magnetfeld aller Planeten – fängt tödliche Strahlung ein.',
-        '🌙 95+ Monde! Die 4 großen (Io, Europa, Ganymed, Kallisto) sind wie Mini-Planeten.',
-        '💎 Es regnet DIAMANTEN im Inneren – durch extremen Druck & Hitze!'
-      ], info: 'Gasriese, größter Planet, 95+ Monde, Ringe, Großer Roter Fleck, starkes Magnetfeld' },
-      { name: 'Saturn', emoji: '♄', dist: 9.58, orbitDays: 10759, radius: 58232, color: [240, 220, 160], emojiColor: '#f0dca0', facts: [
-        '💍 SCHÖNSTE RINGE – aus Eis & Gestein, 280.000 km breit, aber nur ~10 m dick!',
-        '🎈 Würde im Wasser SCHWIMMEN – Dichte nur 0,69 g/cm³ (Wasser = 1)!',
-        '🌬️ Winde bis 1.800 km/h am Äquator – schnellster Jetstream im System!',
-        '🌙 146+ Monde! Titan hat dicke Atmosphäre & Methan-Seen – wie urzeitliche Erde.',
-        '🔄 Ein Tag dauert nur 10,7 Stunden – der Planet ist am Äquator plattgedrückt!'
-      ], info: 'Ringplanet, 2.größter Gasriese, 146+ Monde, niedrigste Dichte, Hexagon am Nordpol' },
-      { name: 'Uranus', emoji: '♅', dist: 19.2, orbitDays: 30687, radius: 25362, color: [120, 200, 210], emojiColor: '#78c8d2', facts: [
-        '🤸 LIEGT AUF DER SEITE – Achse um 98° gekippt! "Rollt" um die Sonne.',
-        '❄️ Kältester Planet (-224°C) – obwohl Neptun weiter weg ist!',
-        '💎 Auch Ringe! Aber dunkel & schmal – 1977 zufällig entdeckt.',
-        '🌬️ "Eisriese" – Wasser, Ammoniak, Methan als Eis im Inneren.',
-        '🌙 28 Monde, alle nach Shakespeare-Figuren benannt (Titania, Oberon, Puck...).'
-      ], info: 'Eisriese, extrem geneigte Achse (98°), 28 Monde, dunkle Ringe, kältester Planet' },
-      { name: 'Neptun', emoji: '♆', dist: 30.05, orbitDays: 60190, radius: 24622, color: [60, 100, 230], emojiColor: '#3c64e6', facts: [
-        '💨 STÄRKSTE WINDE im Sonnensystem – bis 2.100 km/h (Superschnell)!',
-        '🔵 Blau durch Methan in der Atmosphäre – schluckt rotes Licht.',
-        '🔭 Erst 1846 MATHEMATISCH vorhergesagt, dann entdeckt – "Triumph der Mathematik"!',
-        '🌊 Triton (größter Mond) kreist RÜCKWÄRTS – gefangener Kuipergürtel-Objekt.',
-        '💎 Auch hier regnet es Diamanten! Wie bei Jupiter & Saturn im Inneren.'
-      ], info: 'Eisriese, stärkste Winde, 16 Monde, Triton (rückläufig), 1846 mathematisch entdeckt' }
+    // ============ DATA ============
+    const PLANET_DATA = [
+      {name:'Merkur',emoji:'☿',dist:0.39,orbitDays:88,radius:2440,hue:30,sat:11,bri:71,emojiColor:'#b4aaa0',info:'Kleinster Planet, keine Monde'},
+      {name:'Venus',emoji:'♀',dist:0.72,orbitDays:225,radius:6052,hue:40,sat:39,bri:90,emojiColor:'#e6c88c',info:'Heißester Planet, rückläufige Rotation'},
+      {name:'Erde',emoji:'🌍',dist:1.0,orbitDays:365,radius:6371,hue:210,sat:73,bri:86,emojiColor:'#3c8cdc',info:'Unser Zuhause – Wasser, Sauerstoff, Leben!'},
+      {name:'Mars',emoji:'♂',dist:1.52,orbitDays:687,radius:3390,hue:15,sat:80,bri:78,emojiColor:'#c85028',info:'Roter Planet, Olympus Mons, 2 Monde'},
+      {name:'Jupiter',emoji:'♃',dist:5.2,orbitDays:4333,radius:69911,hue:35,sat:41,bri:86,emojiColor:'#dcb482',info:'Größter Planet, Gasriese, 95+ Monde'},
+      {name:'Saturn',emoji:'♄',dist:9.58,orbitDays:10759,radius:58232,hue:45,sat:33,bri:94,emojiColor:'#f0dca0',info:'Ringplanet, 2.größter, 146+ Monde'},
+      {name:'Uranus',emoji:'♅',dist:19.2,orbitDays:30687,radius:25362,hue:187,sat:43,bri:82,emojiColor:'#78c8d2',info:'Eisriese, 98° geneigt, 28 Monde'},
+      {name:'Neptun',emoji:'♆',dist:30.05,orbitDays:60190,radius:24622,hue:226,sat:74,bri:90,emojiColor:'#3c64e6',info:'Eisriese, stärkste Winde, 16 Monde'}
     ];
+    const FACTS = {
+      Merkur:['🥵 Tagsüber 430°C, nachts -180°C!','📅 Ein Jahr = 88 Erdtage','🌑 Fast keine Atmosphäre','☄️ Voller Krater','🏃 47 km/s um die Sonne'],
+      Venus:['🔥 Heißester Planet: 465°C','🔄 Dreht sich rückwärts!','☁️ Giftige Schwefelsäure-Wolken','🌟 Hellster "Abendstern"','📅 Ein Tag > ein Jahr!'],
+      Erde:['🌊 71% Wasser – einziger Ozeanplanet','🛡️ Magnetfeld schützt uns','🌙 Mond stabilisiert Jahreszeiten','🌱 Einzige bekannte Welt mit Leben','🏃 107.000 km/h um die Sonne!'],
+      Mars:['🏔️ Olympus Mons: 27 km hoch','🤖 Roboter suchen Leben','🌪️ Riesige Staubstürme','🌅 Sonnenuntergänge sind BLAU!','🚀 Nächstes Ziel für Menschen'],
+      Jupiter:['👑 1300 Erden passen hinein!','👁️ Großer Roter Fleck (350+ Jahre)','🧲 Stärkstes Magnetfeld','🌙 95+ Monde!','💎 Es regnet Diamanten!'],
+      Saturn:['💍 Ringe: 280.000 km breit, 10 m dick','🎈 Würde im Wasser schwimmen!','🌬️ Winde bis 1.800 km/h','🌙 146+ Monde! Titan mit Methan-Seen','🔄 Tag = 10,7 Stunden'],
+      Uranus:['🤸 Liegt auf der Seite (98°)!','❄️ Kältester Planet: -224°C','💎 Hat auch Ringe!','🌬️ Eisriese','🌙 28 Monde nach Shakespeare'],
+      Neptun:['💨 Stärkste Winde: 2.100 km/h!','🔵 Blau durch Methan','🔭 Mathematisch entdeckt (1846)','🌊 Triton kreist rückwärts','💎 Diamantregen']
+    };
 
-    const DWARF_PLANETS = [
-      { name: 'Pluto', emoji: '♇', dist: 39.5, orbitDays: 90560, radius: 1188, color: [200, 180, 150], emojiColor: '#c8b496', facts: [
-        '💔 War 76 Jahre Planet, 2006 "degradiert" zu Zwergplanet – viele sind traurig!',
-        '❤️ Herzförmiges Gebiet "Tombaugh Regio" – entdeckt 2015 von New Horizons.',
-        '🔄 Tanzt mit Mond Charon um gemeinsamen Mittelpunkt – wie Doppelplanet!',
-        '🌨️ Stickstoff-Gletscher fließen wie auf der Erde – aber bei -230°C!',
-        '📏 So klein: 1/6 der Mondmasse, 1/3 des Mondvolumens.'
-      ], info: 'Zwergplanet, Kuipergürtel, 5 Monde (Charon, Styx, Nix, Kerberos, Hydra), Herz-Form' },
-      { name: 'Ceres', emoji: '⚳', dist: 2.77, orbitDays: 1680, radius: 473, color: [180, 170, 160], emojiColor: '#b4aaa0', facts: [
-        '🌱 Einziger Zwergplanet im ASTEROIDENGÜRTEL – zwischen Mars & Jupiter!',
-        '💧 Vielleicht Ozean unter der Kruste – Dawn-Sonde fand organische Moleküle!',
-        '🏔️ Ahuna Mons – einziger Vulkan, aber aus SALZ & SCHLAMM (Kryovulkan)!',
-        '📏 Größtes Objekt im Asteroidengürtel – 1/3 der gesamten Gürtel-Masse!',
-        '🔬 2006 zum Zwergplanet "befördert" – vorher nur "größter Asteroid".'
-      ], info: 'Zwergplanet im Asteroidengürtel, möglicher Untergrund-Ozean, Kryovulkan, Dawn-Mission' },
-      { name: 'Eris', emoji: '⚴', dist: 67.8, orbitDays: 203670, radius: 1163, color: [255, 255, 255], emojiColor: '#ffffff', facts: [
-        '⚖️ GRUND für Plutos Degradierung – ERIS ist massereicher als Pluto!',
-        '❄️ Eines der kältesten Objekte (-240°C) – Methan-Eis reflektiert 96% Licht.',
-        '🌙 1 Mond: Dysnomia (Tochter von Eris, Göttin des Gesetzes – Ironie!).',
-        '📏 Entdeckt 2005 – führte zur Neudefinition "Planet" 2006.',
-        '🕰️ Ein Jahr = 558 Erdenjahre – seit Entdeckung nicht mal 1/30 Jahr vergangen!'
-      ], info: 'Zwergplanet, streute Plutons Planetenstatus, 1 Mond (Dysnomia), sehr reflektierend' },
-      { name: 'Makemake', emoji: '⚵', dist: 45.8, orbitDays: 112000, radius: 715, color: [200, 150, 100], emojiColor: '#c89664', facts: [
-        '🗿 Benannt nach Schöpfergott der Rapa Nui (Osterinsel) – "Mann, der Fruchtbarkeit bringt".',
-        '🔴 Rötliche Farbe – Tholine (organische Moleküle) durch Sonnenstrahlung.',
-        '🌙 1 Mond: MK2 (entdeckt 2016) – sehr dunkel, schwer zu sehen.',
-        '🧊 Methan-Eis auf Oberfläche – wie Pluto, aber KEINE Atmosphäre.',
-        '📏 2. hellster Kuipergürtel-Objekt nach Pluto.'
-      ], info: 'Kuipergürtel-Zwergplanet, rötlich, Methan-Eis, 1 Mond (MK2), keine Atmosphäre' },
-      { name: 'Haumea', emoji: '⚶', dist: 43.1, orbitDays: 103000, radius: 816, color: [255, 240, 200], emojiColor: '#fff0c8', facts: [
-        '🥚 FORM WIEL EIN RUGBY-BALL! Schnelle Rotation (4h) drückt sie platt.',
-        '💍 HAT EIGENE RINGE! 2017 entdeckt – 1. Zwergplanet mit Ringen.',
-        '❄️ Fast reines Wassereis – reflektiert 80% des Lichts, sehr hell.',
-        '🌙 2 Monde: Hiʻiaka & Namaka (hawaiianische Göttinnen).',
-        '🌀 Schnellste Rotation aller Großobjekte – Tag = 3,9 Stunden!'
-      ], info: 'Elliptischer Zwergplanet, Ringe, 2 Monde, schnellste Rotation, Wassereis-Oberfläche' }
-    ];
-
-    const COMETS = [
-      { name: 'Halley', period: 76, perihelion: 0.59, aphelion: 35.1, inclination: 162, color: [255, 255, 200], tailLen: 1.0, facts: [
-        '🌟 BERÜHMTESTER Komet – alle 76 Jahre sichtbar (nächstes Mal 2061)!',
-        '📜 Schon 240 v. Chr. von Chinesen beobachtet – auf Bayeux-Teppich (1066)!',
-        '🥜 Erdnussförmig (15×8 km) – "schmutziger Schneeball" aus Eis & Staub.',
-        '☀️ Bei Sonnennähe verliert er 6 Meter Oberfläche pro Umlauf!',
-        '👴 Seit 16.000+ Jahren auf dieser Bahn – wird in ~10.000 Jahren verschwinden.'
-      ]},
-      { name: 'Hale-Bopp', period: 2533, perihelion: 0.91, aphelion: 371, inclination: 89, color: [200, 255, 255], tailLen: 1.5, facts: [
-        '😍 "Jahrhundertkomet" 1997 – 18 MONATE lang mit bloßem Auge sichtbar!',
-        '📏 Riesen-Kern: 40-80 km (Halley nur 15 km) – super aktiv!',
-        '🔵 Blauer Ionen-Schweif + weißer Staubschweif – DOPPELTER Schweif!',
-        '🕐 Nächste Rückkehr: 4385 n. Chr. – merkt euch den Termin!',
-        '👥 Entdeckt von ZWEI Amateurastronomen unabhängig voneinander (Hale & Bopp).'
-      ]},
-      { name: 'Neowise', period: 6800, perihelion: 0.29, aphelion: 540, inclination: 129, color: [255, 220, 150], tailLen: 1.2, facts: [
-        '🌅 Überraschungs-Komet 2020 – hellster seit Hale-Bopp, toll am Morgenhimmel!',
-        '☀️ Kam der Sonne SEHR nah (0,29 AE) – überlebte knapp den Hitzetod!',
-        '📸 ISS-Astronauten machten geniale Fotos vom All aus.',
-        '🕐 Nächste Rückkehr: ~8800 n. Chr. – lange Geduld nötig!',
-        '🔭 Entdeckt von WISE-Weltraumteleskop (NASA) – daher der Name NEOWISE.'
-      ]},
-      { name: 'Hyakutake', period: 17000, perihelion: 0.23, aphelion: 3410, inclination: 124, color: [180, 255, 180], tailLen: 1.8, facts: [
-        '🎋 "Großer Komet 1996" – längster gemessener Schweif (1,8 Mrd. km = 12 AE)!',
-        '🌌 Kam Erde sehr nah (0,1 AE = 15 Mio. km) – raste in 2 Wochen am Himmel!',
-        '🇯🇵 Entdeckt von japanischem Amateurastronomen Yuji Hyakutake (Fernglas!).',
-        '💨 Erste Röntgenstrahlung von Komet entdeckt (durch Sonnenwind-Kollision).',
-        '🕐 Periodendauer erst NACH Durchgang präzise berechnet: ~17.000 Jahre.'
-      ]},
-      { name: 'McNaught', period: 92600, perihelion: 0.17, aphelion: 4100, inclination: 78, color: [255, 200, 100], tailLen: 2.0, facts: [
-        '☀️ TAGEKOMET 2007 – hellster seit 40 Jahren, tagsüber neben Sonne sichtbar!',
-        '🌈 Spektakulärer gefächerter Staubschweif – "Kometenfächer" am Südhimmel.',
-        '📏 Perihel nur 0,17 AE – extrem heiß, riesige Staubproduktion.',
-        '🇦🇺 Hauptsächlich von Südhalbkugel beobachtet – Nordlichter hatten Pech.',
-        '🕐 Periodendauer ~92.600 Jahre – fast ein Eiszeitalter!'
-      ]}
-    ];
-
-    const ASTEROID_BELT = { inner: 2.2, outer: 3.2, count: 300 };
-
-    // ============ p5.js SKETCH ============
+    // ============ STATE ============
     let planets = [];
-    let dwarfPlanets = [];
-    let comets = [];
-    let asteroids = [];
-    let sun = null;
-    let selectedPlanet = null;
-    let cameraAngle = 0;
-    let cameraTilt = 30;
-    let cameraDistance = 200;
-    let timeSpeed = 1.0;
-    let isPaused = false;
-    let showOrbits = true;
-    let showLabels = true;
-    let showAsteroids = true;
-    let showComets = true;
-    let showDwarfs = true;
-    let starfield = [];
-    let glowIntensity = 0;
-    let mouseDown = false;
-    let lastMouseX = 0, lastMouseY = 0;
-    let autoRotate = true;
-    let frame = 0;
+    let selected = null;
+    let camH = 0, camV = 0.5, camD = 200;
+    let speed = 1.0, paused = false, frame = 0;
+    let stars = [];
+    let dragging = false, lx = 0, ly = 0;
+    let autoRot = true;
+    let flightMode = false;
+    // Flight state
+    let fx = 0, fy = 0, fz = 0, fyaw = 0, fpitch = 0;
+    // Touch flight
+    let touchId = -1;
 
-    // p5.js instance mode to avoid global pollution
+    // ============ SKETCH ============
     const sketch = (p) => {
-      p.preload = () => {
-        // No external assets needed - all procedural
-      };
-
       p.setup = () => {
-        const canvas = p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL);
-        canvas.style('display', 'block');
+        p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL);
         p.colorMode(p.HSB, 360, 100, 100, 100);
         p.noStroke();
-        
-        // Create starfield
-        for (let i = 0; i < 2000; i++) {
-          const r = p.random(500, 2000);
-          const theta = p.random(p.TWO_PI);
-          const phi = p.acos(p.random(-1, 1));
-          starfield.push({
-            x: r * p.sin(phi) * p.cos(theta),
-            y: r * p.sin(phi) * p.sin(theta),
-            z: r * p.cos(phi),
-            size: p.random(0.5, 3),
-            brightness: p.random(30, 100),
-            twinkleSpeed: p.random(0.005, 0.03),
-            twinkleOffset: p.random(p.TWO_PI)
+
+        // Stars
+        for(let i=0;i<1200;i++){
+          const t = p.random(p.TWO_PI), ph = p.acos(p.random(-1,1)), r = p.random(600,3000);
+          stars.push({x:r*p.sin(ph)*p.cos(t),y:r*p.sin(ph)*p.sin(t),z:r*p.cos(ph),s:p.random(.5,2.5),b:p.random(40,100),tw:p.random(.005,.03),to:p.random(p.TWO_PI)});
+        }
+
+        // Planets
+        PLANET_DATA.forEach((d,i)=>{
+          const moons = d.name==='Erde'?[{n:'Mond',d:6,r:1.2,h:0,s:0,b:71,ang:0,sp:.05}]:
+            d.name==='Mars'?[{n:'Phobos',d:3,r:.3,h:30,s:15,b:55,ang:0,sp:.3},{n:'Deimos',d:5,r:.25,h:30,s:14,b:50,ang:2,sp:.1}]:
+            d.name==='Jupiter'?[{n:'Io',d:10,r:1.5,h:30,s:61,b:100,ang:0,sp:.15},{n:'Europa',d:14,r:1.3,h:240,s:9,b:86,ang:1,sp:.08},{n:'Ganymed',d:18,r:1.8,h:30,s:7,b:63,ang:2,sp:.04},{n:'Kallisto',d:24,r:1.6,h:30,s:8,b:51,ang:3,sp:.02}]:
+            d.name==='Saturn'?[{n:'Titan',d:16,r:1.8,h:30,s:40,b:78,ang:0,sp:.03},{n:'Enceladus',d:8,r:.5,h:0,s:0,b:100,ang:2,sp:.1}]:[];
+          planets.push({
+            data:d, idx:i, ang:p.random(p.TWO_PI), orbitR:d.dist*20, rad:p.map(d.radius,2440,69911,3,22),
+            rot:p.random(p.TWO_PI), rotSp:p.random(.005,.02), orbSp:365.25/d.orbitDays*.08,
+            h:d.hue, s:d.sat, b:d.bri, name:d.name, emoji:d.emoji, ec:d.emojiColor, info:d.info, moons
           });
-        }
-
-        // Create Sun
-        sun = new Sun(p);
-
-        // Create Planets
-        PLANETS.forEach((data, i) => {
-          planets.push(new Planet(p, data, i));
         });
 
-        // Create Dwarf Planets
-        DWARF_PLANETS.forEach((data, i) => {
-          dwarfPlanets.push(new DwarfPlanet(p, data, i));
-        });
-
-        // Create Comets
-        COMETS.forEach((data, i) => {
-          comets.push(new Comet(p, data, i));
-        });
-
-        // Create Asteroid Belt
-        for (let i = 0; i < ASTEROID_BELT.count; i++) {
-          asteroids.push(new Asteroid(p, i));
-        }
-
-        // UI Event listeners
         setupUI();
       };
 
       p.draw = () => {
-        p.background(5, 5, 15);
-        
-        if (!isPaused) {
-          frame += timeSpeed * 0.5;
-        }
-        glowIntensity = p.sin(frame * 0.02) * 10 + 90;
+        p.background(230, 30, 8);
+        if(!paused) frame += speed * 0.3;
 
         // Camera
-        setupCamera(p);
-
-        // Draw starfield
-        drawStarfield(p);
-
-        // Draw Sun
-        sun.draw(p, frame);
-
-        // Draw orbits
-        if (showOrbits) {
-          drawOrbits(p);
+        if(flightMode){
+          p.camera(fx, fy, fz, fx+p.cos(fyaw)*p.cos(fpitch), fy+p.sin(fpitch), fz+p.sin(fyaw)*p.cos(fpitch), 0, 1, 0);
+        } else {
+          const cx = p.cos(camH)*camD*p.cos(camV);
+          const cy = camD*p.sin(camV);
+          const cz = p.sin(camH)*camD*p.cos(camV);
+          p.camera(cx, cy, cz, 0, 0, 0, 0, 1, 0);
+          if(autoRot && !dragging) camH += 0.002 * speed;
         }
+        p.perspective(p.PI/3, p.width/p.height, 1, 5000);
 
-        // Draw asteroid belt
-        if (showAsteroids) {
-          asteroids.forEach(a => a.draw(p, frame));
-        }
+        // Stars
+        p.push();
+        stars.forEach(s=>{
+          const b = s.b + p.sin(frame*s.tw+s.to)*15;
+          p.fill(60, 10, b);
+          p.push(); p.translate(s.x,s.y,s.z); p.sphere(s.s,4,4); p.pop();
+        });
+        p.pop();
 
-        // Draw planets
-        planets.forEach(planet => planet.draw(p, frame, selectedPlanet === planet));
+        // Sun
+        p.push();
+        for(let i=5;i>0;i--){ p.fill(50,90,100,12/i); p.sphere(25+i*6,24,24); }
+        p.fill(50,90,100); p.sphere(25,24,24);
+        p.pop();
 
-        // Draw dwarf planets
-        if (showDwarfs) {
-          dwarfPlanets.forEach(dp => dp.draw(p, frame, selectedPlanet === dp));
-        }
+        // Orbits
+        p.noFill(); p.strokeWeight(.5);
+        planets.forEach(pl=>{
+          p.stroke(60,20,50,20);
+          p.beginShape();
+          for(let i=0;i<=48;i++){ const a=i/48*p.TWO_PI; p.vertex(p.cos(a)*pl.orbitR,0,p.sin(a)*pl.orbitR); }
+          p.endShape();
+        });
+        p.noStroke();
 
-        // Draw comets
-        if (showComets) {
-          comets.forEach(comet => comet.draw(p, frame, selectedPlanet === comet));
-        }
+        // Planets
+        planets.forEach(pl=>{
+          pl.ang += pl.orbSp * speed * 0.01;
+          pl.rot += pl.rotSp * speed;
+          const x = p.cos(pl.ang)*pl.orbitR, z = p.sin(pl.ang)*pl.orbitR, y = p.sin(pl.ang*.5+pl.idx)*1.5;
+          p.push(); p.translate(x,y,z); p.rotateY(pl.rot);
+          p.fill(pl.h,pl.s,pl.b); p.sphere(pl.rad,20,20);
+          // Saturn rings
+          if(pl.name==='Saturn'){
+            p.push(); p.rotateX(p.PI/2);
+            for(let r=pl.rad*1.3;r<pl.rad*2.2;r+=1.5){
+              p.stroke(45,30,85,p.map(r,pl.rad*1.3,pl.rad*2.2,60,10)); p.strokeWeight(1);
+              p.ellipse(0,0,r*2,r*.3);
+            }
+            p.noStroke(); p.pop();
+          }
+          // Moons
+          pl.moons.forEach(m=>{
+            m.ang += m.sp * speed;
+            p.push(); p.translate(p.cos(m.ang)*m.d,0,p.sin(m.ang)*m.d);
+            p.fill(m.h,m.s,m.b); p.sphere(m.r,8,8); p.pop();
+          });
+          // Selection
+          if(selected===pl){ p.noFill(); p.stroke(60,100,100,70); p.strokeWeight(2); p.sphere(pl.rad+2,16,16); p.noStroke(); }
+          p.pop();
+        });
 
-        // Draw labels
-        if (showLabels) {
-          drawLabels(p);
-        }
-
-        // Auto rotate camera
-        if (autoRotate && !mouseDown) {
-          cameraAngle += 0.002 * timeSpeed;
-        }
+        // Labels
+        p.push(); p.textAlign(p.CENTER,p.CENTER); p.textSize(11); p.noStroke();
+        planets.forEach(pl=>{
+          const x = p.cos(pl.ang)*pl.orbitR, z = p.sin(pl.ang)*pl.orbitR, y = p.sin(pl.ang*.5+pl.idx)*1.5;
+          const sp = getScreenPos(p,x,y,z+pl.rad+8);
+          if(sp){ p.fill(pl.ec); p.text(pl.emoji+' '+pl.name,sp.x,sp.y); }
+        });
+        p.pop();
       };
 
-      p.windowResized = () => {
-        p.resizeCanvas(p.windowWidth, p.windowHeight);
-      };
+      p.windowResized = () => p.resizeCanvas(p.windowWidth, p.windowHeight);
 
+      // Mouse
       p.mousePressed = () => {
-        if (p.mouseX > 0 && p.mouseX < p.width && p.mouseY > 0 && p.mouseY < p.height) {
-          mouseDown = true;
-          lastMouseX = p.mouseX;
-          lastMouseY = p.mouseY;
-          autoRotate = false;
-          checkPlanetClick(p);
+        if(p.mouseX>0&&p.mouseX<p.width&&p.mouseY>0&&p.mouseY<p.height){
+          dragging=true; lx=p.mouseX; ly=p.mouseY;
+          if(!flightMode) autoRot=false;
+          checkClick(p);
         }
       };
-
-      p.mouseReleased = () => {
-        mouseDown = false;
-      };
-
+      p.mouseReleased = () => { dragging=false; };
       p.mouseDragged = () => {
-        if (mouseDown) {
-          cameraAngle += (p.mouseX - lastMouseX) * 0.005;
-          cameraTilt = p.constrain(cameraTilt + (p.mouseY - lastMouseY) * 0.005, -80, 80);
-          lastMouseX = p.mouseX;
-          lastMouseY = p.mouseY;
-        }
+        if(!dragging) return;
+        if(flightMode){ fyaw += (p.mouseX-lx)*0.01; fpitch = p.constrain(fpitch+(p.mouseY-ly)*0.01,-1.5,1.5); }
+        else { camH += (p.mouseX-lx)*0.005; camV = p.constrain(camV+(p.mouseY-ly)*0.005,-1.4,1.4); }
+        lx=p.mouseX; ly=p.mouseY;
       };
-
-      p.mouseWheel = (event) => {
-        cameraDistance = p.constrain(cameraDistance - event.delta * 0.1, 50, 1000);
-        updateZoomUI();
+      p.mouseWheel = (e) => {
+        if(!flightMode){ camD = p.constrain(camD-e.delta*0.1,30,1000); updateZoomUI(); }
         return false;
       };
 
+      // Touch
+      p.touchStarted = () => {
+        if(p.touches.length>0){
+          dragging=true; lx=p.touches[0].x; ly=p.touches[0].y;
+          if(!flightMode) autoRot=false;
+        }
+        return false;
+      };
+      p.touchMoved = () => {
+        if(p.touches.length>0&&dragging){
+          if(flightMode){ fyaw += (p.touches[0].x-lx)*0.01; fpitch = p.constrain(fpitch+(p.touches[0].y-ly)*0.01,-1.5,1.5); }
+          else { camH += (p.touches[0].x-lx)*0.005; camV = p.constrain(camV+(p.touches[0].y-ly)*0.005,-1.4,1.4); }
+          lx=p.touches[0].x; ly=p.touches[0].y;
+        }
+        return false;
+      };
+      p.touchEnded = () => { dragging=false; return false; };
+
+      // Keyboard
       p.keyPressed = () => {
-        if (p.key === ' ') { togglePause(); }
-        if (p.key === 'r' || p.key === 'R') { resetView(); }
-        if (p.key === 'o' || p.key === 'O') { showOrbits = !showOrbits; }
-        if (p.key === 'l' || p.key === 'L') { showLabels = !showLabels; }
-        if (p.key === 'a' || p.key === 'A') { showAsteroids = !showAsteroids; }
-        if (p.key === 'c' || p.key === 'C') { showComets = !showComets; }
-        if (p.key === 'd' || p.key === 'D') { showDwarfs = !showDwarfs; }
-        if (p.key === 'ArrowUp') { timeSpeed = p.min(timeSpeed * 1.5, 10); updateSpeedUI(); }
-        if (p.key === 'ArrowDown') { timeSpeed = p.max(timeSpeed / 1.5, 0.01); updateSpeedUI(); }
+        if(p.key===' ') togglePause();
+        if(p.key==='r'||p.key==='R') resetView();
+        if(p.key==='f'||p.key==='F') toggleFlight();
+        if(p.key==='ArrowUp'){ speed=Math.min(speed*1.5,10); updateSpeedUI(); }
+        if(p.key==='ArrowDown'){ speed=Math.max(speed/1.5,0.01); updateSpeedUI(); }
+        if(flightMode){
+          const sp = parseInt(document.getElementById('flightSpeedSlider').value)*0.5;
+          if(p.key==='w'||p.key==='W'){ fx+=Math.cos(fyaw)*Math.cos(fpitch)*sp; fy+=Math.sin(fpitch)*sp; fz+=Math.sin(fyaw)*Math.cos(fpitch)*sp; }
+          if(p.key==='s'||p.key==='S'){ fx-=Math.cos(fyaw)*Math.cos(fpitch)*sp; fy-=Math.sin(fpitch)*sp; fz-=Math.sin(fyaw)*Math.cos(fpitch)*sp; }
+          if(p.key==='a'||p.key==='A'){ fx+=Math.cos(fyaw-Math.PI/2)*sp; fz+=Math.sin(fyaw-Math.PI/2)*sp; }
+          if(p.key==='d'||p.key==='D'){ fx+=Math.cos(fyaw+Math.PI/2)*sp; fz+=Math.sin(fyaw+Math.PI/2)*sp; }
+          if(p.key==='q'||p.key==='Q') fy+=sp;
+          if(p.key==='e'||p.key==='E') fy-=sp;
+        }
       };
     };
 
     new p5(sketch);
 
-    // ============ KLASSEN ============
-    class Sun {
-      constructor(p) {
-        this.p = p;
-        this.radius = 30;
-        this.coronaParticles = [];
-        for (let i = 0; i < 200; i++) {
-          this.coronaParticles.push({
-            angle: p.random(p.TWO_PI),
-            radius: p.random(35, 80),
-            speed: p.random(0.002, 0.01),
-            size: p.random(2, 8),
-            hue: p.random(40, 60),
-            phase: p.random(p.TWO_PI)
-          });
-        }
-        this.flares = [];
-        for (let i = 0; i < 12; i++) {
-          this.flares.push({
-            angle: p.random(p.TWO_PI),
-            length: p.random(40, 100),
-            speed: p.random(0.01, 0.03),
-            width: p.random(3, 8),
-            phase: p.random(p.TWO_PI)
-          });
-        }
-      }
-
-      draw(p, frame) {
-        // Corona/glow layers
-        p.noStroke();
-        for (let i = 5; i > 0; i--) {
-          const alpha = 15 / i;
-          const r = this.radius + i * 8;
-          const hue = 50 + p.sin(frame * 0.03 + i) * 10;
-          p.fill(hue, 90, 100, alpha);
-          p.sphere(r, 32, 32);
-        }
-
-        // Sun surface
-        p.push();
-        p.rotateY(frame * 0.001);
-        p.rotateZ(frame * 0.0005);        // Surface texture using noise
-        const detail = 32;
-        p.beginShape(p.TRIANGLE_STRIP);
-        for (let lat = 0; lat <= detail; lat++) {
-          const theta = p.map(lat, 0, detail, 0, p.PI);
-          for (let lon = 0; lon <= detail; lon++) {
-            const phi = p.map(lon, 0, detail, 0, p.TWO_PI);
-            const nx = p.sin(theta) * p.cos(phi);
-            const ny = p.sin(theta) * p.sin(phi);
-            const nz = p.cos(theta);
-            
-            // Noise-based surface displacement
-            const n = p.noise(nx * 2 + frame * 0.001, ny * 2, nz * 2 + frame * 0.0005);
-            const r = this.radius * (1 + n * 0.02);
-            
-            const hue = 45 + p.sin(n * 10 + frame * 0.02) * 15;
-            const sat = 80 + n * 20;
-            p.fill(hue, sat, 100);
-            
-            p.vertex(r * nx, r * ny, r * nz);
-          }
-        }
-        p.endShape();
-        p.pop();
-
-        // Corona particles
-        p.blendMode(p.ADD);
-        this.coronaParticles.forEach(part => {
-          const a = part.angle + frame * part.speed;
-          const r = part.radius + p.sin(frame * 0.01 + part.phase) * 5;
-          const x = p.cos(a) * r;
-          const y = p.sin(a) * r;
-          const z = p.sin(a * 2 + part.phase) * r * 0.3;
-          const sz = part.size * (0.5 + p.sin(frame * 0.05 + part.phase) * 0.5);
-          p.fill(part.hue, 80, 100, 20);
-          p.push();
-          p.translate(x, y, z);
-          p.rotateY(frame * 0.01);
-          p.sphere(sz, 8, 8);
-          p.pop();
-        });
-        p.blendMode(p.BLEND);
-
-        // Solar flares
-        this.flares.forEach(flare => {
-          const a = flare.angle + frame * flare.speed;
-          const len = flare.length + p.sin(frame * 0.05 + flare.phase) * 20;
-          p.stroke(50, 100, 100, 30);
-          p.strokeWeight(flare.width);
-          p.beginShape();
-          p.vertex(0, 0, 0);
-          for (let i = 0; i <= 5; i++) {
-            const t = i / 5;
-            const r = (this.radius + len * t) * (1 + p.noise(a, frame * 0.01, i) * 0.3);
-            p.vertex(p.cos(a) * r, p.sin(a) * r, p.sin(a * 3) * r * 0.2);
-          }
-          p.endShape();
-        });
-        p.noStroke();
+    // ============ HELPERS ============
+    function getScreenPos(p, x, y, z) {
+      // Use p5's built-in screenXYZ if available, otherwise manual projection
+      try {
+        const v = p.screenVector(p.createVector(x, y, z));
+        if(v.z < 0) return null;
+        return {x: v.x, y: v.y};
+      } catch(e) {
+        // Fallback: simple projection
+        const cx = Math.cos(camH)*camD*Math.cos(camV);
+        const cy = camD*Math.sin(camV);
+        const cz = Math.sin(camH)*camD*Math.cos(camV);
+        const dx = x-cx, dy = y-cy, dz = z-cz;
+        if(dz < 0.1) return null;
+        const fov = Math.PI/3;
+        const scale = p.height/(2*Math.tan(fov/2));
+        const px = (dx/dz)*scale + p.width/2;
+        const py = (dy/dz)*scale + p.height/2;
+        if(px < -100 || px > p.width+100 || py < -100 || py > p.height+100) return null;
+        return {x: px, y: py};
       }
     }
 
-    class Planet {
-      constructor(p, data, index) {
-        this.p = p;
-        this.data = data;
-        this.index = index;
-        this.angle = p.random(p.TWO_PI);
-        this.orbitRadius = data.dist * 25; // Scale factor
-        this.radius = p.map(data.radius, 2440, 69911, 4, 28); // Visual scaling
-        this.rotationSpeed = p.random(0.005, 0.02);
-        this.rotationAngle = p.random(p.TWO_PI);
-        this.axialTilt = p.random(-0.3, 0.3);
-        this.moons = this.generateMoons(data);
-        this.orbitSpeed = 365.25 / data.orbitDays * 0.1; // Relative to Earth
-        this.color = data.color;
-        this.emojiColor = data.emojiColor;
-        this.emoji = data.emoji;
-        this.name = data.name;
-        this.facts = data.facts;
-        this.info = data.info;
-        
-        // Generate surface texture
-        this.surfaceNoise = [];
-        for (let i = 0; i < 1000; i++) {
-          this.surfaceNoise.push({
-            theta: p.random(p.PI),
-            phi: p.random(p.TWO_PI),
-            brightness: p.random(-15, 15),
-            size: p.random(0.5, 2)
-          });
+    function checkClick(p) {
+      for(let pl of planets){
+        const x = Math.cos(pl.ang)*pl.orbitR, z = Math.sin(pl.ang)*pl.orbitR, y = Math.sin(pl.ang*.5+pl.idx)*1.5;
+        const sp = getScreenPos(p,x,y,z);
+        if(sp && p.dist(p.mouseX,p.mouseY,sp.x,sp.y) < pl.rad*2+15){
+          selectPlanet(pl); return;
         }
       }
-
-      generateMoons(data) {
-        const moons = [];
-        if (data.name === 'Erde') {
-          moons.push({ name: 'Mond', dist: 8, radius: 1.5, color: [180, 180, 180], angle: 0, speed: 0.05 });
-        } else if (data.name === 'Mars') {
-          moons.push({ name: 'Phobos', dist: 3, radius: 0.4, color: [150, 130, 110], angle: 0, speed: 0.3 });
-          moons.push({ name: 'Deimos', dist: 5, radius: 0.3, color: [140, 120, 100], angle: 2, speed: 0.1 });
-        } else if (data.name === 'Jupiter') {
-          moons.push({ name: 'Io', dist: 12, radius: 1.8, color: [255, 180, 100], angle: 0, speed: 0.15 });
-          moons.push({ name: 'Europa', dist: 16, radius: 1.6, color: [200, 200, 220], angle: 1, speed: 0.08 });
-          moons.push({ name: 'Ganymed', dist: 22, radius: 2.2, color: [160, 150, 140], angle: 2, speed: 0.04 });
-          moons.push({ name: 'Kallisto', dist: 30, radius: 2, color: [130, 120, 110], angle: 3, speed: 0.02 });
-        } else if (data.name === 'Saturn') {
-          moons.push({ name: 'Titan', dist: 20, radius: 2.2, color: [200, 170, 120], angle: 0, speed: 0.03 });
-          moons.push({ name: 'Enceladus', dist: 10, radius: 0.6, color: [255, 255, 255], angle: 2, speed: 0.1 });
-        }
-        return moons;
-      }
-
-      update(frame) {
-        this.angle += this.orbitSpeed * timeSpeed * 0.01;
-        this.rotationAngle += this.rotationSpeed * timeSpeed;
-      }
-
-      draw(p, frame, isSelected) {
-        this.update(frame);
-        
-        const x = p.cos(this.angle) * this.orbitRadius;
-        const z = p.sin(this.angle) * this.orbitRadius;
-        const y = p.sin(this.angle * 0.5 + this.index) * 2; // Slight orbital inclination
-
-        p.push();
-        p.translate(x, y, z);
-        p.rotateZ(this.axialTilt);
-        p.rotateY(this.rotationAngle);
-
-        // Planet body
-        this.drawPlanet(p, isSelected);
-
-        // Moons
-        this.moons.forEach(moon => {
-          moon.angle += moon.speed * timeSpeed;
-          const mx = p.cos(moon.angle) * moon.dist;
-          const mz = p.sin(moon.angle) * moon.dist;
-          p.push();
-          p.translate(mx, 0, mz);
-          p.fill(moon.color[0], moon.color[1], moon.color[2]);
-          p.sphere(moon.radius, 12, 12);
-          p.pop();
-          
-          // Moon orbit line
-          if (showOrbits) {
-            p.stroke(100, 20, 100, 20);
-            p.strokeWeight(0.5);
-            p.noFill();
-            p.beginShape();
-            for (let i = 0; i <= 32; i++) {
-              const a = (i / 32) * p.TWO_PI;
-              p.vertex(p.cos(a) * moon.dist, 0, p.sin(a) * moon.dist);
-            }
-            p.endShape();
-            p.noStroke();
-          }
-        });
-
-        // Selection highlight
-        if (isSelected) {
-          p.noFill();
-          p.stroke(60, 100, 100, 80);
-          p.strokeWeight(3);
-          p.sphere(this.radius + 3, 24, 24);
-          p.noStroke();
-        }
-
-        p.pop();
-      }
-
-      drawPlanet(p, isSelected) {
-        // Main sphere with procedural texture
-        const detail = 24;
-        p.beginShape(p.TRIANGLE_STRIP);
-        for (let lat = 0; lat <= detail; lat++) {
-          const theta = p.map(lat, 0, detail, 0, p.PI);
-          for (let lon = 0; lon <= detail; lon++) {
-            const phi = p.map(lon, 0, detail, 0, p.TWO_PI);
-            const nx = p.sin(theta) * p.cos(phi);
-            const ny = p.sin(theta) * p.sin(phi);
-            const nz = p.cos(theta);
-            
-            // Base color with noise variation
-            let h = this.getHueFromColor(this.color[0]);
-            let s = this.getSatFromColor(this.color[1]);
-            let b = this.getBriFromColor(this.color[2]);
-            
-            const n = p.noise(nx * 3 + this.index * 10, ny * 3, nz * 3 + frame * 0.001);
-            h += n * 20 - 10;
-            s += n * 10 - 5;
-            b += n * 10 - 5;
-            
-            // Surface features
-            this.surfaceNoise.forEach(sn => {
-              const dx = nx - p.sin(sn.theta) * p.cos(sn.phi);
-              const dy = ny - p.sin(sn.theta) * p.sin(sn.phi);
-              const dz = nz - p.cos(sn.theta);
-              const dist = p.sqrt(dx*dx + dy*dy + dz*dz);
-              if (dist < 0.1) {
-                b += sn.brightness;
-              }
-            });
-            
-            p.fill(h % 360, p.constrain(s, 0, 100), p.constrain(b, 0, 100));
-            p.vertex(this.radius * nx, this.radius * ny, this.radius * nz);
-          }
-        }
-        p.endShape();
-
-        // Rings for Saturn
-        if (this.name === 'Saturn') {
-          this.drawRings(p);
-        }
-      }
-
-      drawRings(p) {
-        const ringInner = this.radius * 1.3;
-        const ringOuter = this.radius * 2.3;
-        const segments = 64;
-        
-        p.push();
-        p.rotateX(p.PI / 2);
-        for (let r = ringInner; r < ringOuter; r += 2) {
-          const alpha = p.map(r, ringInner, ringOuter, 60, 10);
-          const hue = 40;
-          p.stroke(hue, 30, 90, alpha);
-          p.strokeWeight(1.5);
-          p.noFill();
-          p.beginShape();
-          for (let i = 0; i <= segments; i++) {
-            const a = (i / segments) * p.TWO_PI;
-            const wobble = p.noise(r * 0.1, a, frame * 0.001) * 3;
-            p.vertex(p.cos(a) * (r + wobble), 0, p.sin(a) * (r + wobble));
-          }
-          p.endShape();
-        }
-        p.noStroke();
-        p.pop();
-      }
-
-      getHueFromColor(r) { return r; }
-      getSatFromColor(g) { return g; }
-      getBriFromColor(b) { return b; }
+      selected=null; closeInfo();
     }
 
-    class DwarfPlanet {
-      constructor(p, data, index) {
-        this.p = p;
-        this.data = data;
-        this.index = index;
-        this.angle = p.random(p.TWO_PI);
-        this.orbitRadius = data.dist * 25;
-        this.radius = p.max(2, p.map(data.radius, 473, 1188, 1.5, 3.5));
-        this.rotationAngle = p.random(p.TWO_PI);
-        this.rotationSpeed = p.random(0.01, 0.03);
-        this.color = data.color;
-        this.emojiColor = data.emojiColor;
-        this.emoji = data.emoji;
-        this.name = data.name;
-        this.facts = data.facts;
-        this.info = data.info;
-        this.orbitalInclination = p.random(-0.5, 0.5); // More inclined orbits
-      }
+    function selectPlanet(pl){ selected=pl; showInfo(pl); }
 
-      update(frame) {
-        this.angle += (365.25 / this.data.orbitDays) * 0.1 * timeSpeed * 0.01;
-        this.rotationAngle += this.rotationSpeed * timeSpeed;
-      }
-
-      draw(p, frame, isSelected) {
-        this.update(frame);
-        
-        const x = p.cos(this.angle) * this.orbitRadius;
-        const z = p.sin(this.angle) * this.orbitRadius;
-        const y = p.sin(this.angle * 2 + this.index) * this.orbitRadius * 0.1 * this.orbitalInclination;
-
-        p.push();
-        p.translate(x, y, z);
-        p.rotateY(this.rotationAngle);
-
-        // Simple sphere for dwarf planets
-        p.fill(this.color[0], this.color[1], this.color[2]);
-        p.sphere(this.radius, 16, 16);
-
-        // Ring for Haumea
-        if (this.name === 'Haumea') {
-          p.push();
-          p.rotateX(p.PI / 2);
-          p.noFill();
-          p.stroke(60, 20, 90, 60);
-          p.strokeWeight(1);
-          p.ellipse(0, 0, this.radius * 2.5, this.radius * 1.2);
-          p.noStroke();
-          p.pop();
-        }
-
-        if (isSelected) {
-          p.noFill();
-          p.stroke(60, 100, 100, 80);
-          p.strokeWeight(2);
-          p.sphere(this.radius + 2, 16, 16);
-          p.noStroke();
-        }
-
-        p.pop();
-      }
-    }
-
-    class Comet {
-      constructor(p, data, index) {
-        this.p = p;
-        this.data = data;
-        this.index = index;
-        this.perihelion = data.perihelion * 25;
-        this.aphelion = data.aphelion * 25;
-        this.semiMajor = (this.perihelion + this.aphelion) / 2;
-        this.eccentricity = (this.aphelion - this.perihelion) / (this.aphelion + this.perihelion);
-        this.period = data.period / 365.25 * 100; // Scaled time
-        this.meanAnomaly = p.random(p.TWO_PI);
-        this.inclination = p.radians(data.inclination);
-        this.argPerihelion = p.random(p.TWO_PI);
-        this.longAscNode = p.random(p.TWO_PI);
-        this.color = data.color;
-        this.tailLen = data.tailLen;
-        this.nucleusRadius = 1.5;
-        this.tailParticles = [];
-        for (let i = 0; i < 50; i++) {
-          this.tailParticles.push({
-            offset: p.random(0.1, 1),
-            side: p.random(-0.3, 0.3),
-            size: p.random(0.5, 2),
-            brightness: p.random(30, 100)
-          });
-        }
-        this.name = data.name;
-        this.facts = data.facts;
-        this.isVisible = true;
-      }
-
-      getPosition(frame) {
-        const n = p.TWO_PI / this.period; // Mean motion
-        const M = (this.meanAnomaly + n * frame * timeSpeed * 0.01) % p.TWO_PI;
-        
-        // Solve Kepler's equation (simplified)
-        let E = M;
-        for (let i = 0; i < 5; i++) {
-          E = M + this.eccentricity * p.sin(E);
-        }
-        
-        // True anomaly
-        const nu = 2 * p.atan(p.sqrt((1 + this.eccentricity) / (1 - this.eccentricity)) * p.tan(E / 2));
-        
-        // Distance
-        const r = this.semiMajor * (1 - this.eccentricity * this.eccentricity) / (1 + this.eccentricity * p.cos(nu));
-        
-        // Position in orbital plane
-        const x_orb = r * p.cos(nu);
-        const y_orb = r * p.sin(nu);
-        const z_orb = 0;
-        
-        // Rotate to 3D space
-        const cosW = p.cos(this.argPerihelion);
-        const sinW = p.sin(this.argPerihelion);
-        const cosI = p.cos(this.inclination);
-        const sinI = p.sin(this.inclination);
-        const cosO = p.cos(this.longAscNode);
-        const sinO = p.sin(this.longAscNode);
-        
-        const x = (cosW * cosO - sinW * sinO * cosI) * x_orb + (-sinW * cosO - cosW * sinO * cosI) * y_orb;
-        const y = (cosW * sinO + sinW * cosO * cosI) * x_orb + (-sinW * sinO + cosW * cosO * cosI) * y_orb;
-        const z = sinW * sinI * x_orb + cosW * sinI * y_orb;
-        
-        return { x, y, z, r, nu };
-      }
-
-      draw(p, frame, isSelected) {
-        const pos = this.getPosition(frame);
-        
-        // Only draw if not too far
-        if (pos.r > 500) return;
-        
-        p.push();
-        p.translate(pos.x, pos.y, pos.z);
-        
-        // Orient tail away from sun
-        const toSun = p.createVector(-pos.x, -pos.y, -pos.z);
-        toSun.normalize();
-        
-        // Nucleus
-        p.fill(this.color[0], this.color[1], this.color[2]);
-        p.sphere(this.nucleusRadius, 12, 12);
-        
-        // Coma (glow)
-        p.noStroke();
-        for (let i = 3; i > 0; i--) {
-          p.fill(this.color[0], this.color[1], 100, 15 / i);
-          p.sphere(this.nucleusRadius * (1 + i * 0.5), 8, 8);
-        }
-        
-        // Tail
-        this.drawTail(p, toSun, pos.r);
-        
-        if (isSelected) {
-          p.noFill();
-          p.stroke(60, 100, 100, 80);
-          p.strokeWeight(2);
-          p.sphere(this.nucleusRadius + 4, 12, 12);
-          p.noStroke();
-        }
-        
-        p.pop();
-      }
-
-      drawTail(p, toSun, dist) {
-        // Tail points away from sun
-        const tailDir = p.createVector(toSun.x, toSun.y, toSun.z);
-        tailDir.mult(-1);
-        
-        // Dust tail (curved)
-        p.blendMode(p.ADD);
-        p.noStroke();
-        
-        for (let i = 0; i < this.tailParticles.length; i++) {
-          const tp = this.tailParticles[i];
-          const t = i / this.tailParticles.length;
-          const len = this.tailLen * 10 * (0.5 + p.noise(frame * 0.01, i) * 0.5) * (1 - dist / 500);
-          
-          // Curved tail
-          const curve = p.sin(frame * 0.02 + i * 0.5) * 0.3;
-          const tx = tailDir.x * len * t + curve * len * (1-t);
-          const ty = tailDir.y * len * t;
-          const tz = tailDir.z * len * t - curve * len * (1-t);
-          
-          const alpha = tp.brightness * (1 - t) * 0.5;
-          p.fill(this.color[0], this.color[1], 100, alpha);
-          p.push();
-          p.translate(tx, ty, tz);
-          p.sphere(tp.size * (1 - t * 0.5), 6, 6);
-          p.pop();
-        }
-        
-        // Ion tail (straight, blue)
-        for (let i = 0; i < 20; i++) {
-          const t = i / 20;
-          const len = this.tailLen * 15 * (1 - dist / 500);
-          const tx = tailDir.x * len * t;
-          const ty = tailDir.y * len * t;
-          const tz = tailDir.z * len * t;
-          const alpha = 40 * (1 - t);
-          p.fill(200, 80, 100, alpha);
-          p.push();
-          p.translate(tx, ty, tz);
-          p.sphere((1 - t) * 2, 6, 6);
-          p.pop();
-        }
-        
-        p.blendMode(p.BLEND);
-      }
-    }
-
-    class Asteroid {
-      constructor(p, index) {
-        this.p = p;
-        this.index = index;
-        this.orbitRadius = p.random(ASTEROID_BELT.inner, ASTEROID_BELT.outer) * 25;
-        this.angle = p.random(p.TWO_PI);
-        this.orbitSpeed = p.random(0.001, 0.003) * (25 / this.orbitRadius * 25);
-        this.radius = p.random(0.3, 1.5);
-        this.rotationSpeed = p.random(0.01, 0.05);
-        this.rotationAngle = p.random(p.TWO_PI);
-        this.tilt = p.random(-0.5, 0.5);
-        this.color = p.random([
-          [120, 20, 40], [130, 15, 35], [110, 25, 45], 
-          [140, 10, 30], [100, 30, 50]
-        ]);
-        this.shape = this.generateShape();
-      }
-
-      generateShape() {
-        const verts = [];
-        const detail = 6;
-        for (let i = 0; i <= detail; i++) {
-          const theta = p.map(i, 0, detail, 0, p.PI);
-          for (let j = 0; j <= detail; j++) {
-            const phi = p.map(j, 0, detail, 0, p.TWO_PI);
-            const r = 1 + p.noise(i * 0.5, j * 0.5, this.index) * 0.4;
-            verts.push({ theta, phi, r });
-          }
-        }
-        return verts;
-      }
-
-      draw(p, frame) {
-        this.angle += this.orbitSpeed * timeSpeed;
-        this.rotationAngle += this.rotationSpeed * timeSpeed;
-        
-        const x = p.cos(this.angle) * this.orbitRadius;
-        const z = p.sin(this.angle) * this.orbitRadius;
-        const y = p.sin(this.angle * 3 + this.index) * this.orbitRadius * 0.05;
-
-        p.push();
-        p.translate(x, y, z);
-        p.rotateY(this.rotationAngle);
-        p.rotateZ(this.tilt);
-        
-        p.fill(this.color[0], this.color[1], this.color[2]);
-        p.sphere(this.radius, 6, 6);
-        p.pop();
-      }
-    }
-
-    // ============ HILFSFUNKTIONEN ============
-    function setupCamera(p) {
-      const camX = p.cos(cameraAngle) * cameraDistance * p.cos(p.radians(cameraTilt));
-      const camY = cameraDistance * p.sin(p.radians(cameraTilt));
-      const camZ = p.sin(cameraAngle) * cameraDistance * p.cos(p.radians(cameraTilt));
-      
-      p.camera(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
-      p.perspective(p.PI / 3, p.width / p.height, 1, 5000);
-    }
-
-    function drawStarfield(p) {
-      p.push();
-      p.noStroke();
-      starfield.forEach(star => {
-        const twinkle = star.brightness + p.sin(frame * star.twinkleSpeed + star.twinkleOffset) * 20;
-        p.fill(60, 10, twinkle);
-        p.push();
-        p.translate(star.x, star.y, star.z);
-        p.sphere(star.size, 4, 4);
-        p.pop();
-      });
-      p.pop();
-    }
-
-    function drawOrbits(p) {
-      p.noFill();
-      p.strokeWeight(0.8);
-      
-      // Planet orbits
-      PLANETS.forEach((data, i) => {
-        const r = data.dist * 25;
-        const hue = 60;
-        p.stroke(hue, 20, 60, 30);
-        p.beginShape();
-        for (let j = 0; j <= 64; j++) {
-          const a = (j / 64) * p.TWO_PI;
-          p.vertex(p.cos(a) * r, 0, p.sin(a) * r);
-        }
-        p.endShape();
-      });
-
-      // Dwarf planet orbits
-      DWARF_PLANETS.forEach((data, i) => {
-        const r = data.dist * 25;
-        p.stroke(300, 30, 50, 20);
-        p.beginShape();
-        for (let j = 0; j <= 64; j++) {
-          const a = (j / 64) * p.TWO_PI;
-          p.vertex(p.cos(a) * r, p.sin(a * 2) * r * 0.1, p.sin(a) * r);
-        }
-        p.endShape();
-      });
-
-      // Asteroid belt
-      p.stroke(40, 20, 50, 15);
-      p.strokeWeight(0.5);
-      for (let r = ASTEROID_BELT.inner * 25; r < ASTEROID_BELT.outer * 25; r += 15) {
-        p.beginShape();
-        for (let j = 0; j <= 64; j++) {
-          const a = (j / 64) * p.TWO_PI;
-          const wobble = p.noise(r * 0.01, a, frame * 0.0005) * 3;
-          p.vertex(p.cos(a) * (r + wobble), 0, p.sin(a) * (r + wobble));
-        }
-        p.endShape();
-      }
-
-      // Comet orbits (dashed)
-      COMETS.forEach((data, i) => {
-        if (data.aphelion > 100) return; // Skip very long period comets for orbit drawing
-        p.stroke(200, 50, 80, 15);
-        p.strokeWeight(0.5);
-        const peri = data.perihelion * 25;
-        const aph = Math.min(data.aphelion, 50) * 25;
-        const a = (peri + aph) / 2;
-        const e = (aph - peri) / (aph + peri);
-        p.beginShape();
-        for (let j = 0; j <= 64; j++) {
-          const nu = (j / 64) * p.TWO_PI;
-          const r = a * (1 - e * e) / (1 + e * p.cos(nu));
-          p.vertex(p.cos(nu) * r, 0, p.sin(nu) * r);
-        }
-        p.endShape();
-      });
-
-      p.noStroke();
-    }
-
-    function drawLabels(p) {
-      p.push();
-      p.fill(255);
-      p.noStroke();
-      p.textAlign(p.CENTER, p.CENTER);
-      p.textSize(12);
-      
-      // Planet labels
-      planets.forEach(planet => {
-        const x = p.cos(planet.angle) * planet.orbitRadius;
-        const z = p.sin(planet.angle) * planet.orbitRadius;
-        const y = p.sin(planet.angle * 0.5 + planet.index) * 2;
-        
-        // Project to screen
-        const screenPos = getScreenPosition(p, x, y, z + planet.radius + 10);
-        if (screenPos) {
-          p.fill(planet.emojiColor);
-          p.text(planet.emoji + ' ' + planet.name, screenPos.x, screenPos.y);
-        }
-      });
-
-      // Dwarf planet labels
-      if (showDwarfs) {
-        dwarfPlanets.forEach(dp => {
-          const x = p.cos(dp.angle) * dp.orbitRadius;
-          const z = p.sin(dp.angle) * dp.orbitRadius;
-          const y = p.sin(dp.angle * 2 + dp.index) * dp.orbitRadius * 0.1 * dp.orbitalInclination;
-          
-          const screenPos = getScreenPosition(p, x, y, z + dp.radius + 8);
-          if (screenPos) {
-            p.fill(dp.emojiColor);
-            p.textSize(10);
-            p.text(dp.emoji + ' ' + dp.name, screenPos.x, screenPos.y);
-          }
-        });
-      }
-
-      // Comet labels
-      if (showComets) {
-        comets.forEach(comet => {
-          const pos = comet.getPosition(frame);
-          if (pos.r > 500) return;
-          const screenPos = getScreenPosition(p, pos.x, pos.y, pos.z + 10);
-          if (screenPos) {
-            p.fill(comet.color[0], comet.color[1], 100);
-            p.textSize(10);
-            p.text('☄ ' + comet.name, screenPos.x, screenPos.y);
-          }
-        });
-      }
-      p.pop();
-    }
-
-    function getScreenPosition(p, x, y, z) {
-      // Simple projection for label placement
-      const camX = p.cos(cameraAngle) * cameraDistance * p.cos(p.radians(cameraTilt));
-      const camY = cameraDistance * p.sin(p.radians(cameraTilt));
-      const camZ = p.sin(cameraAngle) * cameraDistance * p.cos(p.radians(cameraTilt));
-      
-      const dx = x - camX;
-      const dy = y - camY;
-      const dz = z - camZ;
-      
-      const dist = p.sqrt(dx*dx + dy*dy + dz*dz);
-      if (dist > 1000) return null;
-      
-      // Simplified - just use a basic projection
-      const fov = p.PI / 3;
-      const aspect = p.width / p.height;
-      const scale = p.height / (2 * p.tan(fov / 2));
-      
-      // Project
-      const px = (dx / dz) * scale + p.width / 2;
-      const py = (dy / dz) * scale + p.height / 2;
-      
-      if (px < 0 || px > p.width || py < 0 || py > p.height) return null;
-      if (dz < 0) return null; // Behind camera
-      
-      return { x: px, y: py };
-    }
-
-    function checkPlanetClick(p) {
-      // Check planets
-      for (let planet of planets) {
-        const x = p.cos(planet.angle) * planet.orbitRadius;
-        const z = p.sin(planet.angle) * planet.orbitRadius;
-        const y = p.sin(planet.angle * 0.5 + planet.index) * 2;
-        
-        const screenPos = getScreenPosition(p, x, y, z);
-        if (screenPos) {
-          const d = p.dist(p.mouseX, p.mouseY, screenPos.x, screenPos.y);
-          if (d < planet.radius * 2 + 10) {
-            selectPlanet(planet);
-            return;
-          }
-        }
-      }
-
-      // Check dwarf planets
-      if (showDwarfs) {
-        for (let dp of dwarfPlanets) {
-          const x = p.cos(dp.angle) * dp.orbitRadius;
-          const z = p.sin(dp.angle) * dp.orbitRadius;
-          const y = p.sin(dp.angle * 2 + dp.index) * dp.orbitRadius * 0.1 * dp.orbitalInclination;
-          
-          const screenPos = getScreenPosition(p, x, y, z);
-          if (screenPos) {
-            const d = p.dist(p.mouseX, p.mouseY, screenPos.x, screenPos.y);
-            if (d < dp.radius * 3 + 10) {
-              selectPlanet(dp);
-              return;
-            }
-          }
-        }
-      }
-
-      // Check comets
-      if (showComets) {
-        for (let comet of comets) {
-          const pos = comet.getPosition(frame);
-          if (pos.r > 500) continue;
-          const screenPos = getScreenPosition(p, pos.x, pos.y, pos.z);
-          if (screenPos) {
-            const d = p.dist(p.mouseX, p.mouseY, screenPos.x, screenPos.y);
-            if (d < 20) {
-              selectPlanet(comet);
-              return;
-            }
-          }
-        }
-      }
-
-      // Clicked empty space - deselect
-      selectedPlanet = null;
-      closeInfo();
-    }
-
-    function selectPlanet(planet) {
-      selectedPlanet = planet;
-      showInfo(planet);
-    }
-
-    function showInfo(obj) {
+    function showInfo(pl){
       const panel = document.getElementById('infoPanel');
-      const title = document.getElementById('infoTitle');
-      const content = document.getElementById('infoContent');
-      const stats = document.getElementById('infoStats');
-      
-      title.innerHTML = `${obj.emoji} ${obj.name}`;
-      
+      document.getElementById('infoTitle').innerHTML = pl.emoji+' '+pl.name;
       let html = '';
-      if (obj.facts) {
-        obj.facts.forEach((fact, i) => {
-          html += `<div class="fact"><div class="fact-title">💡 Wusstest du?</div>${fact}</div>`;
-        });
-      }
-      content.innerHTML = html;
-      
-      let statsHtml = '';
-      if (obj.data) {
-        statsHtml += `<div class="stat">📏 Entfernung: <span>${obj.data.dist} AE</span></div>`;
-        statsHtml += `<div class="stat">📅 Umlaufzeit: <span>${obj.data.orbitDays} Tage</span></div>`;
-        statsHtml += `<div class="stat">📐 Radius: <span>${obj.data.radius} km</span></div>`;
-      } else if (obj.period) {
-        statsHtml += `<div class="stat">📅 Periode: <span>${obj.period} Jahre</span></div>`;
-        statsHtml += `<div class="stat">☀️ Perihel: <span>${obj.perihelion} AE</span></div>`;
-        statsHtml += `<div class="stat">📐 Aphel: <span>${obj.aphelion} AE</span></div>`;
-      }
-      statsHtml += `<div class="stat">${obj.info}</div>`;
-      stats.innerHTML = statsHtml;
-      
+      (FACTS[pl.name]||[]).forEach(f=>{ html += '<div class="fact"><div class="fact-title">💡 Wusstest du?</div>'+f+'</div>'; });
+      document.getElementById('infoContent').innerHTML = html;
+      document.getElementById('infoStats').innerHTML =
+        '<div class="stat">📏 Entfernung: <span>'+pl.data.dist+' AE</span></div>'+
+        '<div class="stat">📅 Umlaufzeit: <span>'+pl.data.orbitDays+' Tage</span></div>'+
+        '<div class="stat">📐 Radius: <span>'+pl.data.radius+' km</span></div>'+
+        '<div class="stat">'+pl.info+'</div>';
       panel.classList.add('open');
     }
 
-    function closeInfo() {
-      const panel = document.getElementById('infoPanel');
-      panel.classList.remove('open');
-      selectedPlanet = null;
+    function closeInfo(){ document.getElementById('infoPanel').classList.remove('open'); selected=null; }
+
+    // ============ FLIGHT ============
+    function toggleFlight(){
+      flightMode = !flightMode;
+      const btn = document.getElementById('flightBtn');
+      const fs = document.getElementById('flightSpeed');
+      btn.textContent = flightMode ? '🛸 Fliegen' : '🚀 Fliegen';
+      btn.classList.toggle('active', flightMode);
+      fs.style.display = flightMode ? 'flex' : 'none';
+      if(flightMode){
+        fx = Math.cos(camH)*camD*Math.cos(camV);
+        fy = camD*Math.sin(camV);
+        fz = Math.sin(camH)*camD*Math.cos(camV);
+        fyaw = camH + Math.PI;
+        fpitch = -camV;
+        autoRot = false;
+      }
     }
 
-    // ============ UI FUNKTIONEN ============
-    function setupUI() {
-      const container = document.getElementById('planetBtnContainer');
-      const legend = document.getElementById('legend');
-      
-      // Planet buttons
-      [...PLANETS, ...DWARF_PLANETS].forEach((data, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn planet-btn';
-        btn.innerHTML = `${data.emoji} ${data.name}`;
-        btn.onclick = () => {
-          // Find the actual planet object
-          let target = null;
-          if (i < PLANETS.length) {
-            target = planets[i];
-          } else {
-            target = dwarfPlanets[i - PLANETS.length];
-          }
-          if (target) {
-            selectPlanet(target);
-            // Smooth camera to planet
-            animateCameraTo(target);
-          }
+    // ============ UI ============
+    function setupUI(){
+      const c = document.getElementById('planetBtnContainer');
+      PLANET_DATA.forEach((d,i)=>{
+        const b = document.createElement('button');
+        b.className='btn pbtn'; b.innerHTML=d.emoji+' '+d.name;
+        b.onclick=()=>{
+          const t=planets[i];
+          if(t){ selectPlanet(t); animateTo(t); }
         };
-        container.appendChild(btn);
-      });
-
-      // Legend
-      const items = [
-        { color: '#ffd700', label: '☀️ Sonne' },
-        { color: '#b4aaa0', label: '☿ Merkur' },
-        { color: '#e6c88c', label: '♀ Venus' },
-        { color: '#3c8cdc', label: '🌍 Erde' },
-        { color: '#c85028', label: '♂ Mars' },
-        { color: '#dcb482', label: '♃ Jupiter' },
-        { color: '#f0dca0', label: '♄ Saturn' },
-        { color: '#78c8d2', label: '♅ Uranus' },
-        { color: '#3c64e6', label: '♆ Neptun' },
-        { color: '#c8b496', label: '♇ Zwergplaneten' },
-        { color: '#ffffff', label: '☄️ Kometen' },
-        { color: '#888888', label: '☄ Asteroidengürtel' }
-      ];
-      
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'legend-item';
-        div.innerHTML = `<div class="legend-color" style="background: ${item.color}"></div><span>${item.label}</span>`;
-        legend.appendChild(div);
+        c.appendChild(b);
       });
     }
 
-    function animateCameraTo(target) {
-      // Animate camera to look at target
-      const startAngle = cameraAngle;
-      const startTilt = cameraTilt;
-      const startDist = cameraDistance;
-      
-      // Target position
-      let targetX, targetY, targetZ;
-      if (target.getPosition) {
-        const pos = target.getPosition(frame);
-        targetX = pos.x;
-        targetY = pos.y;
-        targetZ = pos.z;
-      } else {
-        targetX = Math.cos(target.angle) * target.orbitRadius;
-        targetZ = Math.sin(target.angle) * target.orbitRadius;
-        targetY = Math.sin(target.angle * 0.5 + target.index) * 2;
-      }
-      
-      // Calculate target camera angle
-      const targetAngle = Math.atan2(targetZ, targetX);
-      const targetDist = Math.min(Math.max(Math.sqrt(targetX*targetX + targetZ*targetZ) * 2, 80), 300);
-      const targetTilt = 20;
-      
-      const duration = 1000; // ms
-      const startTime = Date.now();
-      
-      function animate() {
-        const elapsed = Date.now() - startTime;
-        const t = Math.min(elapsed / duration, 1);
-        const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease in out quad
-        
-        cameraAngle = startAngle + (targetAngle - startAngle) * eased;
-        cameraTilt = startTilt + (targetTilt - startTilt) * eased;
-        cameraDistance = startDist + (targetDist - startDist) * eased;
-        
+    function animateTo(target){
+      const sH=camH,sV=camV,sD=camD;
+      const tx=Math.cos(target.ang)*target.orbitR, tz=Math.sin(target.ang)*target.orbitR;
+      const eH=Math.atan2(tz,tx), eD=Math.min(Math.max(Math.sqrt(tx*tx+tz*tz)*1.5,50),250), eV=0.3;
+      const dur=800,st=Date.now();
+      function anim(){
+        const t=Math.min((Date.now()-st)/dur,1), e=t<.5?2*t*t:-1+(4-2*t)*t;
+        camH=sH+(eH-sH)*e; camV=sV+(eV-sV)*e; camD=sD+(eD-sD)*e;
         updateZoomUI();
-        
-        if (t < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          autoRotate = false;
-        }
+        if(t<1) requestAnimationFrame(anim); else autoRot=false;
       }
-      animate();
+      anim();
     }
 
-    function togglePause() {
-      isPaused = !isPaused;
-      const btn = document.getElementById('btnPause');
-      btn.textContent = isPaused ? '▶️ Play' : '⏸️ Pause';
-      btn.classList.toggle('active', isPaused);
+    function togglePause(){
+      paused=!paused;
+      document.getElementById('btnPause').textContent=paused?'▶️':'⏸️';
+      document.getElementById('btnPause').classList.toggle('active',paused);
     }
 
-    function resetView() {
-      cameraAngle = 0;
-      cameraTilt = 30;
-      cameraDistance = 200;
-      timeSpeed = 1.0;
-      isPaused = false;
-      autoRotate = true;
-      selectedPlanet = null;
-      closeInfo();
-      updateZoomUI();
-      updateSpeedUI();
-      document.getElementById('zoomSlider').value = 200;
-      document.getElementById('speedSlider').value = 100;
-      document.getElementById('tiltSlider').value = 30;
-      document.getElementById('btnPause').textContent = '⏸️ Pause';
+    function resetView(){
+      camH=0; camV=0.5; camD=200; speed=1.0; paused=false; autoRot=true;
+      flightMode=false; selected=null; closeInfo();
+      document.getElementById('flightBtn').textContent='🚀 Fliegen';
+      document.getElementById('flightBtn').classList.remove('active');
+      document.getElementById('flightSpeed').style.display='none';
+      updateZoomUI(); updateSpeedUI();
+      document.getElementById('zoomSlider').value=200;
+      document.getElementById('speedSlider').value=100;
+      document.getElementById('btnPause').textContent='⏸️';
       document.getElementById('btnPause').classList.remove('active');
     }
 
-    function setZoom(val) {
-      cameraDistance = parseInt(val);
-      document.getElementById('zoomVal').textContent = val;
-      autoRotate = false;
+    function setZoom(v){ camD=parseInt(v); document.getElementById('zoomVal').textContent=v; autoRot=false; }
+    function setSpeed(v){
+      speed=v/100;
+      const d=speed.toFixed(1)+'×';
+      document.getElementById('speedVal2').textContent=d;
+      document.getElementById('speedFill').style.width=(v*0.6)+'%';
+    }
+    function updateZoomUI(){ document.getElementById('zoomSlider').value=Math.round(camD); document.getElementById('zoomVal').textContent=Math.round(camD); }
+    function updateSpeedUI(){
+      const v=Math.round(speed*100);
+      document.getElementById('speedSlider').value=v;
+      document.getElementById('speedVal2').textContent=speed.toFixed(1)+'×';
+      document.getElementById('speedFill').style.width=(v*0.6)+'%';
     }
 
-    function setSpeed(val) {
-      timeSpeed = val / 100;
-      const display = (timeSpeed).toFixed(1) + '×';
-      document.getElementById('speedVal').textContent = display;
-      document.getElementById('speedVal2').textContent = display;
-      document.getElementById('speedFill').style.width = (val * 0.6) + '%';
-    }
-
-    function setTilt(val) {
-      cameraTilt = parseInt(val);
-      document.getElementById('tiltVal').textContent = val + '°';
-      autoRotate = false;
-    }
-
-    function updateZoomUI() {
-      document.getElementById('zoomSlider').value = Math.round(cameraDistance);
-      document.getElementById('zoomVal').textContent = Math.round(cameraDistance);
-    }
-
-    function updateSpeedUI() {
-      const val = Math.round(timeSpeed * 100);
-      document.getElementById('speedSlider').value = val;
-      const display = timeSpeed.toFixed(1) + '×';
-      document.getElementById('speedVal').textContent = display;
-      document.getElementById('speedVal2').textContent = display;
-      document.getElementById('speedFill').style.width = (val * 0.6) + '%';
-    }
-
-    // Hide hint after 10 seconds
-    setTimeout(() => {
-      const hint = document.getElementById('hint');
-      if (hint) hint.style.opacity = '0';
-    }, 10000);
+    // Hide hint
+    setTimeout(()=>{ const h=document.getElementById('hint'); if(h) h.style.opacity='0'; },8000);
+  </script>
+</body>
+</html>
