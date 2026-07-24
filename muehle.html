@@ -514,6 +514,7 @@ function switchPlayer() {
     currentPlayer = opponent(currentPlayer);
     selectedPos = -1;
     updateUI();
+    if (!gameOver && checkAndHandleStalemate()) return;
     if (!gameOver && vsAI && currentPlayer === PLAYER.BLACK) {
         setTimeout(aiMove, 400);
     } else {
@@ -629,6 +630,8 @@ function handleBoardClick(pos) {
                     selectedPos = pos;
                     render(); // highlight
                     setStatus('Wähle Zielfeld');
+                } else {
+                    setStatus('Kein freies Feld für diesen Stein – wähle einen anderen');
                 }
             }
         } else {
@@ -645,9 +648,18 @@ function handleBoardClick(pos) {
                     switchPlayer();
                 }
             } else if (board[pos] === currentPlayer) {
-                // Re-select
-                selectedPos = pos;
-                render();
+                // Re-select — prüfe ob neuer Stein freie Felder hat
+                const newCanFly = myPhase === PHASE.FLYING;
+                const newValid = newCanFly
+                    ? board.map((v, i) => v === PLAYER.NONE ? i : -1).filter(i => i !== -1)
+                    : NEIGHBORS[pos].filter(n => board[n] === PLAYER.NONE);
+                if (newValid.length > 0) {
+                    selectedPos = pos;
+                    render();
+                    setStatus('Wähle Zielfeld');
+                } else {
+                    setStatus('Kein freies Feld für diesen Stein – wähle einen anderen');
+                }
             } else {
                 // Deselect
                 selectedPos = -1;
@@ -657,6 +669,25 @@ function handleBoardClick(pos) {
         }
     }
     render();
+}
+
+function checkAndHandleStalemate() {
+    const p = currentPlayer;
+    const totalPieces = (p === PLAYER.WHITE ? onBoard.white + hand.white : onBoard.black + hand.black);
+    if (totalPieces < 3) {
+        endGame(opponent(p));
+        return true;
+    }
+    const myPhase = getCurrentPhase();
+    if (myPhase === PHASE.MOVING) {
+        const myPositions = board.map((v, i) => v === p ? i : -1).filter(i => i !== -1);
+        const canMove = myPositions.some(pos => NEIGHBORS[pos].some(n => board[n] === PLAYER.NONE));
+        if (!canMove) {
+            endGame(opponent(p));
+            return true;
+        }
+    }
+    return false;
 }
 
 function handleRemovalClick(pos) {
