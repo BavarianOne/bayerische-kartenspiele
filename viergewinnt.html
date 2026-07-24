@@ -1029,6 +1029,7 @@ function render() {
     drawDiscs();
     drawAnimatingDisc();
     drawWinHighlight();
+    drawDebugOverlay(); // Spaltengrenzen & letzter Klick
 }
 
 function drawBoard() {
@@ -1224,6 +1225,60 @@ function drawWinHighlight() {
     // Extra glow on winning discs (already handled in drawDisc)
 }
 
+function drawDebugOverlay() {
+    // Spaltengrenzen zeichnen
+    ctx.strokeStyle = 'rgba(0,229,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    for (let c = 1; c < COLS; c++) {
+        const x = c * cellSize;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvasHeight);
+        ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // Letzter Klick anzeigen (5 Sekunden)
+    if (lastClickPos && Date.now() - lastClickPos.time < 5000) {
+        const { x, y, col, valid } = lastClickPos;
+        
+        // Klick-Position als Kreuz
+        ctx.strokeStyle = valid ? '#4caf50' : '#f44336';
+        ctx.lineWidth = 3;
+        const crossSize = 15;
+        ctx.beginPath();
+        ctx.moveTo(x - crossSize, y);
+        ctx.lineTo(x + crossSize, y);
+        ctx.moveTo(x, y - crossSize);
+        ctx.lineTo(x, y + crossSize);
+        ctx.stroke();
+        
+        // Spalten-Index anzeigen
+        ctx.fillStyle = valid ? '#4caf50' : '#f44336';
+        ctx.font = 'bold 14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Col: ${col} ${valid ? '✓' : '✗'}`, x, y - 25);
+        
+        // Spalten-Bereich highlighten
+        const colX = col * cellSize;
+        ctx.fillStyle = valid ? 'rgba(76,175,80,0.15)' : 'rgba(244,67,54,0.15)';
+        ctx.fillRect(colX, 0, cellSize, canvasHeight);
+        
+        // Koordinaten
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = '11px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(`x:${x.toFixed(0)} y:${y.toFixed(0)} cW:${cellSize.toFixed(1)}`, 10, canvasHeight - 10);
+    }
+    
+    // Game State Info
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`Phase: ${gamePhase} | Player: ${currentPlayer} | AI: ${vsAI} | Anim: ${!!animatingDisc}`, canvasWidth - 10, canvasHeight - 10);
+}
+
 function roundRect(ctx, x, y, w, h, r) {
     const r2 = Math.min(r, w/2, h/2);
     ctx.beginPath();
@@ -1240,22 +1295,43 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // ---------- EVENT HANDLERS ----------
+let lastClickPos = null; // {x, y, col, valid, time} für Debug
+
 function handleCanvasClick(e) {
     if (gamePhase !== PHASE.PLAYING || animatingDisc || aiThinking) return;
     if (vsAI && currentPlayer === PLAYER.YELLOW) return;
 
-    const pos = getCursorPos(e);
-    const col = colFromX(pos.x, pos.rect);
-    if (!isValidColumn(col)) return;
-
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    const cellWidth = rect.width / COLS;
+    const col = Math.floor(x / cellWidth);
+    const valid = isValidColumn(col);
+    
+    // Debug info speichern für Render
+    lastClickPos = { x, y, col, valid, time: Date.now() };
+    
+    console.log('[CLICK]', { x: x.toFixed(1), y: y.toFixed(1), rectW: rect.width, cellW: cellWidth.toFixed(1), col, valid, phase: gamePhase, animating: !!animatingDisc, ai: aiThinking, vsAI, curPlayer: currentPlayer });
+    
+    if (!valid) return;
     dropDisc(col, currentPlayer);
+    render(); // sofort neu zeichnen für Debug
 }
 
 function handleCanvasMove(e) {
     if (gamePhase !== PHASE.PLAYING || animatingDisc) return;
-
-    const pos = getCursorPos(e);
-    const col = colFromX(pos.x, pos.rect);
+    
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    const cellWidth = rect.width / COLS;
+    const col = Math.floor(x / cellWidth);
     const hints = columnHints.querySelectorAll('.column-hint');
     hints.forEach((hint, i) => {
         hint.classList.toggle('active', i === col && isValidColumn(col));
@@ -1309,15 +1385,25 @@ canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false 
 canvas.addEventListener('touchend', e => {
     e.preventDefault();
     const touch = e.changedTouches[0];
-    const rect = canvas.getBoundingClientRect();
-    const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {}, rect };
+    // Simuliere Mouse-Event für einheitliche Logik
+    const fakeEvent = {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        touches: [{ clientX: touch.clientX, clientY: touch.clientY }],
+        changedTouches: [{ clientX: touch.clientX, clientY: touch.clientY }],
+        preventDefault: () => {}
+    };
     handleCanvasClick(fakeEvent);
 }, { passive: false });
 canvas.addEventListener('touchmove', e => {
     e.preventDefault();
     const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {}, rect };
+    const fakeEvent = {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        touches: [{ clientX: touch.clientX, clientY: touch.clientY }],
+        preventDefault: () => {}
+    };
     handleCanvasMove(fakeEvent);
 }, { passive: false });
 
