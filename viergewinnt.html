@@ -675,13 +675,15 @@ function getCursorPos(e) {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - rect.left, y: clientY - rect.top };
+    return { x: clientX - rect.left, y: clientY - rect.top, rect };
 }
 
-function colFromX(x) {
-    const rect = canvas.getBoundingClientRect();
+function colFromX(x, rect) {
     const cellWidth = rect.width / COLS;
-    return Math.floor(x / cellWidth);
+    const col = Math.floor(x / cellWidth);
+    // Debug
+    console.log('[Click] x:', x.toFixed(1), 'rect.width:', rect.width, 'cellWidth:', cellWidth.toFixed(1), '-> col:', col);
+    return col;
 }
 
 // ---------- BOARD LOGIC ----------
@@ -1242,7 +1244,7 @@ function handleCanvasClick(e) {
     if (vsAI && currentPlayer === PLAYER.YELLOW) return;
 
     const pos = getCursorPos(e);
-    const col = colFromX(pos.x);
+    const col = colFromX(pos.x, pos.rect);
     if (!isValidColumn(col)) return;
 
     dropDisc(col, currentPlayer);
@@ -1252,7 +1254,7 @@ function handleCanvasMove(e) {
     if (gamePhase !== PHASE.PLAYING || animatingDisc) return;
 
     const pos = getCursorPos(e);
-    const col = colFromX(pos.x);
+    const col = colFromX(pos.x, pos.rect);
     const hints = columnHints.querySelectorAll('.column-hint');
     hints.forEach((hint, i) => {
         hint.classList.toggle('active', i === col && isValidColumn(col));
@@ -1306,13 +1308,15 @@ canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false 
 canvas.addEventListener('touchend', e => {
     e.preventDefault();
     const touch = e.changedTouches[0];
-    const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {} };
+    const rect = canvas.getBoundingClientRect();
+    const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {}, rect };
     handleCanvasClick(fakeEvent);
 }, { passive: false });
 canvas.addEventListener('touchmove', e => {
     e.preventDefault();
     const touch = e.touches[0];
-    const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {} };
+    const rect = canvas.getBoundingClientRect();
+    const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {}, rect };
     handleCanvasMove(fakeEvent);
 }, { passive: false });
 
