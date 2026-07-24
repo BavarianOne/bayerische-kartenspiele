@@ -1314,7 +1314,21 @@ function handleCanvasClick(e) {
     // Debug info speichern für Render
     lastClickPos = { x, y, col, valid, time: Date.now() };
     
-    console.log('[CLICK]', { x: x.toFixed(1), y: y.toFixed(1), rectW: rect.width, cellW: cellWidth.toFixed(1), col, valid, phase: gamePhase, animating: !!animatingDisc, ai: aiThinking, vsAI, curPlayer: currentPlayer });
+    console.log('[CLICK]', { 
+        x: x.toFixed(1), y: y.toFixed(1), 
+        rectW: rect.width, rectH: rect.height,
+        cellW: cellWidth.toFixed(1), 
+        COLS, ROWS,
+        col, valid, 
+        phase: gamePhase, 
+        animating: !!animatingDisc, 
+        ai: aiThinking, 
+        vsAI, 
+        curPlayer: currentPlayer,
+        dpr: window.devicePixelRatio,
+        canvasW: canvasWidth, canvasH: canvasHeight,
+        cellSize: cellSize.toFixed(1)
+    });
     
     if (!valid) return;
     dropDisc(col, currentPlayer);
