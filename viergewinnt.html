@@ -1117,7 +1117,13 @@ function drawAnimatingDisc() {
     drawDiscAtPixel(x, y, animatingDisc.player, true);
 
     if (progress >= 1) {
+        console.log('[ANIM] Complete, calling completeAnimation()');
         completeAnimation();
+    } else {
+        // Debug: log progress occasionally
+        if (Math.floor(now / 100) % 10 === 0) {
+            console.log('[ANIM] progress:', progress.toFixed(2), 'row:', currentRow.toFixed(2));
+        }
     }
 }
 
@@ -1316,18 +1322,11 @@ function handleCanvasClick(e) {
     
     console.log('[CLICK]', { 
         x: x.toFixed(1), y: y.toFixed(1), 
-        rectW: rect.width, rectH: rect.height,
-        cellW: cellWidth.toFixed(1), 
-        COLS, ROWS,
+        rectW: rect.width, cellW: cellWidth.toFixed(1), 
         col, valid, 
-        phase: gamePhase, 
-        animating: !!animatingDisc, 
-        ai: aiThinking, 
-        vsAI, 
-        curPlayer: currentPlayer,
-        dpr: window.devicePixelRatio,
-        canvasW: canvasWidth, canvasH: canvasHeight,
-        cellSize: cellSize.toFixed(1)
+        phase: gamePhase, animating: !!animatingDisc, 
+        ai: aiThinking, vsAI, curPlayer: currentPlayer,
+        boardEmpty: moveHistory.length === 0
     });
     
     if (!valid) return;
@@ -1456,9 +1455,9 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Animation loop for winning glow
+// Animation loop for winning glow + continuous render during game
 function animate() {
-    if (winningCells.length > 0 || animatingDisc) {
+    if (gamePhase === PHASE.PLAYING || gamePhase === PHASE.ANIMATING || winningCells.length > 0 || animatingDisc) {
         render();
     }
     requestAnimationFrame(animate);
