@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>🌌 Space Explorer 3D – Fliegen & Entdecken</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Space Explorer">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow:hidden;height:100%;background:#000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+canvas{display:block;width:100%;height:100%}
+
+#hud{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:10}
+#topBar{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start}
+#location{background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:1px solid rgba(0,255,200,0.2);border-radius:10px;padding:6px 12px;color:#0fc;font-size:0.75rem;letter-spacing:0.05em;max-width:200px}
+#location .name{font-weight:700;font-size:0.85rem;color:#fff}
+#location .hint{color:rgba(255,255,255,0.4);font-size:0.65rem;margin-top:2px}
+#speedometer{background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:6px 10px;text-align:right;min-width:80px}
+#speedometer .val{font-size:1.1rem;font-weight:700;color:#fc0;font-variant-numeric:tabular-nums}
+#speedometer .unit{font-size:0.6rem;color:rgba(255,200,0,0.5);text-transform:uppercase;letter-spacing:0.1em}
+#speedometer .label{font-size:0.6rem;color:rgba(255,200,0,0.4);text-transform:uppercase}
+
+/* Help overlay */
+#helpOverlay{position:absolute;bottom:50%;left:50%;transform:translate(-50%,50%);background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:2px solid rgba(0,255,200,0.2);border-radius:14px;padding:16px 24px;text-align:center;transition:opacity 1.5s;pointer-events:none;z-index:15;max-width:300px}
+#helpOverlay.hidden{opacity:0}
+#helpOverlay .title{font-size:1.1rem;color:#0fc;font-weight:700;margin-bottom:6px}
+#helpOverlay .hint{font-size:0.8rem;color:rgba(255,255,255,0.6);line-height:1.5}
+#helpOverlay .arrow{font-size:2rem;display:block;margin:8px 0;animation:floatArrow 2s ease-in-out infinite}
+@keyframes floatArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* Planet Info Card */
+#planetInfo{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);max-width:320px;width:90vw;background:rgba(0,10,30,0.92);backdrop-filter:blur(12px);border:2px solid rgba(0,255,200,0.3);border-radius:16px;padding:16px;box-shadow:0 0 40px rgba(0,255,200,0.1);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);opacity:0;pointer-events:none;transform:translateX(-50%) translateY(20px)}
+#planetInfo.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+#planetInfo .title{font-size:1.2rem;font-weight:700;color:#0fc;margin-bottom:4px}
+#planetInfo .title{font-size:1.2rem;font-weight:700;color:#0fc;margin-bottom:4px}
+#planetInfo .sub{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:8px}
+#planetInfo .desc{font-size:0.85rem;color:rgba(255,255,255,0.8);line-height:1.4;margin-bottom:8px}
+#planetInfo .stats{display:flex;flex-wrap:wrap;gap:4px}
+#planetInfo .stat{background:rgba(0,255,200,0.1);border:1px solid rgba(0,255,200,0.15);border-radius:6px;padding:3px 8px;font-size:0.7rem;color:rgba(255,255,255,0.6)}
+#planetInfo .stat span{color:#0fc;font-weight:600}
+#planetInfo .close{position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:1.2rem;cursor:pointer;pointer-events:auto}
+#planetInfo .close:hover{color:#fff}
+
+/* Simple Boost Button */
+#boostBtn{position:fixed;bottom:30px;right:30px;width:80px;height:80px;border-radius:50%;border:3px solid rgba(0,255,200,0.3);background:rgba(0,20,40,0.8);backdrop-filter:blur(6px);color:#0fc;font-size:1.6rem;display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:20;box-shadow:0 0 20px rgba(0,255,200,0.1);transition:all 0.15s}
+#boostBtn:active,#boostBtn.active{transform:scale(0.9);border-color:#0fc;background:rgba(0,255,200,0.2);box-shadow:0 0 30px rgba(0,255,200,0.4)}
+#boostLabel{position:fixed;bottom:8px;right:30px;color:rgba(0,255,200,0.3);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.1em;pointer-events:none;z-index:20}
+
+/* Touch indicator ring */
+#touchRing{position:fixed;width:60px;height:60px;border:3px solid rgba(0,255,200,0.4);border-radius:50%;pointer-events:none;z-index:25;transform:translate(-50%,-50%);transition:opacity 0.3s;opacity:0}
+#touchRing.show{opacity:1}
+#touchRing .inner{position:absolute;top:50%;left:50%;width:12px;height:12px;background:rgba(0,255,200,0.6);border-radius:50%;transform:translate(-50%,-50%)}
+
+/* Direction indicators */
+#dirIndicator{position:fixed;top:50%;left:50%;pointer-events:none;z-index:8;opacity:0;transition:opacity 0.2s}
+#dirIndicator.show{opacity:1}
+#dirIndicator .line{position:absolute;top:50%;left:50%;background:rgba(0,255,200,0.15);transform-origin:0 50%}
+
+@media(max-width:768px){
+  #boostBtn{width:70px;height:70px;font-size:1.3rem;right:20px;bottom:20px}
+  #boostLabel{right:20px;bottom:5px}
+  #topBar{padding:6px}
+  #location{font-size:0.7rem;padding:4px 10px}
+  #speedometer{padding:4px 8px;min-width:60px}
+  #speedometer .val{font-size:0.95rem}
+  #planetInfo{bottom:170px;padding:12px;max-width:280px}
+  #helpOverlay{padding:12px 16px;max-width:260px}
+  #helpOverlay .title{font-size:0.95rem}
+  #helpOverlay .hint{font-size:0.75rem}
+}
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div id="topBar">
+    <div id="location">
+      <div class="name">🚀 Im All</div>
+      <div class="hint" id="nearHint">–</div>
+    </div>
+    <div id="speedometer">
+      <div class="label">Geschwindigkeit</div>
+      <div class="val" id="speedVal">0</div>
+      <div class="unit">km/s</div>
+    </div>
+  </div>
+
+  <div id="helpOverlay">
+    <div class="title">👆 Fliegen</div>
+    <div class="arrow">⬆️</div>
+    <div class="hint" id="helpText">👆 Finger auf Bildschirm & ziehen = fliegen<br>↕ Loopings · ↔ Kurven<br>⚡ Boost-Knopf = schneller!</div>
+  </div>
+
+  <div id="planetInfo">
+    <button class="close" onclick="closePlanetInfo()">✕</button>
+    <div class="title" id="piTitle">🌍 Planet</div>
+    <div class="sub" id="piSub">–</div>
+    <div class="desc" id="piDesc">–</div>
+    <div class="stats" id="piStats"></div>
+  </div>
+</div>
+
+<div id="touchRing"><div class="inner"></div></div>
+<div id="dirIndicator"></div>
+
+<button id="boostBtn" ontouchstart="boostDown=true;event.preventDefault()" ontouchend="boostDown=false;event.preventDefault()" onmousedown="boostDown=true" onmouseup="boostDown=false">⚡</button>
+<div id="boostLabel">Boost</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ===================== CONFIG =====================
+const CFG = {
+  world: { asteroidCount: 200, starCount: 3000, nebulaCount: 8 },
+  player: { thrust: 25, boostMultiplier: 2.5, maxSpeed: 60, maxBoostSpeed: 140,
+            turnSensitivity: 0.006, maxPitch: 1.4, damping: 0.985 },
+  camera: { fov: 70, near: 0.5, far: 5000, followSpeed: 0.08 },
+  landing: { minDist: 8, approachSpeed: 10 }
+};
+
+// ===================== STATE =====================
+const state = {
+  pos: new THREE.Vector3(0, 5, 0),
+  vel: new THREE.Vector3(0, 0, -10),
+  yaw: 0, pitch: 0,
+  boost: false, speed: 0,
+  landed: false, location: 'Im All',
+  nearObject: null, landingZone: false,
+  // Touch state
+  touchId: -1, touchActive: false,
+  touchCX: 0, touchCY: 0, // normalized -1..1 from screen center
+  boostDown: false,
+  frameCount: 0
+};
+
+// ===================== SCENE SETUP =====================
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(CFG.camera.fov, window.innerWidth/window.innerHeight, CFG.camera.near, CFG.camera.far);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.prepend(renderer.domElement);
+
+camera.position.set(0, 2, 6);
+
+// ===================== STARS (3000) =====================
+const starGeom = new THREE.BufferGeometry();
+const starPos = new Float32Array(CFG.world.starCount * 3);
+const starSizes = new Float32Array(CFG.world.starCount);
+const starColors = new Float32Array(CFG.world.starCount * 3);
+for(let i=0; i<CFG.world.starCount; i++){
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(Math.random() * 2 - 1);
+  const r = 800 + Math.random() * 4000;
+  const x = r * Math.sin(phi) * Math.cos(theta);
+  const y = r * Math.sin(phi) * Math.sin(theta);
+  const z = r * Math.cos(phi);
+  starPos[i*3] = x; starPos[i*3+1] = y; starPos[i*3+2] = z;
+  starSizes[i] = 0.5 + Math.random() * 2.5;
+  const c = 0.6 + Math.random() * 0.4;
+  starColors[i*3] = c; starColors[i*3+1] = c; starColors[i*3+2] = 0.7 + Math.random() * 0.3;
+}
+starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+starGeom.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+starGeom.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+scene.add(new THREE.Points(starGeom, new THREE.PointsMaterial({
+  size: 0.5, sizeAttenuation: true, vertexColors: true,
+  transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false
+})));
+
+// ===================== NEBULAE =====================
+for(let n=0; n<CFG.world.nebulaCount; n++){
+  const count = 600;
+  const g = new THREE.BufferGeometry();
+  const p = new Float32Array(count * 3);
+  const c = new Float32Array(count * 3);
+  const hue = Math.random();
+  const cx = (Math.random()-0.5)*2000, cy = (Math.random()-0.5)*2000, cz = (Math.random()-0.5)*2000;
+  const spread = 200 + Math.random()*400;
+  for(let i=0; i<count; i++){
+    p[i*3] = cx + (Math.random()-0.5)*spread;
+    p[i*3+1] = cy + (Math.random()-0.5)*spread*0.5;
+    p[i*3+2] = cz + (Math.random()-0.5)*spread;
+    const h = hue + (Math.random()-0.5)*0.2;
+    const rgb = new THREE.Color().setHSL(h, 0.6, 0.12 + Math.random()*0.12);
+    c[i*3] = rgb.r; c[i*3+1] = rgb.g; c[i*3+2] = rgb.b;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(c, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({
+    size: 6+Math.random()*12, sizeAttenuation: true,
+    vertexColors: true, transparent: true, opacity: 0.12,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  })));
+}
+
+// ===================== PLANETS =====================
+const planets = [];
+const planetData = [
+  { name:'Merkur', color:0xaaaaaa, size:1.5, dist:80, orbSpeed:0.008, desc:'Kleinster Planet, voller Krater. Tagsüber bis 430°C!' },
+  { name:'Venus', color:0xe6b85c, size:2.2, dist:130, orbSpeed:0.005, desc:'Heißester Planet! Giftige Wolken aus Schwefelsäure.' },
+  { name:'Erde', color:0x4488cc, size:2.5, dist:180, orbSpeed:0.003, desc:'Unser Zuhause! 71% Wasser, grüne Kontinente.' },
+  { name:'Mars', color:0xcc5533, size:1.8, dist:240, orbSpeed:0.002, desc:'Der Rote Planet. Höchster Berg: Olympus Mons!' },
+  { name:'Jupiter', color:0xccaa77, size:5, dist:350, orbSpeed:0.001, desc:'Größter Planet! 1300 Erden passen rein.' },
+  { name:'Saturn', color:0xeedd99, size:4, dist:480, orbSpeed:0.0007, desc:'Wunderschöne Ringe! Würde im Wasser schwimmen.' }
+];
+
+planetData.forEach((pd, idx) => {
+  const group = new THREE.Group();
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(pd.size, 32, 32),
+    new THREE.MeshPhongMaterial({ color: pd.color, emissive: pd.color, emissiveIntensity: 0.05, shininess: 30 })
+  );
+  group.add(mesh);
+
+  // Earth atmosphere
+  if(idx === 2){
+    const a = new THREE.Mesh(
+      new THREE.SphereGeometry(pd.size*1.05, 32, 32),
+      new THREE.MeshPhongMaterial({ color: 0x4488ff, transparent: true, opacity: 0.15, side: THREE.BackSide })
+    );
+    group.add(a);
+  }
+
+  // Saturn rings
+  if(idx === 5){
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(pd.size*1.4, pd.size*2.4, 64),
+      new THREE.MeshBasicMaterial({ color: 0xeedd99, side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthWrite: false })
+    );
+    ring.rotation.x = Math.PI * 0.4;
+    group.add(ring);
+  }
+
+  const angle = Math.random() * Math.PI * 2;
+  group.position.set(pd.dist*Math.cos(angle), 0, pd.dist*Math.sin(angle));
+  scene.add(group);
+  planets.push({ group, mesh, data: pd, idx, angle, dist: pd.dist, orbSpeed: pd.orbSpeed });
+});
+
+// ===================== SUN =====================
+const sun = new THREE.Mesh(new THREE.SphereGeometry(8, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffdd44 }));
+scene.add(sun);
+for(let i=0; i<3; i++){
+  scene.add(new THREE.Mesh(
+    new THREE.SphereGeometry(8+(i+1)*4, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffaa22, transparent: true, opacity: 0.1-i*0.025, side: THREE.BackSide })
+  ));
+}
+const sunLight = new THREE.PointLight(0xffeedd, 2, 2000);
+sunLight.position.set(0,0,0);
+scene.add(sunLight);
+scene.add(new THREE.AmbientLight(0x222244, 0.3));
+
+// ===================== ASTEROIDS =====================
+const astGroup = new THREE.Group();
+scene.add(astGroup);
+const asteroids = [];
+
+function createAsteroid(size, pos){
+  const geom = new THREE.DodecahedronGeometry(size, 0);
+  const a = geom.attributes.position;
+  for(let i=0; i<a.count; i++)
+    a.setXYZ(i, a.getX(i)+(Math.random()-0.5)*size*0.3, a.getY(i)+(Math.random()-0.5)*size*0.3, a.getZ(i)+(Math.random()-0.5)*size*0.3);
+  geom.computeVertexNormals();
+  const gray = 0.2+Math.random()*0.3;
+  const mesh = new THREE.Mesh(geom, new THREE.MeshPhongMaterial({
+    color: new THREE.Color().setHSL(0.08, 0.05+Math.random()*0.1, gray),
+    emissiveIntensity: 0.02, flatShading: true
+  }));
+  mesh.position.copy(pos);
+  mesh.rotation.set(Math.random()*6, Math.random()*6, Math.random()*6);
+  mesh.userData = {
+    rotSpeed: new THREE.Vector3((Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01),
+    landable: size > 1.8
+  };
+  astGroup.add(mesh);
+  asteroids.push(mesh);
+}
+
+for(let i=0; i<CFG.world.asteroidCount; i++){
+  const dist = 280 + Math.random()*180;
+  createAsteroid(0.5+Math.random()*3, new THREE.Vector3(
+    dist*Math.cos(Math.random()*Math.PI*2),
+    (Math.random()-0.5)*40,
+    dist*Math.sin(Math.random()*Math.PI*2)
+  ));
+}
+
+// ===================== PLAYER SHIP =====================
+const shipGroup = new THREE.Group();
+shipGroup.position.copy(state.pos);
+
+// Body
+const body = new THREE.Mesh(
+  new THREE.ConeGeometry(0.6, 1.8, 6),
+  new THREE.MeshPhongMaterial({ color: 0x88ddff, emissive: 0x226688, emissiveIntensity: 0.15, shininess: 60 })
+);
+body.rotation.x = Math.PI * 0.5;
+shipGroup.add(body);
+
+// Cockpit
+const cockpit = new THREE.Mesh(
+  new THREE.SphereGeometry(0.35, 12, 12, 0, Math.PI*2, 0, Math.PI*0.5),
+  new THREE.MeshPhongMaterial({ color: 0x88eeff, emissive: 0x44aacc, emissiveIntensity: 0.3, transparent: true, opacity: 0.7, shininess: 100 })
+);
+cockpit.position.set(0, 0.25, 0.6);
+cockpit.rotation.x = -0.3;
+shipGroup.add(cockpit);
+
+// Wings
+const wings = new THREE.Mesh(
+  new THREE.BoxGeometry(1.6, 0.05, 0.3),
+  new THREE.MeshPhongMaterial({ color: 0x66bbdd, emissive: 0x114466, emissiveIntensity: 0.1, shininess: 40 })
+);
+wings.position.set(0, -0.05, -0.1);
+shipGroup.add(wings);
+
+// Engine glows
+const engineMat = new THREE.MeshBasicMaterial({ color: 0x00ccff, transparent: true, opacity: 0.7 });
+const engine = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.4, 8), engineMat);
+engine.rotation.x = -Math.PI*0.5;
+engine.position.set(0, 0, -1.0);
+shipGroup.add(engine);
+
+const engineMat2 = new THREE.MeshBasicMaterial({ color: 0x0088ff, transparent: true, opacity: 0.3 });
+const engine2 = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.6, 8), engineMat2);
+engine2.rotation.x = -Math.PI*0.5;
+engine2.position.set(0, 0, -1.1);
+shipGroup.add(engine2);
+
+// Ship light
+const shipLight = new THREE.PointLight(0x00ccff, 0.5, 20);
+shipLight.position.set(0, 0, -1.5);
+shipGroup.add(shipLight);
+scene.add(shipGroup);
+
+// ===================== SIMPLE TOUCH CONTROLS =====================
+// One finger anywhere = drag to steer. Ship auto-thrusts forward.
+
+const touchRing = document.getElementById('touchRing');
+let boostDown = false; // set by button
+
+// Touch
+document.addEventListener('touchstart', e => {
+  if(state.touchActive) return;
+  const t = e.changedTouches[0];
+  state.touchId = t.identifier;
+  state.touchActive = true;
+  state.touchCX = 0;
+  state.touchCY = 0;
+  touchRing.classList.add('show');
+  touchRing.style.left = t.clientX + 'px';
+  touchRing.style.top = t.clientY + 'px';
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  for(let t of e.changedTouches){
+    if(t.identifier === state.touchId){
+      e.preventDefault();
+      const cx = window.innerWidth/2, cy = window.innerHeight/2;
+      const dx = (t.clientX - cx) / cx;
+      const dy = (t.clientY - cy) / cy;
+      state.touchCX = Math.max(-1, Math.min(1, dx));
+      state.touchCY = Math.max(-1, Math.min(1, dy));
+
+      touchRing.style.left = t.clientX + 'px';
+      touchRing.style.top = t.clientY + 'px';
+    }
+  }
+}, { passive: false });
+
+document.addEventListener('touchend', e => {
+  for(let t of e.changedTouches){
+    if(t.identifier === state.touchId){
+      state.touchActive = false;
+      state.touchId = -1;
+      state.touchCX = 0;
+      state.touchCY = 0;
+      touchRing.classList.remove('show');
+    }
+  }
+}, { passive: true });
+
+document.addEventListener('touchcancel', e => {
+  state.touchActive = false;
+  state.touchId = -1;
+  state.touchCX = 0;
+  state.touchCY = 0;
+  touchRing.classList.remove('show');
+}, { passive: true });
+
+// Keyboard for desktop
+const keys = {};
+document.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if(e.key==='Shift') boostDown=true; });
+document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if(e.key==='Shift') boostDown=false; });
+
+// Mouse (click+drag)
+let mouseDown = false;
+renderer.domElement.addEventListener('mousedown', e => {
+  mouseDown = true;
+  state.touchActive = true;
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  state.touchCX = Math.max(-1, Math.min(1, (e.clientX-cx)/cx));
+  state.touchCY = Math.max(-1, Math.min(1, (e.clientY-cy)/cy));
+});
+document.addEventListener('mousemove', e => {
+  if(mouseDown){
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    state.touchCX = Math.max(-1, Math.min(1, (e.clientX-cx)/cx));
+    state.touchCY = Math.max(-1, Math.min(1, (e.clientY-cy)/cy));
+  }
+});
+document.addEventListener('mouseup', () => {
+  mouseDown = false;
+  state.touchActive = false;
+  state.touchCX = 0; state.touchCY = 0;
+});
+
+// ===================== UPDATE =====================
+function update(delta){
+  state.frameCount++;
+  delta = Math.min(delta, 0.05);
+
+  if(!state.landed){
+    // -- Steering from finger position --
+    if(state.touchActive){
+      state.yaw -= state.touchCX * CFG.player.turnSensitivity * delta * 60;
+      state.pitch = Math.max(-CFG.player.maxPitch, Math.min(CFG.player.maxPitch,
+        state.pitch + state.touchCY * CFG.player.turnSensitivity * delta * 60));
+    }
+
+    // Keyboard steering
+    if(keys['a'] || keys['arrowleft']) state.yaw += CFG.player.turnSensitivity * delta * 40;
+    if(keys['d'] || keys['arrowright']) state.yaw -= CFG.player.turnSensitivity * delta * 40;
+    if(keys['w'] || keys['arrowup']) state.pitch = Math.max(-CFG.player.maxPitch, state.pitch - CFG.player.turnSensitivity * delta * 40);
+    if(keys['s'] || keys['arrowdown']) state.pitch = Math.min(CFG.player.maxPitch, state.pitch + CFG.player.turnSensitivity * delta * 40);
+
+    // -- Auto thrust forward --
+    const boosting = boostDown;
+    const thrust = boosting ? CFG.player.thrust * CFG.player.boostMultiplier : CFG.player.thrust;
+    const maxSpd = boosting ? CFG.player.maxBoostSpeed : CFG.player.maxSpeed;
+
+    const forward = new THREE.Vector3(0, 0, -1);
+    forward.applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
+    state.vel.add(forward.clone().multiplyScalar(thrust * delta));
+
+    // Damping
+    state.vel.multiplyScalar(CFG.player.damping);
+
+    // Clamp
+    if(state.vel.length() > maxSpd) state.vel.setLength(maxSpd);
+
+    state.pos.add(state.vel.clone().multiplyScalar(delta));
+
+    // Update ship rotation
+    shipGroup.position.copy(state.pos);
+    shipGroup.rotation.set(state.pitch, state.yaw, 0);
+
+    state.speed = state.vel.length();
+  }
+
+  // -- Camera follow --
+  const camOffset = new THREE.Vector3(0, 0.8, Math.max(3, 4 - state.speed/60));
+  camOffset.applyEuler(new THREE.Euler(state.pitch*0.6, state.yaw, 0, 'YXZ'));
+  camera.position.lerp(state.pos.clone().add(camOffset), CFG.camera.followSpeed);
+  camera.lookAt(state.pos.x, state.pos.y + 0.3, state.pos.z);
+
+  // -- Update planets --
+  planets.forEach((p, idx) => {
+    p.angle += p.orbSpeed * delta * 30;
+    p.group.position.x = p.dist * Math.cos(p.angle);
+    p.group.position.z = p.dist * Math.sin(p.angle);
+    p.group.children[0].rotation.y += delta * 0.5;
+    if(p.group.children.length > 1 && idx === 5) p.group.children[1].rotation.z += delta * 0.3;
+  });
+
+  // -- Update asteroids --
+  asteroids.forEach(a => {
+    a.rotation.x += a.userData.rotSpeed.x;
+    a.rotation.y += a.userData.rotSpeed.y;
+    a.rotation.z += a.userData.rotSpeed.z;
+  });
+
+  // -- Sun --
+  sun.rotation.y += delta * 0.1;
+
+  // -- Engine effect --
+  const es = state.landed ? 0.3 : Math.min(1, state.speed/15);
+  engine.material.opacity = 0.3 + es*0.7;
+  engine2.material.opacity = 0.1 + es*0.4;
+  const s = 0.8 + es*0.5;
+  engine.scale.set(s, s, 1+es*3);
+  engine2.scale.set(s, s, 1+es*2);
+
+  // -- Proximity detection --
+  let nearest = null, nearDist = Infinity;
+  planets.forEach(p => {
+    const d = state.pos.distanceTo(p.group.position);
+    const th = p.data.size*3+5;
+    if(d < th && d < nearDist){ nearDist = d; nearest = { type:'planet', data:p, dist:d }; }
+  });
+  asteroids.forEach(a => {
+    if(!a.userData.landable) return;
+    const d = state.pos.distanceTo(a.position);
+    if(d < 25 && d < nearDist){ nearDist = d; nearest = { type:'asteroid', data:a, dist:d }; }
+  });
+
+  // -- HUD update --
+  const nearHint = document.getElementById('nearHint');
+  const locName = document.getElementById('location').querySelector('.name');
+  const landingMsg = document.getElementById('landingMsg') || { classList:{remove(){}} };
+  // Landing message element might not exist – handle gracefully
+  let landingEl = null;
+  try { landingEl = document.getElementById('landingMsg'); } catch(e) {}
+
+  if(nearest){
+    if(nearest.type === 'planet'){
+      const p = nearest.data;
+      nearHint.textContent = `🪐 ${p.data.name} (${Math.round(nearest.dist)} km)`;
+      locName.textContent = `🚀 Bei ${p.data.name}`;
+      if(nearest.dist < 15) showPlanetInfo(p); else closePlanetInfo();
+    } else {
+      nearHint.textContent = `☄️ Asteroid (${Math.round(nearest.dist)} km)`;
+      locName.textContent = `🚀 Bei Asteroiden`;
+      closePlanetInfo();
+      if(nearest.dist < 13 && nearest.data.userData.landable && state.speed < CFG.landing.approachSpeed){
+        if(landingEl) landingEl.classList.add('show');
+      } else {
+        if(landingEl) landingEl.classList.remove('show');
+      }
+    }
+  } else {
+    nearHint.textContent = '–';
+    locName.textContent = '🚀 Im All';
+    closePlanetInfo();
+    if(landingEl) landingEl.classList.remove('show');
+  }
+
+  document.getElementById('speedVal').textContent = Math.round(state.speed*10)/10;
+
+  // Hide help after 8 seconds
+  const help = document.getElementById('helpOverlay');
+  if(state.frameCount > 480) help.classList.add('hidden');
+}
+
+// ===================== PLANET INFO =====================
+function showPlanetInfo(p){
+  const pi = document.getElementById('planetInfo');
+  document.getElementById('piTitle').textContent = `🪐 ${p.data.name}`;
+  document.getElementById('piSub').textContent = `${p.data.name === 'Erde' ? '🌍' : '🪐'} Planet im Sonnensystem`;
+  document.getElementById('piDesc').textContent = p.data.desc;
+  document.getElementById('piStats').innerHTML = `
+    <div class="stat">Größe: <span>${p.data.size.toFixed(1)}</span></div>
+    <div class="stat">Entfernung: <span>${p.data.dist} AE</span></div>`;
+  pi.classList.add('open');
+}
+function closePlanetInfo(){ document.getElementById('planetInfo').classList.remove('open'); }
+
+// ===================== RESIZE =====================
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ===================== GAME LOOP =====================
+let lastTime = 0;
+function animate(time){
+  const delta = (time - lastTime)/1000;
+  lastTime = time;
+  update(delta);
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+animate(0);
+
+// ===================== WAKE LOCK =====================
+if(navigator.wakeLock){
+  let wl = null;
+  async function rwl(){ try{ wl = await navigator.wakeLock.request('screen'); }catch(e){} }
+  rwl();
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') rwl(); });
+}
+console.log('🌌 Space Explorer 3D – Einfach fliegen! Finger auf den Bildschirm und ziehen! 🚀');
+</script>
+</body>
+</html>
