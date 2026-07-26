@@ -81,6 +81,20 @@ canvas{display:block;width:100%;height:100%}
 #touchRing.show{opacity:1}
 #touchRing .inner{position:absolute;top:50%;left:50%;width:12px;height:12px;background:rgba(0,255,200,0.6);border-radius:50%;transform:translate(-50%,-50%)}
 
+/* Prograde / Retrograde Markers */
+#progradeMarker{position:absolute;width:18px;height:18px;border:2px solid rgba(0,255,100,0.8);border-radius:50%;pointer-events:none;z-index:8;transform:translate(-50%,-50%);display:none}
+#progradeMarker::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(0,255,100,0.6);border-radius:50%;transform:translate(-50%,-50%)}
+#progradeMarker.show{display:block}
+#retrogradeMarker{position:absolute;width:20px;height:20px;pointer-events:none;z-index:8;transform:translate(-50%,-50%);display:none}
+#retrogradeMarker::before{content:'✕';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;color:rgba(255,80,50,0.8);font-weight:700}
+#retrogradeMarker.show{display:block}
+
+/* Relative velocity hint */
+#relVelHint{position:absolute;top:68px;left:10px;background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:1px solid rgba(0,255,200,0.15);border-radius:8px;padding:4px 10px;font-size:0.7rem;color:rgba(255,255,255,0.5);pointer-events:none;z-index:12;display:none;white-space:nowrap}
+#relVelHint.show{display:block}
+#relVelHint .val{color:#fc0;font-weight:600}
+#relVelHint .icon{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+
 /* Landing state overlay */
 #landedUI{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:12;opacity:0;transition:opacity 0.5s}
 #landedUI.show{opacity:1}
@@ -120,6 +134,10 @@ canvas{display:block;width:100%;height:100%}
 
   <div id="minimap" class="show"><canvas id="mapCanvas" width="140" height="140"></canvas></div>
   <div id="minimapLabel" class="show">RADAR</div>
+
+  <div id="progradeMarker"></div>
+  <div id="retrogradeMarker"></div>
+  <div id="relVelHint"></div>
 
   <div id="helpOverlay">
     <div class="title">🚀 Fliegen</div>
@@ -179,7 +197,8 @@ const state = {
   touchId: -1, touchActive: false,
   touchCX: 0, touchCY: 0,
   boostDown: false, brakeDown: false,
-  frameCount: 0, mapFrame: 0
+  frameCount: 0, mapFrame: 0,
+  camDist: 4
 };
 
 // ===================== THREE SETUP =====================
@@ -421,16 +440,19 @@ function update(delta){
     detectLandingState();
   }
 
-  // Camera
+  // Camera - Chase Mode mit geglätteter Distanz (kein harter Sprung mehr)
   if(state.landed&&state.landedOn){
     const camTarget=state.pos.clone().add(new THREE.Vector3(3,2,3));
-    camera.position.lerp(camTarget,0.04);
+    camera.position.lerp(camTarget,0.12);
     camera.lookAt(state.pos);
   }else{
-    const camOffset=new THREE.Vector3(0,0.8,Math.max(3,4-state.speed/60));
-    camOffset.applyEuler(new THREE.Euler(state.pitch*0.6,state.yaw,0,'YXZ'));
-    camera.position.lerp(state.pos.clone().add(camOffset),CFG.camera.followSpeed);
-    camera.lookAt(state.pos.x,state.pos.y+0.3,state.pos.z);
+    // Smooth distance: bei hoher Geschw nah, bei niedriger weit – linear interpoliert
+    const targetDist=Math.max(3.5,Math.min(6.5,5-state.speed/50));
+    state.camDist+=(targetDist-state.camDist)*0.08;
+    const camOffset=new THREE.Vector3(0,state.camDist*0.15,state.camDist);
+    camOffset.applyEuler(new THREE.Euler(state.pitch,state.yaw,0,'YXZ'));
+    camera.position.copy(state.pos.clone().add(camOffset));
+    camera.lookAt(state.pos);
   }
 
   // Update planets
@@ -463,6 +485,50 @@ function update(delta){
   // Minimap update every 3 frames
   state.mapFrame++;
   if(state.mapFrame%CFG.minimap.updateInterval===0) drawMinimap();
+
+  // Prograde / Retrograde Marker + Relativgeschwindigkeit
+  if(!state.landed&&state.speed>0.5){
+    // Prograde = velocity direction, Retrograde = -velocity direction
+    const velDir=state.vel.clone().normalize();
+    const retroDir=velDir.clone().negate();
+
+    // Project to screen
+    const progWorld=state.pos.clone().add(velDir.multiplyScalar(30));
+    const retroWorld=state.pos.clone().add(retroDir.multiplyScalar(30));
+
+    const progScreen=progWorld.clone().project(camera);
+    const retroScreen=retroWorld.clone().project(camera);
+
+    const pm=document.getElementById('progradeMarker');
+    const rm=document.getElementById('retrogradeMarker');
+
+    const sx=s=>Math.round((s.x*0.5+0.5)*window.innerWidth);
+    const sy=s=>Math.round((-s.y*0.5+0.5)*window.innerHeight);
+
+    if(progScreen.z<1){
+      pm.classList.add('show');pm.style.left=sx(progScreen)+'px';pm.style.top=sy(progScreen)+'px';
+    }else pm.classList.remove('show');
+
+    if(retroScreen.z<1){
+      rm.classList.add('show');rm.style.left=sx(retroScreen)+'px';rm.style.top=sy(retroScreen)+'px';
+    }else rm.classList.remove('show');
+
+    // Relative velocity to nearest planet
+    const rvHint=document.getElementById('relVelHint');
+    if(state.nearPlanet&&state.nearDist<state.nearPlanet.data.size+60){
+      const toPlanet=state.nearPlanet.group.position.clone().sub(state.pos);
+      const radialVel=state.vel.dot(toPlanet.normalize());
+      const closing=radialVel<0;
+      rvHint.innerHTML=`<span class="icon" style="background:${closing?'#0f0':'#ff0'}"></span>Relativ: <span class="val">${Math.abs(radialVel).toFixed(1)}</span> km/s ${closing?'⏎ nähernd':'↗ entfernend'}`;
+      rvHint.classList.add('show');
+    }else{
+      rvHint.classList.remove('show');
+    }
+  }else{
+    document.getElementById('progradeMarker').classList.remove('show');
+    document.getElementById('retrogradeMarker').classList.remove('show');
+    document.getElementById('relVelHint').classList.remove('show');
+  }
 }
 
 // ===================== LANDING STATE =====================
