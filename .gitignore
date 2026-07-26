@@ -26,3 +26,5 @@ test-watten-fix.js
 playwright.config.js
 package.json
 nul
+viergewinnt.html.backup
+viergewinnt.html.corrupted
