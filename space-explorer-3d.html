@@ -256,22 +256,160 @@ for(let n=0; n<CFG.world.nebulaCount; n++){
 // ===================== PLANETS =====================
 const planets = [];
 const planetData = [
-  { name:'Merkur', color:0xaaaaaa, size:1.5, dist:80, orbSpeed:0.008, desc:'Kleinster Planet, voller Krater. Tagsüber bis 430°C!', landColor:0x888888 },
-  { name:'Venus', color:0xe6b85c, size:2.2, dist:130, orbSpeed:0.005, desc:'Heißester Planet! Giftige Wolken aus Schwefelsäure.', landColor:0xc8a050 },
-  { name:'Erde', color:0x4488cc, size:2.5, dist:180, orbSpeed:0.003, desc:'Unser Zuhause! 71% Wasser, grüne Kontinente. 🌍', landColor:0x3366aa },
-  { name:'Mars', color:0xcc5533, size:1.8, dist:240, orbSpeed:0.002, desc:'Der Rote Planet. Höchster Berg: Olympus Mons!', landColor:0xaa4420 },
-  { name:'Jupiter', color:0xccaa77, size:5, dist:350, orbSpeed:0.001, desc:'Größter Planet! 1300 Erden passen rein.', landColor:0xbb9955 },
-  { name:'Saturn', color:0xeedd99, size:4, dist:480, orbSpeed:0.0007, desc:'Wunderschöne Ringe! Würde im Wasser schwimmen.', landColor:0xddcc88 }
+  { name:'Merkur', color:0xaaaaaa, size:1.5, dist:80, orbSpeed:0.008, desc:'Kleinster Planet, voller Krater. Tagsüber bis 430°C!', landColor:0x888888, terrainSeed: 12345, terrainScale: 0.08 },
+  { name:'Venus', color:0xe6b85c, size:2.2, dist:130, orbSpeed:0.005, desc:'Heißester Planet! Giftige Wolken aus Schwefelsäure.', landColor:0xc8a050, terrainSeed: 23456, terrainScale: 0.05 },
+  { name:'Erde', color:0x4488cc, size:2.5, dist:180, orbSpeed:0.003, desc:'Unser Zuhause! 71% Wasser, grüne Kontinente. 🌍', landColor:0x3366aa, terrainSeed: 34567, terrainScale: 0.06 },
+  { name:'Mars', color:0xcc5533, size:1.8, dist:240, orbSpeed:0.002, desc:'Der Rote Planet. Höchster Berg: Olympus Mons!', landColor:0xaa4420, terrainSeed: 45678, terrainScale: 0.10 },
+  { name:'Jupiter', color:0xccaa77, size:5, dist:350, orbSpeed:0.001, desc:'Größter Planet! 1300 Erden passen rein.', landColor:0xbb9955, terrainSeed: 56789, terrainScale: 0.03 },
+  { name:'Saturn', color:0xeedd99, size:4, dist:480, orbSpeed:0.0007, desc:'Wunderschöne Ringe! Würde im Wasser schwimmen.', landColor:0xddcc88, terrainSeed: 67890, terrainScale: 0.04 }
 ];
+
+// Procedural noise function for terrain
+function seededRandom(seed) {
+  let x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function noise2D(x, y, seed) {
+  const nx = x * 0.1, ny = y * 0.1;
+  const ix = Math.floor(nx), iy = Math.floor(ny);
+  const fx = nx - ix, fy = ny - iy;
+  
+  const a = seededRandom(seed + ix * 12345 + iy * 67890);
+  const b = seededRandom(seed + (ix+1) * 12345 + iy * 67890);
+  const c = seededRandom(seed + ix * 12345 + (iy+1) * 67890);
+  const d = seededRandom(seed + (ix+1) * 12345 + (iy+1) * 67890);
+  
+  const u = fx * fx * (3 - 2 * fx);
+  const v = fy * fy * (3 - 2 * fy);
+  
+  return a * (1-u) * (1-v) + b * u * (1-v) + c * (1-u) * v + d * u * v;
+}
+
+function fbm(x, y, seed, octaves=5) {
+  let value = 0, amplitude = 1, frequency = 1, maxValue = 0;
+  for(let i=0; i<octaves; i++) {
+    value += amplitude * noise2D(x * frequency, y * frequency, seed + i * 1000);
+    maxValue += amplitude;
+    amplitude *= 0.5;
+    frequency *= 2;
+  }
+  return value / maxValue;
+}
+
+// Create terrain mesh with procedural displacement
+function createPlanetTerrain(pd) {
+  const radius = pd.size;
+  const segments = 64; // Higher resolution for terrain
+  const geom = new THREE.SphereGeometry(radius, segments, segments);
+  const positions = geom.attributes.position;
+  
+  // Store original positions for raycasting
+  const originalPositions = new Float32Array(positions.array.length);
+  originalPositions.set(positions.array);
+  geom.setAttribute('originalPosition', new THREE.BufferAttribute(originalPositions.slice(), 3));
+  
+  // Apply displacement
+  for(let i=0; i<positions.count; i++) {
+    const x = positions.getX(i);
+    const y = positions.getY(i);
+    const z = positions.getZ(i);
+    
+    // Convert to spherical coordinates
+    const lat = Math.asin(y / radius);
+    const lon = Math.atan2(z, x);
+    
+    // Sample noise at this position
+    const h = fbm(lon * 10, lat * 10, pd.terrainSeed, 6);
+    const displacement = h * pd.size * pd.terrainScale;
+    
+    // Displace along normal (which is just the normalized position for a sphere)
+    const len = Math.sqrt(x*x + y*y + z*z);
+    const nx = x / len, ny = y / len, nz = z / len;
+    
+    positions.setXYZ(i, x + nx * displacement, y + ny * displacement, z + nz * displacement);
+  }
+  
+  geom.computeVertexNormals();
+  geom.computeBoundingSphere();
+  
+  // Create material with terrain coloring based on height
+  const terrainMaterial = new THREE.MeshPhongMaterial({
+    color: pd.color,
+    emissive: pd.color,
+    emissiveIntensity: 0.05,
+    shininess: 30,
+    flatShading: true,
+    vertexColors: true
+  });
+  
+  // Add vertex colors based on height
+  const colors = new Float32Array(positions.count * 3);
+  const landColor = new THREE.Color(pd.landColor);
+  const baseColor = new THREE.Color(pd.color);
+  
+  for(let i=0; i<positions.count; i++) {
+    const origX = originalPositions[i*3];
+    const origY = originalPositions[i*3+1];
+    const origZ = originalPositions[i*3+2];
+    const newX = positions.getX(i);
+    const newY = positions.getY(i);
+    const newZ = positions.getZ(i);
+    
+    const origLen = Math.sqrt(origX*origX + origY*origY + origZ*origZ);
+    const newLen = Math.sqrt(newX*newX + newY*newY + newZ*newZ);
+    const heightRatio = (newLen - origLen) / (pd.size * pd.terrainScale);
+    
+    // Mix between base and land color based on height
+    let r, g, b;
+    if (heightRatio > 0.3) {
+      // High terrain - lighter
+      r = landColor.r + (1 - landColor.r) * Math.min(1, (heightRatio - 0.3) * 2);
+      g = landColor.g + (1 - landColor.g) * Math.min(1, (heightRatio - 0.3) * 2);
+      b = landColor.b + (1 - landColor.b) * Math.min(1, (heightRatio - 0.3) * 2);
+    } else if (heightRatio < -0.2) {
+      // Low terrain - darker (valleys/craters)
+      r = landColor.r * 0.6;
+      g = landColor.g * 0.6;
+      b = landColor.b * 0.6;
+    } else {
+      r = landColor.r;
+      g = landColor.g;
+      b = landColor.b;
+    }
+    colors[i*3] = r;
+    colors[i*3+1] = g;
+    colors[i*3+2] = b;
+  }
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  
+  const mesh = new THREE.Mesh(geom, terrainMaterial);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  
+  // Store terrain data for raycasting during landing
+  mesh.userData.terrainData = {
+    originalPositions: originalPositions,
+    radius: radius,
+    seed: pd.terrainSeed,
+    scale: pd.terrainScale,
+    landColor: pd.landColor
+  };
+  
+  return mesh;
+}
 
 planetData.forEach((pd, idx) => {
   const group = new THREE.Group();
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(pd.size, 32, 32),
-    new THREE.MeshPhongMaterial({ color: pd.color, emissive: pd.color, emissiveIntensity: 0.05, shininess: 30 }));
-  group.add(mesh);
+  
+  // Create terrain mesh instead of simple sphere
+  const terrainMesh = createPlanetTerrain(pd);
+  group.add(terrainMesh);
+  
+  // Add atmosphere glow for Earth
   if(idx===2){
-    group.add(new THREE.Mesh(new THREE.SphereGeometry(pd.size*1.05,32,32),
-      new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.15,side:THREE.BackSide})));
+    group.add(new THREE.Mesh(new THREE.SphereGeometry(pd.size*1.08,32,32),
+      new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.1,side:THREE.BackSide,depthWrite:false})));
   }
   if(idx===5){
     const ring=new THREE.Mesh(new THREE.RingGeometry(pd.size*1.4,pd.size*2.4,64),
@@ -281,7 +419,7 @@ planetData.forEach((pd, idx) => {
   const angle=Math.random()*Math.PI*2;
   group.position.set(pd.dist*Math.cos(angle),0,pd.dist*Math.sin(angle));
   scene.add(group);
-  planets.push({group,mesh,data:pd,idx,angle,dist:pd.dist,orbSpeed:pd.orbSpeed});
+  planets.push({group,mesh:terrainMesh,data:pd,idx,angle,dist:pd.dist,orbSpeed:pd.orbSpeed});
 });
 
 // ===================== SUN =====================
@@ -496,7 +634,7 @@ function cancelApproach(){
   detectLandingState();
 }
 
-// ===================== 3D LANDING SEQUENCE (SIMPLIFIED) =====================
+// ===================== 3D LANDING SEQUENCE (WITH REAL TERRAIN) =====================
 function startLandingSequence(planet){
   if(!planet) return;
   state.autoApproach = false;
@@ -507,11 +645,27 @@ function startLandingSequence(planet){
   document.getElementById('seqStatus').textContent='⬇️ Sinkflug';
   document.getElementById('seqStatus').className='show';
 
-  // Landepunkt auf aktueller Planetenoberfläche berechnen
+  // Raycast gegen echtes Terrain-Mesh für echte Landeposition
+  const terrainMesh = planet.mesh;
+  const raycaster = new THREE.Raycaster();
   const dirFromShip = planet.group.position.clone().sub(state.pos).normalize();
-  const landingPos = planet.group.position.clone().add(
-    dirFromShip.clone().multiplyScalar(planet.data.size + 0.15)
-  );
+  const rayOrigin = state.pos.clone();
+  raycaster.set(rayOrigin, dirFromShip.negate()); // Ray from ship toward planet
+  
+  const intersects = raycaster.intersectObject(terrainMesh, true);
+  let landingPos, landingNormal;
+  
+  if(intersects.length > 0) {
+    // Landung auf echter Terrain-Oberfläche
+    landingPos = intersects[0].point.clone();
+    landingNormal = intersects[0].face ? intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(terrainMesh.matrixWorld)) : dirFromShip.clone();
+    // Leicht über der Oberfläche positionieren (für Landing Gear)
+    landingPos.add(landingNormal.clone().multiplyScalar(0.2));
+  } else {
+    // Fallback: Kugel-Oberfläche
+    landingPos = planet.group.position.clone().add(dirFromShip.clone().multiplyScalar(planet.data.size + 0.15));
+    landingNormal = dirFromShip.clone();
+  }
 
   // STATE MACHINE direkt auf Descent setzen
   state.seqState = 2; // descent
@@ -519,10 +673,11 @@ function startLandingSequence(planet){
   state.seqTimer = 0;
   state.seqStartPos = state.pos.clone();
   state.seqLandingPos = landingPos.clone();
+  state.seqLandingNormal = landingNormal.clone();
   state.vel.set(0,0,0);
   state.speed = 0;
 
-  // Pitch hochziehen (Nase nach oben)  
+  // Pitch hochziehen (Nase nach oben) 
   state.pitch = 1.0;
   // Yaw auf Planet ausrichten
   const toPlanet = dirFromShip;
@@ -535,30 +690,35 @@ function updateLandingSequence(delta){
   state.seqTimer += delta;
 
   if(state.seqState === 2){
-    // ======= DESCENT: Sanfter Sinkflug auf Planetenoberfläche =======
+    // ======= DESCENT: Sanfter Sinkflug auf ECHTER Terrain-Oberfläche =======
     const duration = CFG.landing.descentDuration;
     const t = Math.min(1, state.seqTimer / duration);
     const st = t * t * (3 - 2 * t); // smoothstep
 
-    // Zielposition: Landepunkt wird NACHGEFÜHRT für bewegte Planeten
-    const dirFromShip = p.group.position.clone().sub(state.seqStartPos).normalize();
-    const landingPos = p.group.position.clone().add(
-      dirFromShip.clone().multiplyScalar(p.data.size + 0.15)
-    );
+    // Verwende VORBERECHNETE echte Terrain-Landeposition und -Normale
+    const landingPos = state.seqLandingPos.clone();
+    const landingNormal = state.seqLandingNormal.clone();
 
     // Position interpolieren
     state.pos.lerpVectors(state.seqStartPos, landingPos, st);
 
-    // Pitch hochziehen (Nase zeigt nach oben) & langsam zurücknehmen
+    // Ship-Orientierung: Nase nach oben, aber an Terrain-Normale angepasst
+    // Ziel: Schiff "steht" auf der Oberfläche (Up-Vektor = Terrain-Normale)
+    const targetUp = landingNormal.clone();
+    const targetForward = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
+    
+    // Pitch hochziehen (Nase zeigt nach oben) & langsam zurücknehmen für Flare
     const pitchCurve = 1.0 - Math.min(0.8, t * t * 2.5);
     state.pitch += (pitchCurve * 1.2 - state.pitch) * 0.08;
 
-    // Leichtes Wackeln
+    // Yaw leicht an Terrain anpassen (für Seitwärts-Neigung bei Hängen)
     state.yaw += Math.sin(state.seqTimer * 3) * 0.004;
 
     // Gear ausfahren bei ~50%
     if(st > 0.5 && !legGroup.visible){
       legGroup.visible = true;
+      // Landing Gear an Terrain-Normale ausrichten
+      legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), landingNormal));
       document.getElementById('seqStatus').textContent='🦿 Fahrwerk';
       setTimeout(()=>{document.getElementById('seqStatus').textContent='⬇️ Landen';},400);
     }
@@ -571,27 +731,31 @@ function updateLandingSequence(delta){
       document.getElementById('seqStatus').textContent='🔄 Abfangen';
     }
 
-    // Distanz-Info
+    // Distanz-Info (echte Höhe über Terrain)
     const dist = state.pos.distanceTo(p.group.position);
-    document.getElementById('nearHint').textContent=`🛸 ${Math.round(dist - p.data.size)} m`;
+    const heightAboveTerrain = Math.max(0, dist - p.data.size);
+    document.getElementById('nearHint').textContent=`🛸 ${Math.round(heightAboveTerrain * 1000)} m`;
   }
   else if(state.seqState === 3){
-    // ======= FLARE + TOUCHDOWN =======
+    // ======= FLARE + TOUCHDOWN auf ECHTEM Terrain =======
     const duration = 1.0;
     const t = Math.min(1, state.seqTimer / duration);
     const st = t * t * (3 - 2 * t);
 
-    // Zielposition nachführen
-    const dirFromShip = p.group.position.clone().sub(state.seqStartPos).normalize();
-    const landingPos = p.group.position.clone().add(
-      dirFromShip.clone().multiplyScalar(p.data.size + 0.15)
-    );
+    // Verwende VORBERECHNETE echte Terrain-Position
+    const landingPos = state.seqLandingPos.clone();
+    const landingNormal = state.seqLandingNormal.clone();
 
     state.pos.lerpVectors(state.seqStartPos, landingPos, st);
 
-    // Pitch nach unten zur Horizontalen
+    // Pitch nach unten zur Horizontalen (relativ zur Terrain-Normale)
     state.pitch *= 0.9;
     if(Math.abs(state.pitch) < 0.05) state.pitch = 0;
+
+    // Landing Gear an Terrain anpassen
+    if(legGroup.visible) {
+      legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), landingNormal));
+    }
 
     // Vibration kurz vor Touchdown
     if(st > 0.85){
@@ -601,22 +765,24 @@ function updateLandingSequence(delta){
       state.pos.z += (Math.random()-0.5) * vib;
     }
 
-    // Distanz-Info
+    // Distanz-Info (echte Höhe über Terrain)
     const dist = state.pos.distanceTo(p.group.position);
-    document.getElementById('nearHint').textContent=`🛸 ${Math.round(dist - p.data.size)} m`;
+    const heightAboveTerrain = Math.max(0, dist - p.data.size);
+    document.getElementById('nearHint').textContent=`🛸 ${Math.round(heightAboveTerrain * 1000)} m`;
 
     // Touchdown!
     if(t >= 1){
-      // Exakte Touchdown-Position
-      const dir = p.group.position.clone().sub(state.pos).normalize();
-      state.pos.copy(p.group.position).add(dir.clone().multiplyScalar(p.data.size + 0.15));
+      // Exakte Touchdown-Position auf TERRAIN (nicht Kugel)
+      state.pos.copy(landingPos);
       state.vel.set(0,0,0);
       state.speed = 0;
 
-      // Landing-Gear + Dust
+      // Landing-Gear fest an Terrain-Normale ausrichten
       legGroup.visible = true;
-      const upDir = state.pos.clone().sub(p.group.position).normalize();
-      const dustWorldPos = state.pos.clone().add(upDir.clone().multiplyScalar(-0.1));
+      legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), landingNormal));
+
+      // Dust an Touchdown-Position
+      const dustWorldPos = landingPos.clone().add(landingNormal.clone().multiplyScalar(-0.1));
       emitDustBurst(dustWorldPos, 45);
 
       // Landed setzen
@@ -652,8 +818,9 @@ function startLaunchSequence(){
   state.seqStartPos = state.pos.clone();
   state.landedOn = null;
 
-  // Endposition: etwas über der Oberfläche, dann Wechsel zu Phase 6
-  const upDir = state.seqStartPos.clone().sub(p.group.position).normalize();
+  // Endposition: etwas über der Oberfläche (entlang der Terrain-Normale), dann Wechsel zu Phase 6
+  // Verwende die gespeicherte Terrain-Normale vom Landepunkt
+  const upDir = state.seqLandingNormal.clone(); // Echte Terrain-Normale!
   state.seqEndPos = p.group.position.clone().add(upDir.clone().multiplyScalar(p.data.size + CFG.landing.approachAltitude));
 
   document.getElementById('landBtn').classList.remove('show','launch','land');
@@ -665,7 +832,7 @@ function startLaunchSequence(){
   // Gear einfahren
   legGroup.visible = false;
 
-  // Dust beim Abheben
+  // Dust beim Abheben an Terrain-Position
   const dustWorldPos = state.seqStartPos.clone().add(upDir.clone().multiplyScalar(-0.1));
   emitDustBurst(dustWorldPos, 35);
 }
@@ -761,13 +928,24 @@ function update(delta){
       camera.position.lerp(camPos,0.15);
       const camLook=state.pos.clone().add(new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(0,state.yaw,0,'YXZ')).multiplyScalar(3));
       camera.lookAt(camLook);
-    } else {
-      // Während Descent/Flare: näher dran, von oben
-      const planetDir = state.pos.clone().sub(state.seqPlanet.group.position).normalize();
-      const camPos = state.pos.clone().add(planetDir).multiplyScalar(-1.5);
-      camPos.y += 2.5;
+    } else if(state.seqState === 2) {
+      // Während Descent: Kamera zeigt seitlich/schräg von oben auf Landung
+      const p = state.seqPlanet;
+      const planetDir = state.pos.clone().sub(p.group.position).normalize();
+      // Kamera seitlich versetzt, zeigt auf Schiff und Terrain
+      const sideOffset = new THREE.Vector3(-planetDir.z, 0, planetDir.x).normalize().multiplyScalar(3);
+      const camPos = state.pos.clone().add(planetDir.clone().multiplyScalar(-4)).add(sideOffset);
+      camPos.y += 3;
+      camera.position.lerp(camPos, 0.15);
+      camera.lookAt(state.pos.clone().add(new THREE.Vector3(0, 0.5, 0))); // Leicht über Schiff schauen
+    } else if(state.seqState === 3) {
+      // Während Flare/Touchdown: Nah dran, zeigt Terrain-Detail
+      const landingNormal = state.seqLandingNormal.clone();
+      // Kamera positioniert sich entlang der Terrain-Normale, seitlich versetzt
+      const camPos = state.seqLandingPos.clone().add(landingNormal.clone().multiplyScalar(5));
+      camPos.add(new THREE.Vector3(-landingNormal.z, 0, landingNormal.x).normalize().multiplyScalar(2));
       camera.position.lerp(camPos, 0.2);
-      camera.lookAt(state.pos);
+      camera.lookAt(state.seqLandingPos.clone().add(landingNormal.clone().multiplyScalar(0.5)));
     }
     // HUD
     document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;
@@ -891,10 +1069,29 @@ function update(delta){
   }
 
   // Camera - Chase Mode: nur Yaw folgen, Pitch ignorieren → Schiff bleibt stabil
+  // Gelandet: Kamera um das Schiff auf der Planetenoberfläche
   if(state.landed&&state.landedOn){
-    const camTarget=state.pos.clone().add(new THREE.Vector3(3,2,3));
-    camera.position.lerp(camTarget,0.12);
-    camera.lookAt(state.pos);
+    const p = state.landedOn;
+    // Raycast für aktuelle Terrain-Normale unter dem Schiff
+    const raycaster = new THREE.Raycaster();
+    const downDir = state.pos.clone().sub(p.group.position).normalize().negate();
+    raycaster.set(state.pos.clone().add(new THREE.Vector3(0, 10, 0)), downDir);
+    const intersects = raycaster.intersectObject(p.mesh, true);
+    
+    let terrainNormal = state.pos.clone().sub(p.group.position).normalize(); // Fallback
+    if(intersects.length > 0) {
+      const face = intersects[0].face;
+      if(face) {
+        terrainNormal = face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld));
+      }
+    }
+    
+    // Kamera positioniert sich seitlich/oben relativ zur Terrain-Normale
+    const sideOffset = new THREE.Vector3(-terrainNormal.z, 0, terrainNormal.x).normalize().multiplyScalar(4);
+    const camTarget = state.pos.clone().add(terrainNormal.clone().multiplyScalar(2.5)).add(sideOffset);
+    camTarget.y += 1.5;
+    camera.position.lerp(camTarget, 0.12);
+    camera.lookAt(state.pos.clone().add(terrainNormal.clone().multiplyScalar(0.5)));
   }else{
     // Smooth distance
     const targetDist=Math.max(3.5,Math.min(6.5,5-state.speed/50));
