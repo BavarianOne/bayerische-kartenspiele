@@ -615,13 +615,10 @@ function update(delta){
       camera.lookAt(camLook);
     } else if(state.seqState === 2) {
       // Während Descent: Dynamische Verfolgungskamera hinter dem Schiff
-      // Kamera folgt dem Schiff in einer leichten Distanz, blickt nach vorne/unten
-      const camOffset = new THREE.Vector3(0, 1.2, 3.5); 
+      const camOffset = new THREE.Vector3(0, 1.2, 3.5);
       camOffset.applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
       const camPos = state.pos.clone().add(camOffset);
       camera.position.lerp(camPos, 0.1);
-      
-      // Blickrichtung: Ein Stück vor dem Schiff in Richtung Landepunkt
       const lookTarget = state.pos.clone().add(new THREE.Vector3(0, 0, -5).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ')));
       camera.lookAt(lookTarget);
     } else if(state.seqState === 3) {
