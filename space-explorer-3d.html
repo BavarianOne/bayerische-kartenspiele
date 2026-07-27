@@ -656,11 +656,9 @@ function startLandingSequence(planet){
   let landingPos, landingNormal;
   
   if(intersects.length > 0) {
-    // Landung auf echter Terrain-Oberfläche
-    landingPos = intersects[0].point.clone();
-    landingNormal = intersects[0].face ? intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(terrainMesh.matrixWorld)) : dirFromShip.clone();
-    // Leicht über der Oberfläche positionieren (für Landing Gear)
-    landingPos.add(landingNormal.clone().multiplyScalar(0.2));
+  // Landung auf echter Terrain-Oberfläche
+  landingPos = intersects[0].point.clone();
+  landingNormal = intersects[0].face ? intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(terrainMesh.matrixWorld)) : dirFromShip.clone();
   } else {
     // Fallback: Kugel-Oberfläche
     landingPos = planet.group.position.clone().add(dirFromShip.clone().multiplyScalar(planet.data.size + 0.15));
