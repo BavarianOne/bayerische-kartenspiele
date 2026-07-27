@@ -352,30 +352,15 @@ function createPlanetTerrain(pd) {
     const origX = originalPositions[i*3];
     const origY = originalPositions[i*3+1];
     const origZ = originalPositions[i*3+2];
-    c
+    const newX = positions.getX(i);
+    const newY = positions.getY(i);
+    const newZ = positions.getZ(i);
 
-... [OUTPUT TRUNCATED - 14,421 chars omitted out of 64,348 total] ...
 
- state.seqStartPos = state.pos.clone();
-  state.seqLandingPos = landingPos.clone();
-  state.seqLandingNormal = landingNormal.clone();
-  state.vel.set(0,0,0);
-  state.speed = 0;
 
-  // Pitch hochziehen (Nase nach oben) 
-  state.pitch = 1.0;
-  // Yaw auf Planet ausrichten
-  const toPlanet = dirFromShip;
-  state.yaw = Math.atan2(toPlanet.x, toPlanet.z);
-}
+... [OUTPUT TRUNCATED - 602 chars omitted out of 50,532 total] ...
 
-function updateLandingSequence(delta){
-  const p = state.seqPlanet;
-  if(!p) return;
-  state.seqTimer += delta;
-
-  if(state.seqState === 2){
-    // ======= DESCENT: Sanfter Sinkflug auf ECHTER Terrain-Oberfläche =======
+kflug auf ECHTER Terrain-Oberfläche =======
     const duration = CFG.landing.descentDuration;
     const t = Math.min(1, state.seqTimer / duration);
     const st = t * t * (3 - 2 * t); // smoothstep
