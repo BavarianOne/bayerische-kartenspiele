@@ -781,9 +781,9 @@ function startLandingSequence(planet){
   landingPos = intersects[0].point.clone();
   landingNormal = intersects[0].face ? intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(terrainMesh.matrixWorld)) : dirFromShip.clone();
   } else {
-    // Fallback: Kugel-Oberfläche
-    landingPos = planet.group.position.clone().add(dirFromShip.clone().multiplyScalar(planet.data.size + 0.15));
-    landingNormal = dirFromShip.clone();
+  // Fallback: Kugel-Oberfläche - EXAKT auf der Oberfläche (nicht darüber!)
+  landingPos = planet.group.position.clone().add(dirFromShip.clone().multiplyScalar(planet.data.size));
+  landingNormal = dirFromShip.clone();
   }
 
   // STATE MACHINE direkt auf Descent setzen
@@ -852,7 +852,9 @@ function updateLandingSequence(delta){
 
     // Distanz-Info (echte Höhe über Terrain)
     const dist = state.pos.distanceTo(p.group.position);
-    const heightAboveTerrain = Math.max(0, dist - p.data.size);
+    // Use getTerrainHeight for accurate height above actual terrain surface
+    const currentTerrainHeight = getTerrainHeight(p, state.pos);
+    const heightAboveTerrain = Math.max(0, dist - currentTerrainHeight);
     document.getElementById('nearHint').textContent=`🛸 ${Math.round(heightAboveTerrain * 1000)} m`;
   }
   else if(state.seqState === 3){
@@ -878,15 +880,17 @@ function updateLandingSequence(delta){
 
     // Vibration kurz vor Touchdown
     if(st > 0.85){
-      const vib = (1 - st) * 0.05;
-      state.pos.x += (Math.random()-0.5) * vib;
-      state.pos.y += (Math.random()-0.5) * vib;
-      state.pos.z += (Math.random()-0.5) * vib;
+    const vib = (1 - st) * 0.05;
+    state.pos.x += (Math.random()-0.5) * vib;
+    // state.pos.y += (Math.random()-0.5) * vib; // REMOVED: Keine Y-Vibration, sonst schwebt das Schiff!
+    state.pos.z += (Math.random()-0.5) * vib;
     }
 
     // Distanz-Info (echte Höhe über Terrain)
     const dist = state.pos.distanceTo(p.group.position);
-    const heightAboveTerrain = Math.max(0, dist - p.data.size);
+    // Use getTerrainHeight for accurate height above actual terrain surface
+    const currentTerrainHeight = getTerrainHeight(p, state.pos);
+    const heightAboveTerrain = Math.max(0, dist - currentTerrainHeight);
     document.getElementById('nearHint').textContent=`🛸 ${Math.round(heightAboveTerrain * 1000)} m`;
 
     // Touchdown!
