@@ -293,12 +293,12 @@ for(let n=0; n<CFG.world.nebulaCount; n++){
 // ===================== PLANETS =====================
 const planets = [];
 const planetData = [
-  { name:'Merkur', color:0xaaaaaa, size:1.5, dist:80, orbSpeed:0.008, desc:'Kleinster Planet, voller Krater. Tagsüber bis 430°C!', landColor:0x888888, terrainSeed: 12345, terrainScale: 0.08 },
-  { name:'Venus', color:0xe6b85c, size:2.2, dist:130, orbSpeed:0.005, desc:'Heißester Planet! Giftige Wolken aus Schwefelsäure.', landColor:0xc8a050, terrainSeed: 23456, terrainScale: 0.05 },
-  { name:'Erde', color:0x4488cc, size:2.5, dist:180, orbSpeed:0.003, desc:'Unser Zuhause! 71% Wasser, grüne Kontinente. 🌍', landColor:0x3366aa, terrainSeed: 34567, terrainScale: 0.06 },
-  { name:'Mars', color:0xcc5533, size:1.8, dist:240, orbSpeed:0.002, desc:'Der Rote Planet. Höchster Berg: Olympus Mons!', landColor:0xaa4420, terrainSeed: 45678, terrainScale: 0.10 },
-  { name:'Jupiter', color:0xccaa77, size:5, dist:350, orbSpeed:0.001, desc:'Größter Planet! 1300 Erden passen rein.', landColor:0xbb9955, terrainSeed: 56789, terrainScale: 0.03 },
-  { name:'Saturn', color:0xeedd99, size:4, dist:480, orbSpeed:0.0007, desc:'Wunderschöne Ringe! Würde im Wasser schwimmen.', landColor:0xddcc88, terrainSeed: 67890, terrainScale: 0.04 }
+ { name:'Merkur', color:0xaaaaaa, size:8, dist:120, orbSpeed:0.008, desc:'Kleinster Planet, voller Krater. Tagsüber bis 430°C!', landColor:0x888888, terrainSeed: 12345, terrainScale: 0.12 },
+ { name:'Venus', color:0xe6b85c, size:10, dist:180, orbSpeed:0.005, desc:'Heißester Planet! Giftige Wolken aus Schwefelsäure.', landColor:0xc8a050, terrainSeed: 23456, terrainScale: 0.10 },
+ { name:'Erde', color:0x4488cc, size:12, dist:240, orbSpeed:0.003, desc:'Unser Zuhause! 71% Wasser, grüne Kontinente. 🌍', landColor:0x3366aa, terrainSeed: 34567, terrainScale: 0.10 },
+ { name:'Mars', color:0xcc5533, size:9, dist:320, orbSpeed:0.002, desc:'Der Rote Planet. Höchster Berg: Olympus Mons!', landColor:0xaa4420, terrainSeed: 45678, terrainScale: 0.15 },
+ { name:'Jupiter', color:0xccaa77, size:20, dist:450, orbSpeed:0.001, desc:'Größter Planet! 1300 Erden passen rein.', landColor:0xbb9955, terrainSeed: 56789, terrainScale: 0.08 },
+ { name:'Saturn', color:0xeedd99, size:18, dist:580, orbSpeed:0.0007, desc:'Wunderschöne Ringe! Würde im Wasser schwimmen.', landColor:0xddcc88, terrainSeed: 67890, terrainScale: 0.06 }
 ];
 
 // Procedural noise function for terrain
@@ -334,10 +334,10 @@ function fbm(x, y, seed, octaves=5) {
   return value / maxValue;
 }
 
-// Create terrain mesh with procedural displacement
+ // Create terrain mesh with procedural displacement
 function createPlanetTerrain(pd) {
  const radius = pd.size;
- const segments = CFG.surface.terrainSegments; // Higher resolution for terrain
+ const segments = 128; // Hohe Auflösung für detailliertes Terrain
  const geom = new THREE.SphereGeometry(radius, segments, segments);
  const positions = geom.attributes.position;
 
@@ -346,7 +346,7 @@ function createPlanetTerrain(pd) {
  originalPositions.set(positions.array);
  geom.setAttribute('originalPosition', new THREE.BufferAttribute(originalPositions.slice(), 3));
 
- // Apply displacement
+ // Apply displacement mit mehr Details
  for(let i=0; i<positions.count; i++) {
  const x = positions.getX(i);
  const y = positions.getY(i);
@@ -356,11 +356,11 @@ function createPlanetTerrain(pd) {
  const lat = Math.asin(y / radius);
  const lon = Math.atan2(z, x);
 
- // Sample noise at this position
- const h = fbm(lon * 10, lat * 10, pd.terrainSeed, 6);
+ // Sample noise at this position mit mehr Octaves für Details
+ const h = fbm(lon * 15, lat * 15, pd.terrainSeed, 8);
  const displacement = h * pd.size * pd.terrainScale;
 
- // Displace along normal (which is just the normalized position for a sphere)
+ // Displace along normal
  const len = Math.sqrt(x*x + y*y + z*z);
  const nx = x / len, ny = y / len, nz = z / len;
 
@@ -380,43 +380,54 @@ function createPlanetTerrain(pd) {
     vertexColors: true
   });
   
-  // Add vertex colors based on height
+  // Add vertex colors based on height - verbessert für realistischere Oberfläche
   const colors = new Float32Array(positions.count * 3);
   const landColor = new THREE.Color(pd.landColor);
   const baseColor = new THREE.Color(pd.color);
-  
+  const mountainColor = new THREE.Color().setRGB(0.8, 0.8, 0.8); // Hell für Berge
+  const valleyColor = new THREE.Color().setRGB(0.3, 0.3, 0.3); // Dunkel für Täler
+
   for(let i=0; i<positions.count; i++) {
-    const origX = originalPositions[i*3];
-    const origY = originalPositions[i*3+1];
-    const origZ = originalPositions[i*3+2];
-    const newX = positions.getX(i);
-    const newY = positions.getY(i);
-    const newZ = positions.getZ(i);
-    
-    const origLen = Math.sqrt(origX*origX + origY*origY + origZ*origZ);
-    const newLen = Math.sqrt(newX*newX + newY*newY + newZ*newZ);
-    const heightRatio = (newLen - origLen) / (pd.size * pd.terrainScale);
-    
-    // Mix between base and land color based on height
-    let r, g, b;
-    if (heightRatio > 0.3) {
-      // High terrain - lighter
-      r = landColor.r + (1 - landColor.r) * Math.min(1, (heightRatio - 0.3) * 2);
-      g = landColor.g + (1 - landColor.g) * Math.min(1, (heightRatio - 0.3) * 2);
-      b = landColor.b + (1 - landColor.b) * Math.min(1, (heightRatio - 0.3) * 2);
-    } else if (heightRatio < -0.2) {
-      // Low terrain - darker (valleys/craters)
-      r = landColor.r * 0.6;
-      g = landColor.g * 0.6;
-      b = landColor.b * 0.6;
-    } else {
-      r = landColor.r;
-      g = landColor.g;
-      b = landColor.b;
-    }
-    colors[i*3] = r;
-    colors[i*3+1] = g;
-    colors[i*3+2] = b;
+  const origX = originalPositions[i*3];
+  const origY = originalPositions[i*3+1];
+  const origZ = originalPositions[i*3+2];
+  const newX = positions.getX(i);
+  const newY = positions.getY(i);
+  const newZ = positions.getZ(i);
+
+  const origLen = Math.sqrt(origX*origX + origY*origY + origZ*origZ);
+  const newLen = Math.sqrt(newX*newX + newY*newY + newZ*newZ);
+  const heightRatio = (newLen - origLen) / (pd.size * pd.terrainScale);
+
+  // Realistischere Farbverläufe basierend auf Höhe
+  let r, g, b;
+  if (heightRatio > 0.5) {
+  // Sehr hohe Berge - fast weiß/hellgrau
+  const mountainFactor = Math.min(1, (heightRatio - 0.5) * 2);
+  r = THREE.MathUtils.lerp(landColor.r, mountainColor.r, mountainFactor);
+  g = THREE.MathUtils.lerp(landColor.g, mountainColor.g, mountainFactor);
+  b = THREE.MathUtils.lerp(landColor.b, mountainColor.b, mountainFactor);
+  } else if (heightRatio > 0.1) {
+  // Normale Hügel - Basislandfarbe
+  r = landColor.r;
+  g = landColor.g;
+  b = landColor.b;
+  } else if (heightRatio > -0.3) {
+  // Flaches Land - leicht dunkler
+  const flatFactor = 1 - Math.abs(heightRatio);
+  r = landColor.r * (0.7 + flatFactor * 0.3);
+  g = landColor.g * (0.7 + flatFactor * 0.3);
+  b = landColor.b * (0.7 + flatFactor * 0.3);
+  } else {
+  // Täler/Krater - sehr dunkel
+  const valleyFactor = Math.min(1, (-heightRatio - 0.3) * 2);
+  r = THREE.MathUtils.lerp(landColor.r, valleyColor.r, valleyFactor);
+  g = THREE.MathUtils.lerp(landColor.g, valleyColor.g, valleyFactor);
+  b = THREE.MathUtils.lerp(landColor.b, valleyColor.b, valleyFactor);
+  }
+  colors[i*3] = r;
+  colors[i*3+1] = g;
+  colors[i*3+2] = b;
   }
   geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   
@@ -460,11 +471,30 @@ planetData.forEach((pd, idx) => {
 });
 
 // ===================== SUN =====================
-const sun=new THREE.Mesh(new THREE.SphereGeometry(8,32,32),new THREE.MeshBasicMaterial({color:0xffdd44}));
+const sun=new THREE.Mesh(new THREE.SphereGeometry(12,32,32),new THREE.MeshBasicMaterial({color:0xffdd44}));
 scene.add(sun);
-for(let i=0;i<3;i++) scene.add(new THREE.Mesh(new THREE.SphereGeometry(8+(i+1)*4,32,32),new THREE.MeshBasicMaterial({color:0xffaa22,transparent:true,opacity:0.1-i*0.025,side:THREE.BackSide})));
+for(let i=0;i<3;i++) scene.add(new THREE.Mesh(new THREE.SphereGeometry(12+(i+1)*6,32,32),new THREE.MeshBasicMaterial({color:0xffaa22,transparent:true,opacity:0.1-i*0.025,side:THREE.BackSide})));
+
+// Bessere Beleuchtung für realistischere 3D-Oberfläche
+const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+sunLight.position.set(2000, 1000, 2000);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 2048;
+sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.camera.near = 0.5;
+sunLight.shadow.camera.far = 5000;
+sunLight.shadow.camera.left = -2000;
+sunLight.shadow.camera.right = 2000;
+sunLight.shadow.camera.top = 2000;
+sunLight.shadow.camera.bottom = -2000;
+scene.add(sunLight);
+
 scene.add(new THREE.PointLight(0xffeedd,2,2000));
-scene.add(new THREE.AmbientLight(0x222244,0.3));
+scene.add(new THREE.AmbientLight(0x444466,0.5));
+
+// Enable shadow rendering
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // ===================== ASTEROIDS =====================
 const astGroup=new THREE.Group(); scene.add(astGroup);
@@ -484,11 +514,11 @@ for(let i=0;i<CFG.world.asteroidCount;i++) createAsteroid(0.5+Math.random()*3,ne
 const shipGroup = new THREE.Group();
 shipGroup.position.copy(state.pos);
 const body = new THREE.Mesh(new THREE.ConeGeometry(0.6,1.8,6),new THREE.MeshPhongMaterial({color:0x88ddff,emissive:0x226688,emissiveIntensity:0.15,shininess:60}));
-body.rotation.x=Math.PI*0.5; shipGroup.add(body);
+body.rotation.x=Math.PI*0.5; body.castShadow = true; body.receiveShadow = true; shipGroup.add(body);
 const cockpit=new THREE.Mesh(new THREE.SphereGeometry(0.35,12,12,0,Math.PI*2,0,Math.PI*0.5),new THREE.MeshPhongMaterial({color:0x88eeff,emissive:0x44aacc,emissiveIntensity:0.3,transparent:true,opacity:0.7,shininess:100}));
-cockpit.position.set(0,0.25,0.6);cockpit.rotation.x=-0.3; shipGroup.add(cockpit);
+cockpit.position.set(0,0.25,0.6);cockpit.rotation.x=-0.3; cockpit.castShadow = true; shipGroup.add(cockpit);
 const wings=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.05,0.3),new THREE.MeshPhongMaterial({color:0x66bbdd,emissive:0x114466,emissiveIntensity:0.1,shininess:40}));
-wings.position.set(0,-0.05,-0.1); shipGroup.add(wings);
+wings.position.set(0,-0.05,-0.1); wings.castShadow = true; shipGroup.add(wings);
 
 // Flame
 const flameGroup = new THREE.Group(); shipGroup.add(flameGroup);
@@ -1110,22 +1140,21 @@ function update(delta){
       const camLook=state.pos.clone().add(new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(0,state.yaw,0,'YXZ')).multiplyScalar(3));
       camera.lookAt(camLook);
       } else if(state.seqState === 2) {
-      // Während Descent: Dynamische Verfolgungskamera hinter dem Schiff
-      // Kamera folgt dem Schiff in einer leichten Distanz, blickt nach vorne/unten
-      const camOffset = new THREE.Vector3(0, 1.2, 3.5);
+      // Während Descent: Kamera nah an der Oberfläche für bessere 3D-Wirkung
+      const camOffset = new THREE.Vector3(0, 0.8, 2);
       camOffset.applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
       const camPos = state.pos.clone().add(camOffset);
-      camera.position.lerp(camPos, 0.1);
-      const lookTarget = state.pos.clone().add(new THREE.Vector3(0, 0, -5).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ')));
+      camera.position.lerp(camPos, 0.15);
+      const lookTarget = state.pos.clone().add(new THREE.Vector3(0, 0, -3).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ')));
       camera.lookAt(lookTarget);
       } else if(state.seqState === 3) {
-
-      // Während Flare/Touchdown: Nahaufnahme, Fokus auf Terrain und Fahrwerk
+      } else if(state.seqState === 3) {
+      // Während Flare/Touchdown: Sehr nah für dramatische Landung
       const landingNormal = state.seqLandingNormal.clone();
-      const sideOffset = new THREE.Vector3(-landingNormal.z, 0, landingNormal.x).normalize().multiplyScalar(2);
-      const camPos = state.pos.clone().add(landingNormal.clone().multiplyScalar(2.5)).add(sideOffset);
-      camera.position.lerp(camPos, 0.1);
-      camera.lookAt(state.pos.clone().add(landingNormal.clone().multiplyScalar(0.2)));
+      const sideOffset = new THREE.Vector3(-landingNormal.z, 0, landingNormal.x).normalize().multiplyScalar(1.5);
+      const camPos = state.pos.clone().add(landingNormal.clone().multiplyScalar(1.2)).add(sideOffset);
+      camera.position.lerp(camPos, 0.2);
+      camera.lookAt(state.pos.clone().add(landingNormal.clone().multiplyScalar(0.1)));
     }
     // HUD
     document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;
@@ -1391,11 +1420,12 @@ function update(delta){
     }
     
     // Kamera positioniert sich seitlich/oben relativ zur Terrain-Normale
-    const sideOffset = new THREE.Vector3(-terrainNormal.z, 0, terrainNormal.x).normalize().multiplyScalar(4);
-    const camTarget = state.pos.clone().add(terrainNormal.clone().multiplyScalar(2.5)).add(sideOffset);
-    camTarget.y += 1.5;
-    camera.position.lerp(camTarget, 0.12);
-    camera.lookAt(state.pos.clone().add(terrainNormal.clone().multiplyScalar(0.5)));
+    // NAH DRAUF für bessere 3D-Oberflächen-Wirkung
+    const sideOffset = new THREE.Vector3(-terrainNormal.z, 0, terrainNormal.x).normalize().multiplyScalar(2);
+    const camTarget = state.pos.clone().add(terrainNormal.clone().multiplyScalar(1.5)).add(sideOffset);
+    camTarget.y += 0.8;
+    camera.position.lerp(camTarget, 0.2);
+    camera.lookAt(state.pos.clone().add(terrainNormal.clone().multiplyScalar(0.3)));
   }else{
     // Smooth distance
     const targetDist=Math.max(3.5,Math.min(6.5,5-state.speed/50));
