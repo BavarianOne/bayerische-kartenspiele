@@ -929,10 +929,34 @@ function updateLandingSequence(delta){
 
     // Touchdown!
     if(t >= 1){
-      // Exakte Touchdown-Position auf TERRAIN (nicht Kugel)
-      state.pos.copy(landingPos);
-      state.vel.set(0,0,0);
-      state.speed = 0;
+    // NOCHMALS Raycast für EXAKTE Terrain-Position (Terrain könnte sich bewegt haben)
+    const finalRaycaster = new THREE.Raycaster();
+    const finalDir = p.group.position.clone().sub(state.pos).normalize();
+    finalRaycaster.set(state.pos.clone(), finalDir.negate());
+    const finalIntersects = finalRaycaster.intersectObject(p.mesh, true);
+ 
+    let finalLandingPos = landingPos.clone();
+    if(finalIntersects.length > 0) {
+    finalLandingPos = finalIntersects[0].point.clone();
+    } else {
+    // Fallback: Berechne Position auf der Kugel-Oberfläche
+    const distToCenter = state.pos.distanceTo(p.group.position);
+    finalLandingPos = p.group.position.clone().add(
+    finalDir.clone().multiplyScalar(Math.max(p.data.size, distToCenter))
+    );
+    }
+ 
+    // Schiff EXAKT auf Terrain-Oberfläche setzen
+    state.pos.copy(finalLandingPos);
+ 
+    // WICHTIG: Schiff-Position relativ zum Planeten speichern für Oberflächenmodus
+    state.seqLandingPos = finalLandingPos.clone();
+    state.seqLandingNormal = finalIntersects.length > 0 && finalIntersects[0].face ?
+    finalIntersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld)) :
+    finalDir.clone();
+
+    state.vel.set(0,0,0);
+    state.speed = 0;
 
       // Landing-Gear fest an Terrain-Normale ausrichten
       legGroup.visible = true;
@@ -1392,9 +1416,20 @@ function update(delta){
 
   // Update planets
   planets.forEach((p,idx)=>{p.angle+=p.orbSpeed*delta*30;
-    p.group.position.x=p.dist*Math.cos(p.angle);p.group.position.z=p.dist*Math.sin(p.angle);
-    p.group.children[0].rotation.y+=delta*0.5;
-    if(p.group.children.length>1&&idx===5)p.group.children[1].rotation.z+=delta*0.3;
+  p.group.position.x=p.dist*Math.cos(p.angle);p.group.position.z=p.dist*Math.sin(p.angle);
+  p.group.children[0].rotation.y+=delta*0.5;
+  if(p.group.children.length>1&&idx===5)p.group.children[1].rotation.z+=delta*0.3;
+ 
+  // WICHTIG: Wenn Schiff auf diesem Planeten gelandet ist, mitbewegen!
+  if(state.landed && state.landedOn === p && !state.surfaceMode) {
+  // Schiff bewegt sich mit dem Planeten (Umlaufbahn + Rotation)
+  // Aber bleibt relativ zur Landeposition auf der Oberfläche
+  const relativePos = state.pos.clone().sub(p.group.position);
+  // Planet hat sich bewegt, also Schiff-Position anpassen
+  state.pos.copy(p.group.position.clone().add(relativePos));
+  shipGroup.position.copy(state.pos);
+  shipGroup.rotation.set(state.pitch, state.yaw, 0);
+  }
   });
   asteroids.forEach(a=>{a.rotation.x+=a.userData.rotSpeed.x;a.rotation.y+=a.userData.rotSpeed.y;a.rotation.z+=a.userData.rotSpeed.z;});
   sun.rotation.y+=delta*0.1;
