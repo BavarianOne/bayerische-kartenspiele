@@ -757,83 +757,117 @@ function getTerrainNormal(planet, worldPos) {
 
 // ===================== 3D LANDING SEQUENCE (WITH REAL TERRAIN) =====================
 function startLandingSequence(planet){
-  if(!planet) return;
-  state.autoApproach = false;
-  state.approachTarget = null;
+ if(!planet) return;
+ state.autoApproach = false;
+ state.approachTarget = null;
 
-  document.getElementById('landBtn').classList.remove('show');
-  document.getElementById('locName').textContent=`🛸 Landung ${planet.data.name}`;
-  document.getElementById('seqStatus').textContent='⬇️ Sinkflug';
-  document.getElementById('seqStatus').className='show';
+ document.getElementById('landBtn').classList.remove('show');
+ document.getElementById('locName').textContent=`🛸 Landung ${planet.data.name}`;
+ document.getElementById('seqStatus').textContent='⬇️ Sinkflug';
+ document.getElementById('seqStatus').className='show';
 
-  // Raycast gegen echtes Terrain-Mesh für echte Landeposition
-  const terrainMesh = planet.mesh;
-  const raycaster = new THREE.Raycaster();
-  const dirFromShip = planet.group.position.clone().sub(state.pos).normalize();
-  const rayOrigin = state.pos.clone();
-  raycaster.set(rayOrigin, dirFromShip.negate()); // Ray from ship toward planet
-  
-  const intersects = raycaster.intersectObject(terrainMesh, true);
-  let landingPos, landingNormal;
-  
-  if(intersects.length > 0) {
-  // Landung auf echter Terrain-Oberfläche
-  landingPos = intersects[0].point.clone();
-  landingNormal = intersects[0].face ? intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(terrainMesh.matrixWorld)) : dirFromShip.clone();
-  } else {
-  // Fallback: Kugel-Oberfläche - EXAKT auf der Oberfläche (nicht darüber!)
-  landingPos = planet.group.position.clone().add(dirFromShip.clone().multiplyScalar(planet.data.size));
-  landingNormal = dirFromShip.clone();
-  }
+ // Raycast gegen echtes Terrain-Mesh für echte Landeposition
+ const terrainMesh = planet.mesh;
+ const raycaster = new THREE.Raycaster();
+ const dirFromShip = planet.group.position.clone().sub(state.pos).normalize();
+ const rayOrigin = state.pos.clone();
+ raycaster.set(rayOrigin, dirFromShip.negate()); // Ray from ship toward planet
+ 
+ const intersects = raycaster.intersectObject(terrainMesh, true);
+ let landingPos, landingNormal;
 
-  // STATE MACHINE direkt auf Descent setzen
-  state.seqState = 2; // descent
-  state.seqPlanet = planet;
-  state.seqTimer = 0;
-  state.seqStartPos = state.pos.clone();
-  state.seqLandingPos = landingPos.clone();
-  state.seqLandingNormal = landingNormal.clone();
-  state.vel.set(0,0,0);
-  state.speed = 0;
+ if(intersects.length > 0) {
+ // Landung auf echter Terrain-Oberfläche
+ landingPos = intersects[0].point.clone();
+ landingNormal = intersects[0].face ? intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(terrainMesh.matrixWorld)) : dirFromShip.clone();
+ } else {
+ // Fallback: Kugel-Oberfläche - EXAKT auf der Oberfläche (nicht darüber!)
+ landingPos = planet.group.position.clone().add(dirFromShip.clone().multiplyScalar(planet.data.size));
+ landingNormal = dirFromShip.clone();
+ }
 
-  // Pitch hochziehen (Nase nach oben) 
-  state.pitch = 1.0;
-  // Yaw auf Planet ausrichten
-  const toPlanet = dirFromShip;
-  state.yaw = Math.atan2(toPlanet.x, toPlanet.z);
+ // STATE MACHINE auf Approach setzen (neue Phase 1 für Animation)
+ state.seqState = 1; // approach
+ state.seqPlanet = planet;
+ state.seqTimer = 0;
+ state.seqStartPos = state.pos.clone();
+ state.seqLandingPos = landingPos.clone();
+ state.seqLandingNormal = landingNormal.clone();
+
+ // Schiff langsam abbremsen und ausrichten
+ state.pitch = 0.5;
+ const toPlanet = dirFromShip;
+ state.yaw = Math.atan2(toPlanet.x, toPlanet.z);
+
+ // Ship rotation anpassen für bessere Landeanimation
+ shipGroup.rotation.set(state.pitch, state.yaw, 0);
 }
 
 function updateLandingSequence(delta){
-  const p = state.seqPlanet;
-  if(!p) return;
-  state.seqTimer += delta;
+ const p = state.seqPlanet;
+ if(!p) return;
+ state.seqTimer += delta;
 
-  if(state.seqState === 2){
-    // ======= DESCENT: Sanfter Sinkflug auf ECHTER Terrain-Oberfläche =======
-    const duration = CFG.landing.descentDuration;
-    const t = Math.min(1, state.seqTimer / duration);
-    const st = t * t * (3 - 2 * t); // smoothstep
+ if(state.seqState === 1){
+ // ======= APPROACH: Langsames Annähern an den Planeten =======
+ const approachDuration = 2.0;
+ const t = Math.min(1, state.seqTimer / approachDuration);
+ const st = t * t; // ease-in für sanfte Annäherung
 
-    // Verwende VORBERECHNETE echte Terrain-Landeposition und -Normale
-    const landingPos = state.seqLandingPos.clone();
-    const landingNormal = state.seqLandingNormal.clone();
+ // Zielposition: etwas über der Landezone (für bessere Animation)
+ const approachHeight = 5;
+ const approachTarget = state.seqLandingPos.clone().add(
+ state.seqLandingNormal.clone().multiplyScalar(approachHeight)
+ );
 
-    // Position interpolieren
-    state.pos.lerpVectors(state.seqStartPos, landingPos, st);
+ // Schiff zur Approach-Position bewegen
+ state.pos.lerpVectors(state.seqStartPos, approachTarget, st);
 
-    // Ship-Orientierung: Nase nach oben, aber an Terrain-Normale angepasst
-    // Ziel: Schiff "steht" auf der Oberfläche (Up-Vektor = Terrain-Normale)
-    const targetUp = landingNormal.clone();
-    const targetForward = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
-    
-    // Pitch hochziehen (Nase zeigt nach oben) & langsam zurücknehmen für Flare
-    const pitchCurve = 1.0 - Math.min(0.8, t * t * 2.5);
-    state.pitch += (pitchCurve * 1.2 - state.pitch) * 0.08;
+ // Schiff ausrichten: Nase leicht nach oben, auf Planet zielen
+ state.pitch += (0.3 - state.pitch) * 0.05;
+ const toPlanet = p.group.position.clone().sub(state.pos).normalize();
+ state.yaw += (Math.atan2(toPlanet.x, toPlanet.z) - state.yaw) * 0.05;
 
-    // Yaw leicht an Terrain anpassen (für Seitwärts-Neigung bei Hängen)
-    state.yaw += Math.sin(state.seqTimer * 3) * 0.004;
+ // Geschwindigkeit reduzieren
+ state.vel.multiplyScalar(0.95);
+ state.speed = state.vel.length();
 
-    // Gear ausfahren bei ~50%
+ document.getElementById('seqStatus').textContent='🎯 Anflug';
+ document.getElementById('nearHint').textContent=`🛸 Anflug: ${Math.round((1-st)*100)}%`;
+
+ if(t >= 1){
+ // Approach fertig, Descent starten
+ state.seqState = 2;
+ state.seqTimer = 0;
+ state.seqStartPos = state.pos.clone();
+ document.getElementById('seqStatus').textContent='⬇️ Sinkflug';
+ }
+ } else if(state.seqState === 2){
+ // ======= DESCENT: Sanfter Sinkflug auf ECHTER Terrain-Oberfläche =======
+ const duration = CFG.landing.descentDuration;
+ const t = Math.min(1, state.seqTimer / duration);
+ const st = t * t * (3 - 2 * t); // smoothstep
+
+ // Verwende VORBERECHNETE echte Terrain-Landeposition und -Normale
+ const landingPos = state.seqLandingPos.clone();
+ const landingNormal = state.seqLandingNormal.clone();
+
+ // Position interpolieren
+ state.pos.lerpVectors(state.seqStartPos, landingPos, st);
+
+ // Ship-Orientierung: Nase nach oben, aber an Terrain-Normale angepasst
+ // Ziel: Schiff "steht" auf der Oberfläche (Up-Vektor = Terrain-Normale)
+ const targetUp = landingNormal.clone();
+ const targetForward = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
+ 
+ // Pitch hochziehen (Nase zeigt nach oben) & langsam zurücknehmen für Flare
+ const pitchCurve = 1.0 - Math.min(0.8, t * t * 2.5);
+ state.pitch += (pitchCurve * 1.2 - state.pitch) * 0.08;
+
+ // Yaw leicht an Terrain anpassen (für Seitwärts-Neigung bei Hängen)
+ state.yaw += Math.sin(state.seqTimer * 3) * 0.004;
+
+ // Gear ausfahren bei ~50%
     if(st > 0.5 && !legGroup.visible){
       legGroup.visible = true;
       // Landing Gear an Terrain-Normale ausrichten
@@ -1051,7 +1085,7 @@ function update(delta){
       camera.position.lerp(camPos,0.15);
       const camLook=state.pos.clone().add(new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(0,state.yaw,0,'YXZ')).multiplyScalar(3));
       camera.lookAt(camLook);
-    } else if(state.seqState === 2) {
+      } else if(state.seqState === 2) {
       // Während Descent: Dynamische Verfolgungskamera hinter dem Schiff
       // Kamera folgt dem Schiff in einer leichten Distanz, blickt nach vorne/unten
       const camOffset = new THREE.Vector3(0, 1.2, 3.5);
@@ -1060,7 +1094,8 @@ function update(delta){
       camera.position.lerp(camPos, 0.1);
       const lookTarget = state.pos.clone().add(new THREE.Vector3(0, 0, -5).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ')));
       camera.lookAt(lookTarget);
-    } else if(state.seqState === 3) {
+      } else if(state.seqState === 3) {
+
       // Während Flare/Touchdown: Nahaufnahme, Fokus auf Terrain und Fahrwerk
       const landingNormal = state.seqLandingNormal.clone();
       const sideOffset = new THREE.Vector3(-landingNormal.z, 0, landingNormal.x).normalize().multiplyScalar(2);
