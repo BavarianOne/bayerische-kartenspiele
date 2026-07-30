@@ -962,8 +962,7 @@ function updateLaunchSequence(delta){
   if(!p) return;
   state.seqTimer += delta;
 
-  if(state.seqState === 5){
-    // ======= LIFTOFF: Senkrechtstart aus der Atmosphäre =======
+  if(state.seqState === 6){// ======= LIFTOFF: Senkrechtstart aus der Atmosphäre =======
     const duration = 2.0;
     const t = Math.min(1, state.seqTimer / duration);
     const st = t * t; // ease-in
@@ -987,7 +986,7 @@ function updateLaunchSequence(delta){
 
     if(t >= 1){
       // Genug Abstand – in den Orbit fliegen
-      state.seqState = 6;
+      state.seqState = 7;  // Wechsel zu Climb-Phase
       state.seqTimer = 0;
       state.seqStartPos = state.pos.clone();
       // Zielrichtung: weg vom Planeten, aber mit Kurve
@@ -1054,7 +1053,6 @@ function update(delta){
       camera.lookAt(state.pos.clone().add(new THREE.Vector3(0, 0.5, 0)));
     }
     // HUD
-// HUD
     if(state.seqState>=1&&state.seqState<=4&&state.seqPlanet){const h=state.pos.distanceTo(state.seqPlanet.group.position)-state.seqPlanet.data.size;document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10+' / '+Math.round(Math.max(0,h)*1000)+'m';}else{document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;}
     // Kein normales Update während Sequence
     // (Planeten etc. weiterrotieren lassen)
@@ -1080,7 +1078,7 @@ function update(delta){
     const camPos=state.pos.clone().add(new THREE.Vector3(0.5,1.5,3));
     camera.position.lerp(camPos,0.15);
     camera.lookAt(state.pos);
-    if(state.seqState>=1&&state.seqState<=4&&state.seqPlanet){const h=state.pos.distanceTo(state.seqPlanet.group.position)-state.seqPlanet.data.size;document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10+' / '+Math.round(Math.max(0,h)*1000)+'m';}else{document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;}
+    document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;
     planets.forEach((p,idx)=>{p.angle+=p.orbSpeed*delta*30;
       p.group.position.x=p.dist*Math.cos(p.angle);p.group.position.z=p.dist*Math.sin(p.angle);});
     state.mapFrame++;
@@ -1377,7 +1375,6 @@ function update(delta){
   else{shipLight.color.setHex(0x00ccff);shipLight.intensity=0.3+speedNorm*0.5;}
 
   // HUD
-  if(state.seqState>=1&&state.seqState<=4&&state.seqPlanet){const h=state.pos.distanceTo(state.seqPlanet.group.position)-state.seqPlanet.data.size;document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10+' / '+Math.round(Math.max(0,h)*1000)+'m';}else{document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;}
   if(state.frameCount>480) document.getElementById('helpOverlay').classList.add('hidden');
 
   // Minimap update every 3 frames
