@@ -907,13 +907,24 @@ function updateLandingSequence(delta){
     const dist = state.pos.distanceTo(p.group.position); const h = Math.max(0, dist - getTerrainHeight(p, state.pos)); const hm = Math.round(h*1000);
     document.getElementById('nearHint').textContent = hm < 100 ? '🛸 '+hm+' m - 🔥 LANDUNG!' : '🛸 '+hm+' m';
     if(t >= 1){
-      const fd = p.group.position.clone().sub(state.pos).normalize();
-      const fr = new THREE.Raycaster(); fr.set(state.pos.clone(), fd.negate());
-      const fi = fr.intersectObject(p.mesh, true);
-      let flp = landingPos.clone();
-      if(fi.length>0) flp=fi[0].point.clone(); else { const d=state.pos.distanceTo(p.group.position); flp=p.group.position.clone().add(fd.clone().multiplyScalar(Math.max(p.data.size,d))); }
-      state.pos.copy(flp); state.seqLandingPos=flp.clone();
-      state.seqLandingNormal=fi.length>0&&fi[0].face?fi[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld)):fd.clone();
+    const fd = p.group.position.clone().sub(state.pos).normalize();
+    const fr = new THREE.Raycaster();
+    // Raycast von einer Position über dem Schiff, um die Oberfläche zu finden
+    const rayOrigin = state.pos.clone().add(fd.clone().multiplyScalar(10));
+    fr.set(rayOrigin, fd.negate());
+    const fi = fr.intersectObject(p.mesh, true);
+    let flp = landingPos.clone();
+    if(fi.length>0) {
+    flp = fi[0].point.clone();
+    // Schiff exakt auf die Oberfläche setzen (mit kleinem Offset für das Landing Gear)
+    state.pos.copy(flp.clone().add(landingNormal.clone().multiplyScalar(0.2)));
+    } else { 
+    const d = state.pos.distanceTo(p.group.position); 
+    flp = p.group.position.clone().add(fd.clone().multiplyScalar(Math.max(p.data.size, d)));
+    state.pos.copy(flp);
+    }
+    state.seqLandingPos=flp.clone();
+    state.seqLandingNormal=fi.length>0&&fi[0].face?fi[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld)):fd.clone();
       state.vel.set(0,0,0); state.speed=0; state.inAtmosphere=false; state.heatIntensity=0; state.cameraShakeIntensity=0.8;
       legGroup.visible=true; legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), landingNormal));
       emitDustBurst(landingPos.clone().add(landingNormal.clone().multiplyScalar(-0.1)), 45);
@@ -1429,8 +1440,28 @@ function update(delta){
 
 // ===================== LANDING STATE =====================
 function detectLandingState(){
-  if(state.landed) return;
-  let nearest=null,nearDist=Infinity;
+ if(state.landed) {
+ // Schiff auf der Oberfläche halten
+ const p = state.landedOn;
+ if(p) {
+ const toPlanet = p.group.position.clone().sub(state.pos).normalize();
+ const raycaster = new THREE.Raycaster();
+ const rayOrigin = state.pos.clone().add(toPlanet.clone().multiplyScalar(10));
+ raycaster.set(rayOrigin, toPlanet.clone().negate());
+ const intersects = raycaster.intersectObject(p.mesh, true);
+ if(intersects.length > 0) {
+ const hitPoint = intersects[0].point;
+ const terrainNormal = intersects[0].face ?
+ intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld)) :
+ toPlanet.clone().negate();
+ state.pos.copy(hitPoint.clone().add(terrainNormal.clone().multiplyScalar(0.2)));
+ shipGroup.position.copy(state.pos);
+ legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), terrainNormal));
+ }
+ }
+ return;
+ }
+ let nearest=null,nearDist=Infinity;
   planets.forEach(p=>{const d=state.pos.distanceTo(p.group.position);if(d<nearDist){nearDist=d;nearest=p;}});
   state.nearPlanet=nearest;state.nearDist=nearDist;
 
