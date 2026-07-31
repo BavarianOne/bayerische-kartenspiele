@@ -200,6 +200,11 @@
             min-height: 24px;
         }
 
+        .status-error {
+            color: var(--error);
+            font-weight: 600;
+        }
+
         /* Mode selector */
         .mode-selector {
             display: flex;
@@ -669,6 +674,8 @@
             display: none;
             font-size: 0.85rem;
             line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         .formats-info.visible {
@@ -757,13 +764,19 @@
                 <button class="btn btn-secondary" onclick="uploadImage()">Bild hochladen</button>
             </div>
 
+            <!-- Loading ZXing State -->
+            <div class="loading-zxing" id="loadingZXing" style="display: none; text-align: center; padding: 20px;">
+                <div class="loading"></div>
+                <p style="margin-top: 15px;">Scanner wird geladen...</p>
+            </div>
+
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button class="btn btn-primary" id="startBtn" onclick="startScanning()">Scannen starten</button>
                 <button class="btn btn-secondary" id="stopBtn" onclick="stopScanning()" disabled>Scannen stoppen</button>
                 <button class="btn btn-secondary" id="copyBtn" onclick="copyToClipboard()">Kopieren</button>
                 <button class="btn btn-secondary" id="clearBtn" onclick="clearResult()">Löschen</button>
-                <button class="btn btn-secondary" id="formatsBtn" onclick="toggleFormatsInfo()">Formate</button>
+                <button class="btn btn-secondary" id="retryBtn" onclick="retryScanner()" style="display: none;">Erneut versuchen</button>
             </div>
 
             <!-- Toggle Buttons -->
@@ -776,9 +789,6 @@
                 </button>
                 <button class="toggle-btn" id="cameraToggle" onclick="switchCamera()" title="Kamera wechseln">
                     🔄
-                </button>
-                <button class="toggle-btn" id="infoToggle" onclick="toggleFormatsInfo()" title="Unterstützte Formate">
-                    ℹ️
                 </button>
             </div>
 
@@ -799,10 +809,14 @@
     <!-- Hidden file input for image upload -->
     <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageUpload(event)">
 
+    <!-- Load ZXing library first -->
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
+    
     <script>
         // DOM Elements
         const scanner = document.getElementById('scanner');
         const loading = document.getElementById('loading');
+        const loadingZXing = document.getElementById('loadingZXing');
         const statusMessage = document.getElementById('statusMessage');
         const resultContainer = document.getElementById('resultContainer');
         const resultContent = document.getElementById('resultContent');
@@ -813,7 +827,7 @@
         const stopBtn = document.getElementById('stopBtn');
         const copyBtn = document.getElementById('copyBtn');
         const clearBtn = document.getElementById('clearBtn');
-        const formatsBtn = document.getElementById('formatsBtn');
+        const retryBtn = document.getElementById('retryBtn');
         const historyToggle = document.getElementById('historyToggle');
         const historySection = document.getElementById('historySection');
         const historyList = document.getElementById('historyList');
@@ -838,6 +852,9 @@
         let availableCameras = [];
         let scanMode = 'all'; // 'all', 'qr', 'barcode'
         let lastResult = '';
+        let zxingLoaded = false;
+        let initAttempts = 0;
+        const MAX_INIT_ATTEMPTS = 3;
 
         // Supported formats
         const SUPPORTED_FORMATS = {
@@ -868,8 +885,30 @@
             ]
         };
 
-        // Initialize
-        window.addEventListener('DOMContentLoaded', () => {
+        // Initialize when ZXing is loaded
+        function initWhenReady() {
+            // Check if ZXing is already loaded
+            if (typeof ZXing !== 'undefined' && ZXing.BrowserQRCodeReader) {
+                zxingLoaded = true;
+                initializeApp();
+                return;
+            }
+
+            // If not loaded yet, wait and retry
+            initAttempts++;
+            if (initAttempts < MAX_INIT_ATTEMPTS) {
+                setTimeout(initWhenReady, 500);
+            } else {
+                // Fallback: Show retry button
+                loadingZXing.style.display = 'none';
+                statusMessage.textContent = 'Scanner konnte nicht geladen werden';
+                statusMessage.classList.add('status-error');
+                retryBtn.style.display = 'inline-block';
+            }
+        }
+
+        // Initialize app
+        function initializeApp() {
             loadHistory();
             checkCameraSupport();
             updateButtonStates();
@@ -881,7 +920,10 @@
                     e.preventDefault();
                 }
             }, { passive: false });
-        });
+
+            // Set flag that we tried to initialize
+            zxingLoaded = true;
+        }
 
         // Render supported formats
         function renderSupportedFormats() {
@@ -928,33 +970,14 @@
             });
         }
 
-        // Toggle formats info
-        function toggleFormatsInfo() {
-            formatsInfo.classList.toggle('visible');
-        }
-
-        // Set scan mode
-        function setScanMode(mode) {
-            scanMode = mode;
-            modeAll.classList.remove('active');
-            modeQR.classList.remove('active');
-            modeBarcode.classList.remove('active');
-            
-            if (mode === 'all') modeAll.classList.add('active');
-            if (mode === 'qr') modeQR.classList.add('active');
-            if (mode === 'barcode') modeBarcode.classList.add('active');
-            
-            statusMessage.textContent = getModeLabel() + ' scannen';
-            restartScanning();
-        }
-
-        // Get mode label
-        function getModeLabel() {
-            switch(scanMode) {
-                case 'qr': return 'QR-Code';
-                case 'barcode': return 'Barcode';
-                default: return 'QR & Barcode';
-            }
+        // Retry scanner initialization
+        function retryScanner() {
+            loadingZXing.style.display = 'block';
+            statusMessage.textContent = 'Scanner wird neu geladen...';
+            statusMessage.classList.remove('status-error');
+            retryBtn.style.display = 'none';
+            initAttempts = 0;
+            initWhenReady();
         }
 
         // Check camera support
@@ -1005,6 +1028,7 @@
                 noCamera.style.display = 'none';
                 loading.style.display = 'block';
                 statusMessage.textContent = 'Kamera wird gestartet...';
+                statusMessage.classList.remove('status-error');
                 
                 const constraints = {
                     video: {
@@ -1018,7 +1042,7 @@
                 
                 currentStream = await navigator.mediaDevices.getUserMedia(constraints);
                 scanner.srcObject = currentStream;
-                scanner.play();
+                await scanner.play();
                 
                 loading.style.display = 'none';
                 statusMessage.textContent = getModeLabel() + ' scannen';
@@ -1041,72 +1065,67 @@
         // Initialize QR code reader
         function initQRReader() {
             try {
-                // Use ZXing library from CDN
-                if (typeof ZXing === 'undefined') {
-                    loadZXing();
-                } else {
-                    setupQRReader();
+                if (!zxingLoaded) {
+                    statusMessage.textContent = 'Warte auf Scanner-Bibliothek...';
+                    return;
                 }
-            } catch (error) {
-                console.error('QR reader init error:', error);
-                statusMessage.textContent = 'Scanner konnte nicht initialisiert werden';
-            }
-        }
-
-        // Load ZXing library dynamically
-        function loadZXing() {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@latest';
-            script.onload = () => {
-                setupQRReader();
-            };
-            script.onerror = () => {
-                statusMessage.textContent = 'Fehler beim Laden des Scanners';
-            };
-            document.head.appendChild(script);
-        }
-
-        // Setup QR code reader
-        function setupQRReader() {
-            try {
+                
                 codeReader = new ZXing.BrowserQRCodeReader();
                 
-                // Start scanning
-                startScanning();
+                // Start scanning automatically
+                setTimeout(() => {
+                    if (scanner.srcObject) {
+                        startScanning();
+                    }
+                }, 100);
                 
             } catch (error) {
-                console.error('Setup QR reader error:', error);
-                statusMessage.textContent = 'Scanner-Setup fehlgeschlagen';
+                console.error('QR reader init error:', error);
+                statusMessage.textContent = 'Scanner-Initialisierung fehlgeschlagen: ' + error.message;
+                statusMessage.classList.add('status-error');
+                retryBtn.style.display = 'inline-block';
             }
         }
 
-        // Restart scanning with new mode
-        function restartScanning() {
-            if (isScanning) {
-                isScanning = false;
-                setTimeout(() => {
-                    isScanning = true;
-                    startScanning();
-                }, 100);
-            } else {
-                startScanning();
+        // Set scan mode
+        function setScanMode(mode) {
+            scanMode = mode;
+            modeAll.classList.remove('active');
+            modeQR.classList.remove('active');
+            modeBarcode.classList.remove('active');
+            
+            if (mode === 'all') modeAll.classList.add('active');
+            if (mode === 'qr') modeQR.classList.add('active');
+            if (mode === 'barcode') modeBarcode.classList.add('active');
+            
+            statusMessage.textContent = getModeLabel() + ' scannen';
+            statusMessage.classList.remove('status-error');
+            restartScanning();
+        }
+
+        // Get mode label
+        function getModeLabel() {
+            switch(scanMode) {
+                case 'qr': return 'QR-Code';
+                case 'barcode': return 'Barcode';
+                default: return 'QR & Barcode';
             }
         }
 
-        // Get hints for scan mode
+        // Get scan hints
         function getScanHints() {
+            if (!zxingLoaded) return null;
+            
             const hints = new ZXing.DecodeHintType();
             
             switch(scanMode) {
                 case 'qr':
-                    // Only QR codes
                     hints.setPossibleFormats([
                         ZXing.BarcodeFormat.QR_CODE,
                         ZXing.BarcodeFormat.MICRO_QR_CODE
                     ]);
                     break;
                 case 'barcode':
-                    // Only barcodes
                     hints.setPossibleFormats([
                         ZXing.BarcodeFormat.EAN_13,
                         ZXing.BarcodeFormat.EAN_8,
@@ -1121,7 +1140,6 @@
                     ]);
                     break;
                 default:
-                    // All formats
                     hints.setPossibleFormats([
                         ZXing.BarcodeFormat.QR_CODE,
                         ZXing.BarcodeFormat.MICRO_QR_CODE,
@@ -1141,13 +1159,15 @@
                     ]);
             }
             
+            // Try harder to decode
+            hints.setTryHarder(true);
+            
             return hints;
         }
 
         // Determine result type
         function getResultType(resultText, resultFormat) {
             if (!resultFormat) {
-                // Try to detect from text
                 if (resultText.startsWith('http://') || resultText.startsWith('https://') || resultText.startsWith('www.')) {
                     return 'URL';
                 }
@@ -1196,6 +1216,7 @@
             
             // Update status
             statusMessage.textContent = resultTypeText + ' erkannt!';
+            statusMessage.classList.remove('status-error');
             
             // Stop scanning temporarily
             isScanning = false;
@@ -1206,7 +1227,7 @@
                 isScanning = true;
                 updateButtonStates();
                 statusMessage.textContent = getModeLabel() + ' scannen';
-                scanFromVideo();
+                startScanning();
             }, 2000);
             
             // Visual feedback
@@ -1219,7 +1240,6 @@
             const timestamp = new Date().toLocaleString('de-DE');
             scanHistory.unshift({ text, timestamp, type });
             
-            // Keep only last 20 items
             if (scanHistory.length > 20) {
                 scanHistory = scanHistory.slice(0, 20);
             }
@@ -1257,8 +1277,9 @@
             scanHistory.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
+                const isBarcode = item.type.includes('EAN') || item.type.includes('UPC') || item.type.includes('Code') || item.type.includes('ITF') || item.type.includes('Codabar');
                 div.innerHTML = `
-                    <span class="type-badge ${item.type.includes('Barcode') || item.type.includes('EAN') || item.type.includes('UPC') || item.type.includes('Code') || item.type.includes('ITF') ? 'barcode' : ''}">${item.type}</span>
+                    <span class="type-badge ${isBarcode ? 'barcode' : ''}">${item.type}</span>
                     <div class="content">${escapeHtml(item.text.substring(0, 40))}${item.text.length > 40 ? '...' : ''}</div>
                     <div class="timestamp">${item.timestamp}</div>
                     <button class="copy-btn" onclick="copyHistoryItem(${index})" title="Kopieren">📋</button>
@@ -1299,7 +1320,6 @@
                     flashToggle.classList.toggle('active', flashEnabled);
                     flashIndicator.classList.toggle('visible', flashEnabled);
                     
-                    // Visual feedback
                     flashToggle.classList.add('vibrate');
                     setTimeout(() => flashToggle.classList.remove('vibrate'), 100);
                 }
@@ -1312,34 +1332,35 @@
         async function switchCamera() {
             if (availableCameras.length <= 1) return;
             
-            // Stop current scanning
             isScanning = false;
             updateButtonStates();
             
-            // Stop current stream
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
             
-            // Find current camera index
             const currentIndex = availableCameras.findIndex(c => c.deviceId === currentCameraId);
             const nextIndex = (currentIndex + 1) % availableCameras.length;
             currentCameraId = availableCameras[nextIndex].deviceId;
             
-            // Restart with new camera
             await requestCameraAccess();
             
-            // Visual feedback
             cameraToggle.classList.add('vibrate');
             setTimeout(() => cameraToggle.classList.remove('vibrate'), 100);
         }
 
         // Start scanning
         function startScanning() {
+            if (!zxingLoaded || !scanner.srcObject) {
+                statusMessage.textContent = 'Scanner wird vorbereitet...';
+                return;
+            }
+            
             isScanning = true;
             updateButtonStates();
             statusMessage.textContent = getModeLabel() + ' scannen';
+            statusMessage.classList.remove('status-error');
             scanner.classList.add('vibrate');
             setTimeout(() => scanner.classList.remove('vibrate'), 100);
             
@@ -1348,30 +1369,21 @@
 
         // Scan from video
         async function scanFromVideo() {
-            if (!isScanning) return;
+            if (!isScanning || !zxingLoaded || !scanner.srcObject) return;
             
             try {
                 if (!codeReader) {
-                    await new Promise(resolve => {
-                        const checkZXing = () => {
-                            if (typeof ZXing !== 'undefined') {
-                                codeReader = new ZXing.BrowserQRCodeReader();
-                                resolve();
-                            } else {
-                                setTimeout(checkZXing, 100);
-                            }
-                        };
-                        checkZXing();
-                    });
+                    codeReader = new ZXing.BrowserQRCodeReader();
                 }
                 
                 const hints = getScanHints();
                 
-                codeReader.decodeFromVideoDevice(
+                // Decode from current video frame
+                const result = await codeReader.decodeFromVideoDevice(
                     currentCameraId,
                     scanner,
-                    (result, error, stats) => {
-                        if (result) {
+                    (result, error) => {
+                        if (result && isScanning) {
                             handleQRResult(result.getText(), result.getBarcodeFormat());
                         }
                         if (error && error.name !== 'NotFoundException') {
@@ -1381,14 +1393,19 @@
                     hints
                 );
                 
+                if (result && isScanning) {
+                    handleQRResult(result.getText(), result.getBarcodeFormat());
+                }
+                
             } catch (error) {
                 if (error.name !== 'NotFoundException') {
                     console.error('Scan error:', error);
                 }
             }
             
-            if (isScanning) {
-                setTimeout(scanFromVideo, 500);
+            // Continue scanning loop
+            if (isScanning && scanner.srcObject) {
+                setTimeout(scanFromVideo, 300);
             }
         }
 
@@ -1397,6 +1414,7 @@
             isScanning = false;
             updateButtonStates();
             statusMessage.textContent = 'Scannen gestoppt';
+            statusMessage.classList.remove('status-error');
         }
 
         // Copy to clipboard
@@ -1410,18 +1428,18 @@
             
             try {
                 await navigator.clipboard.writeText(text);
-                statusMessage.textContent = 'Kopiert!';
-                
-                // Visual feedback
+                const originalText = copyBtn.textContent;
                 copyBtn.textContent = '✓ Kopiert';
+                statusMessage.textContent = 'Kopiert!';
+                statusMessage.classList.remove('status-error');
+                
                 setTimeout(() => {
-                    copyBtn.textContent = 'Kopieren';
-                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel() + ' scannen';
+                    copyBtn.textContent = originalText;
+                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel();
                 }, 2000);
                 
             } catch (error) {
                 console.error('Copy error:', error);
-                // Fallback for older browsers
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
                 document.body.appendChild(textarea);
@@ -1429,11 +1447,14 @@
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
                 
-                statusMessage.textContent = 'Kopiert!';
+                const originalText = copyBtn.textContent;
                 copyBtn.textContent = '✓ Kopiert';
+                statusMessage.textContent = 'Kopiert!';
+                statusMessage.classList.remove('status-error');
+                
                 setTimeout(() => {
-                    copyBtn.textContent = 'Kopieren';
-                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel() + ' scannen';
+                    copyBtn.textContent = originalText;
+                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel();
                 }, 2000);
             }
         }
@@ -1444,7 +1465,8 @@
             resultContainer.classList.remove('visible');
             copyBtn.disabled = true;
             lastResult = '';
-            statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel() + ' scannen';
+            statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel();
+            statusMessage.classList.remove('status-error');
         }
 
         // Upload image
@@ -1467,7 +1489,6 @@
             };
             reader.readAsDataURL(file);
             
-            // Reset input
             fileInput.value = '';
         }
 
@@ -1476,9 +1497,10 @@
             try {
                 loading.style.display = 'block';
                 statusMessage.textContent = 'Bild wird analysiert...';
+                statusMessage.classList.remove('status-error');
                 
                 if (!codeReader) {
-                    await loadZXing();
+                    codeReader = new ZXing.BrowserQRCodeReader();
                 }
                 
                 const hints = getScanHints();
@@ -1488,14 +1510,27 @@
                     handleQRResult(result.getText(), result.getBarcodeFormat());
                 } else {
                     statusMessage.textContent = 'Kein QR-Code oder Barcode gefunden';
+                    statusMessage.classList.add('status-error');
                 }
                 
             } catch (error) {
                 console.error('Image scan error:', error);
                 statusMessage.textContent = 'Fehler beim Analysieren des Bildes';
+                statusMessage.classList.add('status-error');
             } finally {
                 loading.style.display = 'none';
             }
+        }
+
+        // Restart scanning with new mode
+        function restartScanning() {
+            isScanning = false;
+            setTimeout(() => {
+                if (scanner.srcObject) {
+                    isScanning = true;
+                    startScanning();
+                }
+            }, 100);
         }
 
         // Show permission denied
@@ -1534,7 +1569,6 @@
 
         // Handle keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Space to start/stop scanning
             if (e.code === 'Space' && e.target === document.body) {
                 e.preventDefault();
                 if (isScanning) {
@@ -1544,37 +1578,27 @@
                 }
             }
             
-            // Escape to clear result
             if (e.code === 'Escape') {
                 clearResult();
             }
             
-            // 1, 2, 3 for mode selection
-            if (e.key === '1') {
-                setScanMode('all');
-            }
-            if (e.key === '2') {
-                setScanMode('qr');
-            }
-            if (e.key === '3') {
-                setScanMode('barcode');
-            }
+            if (e.key === '1') setScanMode('all');
+            if (e.key === '2') setScanMode('qr');
+            if (e.key === '3') setScanMode('barcode');
         });
 
         // Handle visibility change
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                // Stop scanning when tab is hidden
                 if (isScanning) {
                     isScanning = false;
                     updateButtonStates();
                 }
             } else {
-                // Resume scanning when tab becomes visible
                 if (scanner.srcObject && !isScanning) {
                     isScanning = true;
                     updateButtonStates();
-                    scanFromVideo();
+                    startScanning();
                 }
             }
         });
@@ -1599,10 +1623,14 @@
         window.requestCameraAccess = requestCameraAccess;
         window.goBack = goBack;
         window.setScanMode = setScanMode;
-        window.toggleFormatsInfo = toggleFormatsInfo;
+        window.retryScanner = retryScanner;
+
+        // Start initialization when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // ZXing should already be loaded from the script tag above
+            // But we'll check and initialize
+            initWhenReady();
+        });
     </script>
-    
-    <!-- Load ZXing library -->
-    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
 </body>
 </html>
