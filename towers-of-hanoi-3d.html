@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="Türme von Hanoi - Das klassische Denkspiel in 3D für Tablets">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="description" content="Türme von Hanoi - Das klassische Denkspiel in 3D für Tablets und Handys">
     <title>🏗️ Türme von Hanoi 3D</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,6 +20,7 @@
             --text-light: #2d3748;
             --text-dark: #f7fafc;
             --card-bg: rgba(255, 255, 255, 0.95);
+            --card-bg-dark: rgba(45, 55, 72, 0.95);
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             --border-radius: 15px;
         }
@@ -31,6 +32,7 @@
                 --text-light: #f7fafc;
                 --text-dark: #e2e8f0;
                 --card-bg: rgba(45, 55, 72, 0.95);
+                --card-bg-dark: rgba(26, 32, 44, 0.95);
             }
         }
 
@@ -41,6 +43,7 @@
             min-height: 100vh;
             overflow: hidden;
             touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .app-container {
@@ -51,13 +54,13 @@
             position: relative;
         }
 
-        /* Header */
+        /* Header - smaller on mobile */
         .header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 15px 20px;
+            padding: 12px 15px;
             text-align: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 700;
             position: relative;
             z-index: 100;
@@ -66,45 +69,52 @@
 
         .header h1 {
             margin: 0;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
         }
 
         .back-button {
             position: absolute;
-            left: 15px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             background: rgba(255, 255, 255, 0.2);
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .back-button:hover { background: rgba(255, 255, 255, 0.3); }
-
-        /* Info Button */
-        .info-button {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             color: white;
             font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.2s;
+            touch-action: manipulation;
         }
 
-        .info-button:hover { background: rgba(255, 255, 255, 0.3); }
+        .back-button:active { 
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .info-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        .info-button:active { 
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-50%) scale(0.95);
+        }
 
         /* Main Content */
         .main-content {
@@ -120,6 +130,7 @@
             position: relative;
             background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
             overflow: hidden;
+            /* Touch area for towers - invisible but clickable */
         }
 
         #gameCanvas {
@@ -127,6 +138,22 @@
             width: 100%;
             height: 100%;
         }
+
+        /* Invisible touch areas for towers - MOBILE OPTIMIZED */
+        .touch-area {
+            position: absolute;
+            bottom: 0;
+            width: 33.33%;
+            height: 60%;
+            background: transparent;
+            pointer-events: auto;
+            z-index: 5;
+            touch-action: manipulation;
+        }
+
+        .touch-area.left { left: 0; }
+        .touch-area.middle { left: 33.33%; }
+        .touch-area.right { left: 66.66%; }
 
         /* UI Overlay */
         .ui-overlay {
@@ -139,14 +166,14 @@
             z-index: 10;
         }
 
-        /* Controls */
+        /* Controls - at bottom for mobile */
         .controls {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
             display: flex;
-            gap: 15px;
+            gap: 10px;
             pointer-events: auto;
             flex-wrap: wrap;
             justify-content: center;
@@ -154,10 +181,10 @@
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 16px;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -165,6 +192,7 @@
             background: var(--card-bg);
             color: var(--text-light);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            min-width: 100px;
         }
 
         .btn-primary {
@@ -172,31 +200,40 @@
             color: white;
         }
 
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-primary:active { 
+            background: var(--primary-dark); 
+            transform: scale(0.98);
+        }
 
         .btn-secondary {
             background: var(--bg-dark);
             color: var(--text-dark);
         }
 
-        .btn-secondary:hover { background: var(--bg-light); transform: translateY(-2px); }
+        .btn-secondary:active { 
+            background: var(--bg-light); 
+            transform: scale(0.98);
+        }
 
         .btn-success {
             background: var(--success);
             color: white;
         }
 
-        .btn:active { transform: scale(0.98); }
+        .btn-success:active { 
+            background: #059669; 
+            transform: scale(0.98);
+        }
 
-        /* Game Info Panel */
+        /* Game Info Panel - at top for mobile */
         .game-info {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            top: 10px;
+            left: 10px;
+            right: 10px;
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            padding: 15px;
+            padding: 12px;
             box-shadow: var(--shadow);
             pointer-events: auto;
             z-index: 20;
@@ -204,33 +241,35 @@
             justify-content: space-around;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
 
         .info-item {
             text-align: center;
-            min-width: 100px;
+            min-width: 80px;
+            font-size: 0.85rem;
         }
 
         .info-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-light);
             opacity: 0.7;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .info-value {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--primary);
         }
 
-        /* Difficulty Selector */
+        /* Difficulty Selector - simplified for mobile */
         .difficulty-selector {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            bottom: 70px;
+            left: 10px;
+            right: 10px;
             background: var(--card-bg);
             border-radius: var(--border-radius);
             padding: 10px;
@@ -238,17 +277,22 @@
             pointer-events: auto;
             z-index: 20;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .difficulty-selector label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-light);
+            margin-bottom: 5px;
+            width: 100%;
+            text-align: center;
         }
 
         .difficulty-btn {
-            padding: 6px 12px;
+            padding: 6px 10px;
             border: none;
             border-radius: 8px;
             background: var(--primary);
@@ -256,11 +300,20 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s;
+            font-size: 0.8rem;
+            flex: 1;
+            min-width: 60px;
         }
 
-        .difficulty-btn:hover { background: var(--primary-dark); }
+        .difficulty-btn:active { 
+            background: var(--primary-dark); 
+            transform: scale(0.95);
+        }
 
-        .difficulty-btn.active { background: var(--success); }
+        .difficulty-btn.active { 
+            background: var(--success); 
+            transform: scale(1.05);
+        }
 
         /* Win Modal */
         .modal {
@@ -281,10 +334,10 @@
         .modal-content {
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            padding: 30px;
+            padding: 25px;
             text-align: center;
-            max-width: 400px;
-            width: 90%;
+            max-width: 90%;
+            width: 350px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             animation: modalIn 0.3s ease;
         }
@@ -297,25 +350,27 @@
         .modal h2 {
             color: var(--success);
             margin-bottom: 15px;
-            font-size: 1.8rem;
+            font-size: 1.4rem;
         }
 
         .modal p {
             color: var(--text-light);
-            margin-bottom: 25px;
-            line-height: 1.6;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 0.95rem;
         }
 
         .modal-stats {
             background: rgba(16, 185, 129, 0.1);
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 25px;
+            padding: 12px;
+            margin-bottom: 20px;
         }
 
         .modal-stats div {
             margin: 5px 0;
             color: var(--text-light);
+            font-size: 0.9rem;
         }
 
         .modal-stats strong {
@@ -324,8 +379,13 @@
 
         .modal-buttons {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
+        }
+
+        .modal-buttons .btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
         }
 
         /* Instructions Modal */
@@ -347,9 +407,9 @@
         .instructions-content {
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
+            padding: 20px;
+            max-width: 90%;
+            width: 350px;
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -357,22 +417,30 @@
 
         .instructions-content h2 {
             color: var(--primary);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
         }
 
         .instructions-content h3 {
             color: var(--text-light);
-            margin: 15px 0 10px;
+            margin: 12px 0 8px;
+            font-size: 1rem;
         }
 
         .instructions-content p, .instructions-content li {
             color: var(--text-light);
-            line-height: 1.6;
-            margin-bottom: 10px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
         }
 
         .instructions-content ul {
-            padding-left: 20px;
+            padding-left: 18px;
+        }
+
+        .close-instructions {
+            margin-top: 15px;
+            text-align: center;
         }
 
         /* Loading */
@@ -381,9 +449,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(74, 144, 217, 0.2);
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(74, 144, 217, 0.2);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -397,25 +465,106 @@
         @media (prefers-color-scheme: dark) {
             body { background: var(--bg-dark); color: var(--text-dark); }
             .game-info, .controls .btn, .difficulty-selector, .modal-content, .instructions-content {
-                background: var(--card-bg);
+                background: var(--card-bg-dark);
             }
             .btn-secondary { background: var(--bg-light); color: var(--text-light); }
         }
 
-        /* Responsive */
+        /* Mobile specific adjustments */
         @media (max-width: 768px) {
-            .game-info { flex-direction: column; gap: 10px; }
-            .info-item { min-width: auto; }
-            .difficulty-selector { flex-direction: column; gap: 10px; }
-            .controls { flex-direction: column; align-items: center; }
-            .btn { width: 100%; max-width: 200px; }
+            .header { padding: 10px 12px; font-size: 1.1rem; }
+            .header h1 { font-size: 1.1rem; }
+            
+            .game-info {
+                top: 8px;
+                padding: 10px;
+                gap: 8px;
+            }
+            
+            .info-item {
+                min-width: 70px;
+            }
+            
+            .info-label { font-size: 0.7rem; }
+            .info-value { font-size: 0.9rem; }
+            
+            .difficulty-selector {
+                bottom: 65px;
+                padding: 8px;
+                gap: 6px;
+            }
+            
+            .difficulty-btn {
+                padding: 5px 8px;
+                font-size: 0.75rem;
+                min-width: 50px;
+            }
+            
+            .controls {
+                bottom: 8px;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                min-width: 80px;
+            }
+            
+            /* Bigger touch areas for towers */
+            .touch-area {
+                height: 70%;
+            }
+        }
+
+        /* Tablet adjustments */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .difficulty-selector {
+                bottom: 60px;
+            }
+            .controls {
+                bottom: 15px;
+            }
+        }
+
+        /* Desktop adjustments */
+        @media (min-width: 1025px) {
+            .header { padding: 15px 20px; font-size: 1.4rem; }
+            .header h1 { font-size: 1.4rem; }
+            
+            .game-info {
+                top: 20px;
+                padding: 15px;
+            }
+            
+            .info-item { min-width: 100px; }
+            
+            .difficulty-selector {
+                bottom: 20px;
+                right: 20px;
+                left: auto;
+                width: auto;
+            }
+            
+            .difficulty-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .controls {
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+            }
+            
+            .touch-area { display: none; }
         }
 
         /* Touch Feedback */
         @keyframes tap {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.95); }
-            100% { transform: scale(1); }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .tap-feedback {
@@ -425,18 +574,39 @@
         /* Tower Labels */
         .tower-label {
             position: absolute;
-            bottom: -30px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--card-bg);
-            padding: 5px 15px;
+            padding: 6px 12px;
             border-radius: 8px;
             font-weight: 600;
             color: var(--text-light);
             box-shadow: var(--shadow);
             pointer-events: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            z-index: 15;
         }
+
+        /* Selection indicator */
+        .selection-indicator {
+            position: absolute;
+            width: 33.33%;
+            height: 60%;
+            bottom: 0;
+            background: rgba(255, 255, 0, 0.2);
+            border: 2px solid #ffff00;
+            border-radius: 10px;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+
+        .selection-indicator.left { left: 0; }
+        .selection-indicator.middle { left: 33.33%; }
+        .selection-indicator.right { left: 66.66%; }
+
+        .selection-indicator.visible { display: block; }
     </style>
 </head>
 <body>
@@ -452,10 +622,20 @@
                 <canvas id="gameCanvas"></canvas>
                 <div class="loading" id="loading"></div>
                 
+                <!-- Touch areas for towers (mobile) -->
+                <div class="touch-area left" onclick="selectTower(0)"></div>
+                <div class="touch-area middle" onclick="selectTower(1)"></div>
+                <div class="touch-area right" onclick="selectTower(2)"></div>
+                
+                <!-- Selection indicators -->
+                <div class="selection-indicator left" id="selectionLeft"></div>
+                <div class="selection-indicator middle" id="selectionMiddle"></div>
+                <div class="selection-indicator right" id="selectionRight"></div>
+                
                 <!-- Tower Labels -->
-                <div class="tower-label" style="left: 15%;">Start</div>
-                <div class="tower-label" style="left: 50%;">Ziel</div>
-                <div class="tower-label" style="left: 85%;">Hilfe</div>
+                <div class="tower-label" style="left: 16.66%;">A</div>
+                <div class="tower-label" style="left: 50%;">B</div>
+                <div class="tower-label" style="left: 83.33%;">C</div>
             </div>
 
             <div class="ui-overlay">
@@ -476,18 +656,17 @@
 
                 <div class="difficulty-selector">
                     <label>Schwierigkeit:</label>
-                    <button class="difficulty-btn active" onclick="setDifficulty(3)">Leicht</button>
-                    <button class="difficulty-btn" onclick="setDifficulty(4)">Mittel</button>
-                    <button class="difficulty-btn" onclick="setDifficulty(5)">Schwer</button>
-                    <button class="difficulty-btn" onclick="setDifficulty(6)">Experte</button>
-                    <button class="difficulty-btn" onclick="setDifficulty(8)">Meister</button>
+                    <button class="difficulty-btn active" onclick="setDifficulty(3)">3</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(4)">4</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(5)">5</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(6)">6</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(8)">8</button>
                 </div>
 
                 <div class="controls">
-                    <button class="btn btn-primary" onclick="resetGame()">Neu starten</button>
-                    <button class="btn btn-secondary" onclick="undoMove()">Rückgängig</button>
-                    <button class="btn btn-secondary" onclick="toggleAutoRotate()">Drehung: <span id="rotateText">AN</span></button>
-                    <button class="btn btn-success" onclick="solveStep()">Tipp</button>
+                    <button class="btn btn-primary" onclick="resetGame()">Neu</button>
+                    <button class="btn btn-secondary" onclick="undoMove()">↩️</button>
+                    <button class="btn btn-secondary" onclick="solveStep()">💡</button>
                 </div>
             </div>
         </main>
@@ -501,11 +680,11 @@
             <div class="modal-stats">
                 <div><strong>Züge:</strong> <span id="winMoves">0</span></div>
                 <div><strong>Zeit:</strong> <span id="winTime">00:00</span></div>
-                <div><strong>Minimal möglich:</strong> <span id="minMoves">0</span></div>
+                <div><strong>Optimal:</strong> <span id="minMoves">7</span></div>
             </div>
             <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="resetGame()">Neues Spiel</button>
-                <button class="btn btn-secondary" onclick="closeWinModal()">Schließen</button>
+                <button class="btn btn-primary" onclick="resetGame()">Neu</button>
+                <button class="btn btn-secondary" onclick="closeWinModal()">OK</button>
             </div>
         </div>
     </div>
@@ -513,38 +692,30 @@
     <!-- Instructions Modal -->
     <div class="instructions-modal" id="instructionsModal">
         <div class="instructions-content">
-            <h2>🏗️ Türme von Hanoi - Anleitung</h2>
+            <h2>🏗️ Türme von Hanoi</h2>
             
-            <h3>🎯 Ziel des Spiels</h3>
-            <p>Bewege alle Scheiben vom <strong>Start-Turm</strong> zum <strong>Ziel-Turm</strong> unter Einhaltung der Regeln.</p>
+            <h3>🎯 Ziel</h3>
+            <p>Bewege alle Scheiben von Turm <strong>A</strong> zu Turm <strong>C</strong>.</p>
             
             <h3>📜 Regeln</h3>
             <ul>
-                <li>Es darf immer nur <strong>eine Scheibe</strong> auf einmal bewegt werden</li>
-                <li>Eine Scheibe darf nur auf eine <strong>größere Scheibe</strong> oder einen <strong>leeren Turm</strong> gelegt werden</li>
-                <li>Der <strong>mittlere Turm</strong> dient als Hilfsturm</li>
+                <li>Nur <strong>eine Scheibe</strong> auf einmal bewegen</li>
+                <li>Eine Scheibe darf nur auf eine <strong>größere</strong> gelegt werden</li>
+                <li>Turm <strong>B</strong> ist der Hilfsturm</li>
             </ul>
             
             <h3>🎮 Steuerung</h3>
             <ul>
-                <li><strong>Touch/Click:</strong> Wähle eine Scheibe und dann den Ziel-Turm</li>
-                <li><strong>Drag & Drop:</strong> Ziehe Scheiben direkt zwischen den Türmen</li>
-                <li><strong>Tipp-Button:</strong> Zeigt den nächsten optimalen Zug an</li>
-                <li><strong>Rückgängig:</strong> Macht den letzten Zug ungeschehen</li>
+                <li><strong>Tap:</strong> Wähle Turm A, dann Turm B oder C</li>
+                <li><strong>↩️:</strong> Rückgängig machen</li>
+                <li><strong>💡:</strong> Tipp anzeigen</li>
+                <li><strong>Neu:</strong> Spiel zurücksetzen</li>
             </ul>
             
-            <h3>🧠 Mathematik dahinter</h3>
-            <p>Die minimale Anzahl an Zügen für <strong>n Scheiben</strong> ist <strong>2ⁿ - 1</strong>.</p>
-            <p>Für 3 Scheiben: 7 Züge | 4 Scheiben: 15 Züge | 5 Scheiben: 31 Züge | 8 Scheiben: 255 Züge!</p>
+            <h3>🧠 Tipp</h3>
+            <p>Bewege immer die <strong>kleinste Scheibe</strong> im Zyklus A→B→C→A...</p>
             
-            <h3>💡 Strategie</h3>
-            <ul>
-                <li>Bewege zuerst die <strong>kleinste Scheibe</strong> im Zyklus</li>
-                <li>Bewege die <strong>nächstgrößere Scheibe</strong> nur wenn nötig</li>
-                <li>Vermeide es, eine große Scheibe auf eine kleine zu legen</li>
-            </ul>
-            
-            <div style="text-align: center; margin-top: 20px;">
+            <div class="close-instructions">
                 <button class="btn btn-primary" onclick="closeInstructions()">Verstanden!</button>
             </div>
         </div>
@@ -561,20 +732,14 @@
         let scene, camera, renderer, controls;
         let towers = [];
         let disks = [];
-        let selectedDisk = null;
         let selectedTower = null;
         let moveCount = 0;
         let diskCount = 3;
         let gameStartTime = null;
         let timerInterval = null;
-        let autoRotate = true;
         let moveHistory = [];
         let isAnimating = false;
-        let isDragging = false;
-        let dragStart = null;
-        let raycaster = new THREE.Raycaster();
-        let mouse = new THREE.Vector2();
-        
+
         // Colors for disks
         const diskColors = [
             0xff6b6b, // Rot
@@ -595,9 +760,9 @@
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xe0f2fe);
             
-            // Create camera
+            // Create camera - adjusted for mobile
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 15, 25);
+            camera.position.set(0, 12, 18);
             camera.lookAt(0, 0, 0);
             
             // Create renderer
@@ -618,11 +783,11 @@
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(10, 20, 10);
             directionalLight.castShadow = true;
-            directionalLight.shadow.mapSize.width = 2048;
-            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
             scene.add(directionalLight);
             
-            // Add hemisphere light for better colors
+            // Add hemisphere light
             const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.6);
             scene.add(hemisphereLight);
             
@@ -635,20 +800,23 @@
             // Start with default disks
             resetGame();
             
-            // Add orbit controls
+            // Add orbit controls - disabled for mobile touch
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             controls.screenSpacePanning = false;
-            controls.minDistance = 15;
-            controls.maxDistance = 50;
+            controls.minDistance = 12;
+            controls.maxDistance = 30;
             controls.maxPolarAngle = Math.PI / 2 - 0.1;
+            controls.enableRotate = false; // Disable for touch
+            controls.enableZoom = false; // Disable for touch
+            controls.enablePan = false; // Disable for touch
             
             // Handle window resize
             window.addEventListener('resize', onWindowResize);
             
-            // Handle mouse/touch events
-            setupEventListeners();
+            // Handle touch events
+            setupTouchEvents();
             
             // Start game loop
             animate();
@@ -659,19 +827,19 @@
 
         // Create towers
         function createTowers() {
-            const towerGeometry = new THREE.CylinderGeometry(0.5, 0.5, 12, 16);
+            const towerGeometry = new THREE.CylinderGeometry(0.4, 0.4, 10, 16);
             const towerMaterial = new THREE.MeshStandardMaterial({
                 color: 0x374151,
                 roughness: 0.7,
                 metalness: 0.3
             });
             
-            const positions = [-10, 0, 10];
+            const positions = [-8, 0, 8];
             
             positions.forEach((x, index) => {
                 const tower = new THREE.Mesh(towerGeometry, towerMaterial);
                 tower.position.x = x;
-                tower.position.y = 6; // Half height
+                tower.position.y = 5;
                 tower.castShadow = true;
                 tower.receiveShadow = true;
                 tower.userData = {
@@ -682,57 +850,28 @@
                 scene.add(tower);
                 towers[index] = tower;
             });
-            
-            // Add tower numbers
-            positions.forEach((x, index) => {
-                const text = index === 0 ? 'A' : index === 1 ? 'B' : 'C';
-                createTowerLabel(x, 12.5, text);
-            });
-        }
-
-        // Create tower labels
-        function createTowerLabel(x, y, text) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 64;
-            canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillRect(0, 0, 64, 64);
-            ctx.font = 'bold 24px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#2d3748';
-            ctx.fillText(text, 32, 32);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-            const sprite = new THREE.Sprite(material);
-            sprite.position.set(x, y, 0);
-            sprite.scale.set(2, 2, 1);
-            scene.add(sprite);
         }
 
         // Create base
         function createBase() {
-            const baseGeometry = new THREE.BoxGeometry(40, 0.5, 20);
+            const baseGeometry = new THREE.BoxGeometry(35, 0.3, 15);
             const baseMaterial = new THREE.MeshStandardMaterial({
                 color: 0x374151,
                 roughness: 0.9,
                 metalness: 0.1
             });
             const base = new THREE.Mesh(baseGeometry, baseMaterial);
-            base.position.y = -0.25;
+            base.position.y = -0.15;
             base.receiveShadow = true;
             scene.add(base);
         }
 
         // Create a disk
         function createDisk(size, color, position) {
-            const radius = 3 - (size * 0.4);
-            const height = 0.8;
+            const radius = 2.5 - (size * 0.3);
+            const height = 0.6;
             
-            // Create disk geometry with hole
-            const diskGeometry = new THREE.CylinderGeometry(radius, radius, height, 32);
+            const diskGeometry = new THREE.CylinderGeometry(radius, radius, height, 24);
             const diskMaterial = new THREE.MeshStandardMaterial({
                 color: color,
                 roughness: 0.4,
@@ -750,8 +889,8 @@
                 towerId: null
             };
             
-            // Add edge to make it look like a ring
-            const edgeGeometry = new THREE.TorusGeometry(radius - 0.05, 0.05, 16, 32);
+            // Add edge
+            const edgeGeometry = new THREE.TorusGeometry(radius - 0.03, 0.03, 12, 24);
             const edgeMaterial = new THREE.MeshStandardMaterial({
                 color: 0x2d3748,
                 roughness: 0.8,
@@ -778,6 +917,10 @@
             // Reset game state
             moveCount = 0;
             moveHistory = [];
+            selectedTower = null;
+            
+            // Hide selection indicators
+            hideSelectionIndicators();
             
             // Start timer
             startTimer();
@@ -786,7 +929,7 @@
             for (let i = 0; i < diskCount; i++) {
                 const size = diskCount - i;
                 const color = diskColors[i % diskColors.length];
-                const disk = createDisk(size, color, new THREE.Vector3(-10, 12 - (i * 0.8), 0));
+                const disk = createDisk(size, color, new THREE.Vector3(-8, 10 - (i * 0.6), 0));
                 disk.userData.towerId = 0;
                 towers[0].userData.disks.push(disk);
                 disks.push(disk);
@@ -838,57 +981,55 @@
             return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function toggleAutoRotate() {
-            autoRotate = !autoRotate;
-            controls.autoRotate = autoRotate;
-            document.getElementById('rotateText').textContent = autoRotate ? 'AN' : 'AUS';
-        }
-
         function selectTower(towerId) {
             if (isAnimating) return;
             
             const tower = towers[towerId];
             
-            // If no disk selected, select the top disk from this tower
-            if (selectedDisk === null) {
+            // Hide all selection indicators
+            hideSelectionIndicators();
+            
+            // If no tower selected, select this one
+            if (selectedTower === null) {
                 if (tower.userData.disks.length > 0) {
-                    selectedDisk = tower.userData.disks[tower.userData.disks.length - 1];
                     selectedTower = towerId;
-                    
-                    // Highlight selected disk
-                    selectedDisk.material.color.setHex(0xffff00);
+                    showSelectionIndicator(towerId);
                 }
-            } 
-            // If disk is selected, try to move it to this tower
+            }
+            // If tower is selected, try to move disk
             else if (selectedTower !== null && selectedTower !== towerId) {
                 const sourceTower = towers[selectedTower];
                 const targetTower = tower;
                 
                 // Check if move is valid
-                if (isValidMove(selectedDisk, sourceTower, targetTower)) {
-                    moveDisk(selectedDisk, sourceTower, targetTower);
+                if (isValidMove(sourceTower, targetTower)) {
+                    moveDisk(sourceTower, targetTower);
                 }
+            }
+            // If same tower selected twice, deselect
+            else {
+                selectedTower = null;
             }
         }
 
-        function isValidMove(disk, sourceTower, targetTower) {
+        function isValidMove(sourceTower, targetTower) {
             // Cannot move to same tower
             if (sourceTower === targetTower) return false;
             
             // If target tower is empty, move is valid
             if (targetTower.userData.disks.length === 0) return true;
             
-            // Get top disk from target tower
-            const topDisk = targetTower.userData.disks[targetTower.userData.disks.length - 1];
+            // Get top disk from source and target
+            const sourceDisk = sourceTower.userData.disks[sourceTower.userData.disks.length - 1];
+            const targetDisk = targetTower.userData.disks[targetTower.userData.disks.length - 1];
             
             // Can only move onto larger disk
-            return disk.userData.size < topDisk.userData.size;
+            return sourceDisk.userData.size < targetDisk.userData.size;
         }
 
-        function moveDisk(disk, sourceTower, targetTower) {
-            // Remove from source
-            const diskIndex = sourceTower.userData.disks.indexOf(disk);
-            sourceTower.userData.disks.splice(diskIndex, 1);
+        function moveDisk(sourceTower, targetTower) {
+            // Get top disk from source
+            const disk = sourceTower.userData.disks.pop();
             
             // Add to target
             targetTower.userData.disks.push(disk);
@@ -906,9 +1047,8 @@
             updateUI();
             
             // Reset selection
-            selectedDisk.material.color.setHex(disk.userData.color);
-            selectedDisk = null;
             selectedTower = null;
+            hideSelectionIndicators();
             
             // Animate the move
             animateMove(disk, sourceTower, targetTower);
@@ -923,19 +1063,19 @@
             const startPos = disk.position.clone();
             const endPos = new THREE.Vector3(
                 targetTower.position.x,
-                12 - (targetTower.userData.disks.length - 1) * 0.8,
+                10 - (targetTower.userData.disks.length - 1) * 0.6,
                 targetTower.position.z
             );
             
             // Move up first
             const upPos = new THREE.Vector3(
                 startPos.x,
-                startPos.y + 5,
+                startPos.y + 4,
                 startPos.z
             );
             
             let progress = 0;
-            const duration = 300; // ms
+            const duration = 250; // ms
             
             function animate() {
                 progress += 16.67 / duration;
@@ -973,7 +1113,7 @@
             const toTower = lastMove.to;
             
             // Move back
-            moveDisk(disk, toTower, fromTower);
+            moveDisk(toTower, fromTower);
             
             // Decrement move count (will be incremented again by moveDisk)
             moveCount -= 2;
@@ -981,7 +1121,7 @@
         }
 
         function checkWinCondition() {
-            const targetTower = towers[2]; // Right tower
+            const targetTower = towers[2]; // Right tower (C)
             if (targetTower.userData.disks.length === diskCount) {
                 // All disks on target tower
                 setTimeout(() => {
@@ -1022,6 +1162,18 @@
             window.history.back();
         }
 
+        function showSelectionIndicator(towerId) {
+            hideSelectionIndicators();
+            const indicator = document.getElementById(`selection${towerId === 0 ? 'Left' : towerId === 1 ? 'Middle' : 'Right'}`);
+            if (indicator) indicator.classList.add('visible');
+        }
+
+        function hideSelectionIndicators() {
+            document.getElementById('selectionLeft').classList.remove('visible');
+            document.getElementById('selectionMiddle').classList.remove('visible');
+            document.getElementById('selectionRight').classList.remove('visible');
+        }
+
         // ============================================
         // SOLVER (for hint system)
         // ============================================
@@ -1037,235 +1189,53 @@
             const move = findOptimalMove(state);
             
             if (move) {
-                const sourceTower = towers[move.from];
-                const targetTower = towers[move.to];
-                const disk = sourceTower.userData.disks[sourceTower.userData.disks.length - 1];
-                
-                moveDisk(disk, sourceTower, targetTower);
+                selectTower(move.from);
+                setTimeout(() => {
+                    selectTower(move.to);
+                }, 300);
             }
         }
 
         function findOptimalMove(state) {
             // Simple solver: find the smallest disk that can be moved
-            // This is not always optimal, but gives a good hint
+            let bestMove = null;
+            let bestDiskSize = Infinity;
             
             for (let i = 0; i < 3; i++) {
                 if (state[i].length === 0) continue;
                 
                 const diskSize = state[i][state[i].length - 1];
                 
-                for (let j = 0; j < 3; j++) {
-                    if (i === j) continue;
-                    
-                    // Check if valid move
-                    if (state[j].length === 0 || diskSize < state[j][state[j].length - 1]) {
-                        return { from: i, to: j };
+                if (diskSize < bestDiskSize) {
+                    for (let j = 0; j < 3; j++) {
+                        if (i === j) continue;
+                        
+                        // Check if valid move
+                        if (state[j].length === 0 || diskSize < state[j][state[j].length - 1]) {
+                            bestDiskSize = diskSize;
+                            bestMove = { from: i, to: j };
+                            break;
+                        }
                     }
                 }
             }
             
-            return null;
+            return bestMove;
         }
 
         // ============================================
         // EVENT HANDLERS
         // ============================================
-        function setupEventListeners() {
-            // Mouse events
-            renderer.domElement.addEventListener('click', onClick, false);
-            renderer.domElement.addEventListener('mousemove', onMouseMove, false);
-            renderer.domElement.addEventListener('mousedown', onMouseDown, false);
-            renderer.domElement.addEventListener('mouseup', onMouseUp, false);
+        function setupTouchEvents() {
+            // Touch areas are handled by onclick in HTML
+            // We just need to prevent default touch behavior
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+            }, { passive: false });
             
-            // Touch events
-            renderer.domElement.addEventListener('touchstart', onTouchStart, false);
-            renderer.domElement.addEventListener('touchmove', onTouchMove, false);
-            renderer.domElement.addEventListener('touchend', onTouchEnd, false);
-            
-            // Keyboard events
-            document.addEventListener('keydown', onKeyDown, false);
-        }
-
-        function onClick(event) {
-            if (isAnimating) return;
-            
-            // Calculate mouse position in normalized device coordinates
-            const rect = renderer.domElement.getBoundingClientRect();
-            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-            
-            // Check for tower clicks
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(towers);
-            
-            if (intersects.length > 0) {
-                const tower = intersects[0].object;
-                selectTower(tower.userData.id);
-                
-                // Add tap feedback
-                tower.material.color.setHex(0x4a90d9);
-                setTimeout(() => {
-                    tower.material.color.setHex(0x374151);
-                }, 150);
-            } else {
-                // Check for disk clicks
-                const diskIntersects = raycaster.intersectObjects(disks);
-                if (diskIntersects.length > 0) {
-                    const disk = diskIntersects[0].object;
-                    const towerId = disk.userData.towerId;
-                    selectTower(towerId);
-                }
-            }
-        }
-
-        function onMouseMove(event) {
-            const rect = renderer.domElement.getBoundingClientRect();
-            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-        }
-
-        function onMouseDown(event) {
-            if (isAnimating) return;
-            
-            const rect = renderer.domElement.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            
-            // Check for disk drag
-            const diskIntersects = getDiskIntersects(x, y, rect);
-            if (diskIntersects.length > 0) {
-                isDragging = true;
-                dragStart = { x: event.clientX, y: event.clientY };
-                selectedDisk = diskIntersects[0].object;
-                selectedTower = selectedDisk.userData.towerId;
-            }
-        }
-
-        function onMouseUp(event) {
-            if (!isDragging || !selectedDisk) return;
-            
-            isDragging = false;
-            
-            const rect = renderer.domElement.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            
-            // Check for tower drop
-            const towerIntersects = getTowerIntersects(x, y, rect);
-            if (towerIntersects.length > 0) {
-                const targetTower = towerIntersects[0].object;
-                if (targetTower.userData.id !== selectedTower) {
-                    const sourceTower = towers[selectedTower];
-                    if (isValidMove(selectedDisk, sourceTower, targetTower)) {
-                        moveDisk(selectedDisk, sourceTower, targetTower);
-                    }
-                }
-            }
-            
-            // Reset selection
-            selectedDisk.material.color.setHex(selectedDisk.userData.color);
-            selectedDisk = null;
-            selectedTower = null;
-        }
-
-        function onTouchStart(event) {
-            if (isAnimating) return;
-            
-            event.preventDefault();
-            
-            const rect = renderer.domElement.getBoundingClientRect();
-            const touch = event.touches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            // Check for disk touch
-            const diskIntersects = getDiskIntersects(x, y, rect);
-            if (diskIntersects.length > 0) {
-                isDragging = true;
-                dragStart = { x: touch.clientX, y: touch.clientY };
-                selectedDisk = diskIntersects[0].object;
-                selectedTower = selectedDisk.userData.towerId;
-            } else {
-                // Check for tower touch
-                const towerIntersects = getTowerIntersects(x, y, rect);
-                if (towerIntersects.length > 0) {
-                    const tower = towerIntersects[0].object;
-                    selectTower(tower.userData.id);
-                }
-            }
-        }
-
-        function onTouchMove(event) {
-            if (!isDragging) return;
-            
-            event.preventDefault();
-        }
-
-        function onTouchEnd(event) {
-            if (!isDragging || !selectedDisk) return;
-            
-            event.preventDefault();
-            
-            isDragging = false;
-            
-            const rect = renderer.domElement.getBoundingClientRect();
-            const touch = event.changedTouches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            // Check for tower drop
-            const towerIntersects = getTowerIntersects(x, y, rect);
-            if (towerIntersects.length > 0) {
-                const targetTower = towerIntersects[0].object;
-                if (targetTower.userData.id !== selectedTower) {
-                    const sourceTower = towers[selectedTower];
-                    if (isValidMove(selectedDisk, sourceTower, targetTower)) {
-                        moveDisk(selectedDisk, sourceTower, targetTower);
-                    }
-                }
-            }
-            
-            // Reset selection
-            selectedDisk.material.color.setHex(selectedDisk.userData.color);
-            selectedDisk = null;
-            selectedTower = null;
-        }
-
-        function onKeyDown(event) {
-            // Prevent default for arrow keys
-            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(event.code)) {
-                event.preventDefault();
-            }
-            
-            // Tower selection with keys
-            if (event.code === 'ArrowLeft') selectTower(0);
-            if (event.code === 'ArrowDown' || event.code === 'ArrowRight') selectTower(1);
-            if (event.code === 'ArrowUp') selectTower(2);
-            
-            // Undo with Backspace
-            if (event.code === 'Backspace') undoMove();
-            
-            // Reset with R
-            if (event.code === 'KeyR') resetGame();
-            
-            // Hint with H
-            if (event.code === 'KeyH') solveStep();
-        }
-
-        function getDiskIntersects(x, y, rect) {
-            mouse.x = ((x) / rect.width) * 2 - 1;
-            mouse.y = -((y) / rect.height) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            return raycaster.intersectObjects(disks);
-        }
-
-        function getTowerIntersects(x, y, rect) {
-            mouse.x = ((x) / rect.width) * 2 - 1;
-            mouse.y = -((y) / rect.height) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            return raycaster.intersectObjects(towers);
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+            }, { passive: false });
         }
 
         function onWindowResize() {
@@ -1276,9 +1246,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            
-            // Update controls
-            if (controls) controls.update();
             
             // Update disk positions based on tower stacks
             updateDiskPositions();
@@ -1291,7 +1258,7 @@
             towers.forEach(tower => {
                 const disksOnTower = tower.userData.disks;
                 disksOnTower.forEach((disk, index) => {
-                    const yPos = 12 - (disksOnTower.length - 1 - index) * 0.8;
+                    const yPos = 10 - (disksOnTower.length - 1 - index) * 0.6;
                     disk.position.x = tower.position.x;
                     disk.position.y = yPos;
                     disk.position.z = tower.position.z;
