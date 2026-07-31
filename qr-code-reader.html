@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="QR Code Reader - Scanne QR Codes mit deiner Tablet-Kamera">
-    <title>📷 QR Code Reader</title>
+    <meta name="description" content="QR Code & Barcode Scanner - Scanne QR-Codes und Barcodes mit deiner Tablet-Kamera">
+    <title>📷 QR & Barcode Scanner</title>
     <style>
         * {
             margin: 0;
@@ -18,6 +18,7 @@
             --secondary: #667eea;
             --success: #10b981;
             --error: #ef4444;
+            --warning: #f59e0b;
             --bg-light: #f0f4f8;
             --bg-dark: #1a202c;
             --text-light: #2d3748;
@@ -199,10 +200,43 @@
             min-height: 24px;
         }
 
+        /* Mode selector */
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: var(--card-bg);
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            touch-action: manipulation;
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .mode-btn:active {
+            transform: scale(0.95);
+        }
+
         /* Result display */
         .result-container {
             position: absolute;
-            bottom: 20px;
+            bottom: 90px;
             left: 20px;
             right: 20px;
             background: var(--card-bg);
@@ -223,13 +257,32 @@
             pointer-events: auto;
         }
 
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
         .result-label {
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 8px;
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+
+        .result-type {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .result-type.barcode {
+            background: var(--warning);
         }
 
         .result-content {
@@ -345,6 +398,19 @@
             color: var(--text-light);
             word-break: break-all;
             margin-right: 10px;
+        }
+
+        .history-item .type-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--primary);
+            color: white;
+            margin-right: 8px;
+        }
+
+        .history-item .type-badge.barcode {
+            background: var(--warning);
         }
 
         .history-item .timestamp {
@@ -491,7 +557,8 @@
             
             .result-container,
             .history-item,
-            .toggle-btn {
+            .toggle-btn,
+            .mode-selector {
                 background: var(--card-bg-dark);
             }
             
@@ -530,6 +597,15 @@
                 right: 10px;
                 padding: 6px 12px;
                 font-size: 0.8rem;
+            }
+            
+            .mode-selector {
+                margin-bottom: 10px;
+            }
+            
+            .mode-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
             }
         }
 
@@ -579,6 +655,46 @@
         .tooltip.visible {
             opacity: 1;
         }
+        
+        /* Supported formats info */
+        .formats-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            display: none;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .formats-info.visible {
+            display: block;
+        }
+
+        .formats-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 5px;
+        }
+
+        .format-tag {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -586,11 +702,18 @@
         <!-- Header -->
         <header class="header">
             <button class="back-button" onclick="goBack()" aria-label="Zurück">←</button>
-            <h1>📷 QR Code Reader</h1>
+            <h1>📷 QR & Barcode Scanner</h1>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Mode Selector -->
+            <div class="mode-selector">
+                <button class="mode-btn active" id="modeAll" onclick="setScanMode('all')">🌐 Alle</button>
+                <button class="mode-btn" id="modeQR" onclick="setScanMode('qr')">📷 QR-Code</button>
+                <button class="mode-btn" id="modeBarcode" onclick="setScanMode('barcode')">📏 Barcode</button>
+            </div>
+
             <!-- Camera Container -->
             <div class="camera-container">
                 <video id="scanner" playsinline></video>
@@ -612,14 +735,17 @@
 
             <!-- Result Container -->
             <div class="result-container" id="resultContainer">
-                <div class="result-label">Ergebnis:</div>
+                <div class="result-header">
+                    <div class="result-label">Ergebnis:</div>
+                    <div class="result-type" id="resultType">QR Code</div>
+                </div>
                 <div class="result-content" id="resultContent"></div>
             </div>
 
             <!-- Permission Denied State -->
             <div class="permission-denied" id="permissionDenied" style="display: none;">
                 <h3>🚫 Kamera-Zugriff verweigert</h3>
-                <p>Bitte erlaube den Zugriff auf deine Kamera, um QR-Codes scannen zu können.</p>
+                <p>Bitte erlaube den Zugriff auf deine Kamera, um QR-Codes und Barcodes scannen zu können.</p>
                 <button class="btn btn-primary" onclick="requestCameraAccess()">Erneut versuchen</button>
             </div>
 
@@ -627,7 +753,7 @@
             <div class="no-camera" id="noCamera" style="display: none;">
                 <h3>📹 Keine Kamera gefunden</h3>
                 <p>Dieses Gerät hat keine Kamera oder sie wird nicht unterstützt.</p>
-                <p>Du kannst trotzdem QR-Codes aus Bildern hochladen.</p>
+                <p>Du kannst trotzdem QR-Codes und Barcodes aus Bildern hochladen.</p>
                 <button class="btn btn-secondary" onclick="uploadImage()">Bild hochladen</button>
             </div>
 
@@ -637,9 +763,10 @@
                 <button class="btn btn-secondary" id="stopBtn" onclick="stopScanning()" disabled>Scannen stoppen</button>
                 <button class="btn btn-secondary" id="copyBtn" onclick="copyToClipboard()">Kopieren</button>
                 <button class="btn btn-secondary" id="clearBtn" onclick="clearResult()">Löschen</button>
+                <button class="btn btn-secondary" id="formatsBtn" onclick="toggleFormatsInfo()">Formate</button>
             </div>
 
-            <!-- History Toggle Button -->
+            <!-- Toggle Buttons -->
             <div class="toggle-container">
                 <button class="toggle-btn" id="historyToggle" onclick="toggleHistory()" title="Verlauf">
                     📜
@@ -650,6 +777,15 @@
                 <button class="toggle-btn" id="cameraToggle" onclick="switchCamera()" title="Kamera wechseln">
                     🔄
                 </button>
+                <button class="toggle-btn" id="infoToggle" onclick="toggleFormatsInfo()" title="Unterstützte Formate">
+                    ℹ️
+                </button>
+            </div>
+
+            <!-- Supported Formats Info -->
+            <div class="formats-info" id="formatsInfo">
+                <div class="formats-title">Unterstützte Formate:</div>
+                <div class="formats-grid" id="formatsGrid"></div>
             </div>
 
             <!-- History Section -->
@@ -670,12 +806,14 @@
         const statusMessage = document.getElementById('statusMessage');
         const resultContainer = document.getElementById('resultContainer');
         const resultContent = document.getElementById('resultContent');
+        const resultType = document.getElementById('resultType');
         const permissionDenied = document.getElementById('permissionDenied');
         const noCamera = document.getElementById('noCamera');
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         const copyBtn = document.getElementById('copyBtn');
         const clearBtn = document.getElementById('clearBtn');
+        const formatsBtn = document.getElementById('formatsBtn');
         const historyToggle = document.getElementById('historyToggle');
         const historySection = document.getElementById('historySection');
         const historyList = document.getElementById('historyList');
@@ -683,6 +821,11 @@
         const cameraToggle = document.getElementById('cameraToggle');
         const flashIndicator = document.getElementById('flashIndicator');
         const fileInput = document.getElementById('fileInput');
+        const formatsInfo = document.getElementById('formatsInfo');
+        const formatsGrid = document.getElementById('formatsGrid');
+        const modeAll = document.getElementById('modeAll');
+        const modeQR = document.getElementById('modeQR');
+        const modeBarcode = document.getElementById('modeBarcode');
 
         // State
         let isScanning = false;
@@ -693,12 +836,44 @@
         let flashEnabled = false;
         let currentCameraId = null;
         let availableCameras = [];
+        let scanMode = 'all'; // 'all', 'qr', 'barcode'
+        let lastResult = '';
+
+        // Supported formats
+        const SUPPORTED_FORMATS = {
+            qr: [
+                { name: 'QR Code', type: 'qr' },
+                { name: 'Micro QR', type: 'qr' }
+            ],
+            barcode: [
+                { name: 'EAN-13', type: 'barcode' },
+                { name: 'EAN-8', type: 'barcode' },
+                { name: 'UPC-A', type: 'barcode' },
+                { name: 'UPC-E', type: 'barcode' },
+                { name: 'Code 39', type: 'barcode' },
+                { name: 'Code 93', type: 'barcode' },
+                { name: 'Code 128', type: 'barcode' },
+                { name: 'ITF', type: 'barcode' },
+                { name: 'Codabar', type: 'barcode' },
+                { name: 'MSI', type: 'barcode' }
+            ],
+            dataMatrix: [
+                { name: 'Data Matrix', type: 'datamatrix' }
+            ],
+            pdf417: [
+                { name: 'PDF417', type: 'pdf417' }
+            ],
+            aztec: [
+                { name: 'Aztec', type: 'aztec' }
+            ]
+        };
 
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             loadHistory();
             checkCameraSupport();
             updateButtonStates();
+            renderSupportedFormats();
             
             // Prevent default touch behavior
             document.addEventListener('touchmove', (e) => {
@@ -707,6 +882,80 @@
                 }
             }, { passive: false });
         });
+
+        // Render supported formats
+        function renderSupportedFormats() {
+            formatsGrid.innerHTML = '';
+            
+            // QR Codes
+            SUPPORTED_FORMATS.qr.forEach(format => {
+                const tag = document.createElement('div');
+                tag.className = 'format-tag';
+                tag.textContent = format.name;
+                tag.style.background = 'var(--primary)';
+                tag.style.color = 'white';
+                formatsGrid.appendChild(tag);
+            });
+            
+            // Barcodes
+            SUPPORTED_FORMATS.barcode.forEach(format => {
+                const tag = document.createElement('div');
+                tag.className = 'format-tag';
+                tag.textContent = format.name;
+                tag.style.background = 'var(--warning)';
+                tag.style.color = 'white';
+                formatsGrid.appendChild(tag);
+            });
+            
+            // Data Matrix
+            SUPPORTED_FORMATS.dataMatrix.forEach(format => {
+                const tag = document.createElement('div');
+                tag.className = 'format-tag';
+                tag.textContent = format.name;
+                tag.style.background = 'var(--success)';
+                tag.style.color = 'white';
+                formatsGrid.appendChild(tag);
+            });
+            
+            // PDF417
+            SUPPORTED_FORMATS.pdf417.forEach(format => {
+                const tag = document.createElement('div');
+                tag.className = 'format-tag';
+                tag.textContent = format.name;
+                tag.style.background = 'var(--secondary)';
+                tag.style.color = 'white';
+                formatsGrid.appendChild(tag);
+            });
+        }
+
+        // Toggle formats info
+        function toggleFormatsInfo() {
+            formatsInfo.classList.toggle('visible');
+        }
+
+        // Set scan mode
+        function setScanMode(mode) {
+            scanMode = mode;
+            modeAll.classList.remove('active');
+            modeQR.classList.remove('active');
+            modeBarcode.classList.remove('active');
+            
+            if (mode === 'all') modeAll.classList.add('active');
+            if (mode === 'qr') modeQR.classList.add('active');
+            if (mode === 'barcode') modeBarcode.classList.add('active');
+            
+            statusMessage.textContent = getModeLabel() + ' scannen';
+            restartScanning();
+        }
+
+        // Get mode label
+        function getModeLabel() {
+            switch(scanMode) {
+                case 'qr': return 'QR-Code';
+                case 'barcode': return 'Barcode';
+                default: return 'QR & Barcode';
+            }
+        }
 
         // Check camera support
         async function checkCameraSupport() {
@@ -772,7 +1021,7 @@
                 scanner.play();
                 
                 loading.style.display = 'none';
-                statusMessage.textContent = 'QR-Code scannen';
+                statusMessage.textContent = getModeLabel() + ' scannen';
                 
                 // Initialize QR code reader
                 initQRReader();
@@ -800,7 +1049,7 @@
                 }
             } catch (error) {
                 console.error('QR reader init error:', error);
-                statusMessage.textContent = 'QR-Reader konnte nicht initialisiert werden';
+                statusMessage.textContent = 'Scanner konnte nicht initialisiert werden';
             }
         }
 
@@ -812,7 +1061,7 @@
                 setupQRReader();
             };
             script.onerror = () => {
-                statusMessage.textContent = 'Fehler beim Laden des QR-Readers';
+                statusMessage.textContent = 'Fehler beim Laden des Scanners';
             };
             document.head.appendChild(script);
         }
@@ -822,91 +1071,106 @@
             try {
                 codeReader = new ZXing.BrowserQRCodeReader();
                 
-                // Decode from video
-                const decodeFromVideo = async () => {
-                    if (!isScanning || !codeReader) return;
-                    
-                    try {
-                        const result = await codeReader.decodeFromVideoDevice(
-                            currentCameraId,
-                            scanner,
-                            (result, error) => {
-                                if (result) {
-                                    handleQRResult(result.getText());
-                                }
-                                if (error && error.name !== 'NotFoundException') {
-                                    console.error('QR decode error:', error);
-                                }
-                            }
-                        );
-                        
-                        if (result) {
-                            handleQRResult(result.getText());
-                        }
-                        
-                    } catch (error) {
-                        console.error('QR decode error:', error);
-                        if (error.name !== 'NotFoundException') {
-                            statusMessage.textContent = 'Fehler beim Scannen: ' + error.message;
-                        }
-                    }
-                };
-                
-                // Continuous scanning
-                const scanContinuously = async () => {
-                    if (!isScanning) return;
-                    
-                    try {
-                        const result = await codeReader.decodeFromVideoDevice(
-                            currentCameraId,
-                            scanner,
-                            undefined,
-                            undefined
-                        );
-                        
-                        if (result) {
-                            handleQRResult(result.getText());
-                        }
-                        
-                        // Continue scanning
-                        if (isScanning) {
-                            setTimeout(scanContinuously, 500);
-                        }
-                        
-                    } catch (error) {
-                        if (error.name !== 'NotFoundException') {
-                            console.error('Scan error:', error);
-                        }
-                        if (isScanning) {
-                            setTimeout(scanContinuously, 500);
-                        }
-                    }
-                };
-                
-                // Start continuous scanning when start button is clicked
-                startBtn.onclick = async () => {
-                    isScanning = true;
-                    updateButtonStates();
-                    statusMessage.textContent = 'Scanne...';
-                    scanner.classList.add('vibrate');
-                    setTimeout(() => scanner.classList.remove('vibrate'), 100);
-                    scanContinuously();
-                };
-                
-                stopBtn.onclick = () => {
-                    isScanning = false;
-                    updateButtonStates();
-                    statusMessage.textContent = 'Scannen gestoppt';
-                };
+                // Start scanning
+                startScanning();
                 
             } catch (error) {
                 console.error('Setup QR reader error:', error);
-                statusMessage.textContent = 'QR-Reader-Setup fehlgeschlagen';
+                statusMessage.textContent = 'Scanner-Setup fehlgeschlagen';
             }
         }
 
+        // Restart scanning with new mode
+        function restartScanning() {
+            if (isScanning) {
+                isScanning = false;
+                setTimeout(() => {
+                    isScanning = true;
+                    startScanning();
+                }, 100);
+            } else {
+                startScanning();
+            }
+        }
+
+        // Get hints for scan mode
+        function getScanHints() {
+            const hints = new ZXing.DecodeHintType();
+            
+            switch(scanMode) {
+                case 'qr':
+                    // Only QR codes
+                    hints.setPossibleFormats([
+                        ZXing.BarcodeFormat.QR_CODE,
+                        ZXing.BarcodeFormat.MICRO_QR_CODE
+                    ]);
+                    break;
+                case 'barcode':
+                    // Only barcodes
+                    hints.setPossibleFormats([
+                        ZXing.BarcodeFormat.EAN_13,
+                        ZXing.BarcodeFormat.EAN_8,
+                        ZXing.BarcodeFormat.UPC_A,
+                        ZXing.BarcodeFormat.UPC_E,
+                        ZXing.BarcodeFormat.CODE_39,
+                        ZXing.BarcodeFormat.CODE_93,
+                        ZXing.BarcodeFormat.CODE_128,
+                        ZXing.BarcodeFormat.ITF,
+                        ZXing.BarcodeFormat.CODABAR,
+                        ZXing.BarcodeFormat.MSI
+                    ]);
+                    break;
+                default:
+                    // All formats
+                    hints.setPossibleFormats([
+                        ZXing.BarcodeFormat.QR_CODE,
+                        ZXing.BarcodeFormat.MICRO_QR_CODE,
+                        ZXing.BarcodeFormat.EAN_13,
+                        ZXing.BarcodeFormat.EAN_8,
+                        ZXing.BarcodeFormat.UPC_A,
+                        ZXing.BarcodeFormat.UPC_E,
+                        ZXing.BarcodeFormat.CODE_39,
+                        ZXing.BarcodeFormat.CODE_93,
+                        ZXing.BarcodeFormat.CODE_128,
+                        ZXing.BarcodeFormat.ITF,
+                        ZXing.BarcodeFormat.CODABAR,
+                        ZXing.BarcodeFormat.MSI,
+                        ZXing.BarcodeFormat.DATA_MATRIX,
+                        ZXing.BarcodeFormat.PDF_417,
+                        ZXing.BarcodeFormat.AZTEC
+                    ]);
+            }
+            
+            return hints;
+        }
+
+        // Determine result type
+        function getResultType(resultText, resultFormat) {
+            if (!resultFormat) {
+                // Try to detect from text
+                if (resultText.startsWith('http://') || resultText.startsWith('https://') || resultText.startsWith('www.')) {
+                    return 'URL';
+                }
+                if (/^[0-9]{10,}$/.test(resultText)) {
+                    return 'EAN/UPC';
+                }
+                return 'QR Code';
+            }
+            
+            const formatName = resultFormat.toString();
+            if (formatName.includes('QR')) return 'QR Code';
+            if (formatName.includes('EAN') || formatName.includes('UPC')) return 'EAN/UPC';
+            if (formatName.includes('CODE_39') || formatName.includes('CODE_93') || formatName.includes('CODE_128')) return 'Code 128/39';
+            if (formatName.includes('ITF')) return 'ITF';
+            if (formatName.includes('CODABAR')) return 'Codabar';
+            if (formatName.includes('DATA_MATRIX')) return 'Data Matrix';
+            if (formatName.includes('PDF_417')) return 'PDF417';
+            if (formatName.includes('AZTEC')) return 'Aztec';
+            return formatName;
+        }
+
         // Handle QR code result
-        function handleQRResult(text) {
+        function handleQRResult(text, format) {
             if (!text || text === lastResult) return;
             
             lastResult = text;
@@ -916,16 +1180,22 @@
                 navigator.vibrate(100);
             }
             
+            // Determine type
+            const resultTypeText = getResultType(text, format);
+            const isBarcode = !resultTypeText.includes('QR') && !resultTypeText.includes('Data Matrix') && !resultTypeText.includes('Aztec') && !resultTypeText.includes('PDF417');
+            
             // Show result
             resultContent.textContent = text;
+            resultType.textContent = resultTypeText;
+            resultType.className = 'result-type ' + (isBarcode ? 'barcode' : '');
             resultContainer.classList.add('visible');
             copyBtn.disabled = false;
             
             // Add to history
-            addToHistory(text);
+            addToHistory(text, resultTypeText);
             
             // Update status
-            statusMessage.textContent = 'QR-Code erkannt!';
+            statusMessage.textContent = resultTypeText + ' erkannt!';
             
             // Stop scanning temporarily
             isScanning = false;
@@ -935,7 +1205,8 @@
             setTimeout(() => {
                 isScanning = true;
                 updateButtonStates();
-                statusMessage.textContent = 'Scanne...';
+                statusMessage.textContent = getModeLabel() + ' scannen';
+                scanFromVideo();
             }, 2000);
             
             // Visual feedback
@@ -943,12 +1214,10 @@
             setTimeout(() => scanner.classList.remove('vibrate'), 100);
         }
 
-        let lastResult = '';
-
         // Add to history
-        function addToHistory(text) {
+        function addToHistory(text, type) {
             const timestamp = new Date().toLocaleString('de-DE');
-            scanHistory.unshift({ text, timestamp });
+            scanHistory.unshift({ text, timestamp, type });
             
             // Keep only last 20 items
             if (scanHistory.length > 20) {
@@ -989,7 +1258,8 @@
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 div.innerHTML = `
-                    <div class="content">${escapeHtml(item.text.substring(0, 50))}${item.text.length > 50 ? '...' : ''}</div>
+                    <span class="type-badge ${item.type.includes('Barcode') || item.type.includes('EAN') || item.type.includes('UPC') || item.type.includes('Code') || item.type.includes('ITF') ? 'barcode' : ''}">${item.type}</span>
+                    <div class="content">${escapeHtml(item.text.substring(0, 40))}${item.text.length > 40 ? '...' : ''}</div>
                     <div class="timestamp">${item.timestamp}</div>
                     <button class="copy-btn" onclick="copyHistoryItem(${index})" title="Kopieren">📋</button>
                 `;
@@ -1042,16 +1312,20 @@
         async function switchCamera() {
             if (availableCameras.length <= 1) return;
             
-            // Find current camera index
-            const currentIndex = availableCameras.findIndex(c => c.deviceId === currentCameraId);
-            const nextIndex = (currentIndex + 1) % availableCameras.length;
-            currentCameraId = availableCameras[nextIndex].deviceId;
+            // Stop current scanning
+            isScanning = false;
+            updateButtonStates();
             
             // Stop current stream
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
+            
+            // Find current camera index
+            const currentIndex = availableCameras.findIndex(c => c.deviceId === currentCameraId);
+            const nextIndex = (currentIndex + 1) % availableCameras.length;
+            currentCameraId = availableCameras[nextIndex].deviceId;
             
             // Restart with new camera
             await requestCameraAccess();
@@ -1065,11 +1339,10 @@
         function startScanning() {
             isScanning = true;
             updateButtonStates();
-            statusMessage.textContent = 'Scanne...';
+            statusMessage.textContent = getModeLabel() + ' scannen';
             scanner.classList.add('vibrate');
             setTimeout(() => scanner.classList.remove('vibrate'), 100);
             
-            // Use simple approach for better compatibility
             scanFromVideo();
         }
 
@@ -1092,22 +1365,21 @@
                     });
                 }
                 
-                const result = await codeReader.decodeFromVideoDevice(
+                const hints = getScanHints();
+                
+                codeReader.decodeFromVideoDevice(
                     currentCameraId,
                     scanner,
-                    (result, error) => {
+                    (result, error, stats) => {
                         if (result) {
-                            handleQRResult(result.getText());
+                            handleQRResult(result.getText(), result.getBarcodeFormat());
                         }
                         if (error && error.name !== 'NotFoundException') {
                             console.error('Scan error:', error);
                         }
-                    }
+                    },
+                    hints
                 );
-                
-                if (result) {
-                    handleQRResult(result.getText());
-                }
                 
             } catch (error) {
                 if (error.name !== 'NotFoundException') {
@@ -1144,7 +1416,7 @@
                 copyBtn.textContent = '✓ Kopiert';
                 setTimeout(() => {
                     copyBtn.textContent = 'Kopieren';
-                    statusMessage.textContent = isScanning ? 'Scanne...' : 'QR-Code scannen';
+                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel() + ' scannen';
                 }, 2000);
                 
             } catch (error) {
@@ -1161,7 +1433,7 @@
                 copyBtn.textContent = '✓ Kopiert';
                 setTimeout(() => {
                     copyBtn.textContent = 'Kopieren';
-                    statusMessage.textContent = isScanning ? 'Scanne...' : 'QR-Code scannen';
+                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel() + ' scannen';
                 }, 2000);
             }
         }
@@ -1172,7 +1444,7 @@
             resultContainer.classList.remove('visible');
             copyBtn.disabled = true;
             lastResult = '';
-            statusMessage.textContent = isScanning ? 'Scanne...' : 'QR-Code scannen';
+            statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel() + ' scannen';
         }
 
         // Upload image
@@ -1199,7 +1471,7 @@
             fileInput.value = '';
         }
 
-        // Scan image for QR codes
+        // Scan image for QR codes and barcodes
         async function scanImage(image) {
             try {
                 loading.style.display = 'block';
@@ -1209,12 +1481,13 @@
                     await loadZXing();
                 }
                 
-                const result = await codeReader.decodeFromImage(image);
+                const hints = getScanHints();
+                const result = await codeReader.decodeFromImage(image, hints);
                 
                 if (result) {
-                    handleQRResult(result.getText());
+                    handleQRResult(result.getText(), result.getBarcodeFormat());
                 } else {
-                    statusMessage.textContent = 'Kein QR-Code gefunden';
+                    statusMessage.textContent = 'Kein QR-Code oder Barcode gefunden';
                 }
                 
             } catch (error) {
@@ -1275,6 +1548,17 @@
             if (e.code === 'Escape') {
                 clearResult();
             }
+            
+            // 1, 2, 3 for mode selection
+            if (e.key === '1') {
+                setScanMode('all');
+            }
+            if (e.key === '2') {
+                setScanMode('qr');
+            }
+            if (e.key === '3') {
+                setScanMode('barcode');
+            }
         });
 
         // Handle visibility change
@@ -1314,6 +1598,8 @@
         window.uploadImage = uploadImage;
         window.requestCameraAccess = requestCameraAccess;
         window.goBack = goBack;
+        window.setScanMode = setScanMode;
+        window.toggleFormatsInfo = toggleFormatsInfo;
     </script>
     
     <!-- Load ZXing library -->
