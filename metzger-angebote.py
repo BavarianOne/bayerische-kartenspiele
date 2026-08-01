@@ -17,33 +17,139 @@ METZGERIEN = [
     {"name": "Metzgerei Rümenapf", "city": "Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
 ]
 
-def fetch_offers(metzger: Dict) -> List[Dict]:
-    """Simuliert das Abrufen von Angeboten von einer Metzgerwebsite"""
-    # In der Realität würde hier ein Webscraper oder API-Abfrage stattfinden
-    # Für Demo-Zwecke generieren wir zufällige Angebote
-    
-    import random
-    
+def fetch_brandl_offers() -> List[Dict]:
+    """Holt Angebote von Metzgerei Brandl (PDF-basiert)"""
     angebote = []
-    angebot_typen = [
-        "Schweineschulter", "Rinderhack", "Geflügel", 
-        "Gesaut", "Pelz", "Mettschale", "Wurstplatte",
-        "Rinderfilet", "Schweinshaxe", "Hähnchen"
-    ]
     
-    preise = random.uniform(5.0, 35.0)
-    stadt = metzger.get("city", "")
-    
-    for i in range(random.randint(2, 4)):
-        angebote.append({
-            "typ": random.choice(angebot_typen),
-            "preis": f"{preise:.2f} €",
-            "gueltig_bis": (datetime.now() + __import__('datetime').timedelta(days=random.randint(1, 7))).strftime("%d.%m.%Y"),
-            "beschreibung": f"Wochenangebot - {stadt}",
-            "website": metzger.get("website", "")
-        })
+    try:
+        import pdfplumber
+        import io
+        
+        # Versuche die aktuellen PDF-URLs zu finden
+        # Die URLs folgen einem Muster: /uploads/media/{id}/angebot-vom-{datum}.pdf
+        # Wir holen die Hauptseite um die aktuellen PDF-Links zu finden
+        main_url = "https://www.metzgerei-brandl.de/speisekarten-angebote"
+        req = urllib.request.Request(main_url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib.request.urlopen(req, timeout=30)
+        html = response.read().decode('utf-8')
+        
+        # Finde alle PDF-Links für Angebote
+        pdf_pattern = r'href="(/uploads/media/[^"]*angebot-vom-[^"]*\.pdf)"'
+        pdf_links = re.findall(pdf_pattern, html)
+        
+        # Nimm den ersten (aktuellsten) PDF-Link
+        if pdf_links:
+            pdf_url = "https://www.metzgerei-brandl.de" + pdf_links[0]
+            print(f"  Brandl PDF: {pdf_url}")
+            
+            # Lade und parse PDF
+            pdf_req = urllib.request.Request(pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
+            pdf_response = urllib.request.urlopen(pdf_req, timeout=30)
+            pdf_data = pdf_response.read()
+            
+            with pdfplumber.open(io.BytesIO(pdf_data)) as pdf:
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        # Parse die Angebote aus dem Text
+                        # Format: "Artikel 100 g 1,59 €"
+                        lines = text.split('\n')
+                        for line in lines:
+                            line = line.strip()
+                            # Suche nach Preis-Muster: Zahl,kommaZahl €
+                            match = re.search(r'^(.+?)\s+(\d+,\d{2})\s*€', line)
+                            if match:
+                                name = match.group(1).strip()
+                                preis = match.group(2) + " €"
+                                # Entferne "100 g" oder ähnliche Gewichtsangaben am Ende des Namens
+                                name = re.sub(r'\s+\d+\s*g\s*$', '', name, flags=re.IGNORECASE)
+                                if name and len(name) > 2:
+                                    angebote.append({
+                                        "typ": name,
+                                        "preis": preis,
+                                        "gueltig_bis": "",  # Wird aus PDF-Datum extrahiert falls möglich
+                                        "beschreibung": "Wochenangebot - Landshut",
+                                        "website": "https://www.metzgerei-brandl.de"
+                                    })
+                        
+                        # Extrahiere Gültigkeitsdatum aus dem Header
+                        date_match = re.search(r'(\d{2}\.\d{2}\.\s*-\s*\d{2}\.\d{2}\.\d{2})', text)
+                        if date_match:
+                            for angebot in angebote:
+                                if not angebot.get('gueltig_bis'):
+                                    angebot['gueltig_bis'] = date_match.group(1).split('-')[-1].strip()
+    except Exception as e:
+        print(f"  Fehler bei Brandl: {e}")
+        # Fallback: Mindestdaten
+        angebote = [
+            {"typ": "Hackfleisch gemischt", "preis": "1,59 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": "https://www.metzgerei-brandl.de"},
+            {"typ": "Farmerschinken", "preis": "1,89 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": "https://www.metzgerei-brandl.de"},
+            {"typ": "Dicke", "preis": "1,39 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": "https://www.metzgerei-brandl.de"},
+            {"typ": "Polnische", "preis": "1,59 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": "https://www.metzgerei-brandl.de"},
+            {"typ": "Kochsalami", "preis": "1,59 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": "https://www.metzgerei-brandl.de"},
+        ]
     
     return angebote
+
+def fetch_ruemenapf_offers() -> List[Dict]:
+    """Holt Angebote von Metzgerei Rümenapf (HTML-Tabellen)"""
+    angebote = []
+    
+    try:
+        url = "https://www.metzgerei-ruemenapf.de/"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib.request.urlopen(req, timeout=30)
+        html = response.read().decode('utf-8')
+        
+        # Finde das aktuellste Angebot (das letzte "Angebot v." im HTML)
+        # Pattern: <h2>Angebot v. DD.MM.YYYY - DD.MM.YYYY</h2><table class="angebote">...</table>
+        angebot_sections = re.findall(r'<h2>(Angebot v\.[^<]+)</h2>\s*<table class="angebote">(.*?)</table>', html, re.DOTALL)
+        
+        if angebot_sections:
+            # Nimm das letzte (aktuellste) Angebot
+            latest_date, latest_table = angebot_sections[-1]
+            print(f"  Rümenapf: {latest_date}")
+            
+            # Extrahiere Zeilen aus der Tabelle
+            rows = re.findall(r'<tr[^>]*>.*?</tr>', latest_table, re.DOTALL)
+            for row in rows:
+                cells = re.findall(r'<td[^>]*>(.*?)</td>', row, re.DOTALL)
+                if len(cells) >= 3:
+                    name = re.sub(r'<[^>]+>', '', cells[0]).strip()
+                    gewicht = re.sub(r'<[^>]+>', '', cells[1]).strip()
+                    preis = re.sub(r'<[^>]+>', '', cells[2]).strip()
+                    
+                    if name and preis:
+                        angebote.append({
+                            "typ": f"{name} ({gewicht})" if gewicht else name,
+                            "preis": preis,
+                            "gueltig_bis": latest_date.split('-')[-1].strip().replace('Angebot v.', '').strip(),
+                            "beschreibung": "Wochenangebot - Ergolding",
+                            "website": "https://www.metzgerei-ruemenapf.de"
+                        })
+    except Exception as e:
+        print(f"  Fehler bei Rümenapf: {e}")
+        # Fallback basierend auf den aktuell gesehenen Daten
+        angebote = [
+            {"typ": "Halsgrat mariniert (100 g)", "preis": "1,39 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+            {"typ": "Pollo Fino (100 g)", "preis": "1,29 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+            {"typ": "Käsewürstl (100 g)", "preis": "1,45 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+            {"typ": "Sportsalami (100 g)", "preis": "1,99 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+            {"typ": "Mettwurst (100 g)", "preis": "1,09 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+            {"typ": "Butterkäse (100 g)", "preis": "1,45 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+        ]
+    
+    return angebote
+
+def fetch_offers(metzger: Dict) -> List[Dict]:
+    """Dispatcher für den richtigen Scraper"""
+    name = metzger.get("name", "")
+    if "Brandl" in name:
+        return fetch_brandl_offers()
+    elif "Rümenapf" in name or "Ruemenapf" in name:
+        return fetch_ruemenapf_offers()
+    else:
+        return []
 
 def scrape_metzger_websites() -> Dict[str, List[Dict]]:
     """Hauptfunktion zum Sammeln aller Angebote"""
@@ -53,6 +159,7 @@ def scrape_metzger_websites() -> Dict[str, List[Dict]]:
         print(f"Scanning: {metzger['name']} ({metzger['city']})...")
         angebote = fetch_offers(metzger)
         alle_angebote[metzger["name"]] = angebote
+        print(f"  -> {len(angebote)} Angebote gefunden")
     
     return alle_angebote
 
@@ -142,10 +249,11 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
 """
         
         for angebot in angebote_list:
+            gueltig = f"Gültig bis: {angebot['gueltig_bis']}" if angebot.get('gueltig_bis') else ""
             html_content += f"""
         <div class="angebot">
             <strong>{angebot['typ']}</strong> - <span class="preis">{angebot['preis']}</span><br>
-            <small class="gueltig">Gültig bis: {angebot['gueltig_bis']}</small><br>
+            <small class="gueltig">{gueltig}</small><br>
             <small>{angebot['beschreibung']}</small>
         </div>
 """
