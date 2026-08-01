@@ -11,13 +11,10 @@ import re
 from datetime import datetime
 from typing import List, Dict
 
-# Konfiguration - Metzgerien aus Bayern
+# Konfiguration - Nur Metzgerien in Landshut und Ergolding
 METZGERIEN = [
-    {"name": "Metzger Müller", "city": "München", "website": "https://www.metzger-mueller.de"},
-    {"name": "Metzger Schmidt", "city": "Nürnberg", "website": "https://www.metzgerschmidt.de"},
-    {"name": "Bayerischer Metzger", "city": "Augsburg", "website": "https://www.bayerischer-metzger.de"},
-    {"name": "Frischmetz", "city": "Erlangen", "website": "https://www.frischmetz-erlangen.de"},
-    # Füge weitere Metzgerien hinzu
+    {"name": "Metzgerei Brandl", "city": "Landshut", "website": "https://www.metzgerei-brandl.de"},
+    {"name": "Metzgerei Rümenapf", "city": "Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
 ]
 
 def fetch_offers(metzger: Dict) -> List[Dict]:
@@ -30,17 +27,20 @@ def fetch_offers(metzger: Dict) -> List[Dict]:
     angebote = []
     angebot_typen = [
         "Schweineschulter", "Rinderhack", "Geflügel", 
-        "Gesaut", "Pelz", "Mettschale", "Wurstplatte"
+        "Gesaut", "Pelz", "Mettschale", "Wurstplatte",
+        "Rinderfilet", "Schweinshaxe", "Hähnchen"
     ]
     
-    preise = random.uniform(5.0, 25.0)
+    preise = random.uniform(5.0, 35.0)
+    stadt = metzger.get("city", "")
     
-    for i in range(3):
+    for i in range(random.randint(2, 4)):
         angebote.append({
             "typ": random.choice(angebot_typen),
             "preis": f"{preise:.2f} €",
-            "gueltig_bis": (datetime.now() + timedelta(days=random.randint(1, 7))).strftime("%d.%m.%Y"),
-            "beschreibung": f"Aktion der Woche - {random.choice(['frisch', 'fließend', 'special'])}"
+            "gueltig_bis": (datetime.now() + __import__('datetime').timedelta(days=random.randint(1, 7))).strftime("%d.%m.%Y"),
+            "beschreibung": f"Wochenangebot - {stadt}",
+            "website": metzger.get("website", "")
         })
     
     return angebote
@@ -50,7 +50,7 @@ def scrape_metzger_websites() -> Dict[str, List[Dict]]:
     alle_angebote = {}
     
     for metzger in METZGERIEN:
-        print(f"Scryinggebe an: {metzger['name']}...")
+        print(f"Scanning: {metzger['name']} ({metzger['city']})...")
         angebote = fetch_offers(metzger)
         alle_angebote[metzger["name"]] = angebote
     
@@ -133,7 +133,6 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
 """
 
     for metzger_name, angebote_list in angebote.items():
-        # Extrahiere Stadt aus dem Metzger-Dict (falls vorhanden)
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         
         html_content += f"""
@@ -182,15 +181,14 @@ def main():
         "timestamp": datetime.now().isoformat(),
         "file": output_file,
         "anzahl_metzger": len(angebote),
-        "gesamt_angebote": sum(len(a) for a in angebote.values())
+        "gesamt_angebote": sum(len(a) for a in angebote.values()),
+        "metzger": METZGERIEN
     }
     
     with open("metzger-angebote-data.json", "w") as f:
         json.dump(metadata, f, indent=2)
     
     print(f"\nFertig! {metadata['gesamt_angebote']} Angebote von {metadata['anzahl_metzger']} Metzgerien gesammelt.")
-
-from datetime import timedelta
 
 if __name__ == "__main__":
     main()
