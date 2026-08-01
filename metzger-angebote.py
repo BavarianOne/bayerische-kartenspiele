@@ -108,7 +108,7 @@ def fetch_brandl_offers() -> List[Dict]:
     return angebote
 
 def fetch_ruemenapf_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Rümenapf (HTML-Tabellen)"""
+    """Holt Angebote von Metzgerei Rümenapf (HTML-Tabellen) - ALLE Wochen"""
     angebote = []
     
     try:
@@ -117,17 +117,21 @@ def fetch_ruemenapf_offers() -> List[Dict]:
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
         
-        # Finde das aktuellste Angebot (das letzte "Angebot v." im HTML)
+        # Finde ALLE Angebots-Abschnitte
         # Pattern: <h2>Angebot v. DD.MM.YYYY - DD.MM.YYYY</h2><table class="angebote">...</table>
         angebot_sections = re.findall(r'<h2>(Angebot v\.[^<]+)</h2>\s*<table class="angebote">(.*?)</table>', html, re.DOTALL)
         
-        if angebot_sections:
-            # Nimm das letzte (aktuellste) Angebot
-            latest_date, latest_table = angebot_sections[-1]
-            print(f"  Rümenapf: {latest_date}")
+        print(f"  Rümenapf: {len(angebot_sections)} Wochen gefunden")
+        
+        # Parse ALLE Wochen (nicht nur die letzte)
+        for date_header, table_html in angebot_sections:
+            print(f"  Rümenapf: {date_header}")
+            
+            # Extrahiere Gültigkeitsdatum
+            gueltig_bis = date_header.split('-')[-1].strip().replace('Angebot v.', '').strip()
             
             # Extrahiere Zeilen aus der Tabelle
-            rows = re.findall(r'<tr[^>]*>.*?</tr>', latest_table, re.DOTALL)
+            rows = re.findall(r'<tr[^>]*>.*?</tr>', table_html, re.DOTALL)
             for row in rows:
                 cells = re.findall(r'<td[^>]*>(.*?)</td>', row, re.DOTALL)
                 if len(cells) >= 3:
@@ -139,8 +143,8 @@ def fetch_ruemenapf_offers() -> List[Dict]:
                         angebote.append({
                             "typ": f"{name} ({gewicht})" if gewicht else name,
                             "preis": preis,
-                            "gueltig_bis": latest_date.split('-')[-1].strip().replace('Angebot v.', '').strip(),
-                            "beschreibung": "Wochenangebot - Ergolding",
+                            "gueltig_bis": gueltig_bis,
+                            "beschreibung": f"Wochenangebot - Ergolding (gültig bis {gueltig_bis})",
                             "website": "https://www.metzgerei-ruemenapf.de"
                         })
     except Exception as e:
