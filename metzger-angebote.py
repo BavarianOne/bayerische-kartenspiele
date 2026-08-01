@@ -108,7 +108,7 @@ def fetch_brandl_offers() -> List[Dict]:
     return angebote
 
 def fetch_ruemenapf_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Rümenapf (HTML-Tabellen) - ALLE Wochen"""
+    """Holt Angebote von Metzgerei Rümenapf (HTML-Tabellen) - NUR ZUKÜNFTIGE Wochen"""
     angebote = []
     
     try:
@@ -121,14 +121,33 @@ def fetch_ruemenapf_offers() -> List[Dict]:
         # Pattern: <h2>Angebot v. DD.MM.YYYY - DD.MM.YYYY</h2><table class="angebote">...</table>
         angebot_sections = re.findall(r'<h2>(Angebot v\.[^<]+)</h2>\s*<table class="angebote">(.*?)</table>', html, re.DOTALL)
         
-        print(f"  Rümenapf: {len(angebot_sections)} Wochen gefunden")
+        print(f"  Rümenapf: {len(angebot_sections)} Wochen insgesamt gefunden")
         
-        # Parse ALLE Wochen (nicht nur die letzte)
+        # Heute als Vergleichsdatum
+        heute = datetime.now().date()
+        
+        # Parse ALLE Wochen, aber filter vergangene
+        zukuenftige_wochen = 0
         for date_header, table_html in angebot_sections:
             print(f"  Rümenapf: {date_header}")
             
-            # Extrahiere Gültigkeitsdatum
-            gueltig_bis = date_header.split('-')[-1].strip().replace('Angebot v.', '').strip()
+            # Extrahiere Gültigkeitsdatum (Ende der Woche)
+            gueltig_bis_str = date_header.split('-')[-1].strip().replace('Angebot v.', '').strip()
+            
+            # Parse Datum für Vergleich (Format: DD.MM.YYYY)
+            try:
+                gueltig_bis = datetime.strptime(gueltig_bis_str, "%d.%m.%Y").date()
+            except ValueError:
+                print(f"  Warnung: Ungültiges Datumsformat '{gueltig_bis_str}', überspringe Woche")
+                continue
+            
+            # NUR WOCHEN DIE NOCH NICHT VORBEI SIND (gueltig_bis >= heute)
+            if gueltig_bis < heute:
+                print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis_str})")
+                continue
+            
+            zukuenftige_wochen += 1
+            print(f"  -> Nimm Woche (bis {gueltig_bis_str})")
             
             # Extrahiere Zeilen aus der Tabelle
             rows = re.findall(r'<tr[^>]*>.*?</tr>', table_html, re.DOTALL)
@@ -143,10 +162,13 @@ def fetch_ruemenapf_offers() -> List[Dict]:
                         angebote.append({
                             "typ": f"{name} ({gewicht})" if gewicht else name,
                             "preis": preis,
-                            "gueltig_bis": gueltig_bis,
-                            "beschreibung": f"Wochenangebot - Ergolding (gültig bis {gueltig_bis})",
+                            "gueltig_bis": gueltig_bis_str,
+                            "beschreibung": f"Wochenangebot - Ergolding (gültig bis {gueltig_bis_str})",
                             "website": "https://www.metzgerei-ruemenapf.de"
                         })
+        
+        print(f"  Rümenapf: {zukuenftige_wochen} zukünftige Wochen genommen")
+                
     except Exception as e:
         print(f"  Fehler bei Rümenapf: {e}")
         # Fallback basierend auf den aktuell gesehenen Daten
