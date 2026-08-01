@@ -390,6 +390,34 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
     </style>
 </head>
 <body>
+    <!-- WhatsApp Teilen Button - ganz oben -->
+    <div class="top-share-banner" style="background-color: #f0f2f5; padding: 10px; text-align: center; border-bottom: 1px solid #ddd; margin-bottom: 20px;">
+      <button onclick="shareContent()" style="background-color: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
+        📱 Inhalt auf WhatsApp teilen
+      </button>
+    </div>
+
+    <script>
+    async function shareContent() {{
+      const shareData = {{
+        title: document.title,
+        text: 'Schau dir diese Metzger-Angebote an:',
+        url: window.location.href
+      }};
+
+      if (navigator.share) {{
+        try {{
+          await navigator.share(shareData);
+        }} catch (err) {{
+          console.log('Teilen abgebrochen:', err);
+        }}
+      }} else {{
+        const fallbackUrl = "https://wa.me/?text=" + encodeURIComponent(shareData.text + ' ' + shareData.url);
+        window.open(fallbackUrl, '_blank');
+      }}
+    }}
+    </script>
+
     <h1>🥩 Metzger-Angebote aus Bayern</h1>
     <p style="text-align: center; color: #666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
     
