@@ -15,6 +15,7 @@ from typing import List, Dict
 METZGERIEN = [
     {"name": "Metzgerei Brandl", "city": "Landshut", "website": "https://www.metzgerei-brandl.de"},
     {"name": "Metzgerei Rümenapf", "city": "Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+    {"name": "Metzgerei Wasner", "city": "Landshut", "website": "https://www.metzgereiwasner.de/angebote/"},
 ]
 
 def fetch_brandl_offers() -> List[Dict]:
@@ -148,8 +149,22 @@ def fetch_offers(metzger: Dict) -> List[Dict]:
         return fetch_brandl_offers()
     elif "Rümenapf" in name or "Ruemenapf" in name:
         return fetch_ruemenapf_offers()
+    elif "Wasner" in name:
+        return fetch_wasner_offers()
     else:
         return []
+
+def fetch_wasner_offers() -> List[Dict]:
+    """Holt Angebote von Metzgerei Wasner (nur Bild-Links, daher Hinweis)"""
+    # Wasner bietet Angebote nur als JPG-Flyer an - kein strukturierter Text
+    # Wir geben einen Link-Hinweis zurück
+    return [{
+        "typ": "📸 Wochenangebote als Flyer-Bilder (KW 30/31)",
+        "preis": "",
+        "gueltig_bis": "01.08.2026",
+        "beschreibung": "Filiale Landshut: Am alten Viehmarkt 5, 84028 Landshut | Angebote nur als Bilder verfügbar - siehe Website",
+        "website": "https://www.metzgereiwasner.de/angebote/"
+    }]
 
 def scrape_metzger_websites() -> Dict[str, List[Dict]]:
     """Hauptfunktion zum Sammeln aller Angebote"""

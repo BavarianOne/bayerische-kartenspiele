@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-01T15:14:40.640930",
+  "timestamp": "2026-08-01T15:21:57.922293",
   "file": "metzger-angebote.html",
-  "anzahl_metzger": 2,
-  "gesamt_angebote": 11,
+  "anzahl_metzger": 3,
+  "gesamt_angebote": 12,
   "metzger": [
     {
       "name": "Metzgerei Brandl",
@@ -13,6 +13,11 @@
       "name": "Metzgerei R\u00fcmenapf",
       "city": "Ergolding",
       "website": "https://www.metzgerei-ruemenapf.de"
+    },
+    {
+      "name": "Metzgerei Wasner",
+      "city": "Landshut",
+      "website": "https://www.metzgereiwasner.de/angebote/"
     }
   ]
 }
