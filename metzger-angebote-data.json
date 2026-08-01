@@ -1,6 +1,18 @@
 {
-  "timestamp": "2026-08-01T10:13:30.690848",
+  "timestamp": "2026-08-01T14:09:45.198547",
   "file": "metzger-angebote.html",
-  "anzahl_metzger": 4,
-  "gesamt_angebote": 12
+  "anzahl_metzger": 2,
+  "gesamt_angebote": 5,
+  "metzger": [
+    {
+      "name": "Metzgerei Brandl",
+      "city": "Landshut",
+      "website": "https://www.metzgerei-brandl.de"
+    },
+    {
+      "name": "Metzgerei R\u00fcmenapf",
+      "city": "Ergolding",
+      "website": "https://www.metzgerei-ruemenapf.de"
+    }
+  ]
 }
