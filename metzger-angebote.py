@@ -246,7 +246,7 @@ def scrape_metzger_websites() -> Dict[str, List[Dict]]:
     alle_angebote = {}
     
     for metzger in METZGERIEN:
-        print(f"Scanning: {metzger['name']} ({metzger['city']})...")
+        print(f"Scanning: {metzger['name']} ({metzger['city']})....")
         angebote = fetch_offers(metzger)
         alle_angebote[metzger["name"]] = angebote
         print(f"  -> {len(angebote)} Angebote gefunden")
@@ -390,33 +390,70 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
     </style>
 </head>
 <body>
-    <!-- WhatsApp Teilen Button - ganz oben -->
-    <div class="top-share-banner" style="background-color: #f0f2f5; padding: 10px; text-align: center; border-bottom: 1px solid #ddd; margin-bottom: 20px;">
-      <button onclick="shareContent()" style="background-color: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
-        📱 Inhalt auf WhatsApp teilen
-      </button>
-    </div>
+    <!-- WhatsApp Teilen Buttons - ganz oben -->
+    <div class="top-share-banner" style="background-color: #f0f2f5; padding: 12px; text-align: center; border-bottom: 1px solid #ddd; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+  
+  <!-- Button 1: Nur Link -->
+  <button onclick="shareLinkOnly()" style="background-color: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+    🔗 Nur Link teilen
+  </button>
 
-    <script>
-    async function shareContent() {{
-      const shareData = {{
-        title: document.title,
-        text: 'Schau dir diese Metzger-Angebote an:',
-        url: window.location.href
-      }};
+  <!-- Button 2: Inhalt teilen -->
+  <button onclick="shareFullContent()" style="background-color: #128C7E; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+    📱 Inhalt & Angebote teilen
+  </button>
 
-      if (navigator.share) {{
-        try {{
-          await navigator.share(shareData);
-        }} catch (err) {{
-          console.log('Teilen abgebrochen:', err);
-        }}
-      }} else {{
-        const fallbackUrl = "https://wa.me/?text=" + encodeURIComponent(shareData.text + ' ' + shareData.url);
-        window.open(fallbackUrl, '_blank');
-      }}
+</div>
+
+<script>
+// Funktion 1: Nur Link teilen
+async function shareLinkOnly() {{
+  const shareData = {{
+    title: document.title,
+    text: 'Schau dir diese Seite an:',
+    url: window.location.href
+  }};
+
+  if (navigator.share) {{
+    try {{
+      await navigator.share(shareData);
+    }} catch (err) {{
+      console.log('Teilen abgebrochen:', err);
     }}
-    </script>
+  }} else {{
+    const fallbackUrl = `https://wa.me/?text=${{encodeURIComponent(shareData.text + ' ' + shareData.url)}}`;
+    window.open(fallbackUrl, '_blank');
+  }}
+}}
+
+// Funktion 2: Inhalt + Link teilen
+async function shareFullContent() {{
+  const contentElement = document.getElementById('angebote-inhalt');
+  let bodyText = "";
+  
+  if (contentElement) {{
+    bodyText = contentElement.innerText.trim();
+  }} else {{
+    bodyText = "Schau dir diese aktuellen Angebote an!";
+  }}
+
+  const fullMessage = `${{bodyText}}\n\n👉 Hier online ansehen:\n${{window.location.href}}`;
+
+  if (navigator.share) {{
+    try {{
+      await navigator.share({{
+        title: document.title,
+        text: fullMessage
+      }});
+    }} catch (err) {{
+      console.log('Teilen abgebrochen:', err);
+    }}
+  }} else {{
+    const fallbackUrl = `https://wa.me/?text=${{encodeURIComponent(fullMessage)}}`;
+    window.open(fallbackUrl, '_blank');
+  }}
+}}
+</script>
 
     <h1>🥩 Metzger-Angebote aus Bayern</h1>
     <p style="text-align: center; color: #666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
@@ -424,6 +461,9 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
     <div class="last-update">
         Letzte Aktualisierung: {timestamp}
     </div>
+
+    <!-- Container für alle Angebote (für WhatsApp Teilen) -->
+    <div id="angebote-inhalt">
 """
 
     for metzger_name, angebote_list in angebote.items():
@@ -511,6 +551,8 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
         html_content += "    </div>\n"
 
     html_content += """
+</div>
+
 </body>
 </html>
 """
