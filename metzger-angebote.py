@@ -20,7 +20,7 @@ METZGERIEN = [
 ]
 
 def fetch_brandl_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Brandl (PDF-basiert)"""
+    """Holt Angebote von Metzgerei Brandl (PDF-basiert) - ALLE zukünftigen Wochen"""
     angebote = []
     
     try:
@@ -35,51 +35,65 @@ def fetch_brandl_offers() -> List[Dict]:
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
         
-        # Finde alle PDF-Links für Angebote
+        # Finde ALLE PDF-Links für Angebote
         pdf_pattern = r'href="(/uploads/media/[^"]*angebot-vom-[^"]*\.pdf)"'
         pdf_links = re.findall(pdf_pattern, html)
         
-        # Nimm den ersten (aktuellsten) PDF-Link
-        if pdf_links:
-            pdf_url = "https://www.metzgerei-brandl.de" + pdf_links[0]
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_pdf_links = []
+        for link in pdf_links:
+            if link not in seen:
+                seen.add(link)
+                unique_pdf_links.append(link)
+        
+        print(f"  Brandl: {len(unique_pdf_links)} eindeutige PDF-Wochen gefunden")
+        
+        # Parse ALLE PDFs (jede Woche)
+        for pdf_link in unique_pdf_links:
+            pdf_url = "https://www.metzgerei-brandl.de" + pdf_link
             print(f"  Brandl PDF: {pdf_url}")
             
-            # Lade und parse PDF
-            pdf_req = urllib.request.Request(pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
-            pdf_response = urllib.request.urlopen(pdf_req, timeout=30)
-            pdf_data = pdf_response.read()
-            
-            with pdfplumber.open(io.BytesIO(pdf_data)) as pdf:
-                for page in pdf.pages:
-                    text = page.extract_text()
-                    if text:
-                        # Parse die Angebote aus dem Text
-                        # Format: "Artikel 100 g 1,59 €"
-                        lines = text.split('\n')
-                        for line in lines:
-                            line = line.strip()
-                            # Suche nach Preis-Muster: Zahl,kommaZahl €
-                            match = re.search(r'^(.+?)\s+(\d+,\d{2})\s*€', line)
-                            if match:
-                                name = match.group(1).strip()
-                                preis = match.group(2) + " €"
-                                # Entferne "100 g" oder ähnliche Gewichtsangaben am Ende des Namens
-                                name = re.sub(r'\s+\d+\s*g\s*$', '', name, flags=re.IGNORECASE)
-                                if name and len(name) > 2:
-                                    angebote.append({
-                                        "typ": name,
-                                        "preis": preis,
-                                        "gueltig_bis": "",  # Wird aus PDF-Datum extrahiert falls möglich
-                                        "beschreibung": "Wochenangebot - Landshut",
-                                        "website": "https://www.metzgerei-brandl.de"
-                                    })
-                        
-                        # Extrahiere Gültigkeitsdatum aus dem Header
-                        date_match = re.search(r'(\d{2}\.\d{2}\.\s*-\s*\d{2}\.\d{2}\.\d{2})', text)
-                        if date_match:
-                            for angebot in angebote:
-                                if not angebot.get('gueltig_bis'):
-                                    angebot['gueltig_bis'] = date_match.group(1).split('-')[-1].strip()
+            try:
+                pdf_req = urllib.request.Request(pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
+                pdf_response = urllib.request.urlopen(pdf_req, timeout=30)
+                pdf_data = pdf_response.read()
+                
+                with pdfplumber.open(io.BytesIO(pdf_data)) as pdf:
+                    # Extrahiere Gültigkeitsdatum aus dem Header (vor dem Parsen der Angebote)
+                    gueltig_bis = ""
+                    for page in pdf.pages:
+                        text = page.extract_text()
+                        if text:
+                            date_match = re.search(r'(\d{2}\.\d{2}\.\s*-\s*\d{2}\.\d{2}\.\d{2})', text)
+                            if date_match:
+                                gueltig_bis = date_match.group(1).split('-')[-1].strip()
+                                break
+                    
+                    # Jetzt parse die Angebote mit dem gefundenen Datum
+                    for page in pdf.pages:
+                        text = page.extract_text()
+                        if text:
+                            lines = text.split('\n')
+                            for line in lines:
+                                line = line.strip()
+                                match = re.search(r'^(.+?)\s+(\d+,\d{2})\s*€', line)
+                                if match:
+                                    name = match.group(1).strip()
+                                    preis = match.group(2) + " €"
+                                    name = re.sub(r'\s+\d+\s*g\s*$', '', name, flags=re.IGNORECASE)
+                                    if name and len(name) > 2:
+                                        angebote.append({
+                                            "typ": name,
+                                            "preis": preis,
+                                            "gueltig_bis": gueltig_bis,
+                                            "beschreibung": f"Wochenangebot - Landshut (gültig bis {gueltig_bis})" if gueltig_bis else "Wochenangebot - Landshut",
+                                            "website": "https://www.metzgerei-brandl.de"
+                                        })
+            except Exception as e:
+                print(f"  Fehler bei Brandl PDF {pdf_url}: {e}")
+                continue
+                
     except Exception as e:
         print(f"  Fehler bei Brandl: {e}")
         # Fallback: Mindestdaten
