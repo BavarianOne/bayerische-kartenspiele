@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-08-01T20:46:54.879207",
+  "file": "benzinpreise.html",
+  "anzahl_tankstellen": 6,
+  "standort": {
+    "lat": 48.5296,
+    "lng": 12.1616,
+    "radius": 10
+  }
+}
