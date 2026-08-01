@@ -171,15 +171,14 @@ def fetch_wasner_offers() -> List[Dict]:
 
 def fetch_tristlhof_offers() -> List[Dict]:
     """Statische Angebote für Metzgerei Tristlhof (manuell gepflegt)"""
-    # Angebote für 27.07.2026 - 01.08.2026
+    # Angebote für 03.08.2026 - 08.08.2026
     return [
-        {"typ": "Schweineschnitzel", "preis": "1,09 € / 100 g", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "Milzwurst", "preis": "1,19 € / 100 g", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "Wiener", "preis": "1,29 € / 100 g", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "Mettwurst (fein & Schinkenmett)", "preis": "1,39 € / 100 g", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "Goldsteig Emmentaler", "preis": "1,19 € / 100 g", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "🥩 Hackfleischtag (Mo): Mageres Schwein & Rind", "preis": "4,98 € / 500 g", "gueltig_bis": "01.08.2026", "beschreibung": "Aktionstag Montag - Landshut", "website": ""},
-        {"typ": "🥩 Haxentag (Sa): Frisch & kross", "preis": "0,79 € / 100 g", "gueltig_bis": "01.08.2026", "beschreibung": "Aktionstag Samstag - Landshut", "website": ""},
+        {"typ": "frische Hähnchenbrust (natur oder gewürzt)", "preis": "1,49 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "frisch und eiweißreich - Wochenangebot - Landshut", "website": ""},
+        {"typ": "Salami-Aufschnitt (gut gemischt, gut gereift)", "preis": "1,99 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Frisch aus Stadler's Wurstküche - Wochenangebot - Landshut", "website": ""},
+        {"typ": "Dicke oder Regensburger (hausgemacht, frisch vom Rauch)", "preis": "1,19 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
+        {"typ": "Leberkäse (täglich frisch)", "preis": "1,19 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
+        {"typ": "🥩 Hackfleischtag (Mo): Mageres Schwein & Rind", "preis": "4,98 € / 500 g", "gueltig_bis": "08.08.2026", "beschreibung": "Aktionstag Montag - Landshut", "website": ""},
+        {"typ": "🥩 Haxentag (Sa): Frisch & kross", "preis": "0,79 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Aktionstag Samstag - Landshut", "website": ""},
     ]
 
 def scrape_metzger_websites() -> Dict[str, List[Dict]]:
