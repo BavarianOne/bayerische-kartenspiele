@@ -467,6 +467,7 @@ async function shareFullContent() {{
 
     for metzger_name, angebote_list in angebote.items():
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
+        metzger_website = next((m.get("website", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         
         # Gruppiere Angebote nach Gültigkeitsdatum (Woche)
         wochen = {}
@@ -481,7 +482,7 @@ async function shareFullContent() {{
         
         html_content += f"""
     <div class="metzger-card">
-        <div class="metzger-name">{metzger_name}</div>
+        <div class="metzger-name">{f'<a href="{metzger_website}" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">{metzger_name}</a>' if metzger_website else metzger_name}</div>
         <div class="city">📍 {stadt}</div>
 """
 
@@ -492,16 +493,23 @@ async function shareFullContent() {{
             <div class="week-header" style="background: #8b4513;">Aktuelle Angebote</div>
             <div class="week-content">
 """
+            import re
             for angebot in angebote_list:
-                website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener" class="angebot-link">Zur Website</a>' if angebot.get('website') else ""
+                # Entferne "gültig bis XX.XX.XXXX" und "Wochenangebot - Stadt" aus der Beschreibung
+                beschreibung = angebot.get('beschreibung', '')
+                beschreibung = re.sub(r'\s*\(?gültig\s+bis\s+\d{2}\.\d{2}\.\d{2,4}\)?', '', beschreibung, flags=re.IGNORECASE).strip()
+                beschreibung = re.sub(r'Wochenangebot\s*-\s*\w+', '', beschreibung, flags=re.IGNORECASE).strip()
+                beschreibung = re.sub(r'Aktionstag\s+\w+\s*-\s*\w+', '', beschreibung, flags=re.IGNORECASE).strip()
+                beschreibung = re.sub(r'\s{2,}', ' ', beschreibung).strip()
+                beschreibung = beschreibung.strip(' -')
+                
                 html_content += f"""
             <div class="angebot">
                 <div class="angebot-header">
                     <span class="angebot-name">{angebot['typ']}</span>
                     <span class="angebot-preis">{angebot['preis']}</span>
                 </div>
-                <div class="angebot-desc">{angebot['beschreibung']}</div>
-                {f'<div>{website_link}</div>' if website_link else ''}
+                {f'<div class="angebot-desc">{beschreibung}</div>' if beschreibung else ''}
             </div>
 """
             html_content += """
@@ -528,21 +536,23 @@ async function shareFullContent() {{
             <div class="week-header" style="background: {color['border']};">{wochen_beschreibung}</div>
             <div class="week-content" style="background: {color['bg']};">
 """
+                import re
                 for angebot in wochen_angebote:
-                    # Entferne "gültig bis XX.XX.XXXX" aus der Beschreibung, da der Wochen-Header das Datum schon anzeigt
+                    # Entferne "gültig bis XX.XX.XXXX" und "Wochenangebot - Stadt" aus der Beschreibung
                     beschreibung = angebot.get('beschreibung', '')
                     beschreibung = re.sub(r'\s*\(?gültig\s+bis\s+\d{2}\.\d{2}\.\d{2,4}\)?', '', beschreibung, flags=re.IGNORECASE).strip()
+                    beschreibung = re.sub(r'Wochenangebot\s*-\s*\w+', '', beschreibung, flags=re.IGNORECASE).strip()
+                    beschreibung = re.sub(r'Aktionstag\s+\w+\s*-\s*\w+', '', beschreibung, flags=re.IGNORECASE).strip()
                     beschreibung = re.sub(r'\s{2,}', ' ', beschreibung).strip()
+                    beschreibung = beschreibung.strip(' -')
                     
-                    website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener" class="angebot-link">Zur Website</a>' if angebot.get('website') else ""
                     html_content += f"""
                 <div class="angebot">
                     <div class="angebot-header">
                         <span class="angebot-name">{angebot['typ']}</span>
                         <span class="angebot-preis">{angebot['preis']}</span>
                     </div>
-                    <div class="angebot-desc">{beschreibung}</div>
-                    {f'<div>{website_link}</div>' if website_link else ''}
+                    {f'<div class="angebot-desc">{beschreibung}</div>' if beschreibung else ''}
                 </div>
 """
                 html_content += """
