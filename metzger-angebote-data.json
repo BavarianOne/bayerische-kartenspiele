@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-01T15:30:52.206180",
+  "timestamp": "2026-08-01T15:45:49.835894",
   "file": "metzger-angebote.html",
-  "anzahl_metzger": 3,
-  "gesamt_angebote": 12,
+  "anzahl_metzger": 4,
+  "gesamt_angebote": 19,
   "metzger": [
     {
       "name": "Metzgerei Brandl",
@@ -18,6 +18,11 @@
       "name": "Metzgerei Wasner",
       "city": "Landshut",
       "website": "https://www.metzgereiwasner.de/angebote/"
+    },
+    {
+      "name": "Metzgerei Tristlhof",
+      "city": "Landshut",
+      "website": ""
     }
   ]
 }
