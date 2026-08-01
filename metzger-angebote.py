@@ -212,9 +212,19 @@ def scrape_metzger_websites() -> Dict[str, List[Dict]]:
     return alle_angebote
 
 def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-angebote.html"):
-    """Generiert eine HTML-Seite mit allen Angeboten"""
+    """Generiert eine HTML-Seite mit allen Angeboten, gruppiert nach Wochen"""
     
     timestamp = datetime.now().strftime("%d.%m.%Y %H:%M Uhr")
+    
+    # Farbpalette für Wochen-Abgrenzung
+    WEEK_COLORS = [
+        {"bg": "#fff3e0", "border": "#ff9800", "header_bg": "#ffe0b2", "header_text": "#e65100"},  # Orange
+        {"bg": "#e8f5e9", "border": "#4caf50", "header_bg": "#c8e6c9", "header_text": "#1b5e20"},  # Grün
+        {"bg": "#e3f2fd", "border": "#2196f3", "header_bg": "#bbdefb", "header_text": "#0d47a1"},  # Blau
+        {"bg": "#fce4ec", "border": "#e91e63", "header_bg": "#f8bbd0", "header_text": "#880e4f"},  # Pink
+        {"bg": "#f3e5f5", "border": "#9c27b0", "header_bg": "#e1bee7", "header_text": "#4a148c"},  # Violett
+        {"bg": "#e0f2f1", "border": "#009688", "header_bg": "#b2dfdb", "header_text": "#004d40"},  # Teal
+    ]
     
     html_content = f"""<!DOCTYPE html>
 <html lang="de">
@@ -254,33 +264,92 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
             font-style: italic;
             margin-bottom: 15px;
         }}
+        .week-section {{
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }}
+        .week-header {{
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }}
+        .week-content {{
+            padding: 15px 20px;
+        }}
         .angebot {{
             background: #fff8dc;
             border-left: 4px solid #d4af37;
-            padding: 10px 15px;
+            padding: 12px 15px;
             margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
         }}
-        .preis {{
+        .angebot:hover {{
+            transform: translateX(5px);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }}
+        .angebot-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }}
+        .angebot-name {{
             font-weight: bold;
             color: #8b4513;
+            font-size: 1.05em;
         }}
-        .gueltig {{
-            font-size: 0.9em;
+        .angebot-preis {{
+            font-weight: bold;
+            color: #d4af37;
+            font-size: 1.1em;
+            background: #8b4513;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }}
+        .angebot-desc {{
+            font-size: 0.85em;
             color: #666;
+            margin-top: 4px;
+        }}
+        .angebot-link {{
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: #8b4513;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85em;
+            transition: background 0.2s;
+        }}
+        .angebot-link:hover {{
+            background: #a0522d;
         }}
         .last-update {{
             text-align: center;
             color: #666;
             font-size: 0.9em;
-            margin-top: 20px;
-            padding-top: 10px;
+            margin-top: 30px;
+            padding-top: 15px;
             border-top: 1px solid #ddd;
+        }}
+        .empty-week {{
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
         }}
     </style>
 </head>
 <body>
     <h1>🥩 Metzger-Angebote aus Bayern</h1>
-    <p>Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
+    <p style="text-align: center; color: #666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
     
     <div class="last-update">
         Letzte Aktualisierung: {timestamp}
@@ -290,21 +359,82 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
     for metzger_name, angebote_list in angebote.items():
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         
+        # Gruppiere Angebote nach Gültigkeitsdatum (Woche)
+        wochen = {}
+        for angebot in angebote_list:
+            gueltig = angebot.get('gueltig_bis', '')
+            if gueltig not in wochen:
+                wochen[gueltig] = []
+            wochen[gueltig].append(angebot)
+        
+        # Sortiere Wochen nach Datum
+        sorted_weeks = sorted(wochen.items(), key=lambda x: x[0] if x[0] else 'zzz')
+        
         html_content += f"""
     <div class="metzger-card">
         <div class="metzger-name">{metzger_name}</div>
         <div class="city">📍 {stadt}</div>
 """
         
-        for angebot in angebote_list:
-            gueltig = f"Gültig bis: {angebot['gueltig_bis']}" if angebot.get('gueltig_bis') else ""
-            website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener">Zur Website</a>' if angebot.get('website') else ""
+        if not sorted_weeks or (len(sorted_weeks) == 1 and not sorted_weeks[0][0]):
+            # Fallback für Metzgereien ohne Wochen-Datumsangabe (z.B. Wasner)
             html_content += f"""
-        <div class="angebot">
-            <strong>{angebot['typ']}</strong> - <span class="preis">{angebot['preis']}</span><br>
-            <small class="gueltig">{gueltig}</small><br>
-            <small>{angebot['beschreibung']}</small>
-            {f'<br><small>{website_link}</small>' if website_link else ''}
+        <div class="week-section" style="border-left: 4px solid #8b4513;">
+            <div class="week-header" style="background: #8b4513;">Aktuelle Angebote</div>
+            <div class="week-content">
+"""
+            for angebot in angebote_list:
+                gueltig = f"Gültig bis: {angebot['gueltig_bis']}" if angebot.get('gueltig_bis') else ""
+                website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener" class="angebot-link">Zur Website</a>' if angebot.get('website') else ""
+                html_content += f"""
+            <div class="angebot">
+                <div class="angebot-header">
+                    <span class="angebot-name">{angebot['typ']}</span>
+                    <span class="angebot-preis">{angebot['preis']}</span>
+                </div>
+                <div class="angebot-desc">{angebot['beschreibung']}</div>
+                {f'<div>{website_link}</div>' if website_link else ''}
+            </div>
+"""
+            html_content += """
+            </div>
+        </div>
+"""
+        else:
+            # Normale Wochen-Anzeige
+            for week_idx, (gueltig_bis, wochen_angebote) in enumerate(sorted_weeks):
+                color = WEEK_COLORS[week_idx % len(WEEK_COLORS)]
+                
+                # Versuche Wochenanfang aus Beschreibung zu extrahieren
+                wochen_beschreibung = f"Woche bis {gueltig_bis}"
+                if wochen_angebote and 'beschreibung' in wochen_angebote[0]:
+                    desc = wochen_angebote[0]['beschreibung']
+                    # Suche nach Datumsbereich in Beschreibung
+                    import re
+                    date_range = re.search(r'(\d{2}\.\d{2}\.\s*-\s*\d{2}\.\d{2}\.\d{2})', desc)
+                    if date_range:
+                        wochen_beschreibung = date_range.group(1)
+                
+                html_content += f"""
+        <div class="week-section" style="border-left: 5px solid {color['border']};">
+            <div class="week-header" style="background: {color['border']};">{wochen_beschreibung}</div>
+            <div class="week-content" style="background: {color['bg']};">
+"""
+                for angebot in wochen_angebote:
+                    gueltig = f"Gültig bis: {angebot['gueltig_bis']}" if angebot.get('gueltig_bis') else ""
+                    website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener" class="angebot-link">Zur Website</a>' if angebot.get('website') else ""
+                    html_content += f"""
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">{angebot['typ']}</span>
+                        <span class="angebot-preis">{angebot['preis']}</span>
+                    </div>
+                    <div class="angebot-desc">{angebot['beschreibung']}</div>
+                    {f'<div>{website_link}</div>' if website_link else ''}
+                </div>
+"""
+                html_content += """
+            </div>
         </div>
 """
         

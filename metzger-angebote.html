@@ -36,145 +36,255 @@
             font-style: italic;
             margin-bottom: 15px;
         }
+        .week-section {
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .week-header {
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .week-content {
+            padding: 15px 20px;
+        }
         .angebot {
             background: #fff8dc;
             border-left: 4px solid #d4af37;
-            padding: 10px 15px;
+            padding: 12px 15px;
             margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .preis {
+        .angebot:hover {
+            transform: translateX(5px);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }
+        .angebot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+        .angebot-name {
             font-weight: bold;
             color: #8b4513;
+            font-size: 1.05em;
         }
-        .gueltig {
-            font-size: 0.9em;
+        .angebot-preis {
+            font-weight: bold;
+            color: #d4af37;
+            font-size: 1.1em;
+            background: #8b4513;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .angebot-desc {
+            font-size: 0.85em;
             color: #666;
+            margin-top: 4px;
+        }
+        .angebot-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: #8b4513;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85em;
+            transition: background 0.2s;
+        }
+        .angebot-link:hover {
+            background: #a0522d;
         }
         .last-update {
             text-align: center;
             color: #666;
             font-size: 0.9em;
-            margin-top: 20px;
-            padding-top: 10px;
+            margin-top: 30px;
+            padding-top: 15px;
             border-top: 1px solid #ddd;
+        }
+        .empty-week {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
     <h1>🥩 Metzger-Angebote aus Bayern</h1>
-    <p>Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
+    <p style="text-align: center; color: #666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
     
     <div class="last-update">
-        Letzte Aktualisierung: 01.08.2026 17:03 Uhr
+        Letzte Aktualisierung: 01.08.2026 17:24 Uhr
     </div>
 
     <div class="metzger-card">
         <div class="metzger-name">Metzgerei Brandl</div>
         <div class="city">📍 Landshut</div>
 
-        <div class="angebot">
-            <strong>Hackfleisch gemischt</strong> - <span class="preis">1,59 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 01.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
+        <div class="week-section" style="border-left: 5px solid #ff9800;">
+            <div class="week-header" style="background: #ff9800;">Woche bis 01.08.26</div>
+            <div class="week-content" style="background: #fff3e0;">
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Hackfleisch gemischt</span>
+                        <span class="angebot-preis">1,59 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 01.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Farmerschinken</span>
+                        <span class="angebot-preis">1,89 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 01.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Dicke</span>
+                        <span class="angebot-preis">1,39 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 01.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Polnische</span>
+                        <span class="angebot-preis">1,59 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 01.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Kochsalami</span>
+                        <span class="angebot-preis">1,59 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 01.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="angebot">
-            <strong>Farmerschinken</strong> - <span class="preis">1,89 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 01.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
+        <div class="week-section" style="border-left: 5px solid #4caf50;">
+            <div class="week-header" style="background: #4caf50;">Woche bis 08.08.26</div>
+            <div class="week-content" style="background: #e8f5e9;">
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Hochrippe</span>
+                        <span class="angebot-preis">1,75 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 08.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Geräuchertes gekocht</span>
+                        <span class="angebot-preis">1,85 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 08.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Dultwürstl</span>
+                        <span class="angebot-preis">1,29 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 08.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Regensburger</span>
+                        <span class="angebot-preis">1,49 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 08.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Presssack gemischt</span>
+                        <span class="angebot-preis">1,25 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 08.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="angebot">
-            <strong>Dicke</strong> - <span class="preis">1,39 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 01.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+        <div class="week-section" style="border-left: 5px solid #2196f3;">
+            <div class="week-header" style="background: #2196f3;">Woche bis 15.08.26</div>
+            <div class="week-content" style="background: #e3f2fd;">
 
-        <div class="angebot">
-            <strong>Polnische</strong> - <span class="preis">1,59 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 01.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Schweine-Filet</span>
+                        <span class="angebot-preis">1,69 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 15.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Kochsalami</strong> - <span class="preis">1,59 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 01.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Lachsschinken</span>
+                        <span class="angebot-preis">1,95 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 15.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Hochrippe</strong> - <span class="preis">1,75 €</span><br>
-            <small class="gueltig">Gültig bis: 08.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 08.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Schweinswürstl</span>
+                        <span class="angebot-preis">1,39 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 15.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Geräuchertes gekocht</strong> - <span class="preis">1,85 €</span><br>
-            <small class="gueltig">Gültig bis: 08.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 08.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Gelbwurst</span>
+                        <span class="angebot-preis">1,29 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 15.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Dultwürstl</strong> - <span class="preis">1,29 €</span><br>
-            <small class="gueltig">Gültig bis: 08.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 08.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Emmentaler</span>
+                        <span class="angebot-preis">1,49 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut (gültig bis 15.08.26)</div>
+                    <div><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Regensburger</strong> - <span class="preis">1,49 €</span><br>
-            <small class="gueltig">Gültig bis: 08.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 08.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Presssack gemischt</strong> - <span class="preis">1,25 €</span><br>
-            <small class="gueltig">Gültig bis: 08.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 08.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Schweine-Filet</strong> - <span class="preis">1,69 €</span><br>
-            <small class="gueltig">Gültig bis: 15.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 15.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Lachsschinken</strong> - <span class="preis">1,95 €</span><br>
-            <small class="gueltig">Gültig bis: 15.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 15.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Schweinswürstl</strong> - <span class="preis">1,39 €</span><br>
-            <small class="gueltig">Gültig bis: 15.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 15.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Gelbwurst</strong> - <span class="preis">1,29 €</span><br>
-            <small class="gueltig">Gültig bis: 15.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 15.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Emmentaler</strong> - <span class="preis">1,49 €</span><br>
-            <small class="gueltig">Gültig bis: 15.08.26</small><br>
-            <small>Wochenangebot - Landshut (gültig bis 15.08.26)</small>
-            <br><small><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Zur Website</a></small>
+            </div>
         </div>
     </div>
 
@@ -182,130 +292,187 @@
         <div class="metzger-name">Metzgerei Rümenapf</div>
         <div class="city">📍 Ergolding</div>
 
-        <div class="angebot">
-            <strong>Schweinelendchen (100 g)</strong> - <span class="preis">1,49 €</span><br>
-            <small class="gueltig">Gültig bis: 18.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 18.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
+        <div class="week-section" style="border-left: 5px solid #ff9800;">
+            <div class="week-header" style="background: #ff9800;">Woche bis 01.08.2026</div>
+            <div class="week-content" style="background: #fff3e0;">
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Halsgrat mariniert (100 g)</span>
+                        <span class="angebot-preis">1,39 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 01.08.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Pollo Fino (100 g)</span>
+                        <span class="angebot-preis">1,29 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 01.08.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Käsewürstl (100 g)</span>
+                        <span class="angebot-preis">1,45 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 01.08.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Sportsalami (100 g)</span>
+                        <span class="angebot-preis">1,99 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 01.08.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Mettwurst (100 g)</span>
+                        <span class="angebot-preis">1,09 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 01.08.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Butterkäse (100 g)</span>
+                        <span class="angebot-preis">1,45 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 01.08.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="angebot">
-            <strong>Rinderrouladen (100 g)</strong> - <span class="preis">2,49 €</span><br>
-            <small class="gueltig">Gültig bis: 18.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 18.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
+        <div class="week-section" style="border-left: 5px solid #4caf50;">
+            <div class="week-header" style="background: #4caf50;">Woche bis 18.07.2026</div>
+            <div class="week-content" style="background: #e8f5e9;">
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Schweinelendchen (100 g)</span>
+                        <span class="angebot-preis">1,49 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 18.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Rinderrouladen (100 g)</span>
+                        <span class="angebot-preis">2,49 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 18.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Dicke (100 g)</span>
+                        <span class="angebot-preis">1,29 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 18.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Pfefferrandsalami (100 g)</span>
+                        <span class="angebot-preis">1,99 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 18.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Presssack (100 g)</span>
+                        <span class="angebot-preis">1,19 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 18.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Bergkäse (100 g)</span>
+                        <span class="angebot-preis">2,25 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 18.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="angebot">
-            <strong>Dicke (100 g)</strong> - <span class="preis">1,29 €</span><br>
-            <small class="gueltig">Gültig bis: 18.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 18.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+        <div class="week-section" style="border-left: 5px solid #2196f3;">
+            <div class="week-header" style="background: #2196f3;">Woche bis 25.07.2026</div>
+            <div class="week-content" style="background: #e3f2fd;">
 
-        <div class="angebot">
-            <strong>Pfefferrandsalami (100 g)</strong> - <span class="preis">1,99 €</span><br>
-            <small class="gueltig">Gültig bis: 18.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 18.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Schweinekrustenbraten (100 g)</span>
+                        <span class="angebot-preis">1,09 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 25.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Presssack (100 g)</strong> - <span class="preis">1,19 €</span><br>
-            <small class="gueltig">Gültig bis: 18.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 18.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Hähnchenbrustfilet (100 g)</span>
+                        <span class="angebot-preis">1,59 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 25.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Bergkäse (100 g)</strong> - <span class="preis">2,25 €</span><br>
-            <small class="gueltig">Gültig bis: 18.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 18.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Hausgeräuchertes (100 g)</span>
+                        <span class="angebot-preis">1,89 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 25.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Schweinekrustenbraten (100 g)</strong> - <span class="preis">1,09 €</span><br>
-            <small class="gueltig">Gültig bis: 25.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 25.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Fränkische Bratwurst (100 g)</span>
+                        <span class="angebot-preis">1,49 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 25.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Hähnchenbrustfilet (100 g)</strong> - <span class="preis">1,59 €</span><br>
-            <small class="gueltig">Gültig bis: 25.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 25.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Champignonfleischwurst (100 g)</span>
+                        <span class="angebot-preis">1,39 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 25.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Hausgeräuchertes (100 g)</strong> - <span class="preis">1,89 €</span><br>
-            <small class="gueltig">Gültig bis: 25.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 25.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Griebenschmalz (100 g)</span>
+                        <span class="angebot-preis">0,99 €</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Ergolding (gültig bis 25.07.2026)</div>
+                    <div><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
 
-        <div class="angebot">
-            <strong>Fränkische Bratwurst (100 g)</strong> - <span class="preis">1,49 €</span><br>
-            <small class="gueltig">Gültig bis: 25.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 25.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Champignonfleischwurst (100 g)</strong> - <span class="preis">1,39 €</span><br>
-            <small class="gueltig">Gültig bis: 25.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 25.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Griebenschmalz (100 g)</strong> - <span class="preis">0,99 €</span><br>
-            <small class="gueltig">Gültig bis: 25.07.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 25.07.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Halsgrat mariniert (100 g)</strong> - <span class="preis">1,39 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 01.08.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Pollo Fino (100 g)</strong> - <span class="preis">1,29 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 01.08.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Käsewürstl (100 g)</strong> - <span class="preis">1,45 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 01.08.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Sportsalami (100 g)</strong> - <span class="preis">1,99 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 01.08.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Mettwurst (100 g)</strong> - <span class="preis">1,09 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 01.08.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
-        </div>
-
-        <div class="angebot">
-            <strong>Butterkäse (100 g)</strong> - <span class="preis">1,45 €</span><br>
-            <small class="gueltig">Gültig bis: 01.08.2026</small><br>
-            <small>Wochenangebot - Ergolding (gültig bis 01.08.2026)</small>
-            <br><small><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Zur Website</a></small>
+            </div>
         </div>
     </div>
 
@@ -313,11 +480,20 @@
         <div class="metzger-name">Metzgerei Wasner</div>
         <div class="city">📍 Landshut</div>
 
-        <div class="angebot">
-            <strong>📸 Wochenangebote als Flyer-Bilder (KW 30/31)</strong> - <span class="preis"></span><br>
-            <small class="gueltig">Gültig bis: 01.08.2026</small><br>
-            <small>Filiale Landshut: Am alten Viehmarkt 5, 84028 Landshut | Angebote nur als Bilder verfügbar - siehe Website</small>
-            <br><small><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Zur Website</a></small>
+        <div class="week-section" style="border-left: 5px solid #ff9800;">
+            <div class="week-header" style="background: #ff9800;">Woche bis 01.08.2026</div>
+            <div class="week-content" style="background: #fff3e0;">
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">📸 Wochenangebote als Flyer-Bilder (KW 30/31)</span>
+                        <span class="angebot-preis"></span>
+                    </div>
+                    <div class="angebot-desc">Filiale Landshut: Am alten Viehmarkt 5, 84028 Landshut | Angebote nur als Bilder verfügbar - siehe Website</div>
+                    <div><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener" class="angebot-link">Zur Website</a></div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -325,46 +501,65 @@
         <div class="metzger-name">Metzgerei Tristlhof</div>
         <div class="city">📍 Landshut</div>
 
-        <div class="angebot">
-            <strong>frische Hähnchenbrust (natur oder gewürzt)</strong> - <span class="preis">1,49 € / 100 g</span><br>
-            <small class="gueltig">Gültig bis: 08.08.2026</small><br>
-            <small>frisch und eiweißreich - Wochenangebot - Landshut</small>
-            
-        </div>
+        <div class="week-section" style="border-left: 5px solid #ff9800;">
+            <div class="week-header" style="background: #ff9800;">Woche bis 08.08.2026</div>
+            <div class="week-content" style="background: #fff3e0;">
 
-        <div class="angebot">
-            <strong>Salami-Aufschnitt (gut gemischt, gut gereift)</strong> - <span class="preis">1,99 € / 100 g</span><br>
-            <small class="gueltig">Gültig bis: 08.08.2026</small><br>
-            <small>Frisch aus Stadler's Wurstküche - Wochenangebot - Landshut</small>
-            
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">frische Hähnchenbrust (natur oder gewürzt)</span>
+                        <span class="angebot-preis">1,49 € / 100 g</span>
+                    </div>
+                    <div class="angebot-desc">frisch und eiweißreich - Wochenangebot - Landshut</div>
+                    
+                </div>
 
-        <div class="angebot">
-            <strong>Dicke oder Regensburger (hausgemacht, frisch vom Rauch)</strong> - <span class="preis">1,19 € / 100 g</span><br>
-            <small class="gueltig">Gültig bis: 08.08.2026</small><br>
-            <small>Wochenangebot - Landshut</small>
-            
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Salami-Aufschnitt (gut gemischt, gut gereift)</span>
+                        <span class="angebot-preis">1,99 € / 100 g</span>
+                    </div>
+                    <div class="angebot-desc">Frisch aus Stadler's Wurstküche - Wochenangebot - Landshut</div>
+                    
+                </div>
 
-        <div class="angebot">
-            <strong>Leberkäse (täglich frisch)</strong> - <span class="preis">1,19 € / 100 g</span><br>
-            <small class="gueltig">Gültig bis: 08.08.2026</small><br>
-            <small>Wochenangebot - Landshut</small>
-            
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Dicke oder Regensburger (hausgemacht, frisch vom Rauch)</span>
+                        <span class="angebot-preis">1,19 € / 100 g</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut</div>
+                    
+                </div>
 
-        <div class="angebot">
-            <strong>🥩 Hackfleischtag (Mo): Mageres Schwein & Rind</strong> - <span class="preis">4,98 € / 500 g</span><br>
-            <small class="gueltig">Gültig bis: 08.08.2026</small><br>
-            <small>Aktionstag Montag - Landshut</small>
-            
-        </div>
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">Leberkäse (täglich frisch)</span>
+                        <span class="angebot-preis">1,19 € / 100 g</span>
+                    </div>
+                    <div class="angebot-desc">Wochenangebot - Landshut</div>
+                    
+                </div>
 
-        <div class="angebot">
-            <strong>🥩 Haxentag (Sa): Frisch & kross</strong> - <span class="preis">0,79 € / 100 g</span><br>
-            <small class="gueltig">Gültig bis: 08.08.2026</small><br>
-            <small>Aktionstag Samstag - Landshut</small>
-            
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">🥩 Hackfleischtag (Mo): Mageres Schwein & Rind</span>
+                        <span class="angebot-preis">4,98 € / 500 g</span>
+                    </div>
+                    <div class="angebot-desc">Aktionstag Montag - Landshut</div>
+                    
+                </div>
+
+                <div class="angebot">
+                    <div class="angebot-header">
+                        <span class="angebot-name">🥩 Haxentag (Sa): Frisch & kross</span>
+                        <span class="angebot-preis">0,79 € / 100 g</span>
+                    </div>
+                    <div class="angebot-desc">Aktionstag Samstag - Landshut</div>
+                    
+                </div>
+
+            </div>
         </div>
     </div>
 
