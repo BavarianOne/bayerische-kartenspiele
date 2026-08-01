@@ -265,11 +265,13 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
         
         for angebot in angebote_list:
             gueltig = f"Gültig bis: {angebot['gueltig_bis']}" if angebot.get('gueltig_bis') else ""
+            website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener">Zur Website</a>' if angebot.get('website') else ""
             html_content += f"""
         <div class="angebot">
             <strong>{angebot['typ']}</strong> - <span class="preis">{angebot['preis']}</span><br>
             <small class="gueltig">{gueltig}</small><br>
             <small>{angebot['beschreibung']}</small>
+            {f'<br><small>{website_link}</small>' if website_link else ''}
         </div>
 """
         
