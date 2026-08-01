@@ -167,9 +167,8 @@ def fetch_ruemenapf_offers() -> List[Dict]:
                             "beschreibung": f"Wochenangebot - Ergolding (gültig bis {gueltig_bis_str})",
                             "website": "https://www.metzgerei-ruemenapf.de"
                         })
-        
         print(f"  Rümenapf: {zukuenftige_wochen} zukünftige Wochen genommen")
-                
+            
     except Exception as e:
         print(f"  Fehler bei Rümenapf: {e}")
         # Fallback basierend auf den aktuell gesehenen Daten
@@ -393,15 +392,15 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
     <!-- WhatsApp Teilen Buttons - ganz oben -->
     <div class="top-share-banner" style="background-color: #f0f2f5; padding: 12px; text-align: center; border-bottom: 1px solid #ddd; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
   
-  <!-- Button 1: Nur Link -->
-  <button onclick="shareLinkOnly()" style="background-color: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-    🔗 Nur Link teilen
-  </button>
+    <!-- Button 1: Nur Link -->
+    <button onclick="shareLinkOnly()" style="background-color: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+      🔗 Nur Link teilen
+    </button>
 
-  <!-- Button 2: Inhalt teilen -->
-  <button onclick="shareFullContent()" style="background-color: #128C7E; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-    📱 Inhalt & Angebote teilen
-  </button>
+    <!-- Button 2: Inhalt teilen -->
+    <button onclick="shareFullContent()" style="background-color: #128C7E; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+      📱 Inhalt & Angebote teilen
+    </button>
 
 </div>
 
@@ -485,7 +484,7 @@ async function shareFullContent() {{
         <div class="metzger-name">{metzger_name}</div>
         <div class="city">📍 {stadt}</div>
 """
-        
+
         if not sorted_weeks or (len(sorted_weeks) == 1 and not sorted_weeks[0][0]):
             # Fallback für Metzgereien ohne Wochen-Datumsangabe (z.B. Wasner)
             html_content += f"""
@@ -494,7 +493,6 @@ async function shareFullContent() {{
             <div class="week-content">
 """
             for angebot in angebote_list:
-                gueltig = f"Gültig bis: {angebot['gueltig_bis']}" if angebot.get('gueltig_bis') else ""
                 website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener" class="angebot-link">Zur Website</a>' if angebot.get('website') else ""
                 html_content += f"""
             <div class="angebot">
@@ -531,7 +529,11 @@ async function shareFullContent() {{
             <div class="week-content" style="background: {color['bg']};">
 """
                 for angebot in wochen_angebote:
-                    gueltig = f"Gültig bis: {angebot['gueltig_bis']}" if angebot.get('gueltig_bis') else ""
+                    # Entferne "gültig bis XX.XX.XXXX" aus der Beschreibung, da der Wochen-Header das Datum schon anzeigt
+                    beschreibung = angebot.get('beschreibung', '')
+                    beschreibung = re.sub(r'\s*\(?gültig\s+bis\s+\d{2}\.\d{2}\.\d{2,4}\)?', '', beschreibung, flags=re.IGNORECASE).strip()
+                    beschreibung = re.sub(r'\s{2,}', ' ', beschreibung).strip()
+                    
                     website_link = f'<a href="{angebot["website"]}" target="_blank" rel="noopener" class="angebot-link">Zur Website</a>' if angebot.get('website') else ""
                     html_content += f"""
                 <div class="angebot">
@@ -539,7 +541,7 @@ async function shareFullContent() {{
                         <span class="angebot-name">{angebot['typ']}</span>
                         <span class="angebot-preis">{angebot['preis']}</span>
                     </div>
-                    <div class="angebot-desc">{angebot['beschreibung']}</div>
+                    <div class="angebot-desc">{beschreibung}</div>
                     {f'<div>{website_link}</div>' if website_link else ''}
                 </div>
 """
