@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-01T17:39:29.819423",
+  "timestamp": "2026-08-01T18:23:13.085735",
   "file": "metzger-angebote.html",
-  "anzahl_metzger": 4,
-  "gesamt_angebote": 28,
+  "anzahl_metzger": 5,
+  "gesamt_angebote": 39,
   "metzger": [
     {
       "name": "Metzgerei Brandl",
@@ -23,6 +23,11 @@
       "name": "Metzgerei Tristlhof",
       "city": "Landshut",
       "website": ""
+    },
+    {
+      "name": "Metzgerei Hahn",
+      "city": "Eggenfelden",
+      "website": "https://metzgerei-hahn.de/Lauterbachstrasse"
     }
   ]
 }

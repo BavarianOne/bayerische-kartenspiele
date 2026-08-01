@@ -11,12 +11,13 @@ import re
 from datetime import datetime
 from typing import List, Dict
 
-# Konfiguration - Nur Metzgerien in Landshut und Ergolding
+# Konfiguration - Metzgerien in Landshut, Ergolding und Umgebung
 METZGERIEN = [
     {"name": "Metzgerei Brandl", "city": "Landshut", "website": "https://www.metzgerei-brandl.de"},
     {"name": "Metzgerei Rümenapf", "city": "Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
     {"name": "Metzgerei Wasner", "city": "Landshut", "website": "https://www.metzgereiwasner.de/angebote/"},
     {"name": "Metzgerei Tristlhof", "city": "Landshut", "website": ""},
+    {"name": "Metzgerei Hahn", "city": "Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
 ]
 
 def fetch_brandl_offers() -> List[Dict]:
@@ -183,20 +184,6 @@ def fetch_ruemenapf_offers() -> List[Dict]:
     
     return angebote
 
-def fetch_offers(metzger: Dict) -> List[Dict]:
-    """Dispatcher für den richtigen Scraper"""
-    name = metzger.get("name", "")
-    if "Brandl" in name:
-        return fetch_brandl_offers()
-    elif "Rümenapf" in name or "Ruemenapf" in name:
-        return fetch_ruemenapf_offers()
-    elif "Wasner" in name:
-        return fetch_wasner_offers()
-    elif "Tristlhof" in name:
-        return fetch_tristlhof_offers()
-    else:
-        return []
-
 def fetch_wasner_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Wasner (nur Bild-Links, daher Hinweis)"""
     # Wasner bietet Angebote nur als JPG-Flyer an - kein strukturierter Text
@@ -220,6 +207,39 @@ def fetch_tristlhof_offers() -> List[Dict]:
         {"typ": "🥩 Hackfleischtag (Mo): Mageres Schwein & Rind", "preis": "4,98 € / 500 g", "gueltig_bis": "08.08.2026", "beschreibung": "Aktionstag Montag - Landshut", "website": ""},
         {"typ": "🥩 Haxentag (Sa): Frisch & kross", "preis": "0,79 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Aktionstag Samstag - Landshut", "website": ""},
     ]
+
+def fetch_hahn_offers() -> List[Dict]:
+    """Statische Angebote für Metzgerei Hahn Eggenfelden (OCR aus Bild extrahiert)"""
+    # Angebote für KW 31/32 (extrahiert aus ANGEBOTE.png)
+    return [
+        {"typ": "Färsen-Hackfleisch", "preis": "12,00 € / kg (500g = 6,00 €)", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Frischwurst-Aufschnitt", "preis": "9,90 € / kg (500g = 4,95 €)", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Gyros-Pfanne", "preis": "10,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Lyoner-Stange", "preis": "3,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Schweinelendchen im Ganzen", "preis": "6,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Rauchfrische Wiener", "preis": "10,49 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Unsere Scharfen", "preis": "9,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Grillfleisch", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Ententeile gefroren", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Fisch gefroren", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Sauerkonserven", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+    ]
+
+def fetch_offers(metzger: Dict) -> List[Dict]:
+    """Dispatcher für den richtigen Scraper"""
+    name = metzger.get("name", "")
+    if "Brandl" in name:
+        return fetch_brandl_offers()
+    elif "Rümenapf" in name or "Ruemenapf" in name:
+        return fetch_ruemenapf_offers()
+    elif "Wasner" in name:
+        return fetch_wasner_offers()
+    elif "Tristlhof" in name:
+        return fetch_tristlhof_offers()
+    elif "Hahn" in name:
+        return fetch_hahn_offers()
+    else:
+        return []
 
 def scrape_metzger_websites() -> Dict[str, List[Dict]]:
     """Hauptfunktion zum Sammeln aller Angebote"""
