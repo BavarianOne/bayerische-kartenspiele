@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="description" content="Türme von Hanoi - Das klassische Denkspiel in 2D">
+    <title>🏗️ Türme von Hanoi 2D</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #4a90d9;
+            --primary-dark: #2563eb;
+            --secondary: #667eea;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-light: #f0f4f8;
+            --bg-dark: #1a202c;
+            --text-light: #2d3748;
+            --text-dark: #f7fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-bg-dark: rgba(45, 55, 72, 0.95);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --border-radius: 15px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-light: #1a202c;
+                --bg-dark: #2d3748;
+                --text-light: #f7fafc;
+                --text-dark: #e2e8f0;
+                --card-bg: rgba(45, 55, 72, 0.95);
+                --card-bg-dark: rgba(26, 32, 44, 0.95);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 1.2rem; }
+
+        .back-button, .info-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        .back-button { left: 10px; }
+        .info-button { right: 10px; font-size: 1rem; }
+        .back-button:active, .info-button:active { 
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .main-content {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0f4f8 100%);
+            overflow: hidden;
+        }
+
+        #gameCanvas { display: block; width: 100%; height: 100%; }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .game-info {
+            position: absolute;
+            top: 10px; left: 10px; right: 10px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            pointer-events: auto;
+            z-index: 20;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .info-item { text-align: center; min-width: 80px; font-size: 0.85rem; }
+        .info-label { font-size: 0.75rem; color: var(--text-light); opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-value { font-size: 1rem; font-weight: 700; color: var(--primary); }
+
+        .difficulty-selector {
+            position: absolute;
+            bottom: 70px; left: 10px; right: 10px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            box-shadow: var(--shadow);
+            pointer-events: auto;
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .difficulty-selector label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 5px; width: 100%; text-align: center; }
+        .difficulty-btn {
+            padding: 6px 10px; border: none; border-radius: 8px;
+            background: var(--primary); color: white; cursor: pointer;
+            font-weight: 600; transition: all 0.2s; font-size: 0.8rem;
+            flex: 1; min-width: 60px;
+        }
+        .difficulty-btn:active { background: var(--primary-dark); transform: scale(0.95); }
+        .difficulty-btn.active { background: var(--success); transform: scale(1.05); }
+
+        .controls {
+            position: absolute;
+            bottom: 10px; left: 10px; right: 10px;
+            display: flex; gap: 10px;
+            pointer-events: auto; flex-wrap: wrap; justify-content: center; z-index: 20;
+        }
+
+        .btn {
+            padding: 10px 16px; border: none; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; touch-action: manipulation;
+            background: var(--card-bg); color: var(--text-light);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); min-width: 100px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
+        .btn-secondary { background: var(--bg-dark); color: var(--text-dark); }
+        .btn-secondary:active { background: var(--bg-light); transform: scale(0.98); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:active { background: #059669; transform: scale(0.98); }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .modal.visible { display: flex; }
+        .modal-content {
+            background: var(--card-bg); border-radius: var(--border-radius);
+            padding: 25px; text-align: center; max-width: 90%; width: 350px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal h2 { color: var(--success); margin-bottom: 15px; font-size: 1.4rem; }
+        .modal p { color: var(--text-light); margin-bottom: 20px; line-height: 1.5; font-size: 0.95rem; }
+        .modal-stats { background: rgba(16, 185, 129, 0.1); border-radius: 10px; padding: 12px; margin-bottom: 20px; }
+        .modal-stats div { margin: 5px 0; color: var(--text-light); font-size: 0.9rem; }
+        .modal-stats strong { color: var(--success); }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        .modal-buttons .btn { padding: 10px 20px; font-size: 0.9rem; }
+
+        .instructions-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .instructions-modal.visible { display: flex; }
+        .instructions-content {
+            background: var(--card-bg); border-radius: var(--border-radius);
+            padding: 20px; max-width: 90%; width: 350px; max-height: 80vh;
+            overflow-y: auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        .instructions-content h2 { color: var(--primary); margin-bottom: 15px; font-size: 1.3rem; }
+        .instructions-content h3 { color: var(--text-light); margin: 12px 0 8px; font-size: 1rem; }
+        .instructions-content p, .instructions-content li { color: var(--text-light); line-height: 1.5; margin-bottom: 8px; font-size: 0.9rem; }
+        .instructions-content ul { padding-left: 18px; }
+        .close-instructions { margin-top: 15px; text-align: center; }
+
+        .loading {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32px; height: 32px;
+            border: 3px solid rgba(74, 144, 217, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: var(--bg-dark); color: var(--text-dark); }
+            .game-info, .controls .btn, .difficulty-selector, .modal-content, .instructions-content {
+                background: var(--card-bg-dark);
+            }
+            .btn-secondary { background: var(--bg-light); color: var(--text-light); }
+        }
+
+        @media (max-width: 768px) {
+            .header { padding: 10px 12px; font-size: 1.1rem; }
+            .header h1 { font-size: 1.1rem; }
+            .game-info { top: 8px; padding: 10px; gap: 8px; }
+            .info-item { min-width: 70px; }
+            .info-label { font-size: 0.7rem; }
+            .info-value { font-size: 0.9rem; }
+            .difficulty-selector { bottom: 65px; padding: 8px; gap: 6px; }
+            .difficulty-btn { padding: 5px 8px; font-size: 0.75rem; min-width: 50px; }
+            .controls { bottom: 8px; gap: 8px; }
+            .btn { padding: 8px 12px; font-size: 0.85rem; min-width: 80px; }
+        }
+
+        @media (min-width: 1025px) {
+            .header { padding: 15px 20px; font-size: 1.4rem; }
+            .header h1 { font-size: 1.4rem; }
+            .game-info { top: 20px; padding: 15px; }
+            .info-item { min-width: 100px; }
+            .difficulty-selector { bottom: 20px; right: 20px; left: auto; width: auto; }
+            .difficulty-btn { padding: 8px 16px; font-size: 0.9rem; }
+            .controls { bottom: 20px; left: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <button class="back-button" onclick="goBack()">←</button>
+            <h1>🏗️ Türme von Hanoi</h1>
+            <button class="info-button" onclick="showInstructions()">ℹ️</button>
+        </header>
+
+        <main class="main-content">
+            <div class="game-container">
+                <canvas id="gameCanvas"></canvas>
+                <div class="loading" id="loading"></div>
+            </div>
+
+            <div class="ui-overlay">
+                <div class="game-info">
+                    <div class="info-item">
+                        <div class="info-label">Züge</div>
+                        <div class="info-value" id="moveCount">0</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Zeit</div>
+                        <div class="info-value" id="timeDisplay">00:00</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Scheiben</div>
+                        <div class="info-value" id="diskCount">3</div>
+                    </div>
+                </div>
+
+                <div class="difficulty-selector">
+                    <label>Schwierigkeit:</label>
+                    <button class="difficulty-btn active" onclick="setDifficulty(3)">3</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(4)">4</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(5)">5</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(6)">6</button>
+                    <button class="difficulty-btn" onclick="setDifficulty(8)">8</button>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="resetGame()">Neu</button>
+                    <button class="btn btn-secondary" onclick="undoMove()">↩️</button>
+                    <button class="btn btn-secondary" onclick="solveStep()">💡</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2>🎉 Glückwunsch!</h2>
+            <p>Du hast die Türme von Hanoi gelöst!</p>
+            <div class="modal-stats">
+                <div><strong>Züge:</strong> <span id="winMoves">0</span></div>
+                <div><strong>Zeit:</strong> <span id="winTime">00:00</span></div>
+                <div><strong>Optimal:</strong> <span id="minMoves">7</span></div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="resetGame()">Neu</button>
+                <button class="btn btn-secondary" onclick="closeWinModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div class="instructions-modal" id="instructionsModal">
+        <div class="instructions-content">
+            <h2>🏗️ Türme von Hanoi</h2>
+            <h3>🎯 Ziel</h3>
+            <p>Bewege alle Scheiben von Turm <strong>A</strong> zu Turm <strong>C</strong>.</p>
+            <h3>📜 Regeln</h3>
+            <ul>
+                <li>Nur <strong>eine Scheibe</strong> auf einmal bewegen</li>
+                <li>Eine Scheibe darf nur auf eine <strong>größere</strong> gelegt werden</li>
+                <li>Turm <strong>B</strong> ist der Hilfsturm</li>
+            </ul>
+            <h3>🎮 Steuerung</h3>
+            <ul>
+                <li><strong>Tap/Klick:</strong> Wähle Turm A, dann Turm B oder C</li>
+                <li><strong>↩️:</strong> Rückgängig machen</li>
+                <li><strong>💡:</strong> Tipp anzeigen</li>
+                <li><strong>Neu:</strong> Spiel zurücksetzen</li>
+            </ul>
+            <h3>🧠 Tipp</h3>
+            <p>Bewege immer die <strong>kleinste Scheibe</strong> im Zyklus A→B→C→A...</p>
+            <div class="close-instructions">
+                <button class="btn btn-primary" onclick="closeInstructions()">Verstanden!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GAME STATE
+        // ============================================
+        let canvas, ctx;
+        let towers = [[], [], []];  // Each tower is an array of disk sizes
+        let selectedTower = null;
+        let moveCount = 0;
+        let diskCount = 3;
+        let gameStartTime = null;
+        let timerInterval = null;
+        let moveHistory = [];
+        let isAnimating = false;
+        let animatingDisk = null;
+        let animationStart = 0;
+        let animationDuration = 300; // ms
+
+        // Colors for disks (top to bottom = small to large)
+        const diskColors = [
+            '#ff6b6b', // Rot
+            '#4ecdc4', // Türkis
+            '#45b7d1', // Blau
+            '#f9ca24', // Gelb
+            '#6c5ce7', // Lila
+            '#a0e7e5', // Hell Türkis
+            '#fdcb6e', // Orange
+            '#636e72'  // Dunkel Grau
+        ];
+
+        const towerLabels = ['A', 'B', 'C'];
+        const towerX = []; // Will be set on resize
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Touch/click handling
+            canvas.addEventListener('click', handleClick);
+            canvas.addEventListener('touchstart', handleTouch, { passive: false });
+            
+            resetGame();
+            
+            // Start game loop
+            animate();
+            
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Calculate tower X positions (3 equal columns)
+            const width = canvas.width;
+            towerX[0] = width * 1/6;
+            towerX[1] = width * 3/6;
+            towerX[2] = width * 5/6;
+        }
+
+        // ============================================
+        // GAME LOGIC
+        // ============================================
+        function resetGame() {
+            towers = [[], [], []];
+            moveCount = 0;
+            moveHistory = [];
+            selectedTower = null;
+            isAnimating = false;
+            animatingDisk = null;
+            
+            startTimer();
+            
+            // Create disks on first tower (largest at bottom)
+            for (let i = diskCount - 1; i >= 0; i--) {
+                towers[0].push(i);
+            }
+            
+            updateUI();
+            closeWinModal();
+        }
+
+        function setDifficulty(count) {
+            diskCount = count;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            resetGame();
+        }
+
+        function updateUI() {
+            document.getElementById('moveCount').textContent = moveCount;
+            document.getElementById('diskCount').textContent = diskCount;
+        }
+
+        function startTimer() {
+            gameStartTime = Date.now();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeDisplay').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function getTimeString() {
+            const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function handleClick(e) {
+            if (isAnimating) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            handleTowerSelect(x);
+        }
+
+        function handleTouch(e) {
+            if (isAnimating) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.touches[0].clientX - rect.left;
+            handleTowerSelect(x);
+        }
+
+        function handleTowerSelect(x) {
+            // Determine which tower was clicked
+            const width = canvas.width;
+            const towerWidth = width / 3;
+            let towerId = Math.floor(x / towerWidth);
+            towerId = Math.max(0, Math.min(2, towerId));
+            
+            // If no tower selected, select this one (if it has disks)
+            if (selectedTower === null) {
+                if (towers[towerId].length > 0) {
+                    selectedTower = towerId;
+                }
+            }
+            // If different tower selected, try to move
+            else if (selectedTower !== towerId) {
+                if (isValidMove(selectedTower, towerId)) {
+                    moveDisk(selectedTower, towerId);
+                }
+                selectedTower = null;
+            }
+            // Same tower clicked twice = deselect
+            else {
+                selectedTower = null;
+            }
+        }
+
+        function isValidMove(from, to) {
+            if (towers[from].length === 0) return false;
+            if (towers[to].length === 0) return true;
+            // Can only place smaller disk on larger disk
+            return towers[from][towers[from].length - 1] < towers[to][towers[to].length - 1];
+        }
+
+        function moveDisk(from, to) {
+            const disk = towers[from].pop();
+            towers[to].push(disk);
+            
+            moveHistory.push({ disk, from, to });
+            moveCount++;
+            updateUI();
+            
+            // Start animation
+            animatingDisk = { disk, from, to, startTime: Date.now() };
+            isAnimating = true;
+            
+            checkWinCondition();
+        }
+
+        function undoMove() {
+            if (isAnimating || moveHistory.length === 0) return;
+            
+            const lastMove = moveHistory.pop();
+            // Reverse the move
+            towers[lastMove.to].pop();
+            towers[lastMove.from].push(lastMove.disk);
+            
+            moveCount -= 2; // Will be incremented by 1 in updateUI
+            updateUI();
+        }
+
+        function checkWinCondition() {
+            if (towers[2].length === diskCount) {
+                setTimeout(() => showWinModal(), 500);
+            }
+        }
+
+        function showWinModal() {
+            const minMoves = Math.pow(2, diskCount) - 1;
+            document.getElementById('winMoves').textContent = moveCount;
+            document.getElementById('winTime').textContent = getTimeString();
+            document.getElementById('minMoves').textContent = minMoves;
+            document.getElementById('winModal').classList.add('visible');
+            
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        }
+
+        function closeWinModal() {
+            document.getElementById('winModal').classList.remove('visible');
+        }
+
+        function showInstructions() {
+            document.getElementById('instructionsModal').classList.add('visible');
+        }
+
+        function closeInstructions() {
+            document.getElementById('instructionsModal').classList.remove('visible');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // ============================================
+        // SOLVER (for hint system)
+        // ============================================
+        function solveStep() {
+            if (isAnimating) return;
+            
+            const move = findOptimalMove();
+            if (move) {
+                selectedTower = move.from;
+                // Visual feedback - briefly highlight the source tower
+                setTimeout(() => {
+                    if (isValidMove(move.from, move.to)) {
+                        moveDisk(move.from, move.to);
+                    }
+                }, 300);
+            }
+        }
+
+        function findOptimalMove() {
+            // Simple optimal solver for Tower of Hanoi
+            // Find the smallest movable disk that makes progress
+            let bestMove = null;
+            let bestDiskSize = Infinity;
+            
+            for (let i = 0; i < 3; i++) {
+                if (towers[i].length === 0) continue;
+                const diskSize = towers[i][towers[i].length - 1];
+                
+                if (diskSize < bestDiskSize) {
+                    for (let j = 0; j < 3; j++) {
+                        if (i === j) continue;
+                        if (towers[j].length === 0 || diskSize < towers[j][towers[j].length - 1]) {
+                            // Prefer moves that don't undo previous move
+                            if (moveHistory.length === 0 || 
+                                !(moveHistory[moveHistory.length - 1].from === j && moveHistory[moveHistory.length - 1].to === i)) {
+                                bestDiskSize = diskSize;
+                                bestMove = { from: i, to: j };
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return bestMove;
+        }
+
+        // ============================================
+        // RENDERING
+        // ============================================
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update animation
+            if (isAnimating && animatingDisk) {
+                const elapsed = Date.now() - animatingDisk.startTime;
+                const progress = Math.min(elapsed / animationDuration, 1);
+                
+                if (progress >= 1) {
+                    isAnimating = false;
+                    animatingDisk = null;
+                }
+            }
+            
+            render();
+        }
+
+        function render() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Clear
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#e0f2fe');
+            gradient.addColorStop(1, '#f0f4f8');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            // Base line
+            const baseY = height - 40;
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(20, baseY, width - 40, 20);
+            
+            // Tower base height
+            const towerBaseY = baseY;
+            const towerHeight = Math.min(height * 0.6, 300);
+            
+            // Draw towers
+            for (let i = 0; i < 3; i++) {
+                const x = towerX[i];
+                
+                // Tower pole
+                ctx.fillStyle = '#374151';
+                const poleWidth = 8;
+                ctx.fillRect(x - poleWidth/2, towerBaseY - towerHeight, poleWidth, towerHeight);
+                
+                // Tower label
+                ctx.fillStyle = '#374151';
+                ctx.font = 'bold 18px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(towerLabels[i], x, baseY + 30);
+                
+                // Highlight selected tower
+                if (selectedTower === i) {
+                    ctx.fillStyle = 'rgba(74, 144, 217, 0.2)';
+                    ctx.fillRect(x - width/6, towerBaseY - towerHeight, width/3, towerHeight + 20);
+                    ctx.strokeStyle = '#4a90d9';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x - width/6 + 2, towerBaseY - towerHeight + 2, width/3 - 4, towerHeight + 16);
+                }
+                
+                // Draw disks on this tower
+                const disksOnTower = towers[i];
+                for (let j = 0; j < disksOnTower.length; j++) {
+                    const diskSize = disksOnTower[j];
+                    // Check if this disk is animating
+                    if (isAnimating && animatingDisk && animatingDisk.disk === diskSize && animatingDisk.from === i) {
+                        continue; // Skip - will draw at animated position
+                    }
+                    if (isAnimating && animatingDisk && animatingDisk.disk === diskSize && animatingDisk.to === i) {
+                        continue; // Skip - will draw at animated position
+                    }
+                    drawDisk(x, towerBaseY, diskSize, j, disksOnTower.length);
+                }
+            }
+            
+            // Draw animating disk
+            if (isAnimating && animatingDisk) {
+                const progress = Math.min((Date.now() - animatingDisk.startTime) / animationDuration, 1);
+                const fromX = towerX[animatingDisk.from];
+                const toX = towerX[animatingDisk.to];
+                
+                // Animation path: up, across, down
+                let x, y;
+                if (progress < 0.3) {
+                    // Move up
+                    const t = progress / 0.3;
+                    x = fromX;
+                    y = towerBaseY - (towers[animatingDisk.from].length + 1) * 22 - (towerHeight * 0.3) * t;
+                } else if (progress < 0.7) {
+                    // Move across
+                    const t = (progress - 0.3) / 0.4;
+                    x = fromX + (toX - fromX) * t;
+                    y = towerBaseY - (towers[animatingDisk.from].length + 1) * 22 - towerHeight * 0.3;
+                } else {
+                    // Move down
+                    const t = (progress - 0.7) / 0.3;
+                    x = toX;
+                    const targetStackHeight = towers[animatingDisk.to].length;
+                    y = towerBaseY - targetStackHeight * 22 - (towerHeight * 0.3) * (1 - t);
+                }
+                
+                drawDisk(x, towerBaseY, animatingDisk.disk, 0, 1, true, y);
+            }
+        }
+
+        function drawDisk(cx, baseY, diskSize, index, totalDisks, isAnimating = false, animY = null) {
+            // Disk dimensions
+            const maxRadius = Math.min(canvas.width, canvas.height) * 0.12;
+            const minRadius = maxRadius * 0.3;
+            const radius = maxRadius - (diskSize / (diskCount - 1 || 1)) * (maxRadius - minRadius);
+            const diskHeight = 20;
+            const gap = 2;
+            
+            // Y position
+            let y;
+            if (isAnimating && animY !== null) {
+                y = animY;
+            } else {
+                y = baseY - (totalDisks - index) * (diskHeight + gap) - diskHeight/2;
+            }
+            
+            // Disk color
+            ctx.fillStyle = diskColors[diskSize % diskColors.length];
+            
+            // Draw disk body (rounded rectangle)
+            const x = cx - radius;
+            const w = radius * 2;
+            const h = diskHeight;
+            const r = 8;
+            
+            ctx.beginPath();
+            ctx.moveTo(x + r, y - h/2);
+            ctx.lineTo(x + w - r, y - h/2);
+            ctx.quadraticCurveTo(x + w, y - h/2, x + w, y - h/2 + r);
+            ctx.lineTo(x + w, y + h/2 - r);
+            ctx.quadraticCurveTo(x + w, y + h/2, x + w - r, y + h/2);
+            ctx.lineTo(x + r, y + h/2);
+            ctx.quadraticCurveTo(x, y + h/2, x, y + h/2 - r);
+            ctx.lineTo(x, y - h/2 + r);
+            ctx.quadraticCurveTo(x, y - h/2, x + r, y - h/2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw disk edge/highlight
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Darker bottom edge
+            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath();
+            ctx.moveTo(x, y + h/2);
+            ctx.lineTo(x + w, y + h/2);
+            ctx.stroke();
+            
+            // Size number in center
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText((diskSize + 1).toString(), cx, y);
+        }
+
+        // ============================================
+        // START
+        // ============================================
+        init();
+    </script>
+</body>
+</html>
