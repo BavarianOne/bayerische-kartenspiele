@@ -512,10 +512,12 @@
                     const value = grid[r][c];
                     const tile = document.createElement('div');
                     tile.className = 'tile';
-                    tile.dataset.value = value;
                     
                     if (value === 0) {
                         tile.classList.add('empty');
+                        // Don't set data-value for empty tiles to avoid "0" flash
+                    } else {
+                        tile.dataset.value = value;
                     }
                     
                     gridEl.appendChild(tile);
