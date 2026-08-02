@@ -51,22 +51,23 @@
             flex-direction: column;
             height: 100vh;
             width: 100vw;
-            position: relative;
         }
 
+        /* Header - fixed height */
         .header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 12px 15px;
+            padding: 10px 12px;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             position: relative;
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
-        .header h1 { margin: 0; font-size: 1.2rem; }
+        .header h1 { margin: 0; font-size: 1.1rem; }
 
         .back-button, .info-button {
             position: absolute;
@@ -78,100 +79,103 @@
             width: 36px;
             height: 36px;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.2s;
             touch-action: manipulation;
         }
-        .back-button { left: 10px; }
-        .info-button { right: 10px; font-size: 1rem; }
+        .back-button { left: 8px; }
+        .info-button { right: 8px; font-size: 1rem; }
         .back-button:active, .info-button:active { 
             background: rgba(255, 255, 255, 0.4);
             transform: translateY(-50%) scale(0.95);
         }
 
+        /* Main Content - fills remaining space */
         .main-content {
             flex: 1;
-            position: relative;
             display: flex;
             flex-direction: column;
-        }
-
-        .game-container {
-            flex: 1;
-            position: relative;
             background: linear-gradient(180deg, #e0f2fe 0%, #f0f4f8 100%);
-            overflow: hidden;
+            min-height: 0; /* critical for flex child overflow */
         }
 
-        #gameCanvas { display: block; width: 100%; height: 100%; }
-
-        .ui-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            pointer-events: none;
-            z-index: 10;
-        }
-
+        /* Game Info Bar - top, fixed height */
         .game-info {
-            position: absolute;
-            top: 10px; left: 10px; right: 10px;
             background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 12px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            padding: 8px 12px;
             box-shadow: var(--shadow);
-            pointer-events: auto;
-            z-index: 20;
             display: flex;
             justify-content: space-around;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 6px;
+            flex-shrink: 0;
         }
 
-        .info-item { text-align: center; min-width: 80px; font-size: 0.85rem; }
-        .info-label { font-size: 0.75rem; color: var(--text-light); opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
-        .info-value { font-size: 1rem; font-weight: 700; color: var(--primary); }
+        .info-item { text-align: center; min-width: 70px; font-size: 0.8rem; }
+        .info-label { font-size: 0.65rem; color: var(--text-light); opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-value { font-size: 0.95rem; font-weight: 700; color: var(--primary); }
 
+        /* Game Area - fills remaining space */
+        .game-area {
+            flex: 1;
+            position: relative;
+            min-height: 0; /* critical for flex child overflow */
+            overflow: hidden;
+        }
+
+        #gameCanvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+        }
+
+        /* Bottom Controls Container - fixed height */
+        .bottom-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px 10px 10px;
+            flex-shrink: 0;
+        }
+
+        /* Difficulty Selector */
         .difficulty-selector {
-            position: absolute;
-            bottom: 70px; left: 10px; right: 10px;
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            padding: 10px;
+            padding: 8px;
             box-shadow: var(--shadow);
-            pointer-events: auto;
-            z-index: 20;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             flex-wrap: wrap;
             justify-content: center;
         }
 
-        .difficulty-selector label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 5px; width: 100%; text-align: center; }
+        .difficulty-selector label { font-size: 0.8rem; color: var(--text-light); margin-bottom: 4px; width: 100%; text-align: center; }
         .difficulty-btn {
-            padding: 6px 10px; border: none; border-radius: 8px;
+            padding: 5px 8px; border: none; border-radius: 8px;
             background: var(--primary); color: white; cursor: pointer;
-            font-weight: 600; transition: all 0.2s; font-size: 0.8rem;
-            flex: 1; min-width: 60px;
+            font-weight: 600; transition: all 0.2s; font-size: 0.75rem;
+            flex: 1; min-width: 50px;
         }
         .difficulty-btn:active { background: var(--primary-dark); transform: scale(0.95); }
         .difficulty-btn.active { background: var(--success); transform: scale(1.05); }
 
+        /* Action Buttons */
         .controls {
-            position: absolute;
-            bottom: 10px; left: 10px; right: 10px;
-            display: flex; gap: 10px;
-            pointer-events: auto; flex-wrap: wrap; justify-content: center; z-index: 20;
+            display: flex; gap: 8px;
+            flex-wrap: wrap; justify-content: center;
         }
 
         .btn {
-            padding: 10px 16px; border: none; border-radius: 10px;
-            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            padding: 10px 14px; border: none; border-radius: 10px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
             transition: all 0.2s; touch-action: manipulation;
             background: var(--card-bg); color: var(--text-light);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); min-width: 100px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); min-width: 90px;
         }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
@@ -180,45 +184,50 @@
         .btn-success { background: var(--success); color: white; }
         .btn-success:active { background: #059669; transform: scale(0.98); }
 
+        /* Modals */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
             display: none; justify-content: center; align-items: center;
             z-index: 1000;
+            padding: 20px;
         }
         .modal.visible { display: flex; }
         .modal-content {
             background: var(--card-bg); border-radius: var(--border-radius);
-            padding: 25px; text-align: center; max-width: 90%; width: 350px;
+            padding: 20px; text-align: center; max-width: 90%; width: 320px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             animation: modalIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         @keyframes modalIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal h2 { color: var(--success); margin-bottom: 15px; font-size: 1.4rem; }
-        .modal p { color: var(--text-light); margin-bottom: 20px; line-height: 1.5; font-size: 0.95rem; }
-        .modal-stats { background: rgba(16, 185, 129, 0.1); border-radius: 10px; padding: 12px; margin-bottom: 20px; }
-        .modal-stats div { margin: 5px 0; color: var(--text-light); font-size: 0.9rem; }
+        .modal h2 { color: var(--success); margin-bottom: 12px; font-size: 1.3rem; }
+        .modal p { color: var(--text-light); margin-bottom: 16px; line-height: 1.5; font-size: 0.9rem; }
+        .modal-stats { background: rgba(16, 185, 129, 0.1); border-radius: 10px; padding: 10px; margin-bottom: 16px; }
+        .modal-stats div { margin: 4px 0; color: var(--text-light); font-size: 0.85rem; }
         .modal-stats strong { color: var(--success); }
-        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
-        .modal-buttons .btn { padding: 10px 20px; font-size: 0.9rem; }
+        .modal-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .modal-buttons .btn { padding: 8px 16px; font-size: 0.85rem; min-width: 80px; }
 
         .instructions-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
             display: none; justify-content: center; align-items: center;
             z-index: 1000;
+            padding: 20px;
         }
         .instructions-modal.visible { display: flex; }
         .instructions-content {
             background: var(--card-bg); border-radius: var(--border-radius);
-            padding: 20px; max-width: 90%; width: 350px; max-height: 80vh;
+            padding: 16px; max-width: 90%; width: 320px; max-height: 85vh;
             overflow-y: auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
-        .instructions-content h2 { color: var(--primary); margin-bottom: 15px; font-size: 1.3rem; }
-        .instructions-content h3 { color: var(--text-light); margin: 12px 0 8px; font-size: 1rem; }
-        .instructions-content p, .instructions-content li { color: var(--text-light); line-height: 1.5; margin-bottom: 8px; font-size: 0.9rem; }
-        .instructions-content ul { padding-left: 18px; }
-        .close-instructions { margin-top: 15px; text-align: center; }
+        .instructions-content h2 { color: var(--primary); margin-bottom: 12px; font-size: 1.2rem; }
+        .instructions-content h3 { color: var(--text-light); margin: 10px 0 6px; font-size: 0.95rem; }
+        .instructions-content p, .instructions-content li { color: var(--text-light); line-height: 1.5; margin-bottom: 6px; font-size: 0.85rem; }
+        .instructions-content ul { padding-left: 16px; }
+        .close-instructions { margin-top: 12px; text-align: center; }
 
         .loading {
             position: absolute; top: 50%; left: 50%;
@@ -228,38 +237,37 @@
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            z-index: 5;
         }
         @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
         @media (prefers-color-scheme: dark) {
             body { background: var(--bg-dark); color: var(--text-dark); }
-            .game-info, .controls .btn, .difficulty-selector, .modal-content, .instructions-content {
+            .game-info, .difficulty-selector, .controls .btn, .modal-content, .instructions-content {
                 background: var(--card-bg-dark);
             }
             .btn-secondary { background: var(--bg-light); color: var(--text-light); }
         }
 
-        @media (max-width: 768px) {
-            .header { padding: 10px 12px; font-size: 1.1rem; }
-            .header h1 { font-size: 1.1rem; }
-            .game-info { top: 8px; padding: 10px; gap: 8px; }
-            .info-item { min-width: 70px; }
+        /* Tablet/Desktop adjustments */
+        @media (min-width: 768px) {
+            .header { padding: 14px 20px; font-size: 1.3rem; }
+            .header h1 { font-size: 1.3rem; }
+            .game-info { padding: 12px 20px; border-radius: 0 0 var(--border-radius) var(--border-radius); }
+            .info-item { min-width: 90px; font-size: 0.9rem; }
             .info-label { font-size: 0.7rem; }
-            .info-value { font-size: 0.9rem; }
-            .difficulty-selector { bottom: 65px; padding: 8px; gap: 6px; }
-            .difficulty-btn { padding: 5px 8px; font-size: 0.75rem; min-width: 50px; }
-            .controls { bottom: 8px; gap: 8px; }
-            .btn { padding: 8px 12px; font-size: 0.85rem; min-width: 80px; }
+            .info-value { font-size: 1.1rem; }
+            .bottom-controls { padding: 12px 20px 16px; gap: 10px; }
+            .difficulty-btn { padding: 6px 12px; font-size: 0.8rem; min-width: 60px; }
+            .btn { padding: 12px 18px; font-size: 0.9rem; min-width: 100px; }
         }
 
         @media (min-width: 1025px) {
-            .header { padding: 15px 20px; font-size: 1.4rem; }
-            .header h1 { font-size: 1.4rem; }
-            .game-info { top: 20px; padding: 15px; }
-            .info-item { min-width: 100px; }
-            .difficulty-selector { bottom: 20px; right: 20px; left: auto; width: auto; }
-            .difficulty-btn { padding: 8px 16px; font-size: 0.9rem; }
-            .controls { bottom: 20px; left: 20px; right: 20px; }
+            .app-container { max-width: 600px; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+            .header { border-radius: 0; }
+            .game-info { border-radius: 0; }
+            body { background: #e8ecf1; }
+            @media (prefers-color-scheme: dark) { body { background: #15191f; } }
         }
     </style>
 </head>
@@ -272,27 +280,27 @@
         </header>
 
         <main class="main-content">
-            <div class="game-container">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Züge</div>
+                    <div class="info-value" id="moveCount">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Zeit</div>
+                    <div class="info-value" id="timeDisplay">00:00</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Scheiben</div>
+                    <div class="info-value" id="diskCount">3</div>
+                </div>
+            </div>
+
+            <div class="game-area">
                 <canvas id="gameCanvas"></canvas>
                 <div class="loading" id="loading"></div>
             </div>
 
-            <div class="ui-overlay">
-                <div class="game-info">
-                    <div class="info-item">
-                        <div class="info-label">Züge</div>
-                        <div class="info-value" id="moveCount">0</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Zeit</div>
-                        <div class="info-value" id="timeDisplay">00:00</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Scheiben</div>
-                        <div class="info-value" id="diskCount">3</div>
-                    </div>
-                </div>
-
+            <div class="bottom-controls">
                 <div class="difficulty-selector">
                     <label>Schwierigkeit:</label>
                     <button class="difficulty-btn active" onclick="setDifficulty(3)">3</button>
@@ -369,23 +377,14 @@
         let moveHistory = [];
         let isAnimating = false;
         let animatingDisk = null;
-        let animationStart = 0;
-        let animationDuration = 300; // ms
 
-        // Colors for disks (top to bottom = small to large)
         const diskColors = [
-            '#ff6b6b', // Rot
-            '#4ecdc4', // Türkis
-            '#45b7d1', // Blau
-            '#f9ca24', // Gelb
-            '#6c5ce7', // Lila
-            '#a0e7e5', // Hell Türkis
-            '#fdcb6e', // Orange
-            '#636e72'  // Dunkel Grau
+            '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24',
+            '#6c5ce7', '#a0e7e5', '#fdcb6e', '#636e72'
         ];
 
         const towerLabels = ['A', 'B', 'C'];
-        const towerX = []; // Will be set on resize
+        let towerX = [];
 
         // ============================================
         // INITIALIZATION
@@ -397,24 +396,20 @@
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
             
-            // Touch/click handling
             canvas.addEventListener('click', handleClick);
             canvas.addEventListener('touchstart', handleTouch, { passive: false });
             
             resetGame();
-            
-            // Start game loop
             animate();
             
             document.getElementById('loading').style.display = 'none';
         }
 
         function resizeCanvas() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+            const area = document.querySelector('.game-area');
+            canvas.width = area.clientWidth;
+            canvas.height = area.clientHeight;
             
-            // Calculate tower X positions (3 equal columns)
             const width = canvas.width;
             towerX[0] = width * 1/6;
             towerX[1] = width * 3/6;
@@ -434,7 +429,6 @@
             
             startTimer();
             
-            // Create disks on first tower (largest at bottom)
             for (let i = diskCount - 1; i >= 0; i--) {
                 towers[0].push(i);
             }
@@ -490,26 +484,22 @@
         }
 
         function handleTowerSelect(x) {
-            // Determine which tower was clicked
             const width = canvas.width;
             const towerWidth = width / 3;
             let towerId = Math.floor(x / towerWidth);
             towerId = Math.max(0, Math.min(2, towerId));
             
-            // If no tower selected, select this one (if it has disks)
             if (selectedTower === null) {
                 if (towers[towerId].length > 0) {
                     selectedTower = towerId;
                 }
             }
-            // If different tower selected, try to move
             else if (selectedTower !== towerId) {
                 if (isValidMove(selectedTower, towerId)) {
                     moveDisk(selectedTower, towerId);
                 }
                 selectedTower = null;
             }
-            // Same tower clicked twice = deselect
             else {
                 selectedTower = null;
             }
@@ -518,7 +508,6 @@
         function isValidMove(from, to) {
             if (towers[from].length === 0) return false;
             if (towers[to].length === 0) return true;
-            // Can only place smaller disk on larger disk
             return towers[from][towers[from].length - 1] < towers[to][towers[to].length - 1];
         }
 
@@ -530,7 +519,6 @@
             moveCount++;
             updateUI();
             
-            // Start animation
             animatingDisk = { disk, from, to, startTime: Date.now() };
             isAnimating = true;
             
@@ -541,11 +529,10 @@
             if (isAnimating || moveHistory.length === 0) return;
             
             const lastMove = moveHistory.pop();
-            // Reverse the move
             towers[lastMove.to].pop();
             towers[lastMove.from].push(lastMove.disk);
             
-            moveCount -= 2; // Will be incremented by 1 in updateUI
+            moveCount -= 2;
             updateUI();
         }
 
@@ -582,7 +569,7 @@
         }
 
         // ============================================
-        // SOLVER (for hint system)
+        // SOLVER
         // ============================================
         function solveStep() {
             if (isAnimating) return;
@@ -590,7 +577,6 @@
             const move = findOptimalMove();
             if (move) {
                 selectedTower = move.from;
-                // Visual feedback - briefly highlight the source tower
                 setTimeout(() => {
                     if (isValidMove(move.from, move.to)) {
                         moveDisk(move.from, move.to);
@@ -600,8 +586,6 @@
         }
 
         function findOptimalMove() {
-            // Simple optimal solver for Tower of Hanoi
-            // Find the smallest movable disk that makes progress
             let bestMove = null;
             let bestDiskSize = Infinity;
             
@@ -613,7 +597,6 @@
                     for (let j = 0; j < 3; j++) {
                         if (i === j) continue;
                         if (towers[j].length === 0 || diskSize < towers[j][towers[j].length - 1]) {
-                            // Prefer moves that don't undo previous move
                             if (moveHistory.length === 0 || 
                                 !(moveHistory[moveHistory.length - 1].from === j && moveHistory[moveHistory.length - 1].to === i)) {
                                 bestDiskSize = diskSize;
@@ -633,10 +616,9 @@
         function animate() {
             requestAnimationFrame(animate);
             
-            // Update animation
             if (isAnimating && animatingDisk) {
                 const elapsed = Date.now() - animatingDisk.startTime;
-                const progress = Math.min(elapsed / animationDuration, 1);
+                const progress = Math.min(elapsed / 300, 1);
                 
                 if (progress >= 1) {
                     isAnimating = false;
@@ -651,10 +633,9 @@
             const width = canvas.width;
             const height = canvas.height;
             
-            // Clear
             ctx.clearRect(0, 0, width, height);
             
-            // Draw background gradient
+            // Background
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
             gradient.addColorStop(0, '#e0f2fe');
             gradient.addColorStop(1, '#f0f4f8');
@@ -662,73 +643,64 @@
             ctx.fillRect(0, 0, width, height);
             
             // Base line
-            const baseY = height - 40;
+            const baseY = height - 30;
             ctx.fillStyle = '#374151';
-            ctx.fillRect(20, baseY, width - 40, 20);
+            ctx.fillRect(10, baseY, width - 20, 15);
             
-            // Tower base height
+            const towerHeight = Math.min(height * 0.7, 280);
             const towerBaseY = baseY;
-            const towerHeight = Math.min(height * 0.6, 300);
             
-            // Draw towers
             for (let i = 0; i < 3; i++) {
                 const x = towerX[i];
                 
                 // Tower pole
                 ctx.fillStyle = '#374151';
-                const poleWidth = 8;
+                const poleWidth = 6;
                 ctx.fillRect(x - poleWidth/2, towerBaseY - towerHeight, poleWidth, towerHeight);
                 
                 // Tower label
                 ctx.fillStyle = '#374151';
-                ctx.font = 'bold 18px sans-serif';
+                ctx.font = 'bold 16px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(towerLabels[i], x, baseY + 30);
+                ctx.fillText(towerLabels[i], x, baseY + 24);
                 
                 // Highlight selected tower
                 if (selectedTower === i) {
-                    ctx.fillStyle = 'rgba(74, 144, 217, 0.2)';
-                    ctx.fillRect(x - width/6, towerBaseY - towerHeight, width/3, towerHeight + 20);
+                    ctx.fillStyle = 'rgba(74, 144, 217, 0.15)';
+                    ctx.fillRect(x - width/6, towerBaseY - towerHeight, width/3, towerHeight + 30);
                     ctx.strokeStyle = '#4a90d9';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x - width/6 + 2, towerBaseY - towerHeight + 2, width/3 - 4, towerHeight + 16);
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x - width/6 + 1, towerBaseY - towerHeight + 1, width/3 - 2, towerHeight + 28);
                 }
                 
-                // Draw disks on this tower
+                // Draw disks
                 const disksOnTower = towers[i];
                 for (let j = 0; j < disksOnTower.length; j++) {
                     const diskSize = disksOnTower[j];
-                    // Check if this disk is animating
-                    if (isAnimating && animatingDisk && animatingDisk.disk === diskSize && animatingDisk.from === i) {
-                        continue; // Skip - will draw at animated position
-                    }
-                    if (isAnimating && animatingDisk && animatingDisk.disk === diskSize && animatingDisk.to === i) {
-                        continue; // Skip - will draw at animated position
+                    if (isAnimating && animatingDisk && animatingDisk.disk === diskSize && 
+                        (animatingDisk.from === i || animatingDisk.to === i)) {
+                        continue;
                     }
                     drawDisk(x, towerBaseY, diskSize, j, disksOnTower.length);
                 }
             }
             
-            // Draw animating disk
+            // Animating disk
             if (isAnimating && animatingDisk) {
-                const progress = Math.min((Date.now() - animatingDisk.startTime) / animationDuration, 1);
+                const progress = Math.min((Date.now() - animatingDisk.startTime) / 300, 1);
                 const fromX = towerX[animatingDisk.from];
                 const toX = towerX[animatingDisk.to];
                 
-                // Animation path: up, across, down
                 let x, y;
                 if (progress < 0.3) {
-                    // Move up
                     const t = progress / 0.3;
                     x = fromX;
                     y = towerBaseY - (towers[animatingDisk.from].length + 1) * 22 - (towerHeight * 0.3) * t;
                 } else if (progress < 0.7) {
-                    // Move across
                     const t = (progress - 0.3) / 0.4;
                     x = fromX + (toX - fromX) * t;
                     y = towerBaseY - (towers[animatingDisk.from].length + 1) * 22 - towerHeight * 0.3;
                 } else {
-                    // Move down
                     const t = (progress - 0.7) / 0.3;
                     x = toX;
                     const targetStackHeight = towers[animatingDisk.to].length;
@@ -740,14 +712,12 @@
         }
 
         function drawDisk(cx, baseY, diskSize, index, totalDisks, isAnimating = false, animY = null) {
-            // Disk dimensions
-            const maxRadius = Math.min(canvas.width, canvas.height) * 0.12;
-            const minRadius = maxRadius * 0.3;
-            const radius = maxRadius - (diskSize / (diskCount - 1 || 1)) * (maxRadius - minRadius);
+            const maxRadius = Math.min(canvas.width, canvas.height) * 0.13;
+            const minRadius = maxRadius * 0.35;
+            const radius = maxRadius - (diskSize / Math.max(diskCount - 1, 1)) * (maxRadius - minRadius);
             const diskHeight = 20;
             const gap = 2;
             
-            // Y position
             let y;
             if (isAnimating && animY !== null) {
                 y = animY;
@@ -755,10 +725,8 @@
                 y = baseY - (totalDisks - index) * (diskHeight + gap) - diskHeight/2;
             }
             
-            // Disk color
             ctx.fillStyle = diskColors[diskSize % diskColors.length];
             
-            // Draw disk body (rounded rectangle)
             const x = cx - radius;
             const w = radius * 2;
             const h = diskHeight;
@@ -777,29 +745,23 @@
             ctx.closePath();
             ctx.fill();
             
-            // Draw disk edge/highlight
             ctx.strokeStyle = 'rgba(255,255,255,0.3)';
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            // Darker bottom edge
-            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
             ctx.beginPath();
             ctx.moveTo(x, y + h/2);
             ctx.lineTo(x + w, y + h/2);
             ctx.stroke();
             
-            // Size number in center
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.font = 'bold 14px sans-serif';
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.font = 'bold 13px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText((diskSize + 1).toString(), cx, y);
         }
 
-        // ============================================
-        // START
-        // ============================================
         init();
     </script>
 </body>
