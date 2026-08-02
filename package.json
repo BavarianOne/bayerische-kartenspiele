@@ -4,9 +4,9 @@
   "description": "",
   "main": "asteroids.js",
   "scripts": {
-      "test": "npx playwright test",
-      "test:headed": "npx playwright test --headed"
-    },
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BavarianOne/bayerische-kartenspiele.git"
@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/BavarianOne/bayerische-kartenspiele#readme",
   "dependencies": {
-    "playwright": "^1.61.1"
+    "playwright": "^1.61.1",
+    "puppeteer-core": "^25.4.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1"
