@@ -12,6 +12,7 @@ const GAMES = [
   { file: 'towers-of-hanoi-2d.html', name: 'Türme von Hanoi 2D', checks: ['canvas', 'moveCount', 'diskCount'] },
   { file: 'towers-of-hanoi-3d.html', name: 'Türme von Hanoi 3D', checks: ['canvas', 'moveCount'] },
   { file: 'sternhimmel.html', name: 'Sternenhimmel', checks: ['canvas', 'stars'] },
+  { file: '2048.html', name: '2048', checks: ['grid', 'score', 'best'] },
 ];
 
 const HUB_PAGES = [
