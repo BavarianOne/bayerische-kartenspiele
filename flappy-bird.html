@@ -315,6 +315,9 @@
         // ============================================
         // INPUT HANDLING
         // ============================================
+        let lastFlapTime = 0;
+        const FLAP_COOLDOWN = 120; // ms zwischen Flaps
+
         function handleKeydown(e) {
             if (e.code === 'Space') {
                 e.preventDefault();
@@ -328,10 +331,15 @@
         }
 
         function handleInput() {
+            const now = Date.now();
+            if (now - lastFlapTime < FLAP_COOLDOWN) return;
+            lastFlapTime = now;
+
             if (state === 'start') {
                 startGame();
             } else if (state === 'playing') {
-                bird.velocity = CONFIG.jumpForce;
+                // Sanfter: addiere Jump-Force statt hart zu setzen
+                bird.velocity = Math.min(bird.velocity + CONFIG.jumpForce * 0.6, CONFIG.jumpForce);
             } else if (state === 'gameOver') {
                 startGame();
             }
