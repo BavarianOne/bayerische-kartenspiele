@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-08-02T04:34:55.342795",
+  "file": "benzinpreise-strasswalchen.html",
+  "anzahl_tankstellen": 5,
+  "standort": {
+    "id": "strasswalchen",
+    "name": "Stra\u00dfwalchen",
+    "country": "\u00d6sterreich",
+    "lat": 47.9802,
+    "lng": 13.2555,
+    "radius": 15
+  }
+}

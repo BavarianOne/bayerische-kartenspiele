@@ -2,6 +2,7 @@
 """
 Automatische Benzin- und Dieselpreise Sammler für bayerische-kartenspiele
 Holt Tankstellenpreise via Tankerkönig API und erstellt HTML-Seite
+Unterstützt mehrere Standorte: Landshut/Ergolding (DE) und Straßwalchen (AT)
 """
 
 import json
@@ -11,15 +12,36 @@ import re
 from datetime import datetime
 from typing import List, Dict, Optional
 
-# Konfiguration
+# ============================================================
+# KONFIGURATION - STANDORTE
+# ============================================================
 # API-Key von https://creativecommons.tankerkoenig.de/ (kostenlos registrieren)
 # Demo-Key: 00000000-0000-0000-0000-000000000002 (liefert nur Beispieldaten)
 API_KEY = "DEIN_API_KEY_HIER"  # <- HIER EIGENEN KEY EINTRAGEN
 
-# Landshut/Ergolding Koordinaten
-LAT = 48.5296
-LNG = 12.1616
-RADIUS = 10  # km, max 25
+# Standorte konfigurieren
+STANDORTE = [
+    {
+        "id": "landshut",
+        "name": "Landshut / Ergolding",
+        "country": "Deutschland",
+        "lat": 48.5296,
+        "lng": 12.1616,
+        "radius": 10,
+        "output_file": "benzinpreise.html",
+        "data_file": "benzinpreise-data.json",
+    },
+    {
+        "id": "strasswalchen",
+        "name": "Straßwalchen",
+        "country": "Österreich",
+        "lat": 47.9802,
+        "lng": 13.2555,
+        "radius": 15,
+        "output_file": "benzinpreise-strasswalchen.html",
+        "data_file": "benzinpreise-strasswalchen-data.json",
+    },
+]
 
 # Tankstellen-Marken Farben
 BRAND_COLORS = {
@@ -48,15 +70,20 @@ def get_brand_color(brand: str) -> Dict[str, str]:
     return BRAND_COLORS["DEFAULT"]
 
 
-def fetch_tankstellen() -> List[Dict]:
-    """Holt Tankstellen im Umkreis via Tankerkönig API"""
+def fetch_tankstellen(standort: Dict) -> List[Dict]:
+    """Holt Tankstellen im Umkreis via Tankerkönig API für einen Standort"""
+    lat = standort["lat"]
+    lng = standort["lng"]
+    radius = standort["radius"]
+    name = standort["name"]
+
     if API_KEY == "DEIN_API_KEY_HIER":
-        print("  WARNUNG: Kein API-Key konfiguriert! Nutze Demo-Daten.")
-        return get_demo_data()
+        print(f"  [{name}] WARNUNG: Kein API-Key konfiguriert! Nutze Demo-Daten.")
+        return get_demo_data(standort)
 
     url = (
         f"https://creativecommons.tankerkoenig.de/json/list.php"
-        f"?lat={LAT}&lng={LNG}&rad={RADIUS}&sort=dist&type=all&apikey={API_KEY}"
+        f"?lat={lat}&lng={lng}&rad={radius}&sort=dist&type=all&apikey={API_KEY}"
     )
 
     try:
@@ -65,20 +92,29 @@ def fetch_tankstellen() -> List[Dict]:
         data = json.loads(response.read().decode('utf-8'))
 
         if not data.get('ok'):
-            print(f"  API-Fehler: {data.get('message', 'Unbekannt')}")
-            return get_demo_data()
+            print(f"  [{name}] API-Fehler: {data.get('message', 'Unbekannt')}")
+            return get_demo_data(standort)
 
         stations = data.get('stations', [])
-        print(f"  {len(stations)} Tankstellen gefunden")
+        print(f"  [{name}] {len(stations)} Tankstellen gefunden")
         return stations
 
     except Exception as e:
-        print(f"  Fehler bei API-Abfrage: {e}")
-        return get_demo_data()
+        print(f"  [{name}] Fehler bei API-Abfrage: {e}")
+        return get_demo_data(standort)
 
 
-def get_demo_data() -> List[Dict]:
-    """Fallback Demo-Daten für Landshut/Ergolding"""
+def get_demo_data(standort: Dict) -> List[Dict]:
+    """Fallback Demo-Daten für den jeweiligen Standort"""
+    if standort["id"] == "landshut":
+        return get_demo_data_landshut()
+    elif standort["id"] == "strasswalchen":
+        return get_demo_data_strasswalchen()
+    return []
+
+
+def get_demo_data_landshut() -> List[Dict]:
+    """Demo-Daten für Landshut/Ergolding"""
     return [
         {
             "id": "demo-1",
@@ -179,6 +215,92 @@ def get_demo_data() -> List[Dict]:
     ]
 
 
+def get_demo_data_strasswalchen() -> List[Dict]:
+    """Demo-Daten für Straßwalchen, Österreich"""
+    return [
+        {
+            "id": "demo-at-1",
+            "name": "OMV Straßwalchen",
+            "brand": "OMV",
+            "street": "Salzburger Str.",
+            "houseNumber": "25",
+            "place": "Straßwalchen",
+            "postCode": 5204,
+            "lat": 47.9810,
+            "lng": 13.2560,
+            "dist": 0.8,
+            "e5": 1.629,
+            "e10": 1.579,
+            "diesel": 1.519,
+            "isOpen": True
+        },
+        {
+            "id": "demo-at-2",
+            "name": "Aral Salzburg-Nord",
+            "brand": "ARAL",
+            "street": "Innsbrucker Bundesstr.",
+            "houseNumber": "142",
+            "place": "Salzburg",
+            "postCode": 5020,
+            "lat": 47.8500,
+            "lng": 13.0800,
+            "dist": 12.5,
+            "e5": 1.659,
+            "e10": 1.609,
+            "diesel": 1.549,
+            "isOpen": True
+        },
+        {
+            "id": "demo-at-3",
+            "name": "Diskont Tankstelle Neumarkt",
+            "brand": "FREIE TANKSTELLE",
+            "street": "Hauptstr.",
+            "houseNumber": "38",
+            "place": "Neumarkt am Wallersee",
+            "postCode": 5202,
+            "lat": 47.9350,
+            "lng": 13.1850,
+            "dist": 6.2,
+            "e5": 1.599,
+            "e10": 1.549,
+            "diesel": 1.489,
+            "isOpen": True
+        },
+        {
+            "id": "demo-at-4",
+            "name": "Shell Seekirchen",
+            "brand": "SHELL",
+            "street": "Hauptstr.",
+            "houseNumber": "55",
+            "place": "Seekirchen am Wallersee",
+            "postCode": 5201,
+            "lat": 47.8900,
+            "lng": 13.1500,
+            "dist": 9.8,
+            "e5": 1.639,
+            "e10": 1.589,
+            "diesel": 1.529,
+            "isOpen": True
+        },
+        {
+            "id": "demo-at-5",
+            "name": "BP Tankstelle Obertrum",
+            "brand": "OMV",
+            "street": "Seestraße",
+            "houseNumber": "12",
+            "place": "Obertrum am See",
+            "postCode": 5162,
+            "lat": 47.9200,
+            "lng": 13.1300,
+            "dist": 11.3,
+            "e5": 1.619,
+            "e10": 1.569,
+            "diesel": 1.509,
+            "isOpen": False
+        },
+    ]
+
+
 def format_price(price) -> str:
     """Formatiert Preis als String mit 3 Nachkommastellen"""
     if price is False or price is None:
@@ -186,17 +308,19 @@ def format_price(price) -> str:
     return f"{float(price):.3f} €"
 
 
-def generate_html(stationen: List[Dict], output_file: str = "benzinpreise.html"):
-    """Generiert HTML-Seite mit Tankstellenpreisen"""
+def generate_html(stationen: List[Dict], standort: Dict, timestamp: str):
+    """Generiert HTML-Seite mit Tankstellenpreisen für einen Standort"""
 
-    timestamp = datetime.now().strftime("%d.%m.%Y %H:%M Uhr")
+    country = standort["country"]
+    name = standort["name"]
+    radius = standort["radius"]
 
     html_content = f"""<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benzin- & Dieselpreise Landshut/Ergolding | Bavarian Card Games</title>
+    <title>Benzin- & Dieselpreise {name} | Bavarian Card Games</title>
     <style>
         body {{
             font-family: Arial, sans-serif;
@@ -335,6 +459,32 @@ def generate_html(stationen: List[Dict], output_file: str = "benzinpreise.html")
             height: 20px;
             border-radius: 4px;
         }}
+        .location-nav {{
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }}
+        .location-nav a {{
+            display: inline-block;
+            margin: 0 10px;
+            padding: 8px 16px;
+            background: #8b4513;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }}
+        .location-nav a:hover {{
+            background: #a0522d;
+        }}
+        .location-nav a.current {{
+            background: #d4af37;
+            color: #8b4513;
+        }}
     </style>
 </head>
 <body>
@@ -379,8 +529,13 @@ async function shareFullContent() {{
 }}
 </script>
 
-    <h1>⛽ Spritpreise Landshut / Ergolding</h1>
-    <p class="subtitle">Aktuelle Preise für Super E5, E10 & Diesel · Umkreis {RADIUS} km · Quelle: Tankerkönig API (MTS-K)</p>
+    <h1>⛽ Spritpreise {name}</h1>
+    <p class="subtitle">Aktuelle Preise für Super E5, E10 & Diesel · Umkreis {radius} km · {country} · Quelle: Tankerkönig API (MTS-K)</p>
+
+    <div class="location-nav">
+        <a href="benzinpreise.html" class="{'current' if standort['id'] == 'landshut' else ''}">🇩🇪 Landshut / Ergolding</a>
+        <a href="benzinpreise-strasswalchen.html" class="{'current' if standort['id'] == 'strasswalchen' else ''}">🇦🇹 Straßwalchen (AT)</a>
+    </div>
 
     <div class="legend">
         <div class="legend-item"><div class="legend-color" style="background: #ff9800;"></div>Super E5</div>
@@ -399,7 +554,7 @@ async function shareFullContent() {{
     for station in stationen:
         brand = station.get('brand', 'UNBEKANNT')
         colors = get_brand_color(brand)
-        name = station.get('name', 'Ohne Name')
+        name_st = station.get('name', 'Ohne Name')
         street = station.get('street', '')
         house_number = station.get('houseNumber', '')
         place = station.get('place', '')
@@ -420,7 +575,7 @@ async function shareFullContent() {{
     <div class="tankstellen-card" style="border-left: 5px solid {colors['border']};">
         <div class="tankstellen-header">
             <div>
-                <div class="tankstellen-name">{name}</div>
+                <div class="tankstellen-name">{name_st}</div>
                 <span class="tankstellen-brand" style="background: {colors['border']};">{brand}</span>
             </div>
             <div style="text-align: right;">
@@ -467,45 +622,58 @@ async function shareFullContent() {{
 </html>
 """
 
-    with open(output_file, "w", encoding="utf-8") as f:
+    with open(standort["output_file"], "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"HTML-Datei erstellt: {output_file}")
+    print(f"  HTML-Datei erstellt: {standort['output_file']}")
 
 
 def main():
-    """Hauptprogramm"""
-    print("=" * 50)
+    """Hauptprogramm - verarbeitet alle Standorte"""
+    print("=" * 60)
     print("Benzin- & Dieselpreise Collector gestartet")
     print(f"Zeit: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"Standort: Landshut/Ergolding (Lat: {LAT}, Lng: {LNG})")
-    print(f"Radius: {RADIUS} km")
-    print("=" * 50)
+    print("=" * 60)
 
-    # Tankstellen abfragen
-    print("Tankstellen abfragen...")
-    stationen = fetch_tankstellen()
+    timestamp = datetime.now().strftime("%d.%m.%Y %H:%M Uhr")
 
-    if not stationen:
-        print("Keine Tankstellen gefunden!")
-        return
+    for standort in STANDORTE:
+        print(f"\n📍 Verarbeite: {standort['name']} ({standort['country']})")
+        print(f"   Koordinaten: {standort['lat']}, {standort['lng']} | Radius: {standort['radius']} km")
 
-    # HTML generieren
-    output_file = "benzinpreise.html"
-    generate_html(stationen, output_file)
+        # Tankstellen abfragen
+        stationen = fetch_tankstellen(standort)
 
-    # Metadaten speichern
-    metadata = {
-        "timestamp": datetime.now().isoformat(),
-        "file": output_file,
-        "anzahl_tankstellen": len(stationen),
-        "standort": {"lat": LAT, "lng": LNG, "radius": RADIUS},
-    }
+        if not stationen:
+            print(f"   ⚠️  Keine Tankstellen gefunden für {standort['name']}!")
+            continue
 
-    with open("benzinpreise-data.json", "w") as f:
-        json.dump(metadata, f, indent=2)
+        # HTML generieren
+        generate_html(stationen, standort, timestamp)
 
-    print(f"\nFertig! {len(stationen)} Tankstellen verarbeitet.")
+        # Metadaten speichern
+        metadata = {
+            "timestamp": datetime.now().isoformat(),
+            "file": standort["output_file"],
+            "anzahl_tankstellen": len(stationen),
+            "standort": {
+                "id": standort["id"],
+                "name": standort["name"],
+                "country": standort["country"],
+                "lat": standort["lat"],
+                "lng": standort["lng"],
+                "radius": standort["radius"]
+            },
+        }
+
+        with open(standort["data_file"], "w") as f:
+            json.dump(metadata, f, indent=2)
+
+        print(f"   ✅ {len(stationen)} Tankstellen verarbeitet")
+
+    print("\n" + "=" * 60)
+    print("Fertig! Alle Standorte verarbeitet.")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
