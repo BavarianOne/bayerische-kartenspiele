@@ -161,6 +161,11 @@
             animation: appear 0.15s ease-out;
         }
 
+        .tile.empty {
+            background: var(--tile-bg);
+            opacity: 0;
+        }
+
         .tile::before {
             content: attr(data-value);
         }
@@ -505,11 +510,13 @@
             for (let r = 0; r < SIZE; r++) {
                 for (let c = 0; c < SIZE; c++) {
                     const value = grid[r][c];
-                    if (value === 0) continue; // Don't create tiles for empty cells
-                    
                     const tile = document.createElement('div');
                     tile.className = 'tile';
                     tile.dataset.value = value;
+                    
+                    if (value === 0) {
+                        tile.classList.add('empty');
+                    }
                     
                     gridEl.appendChild(tile);
                 }
