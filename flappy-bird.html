@@ -220,31 +220,31 @@
             canvasWidth: 400,
             canvasHeight: 600,
 
-            // Physics
-            gravity: 0.55,
-            jumpForce: -10,
-            maxFallSpeed: 12,
+            // Physics - etwas verzeihender
+            gravity: 0.45,
+            jumpForce: -9,
+            maxFallSpeed: 10,
             rotationSpeed: 0.08,
             maxRotationUp: -0.6,
             maxRotationDown: 1.2,
 
             // Bird
             birdX: 80,
-            birdWidth: 34,
-            birdHeight: 24,
+            birdWidth: 30,
+            birdHeight: 22,
             birdStartY: 300,
 
-            // Pipes
-            pipeWidth: 64,
-            pipeGap: 160,
-            pipeSpawnInterval: 1500,
-            pipeSpeed: 3,
-            minPipeHeight: 60,
+            // Pipes - größerer Gap
+            pipeWidth: 60,
+            pipeGap: 180,
+            pipeSpawnInterval: 1600,
+            pipeSpeed: 2.5,
+            minPipeHeight: 50,
             maxPipeHeightOffset: 200,
 
             // Ground
             groundHeight: 80,
-            groundSpeed: 3,
+            groundSpeed: 2.5,
 
             // Visual
             skyGradientStops: ['#70c5ce', '#4ec0ca'],
@@ -350,8 +350,8 @@
 
             bird = {
                 y: CONFIG.birdStartY,
-                velocity: 0,
-                rotation: 0
+                velocity: CONFIG.jumpForce, // Sofort erster Flap beim Start
+                rotation: CONFIG.maxRotationUp
             };
 
             updateScoreDisplay();
