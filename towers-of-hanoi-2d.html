@@ -714,7 +714,9 @@
         function drawDisk(cx, baseY, diskSize, index, totalDisks, isAnimating = false, animY = null) {
             const maxRadius = Math.min(canvas.width, canvas.height) * 0.13;
             const minRadius = maxRadius * 0.35;
-            const radius = maxRadius - (diskSize / Math.max(diskCount - 1, 1)) * (maxRadius - minRadius);
+            // diskSize: 0 = smallest, diskCount-1 = largest
+            // Visual: larger diskSize = larger radius
+            const radius = minRadius + (diskSize / Math.max(diskCount - 1, 1)) * (maxRadius - minRadius);
             const diskHeight = 20;
             const gap = 2;
             
