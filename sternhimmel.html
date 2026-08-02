@@ -574,11 +574,13 @@ function resize(){
   H = canvas.height = Math.floor(innerHeight*DPR)
   canvas.style.width = innerWidth+'px'
   canvas.style.height = innerHeight+'px'
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
+  // Don't set transform here - render() does it every frame
 }
 addEventListener('resize',resize); resize()
 
-let cam = {az:0.2, alt:0.37, fov:60*D2R, targetAlt:0.37, targetAz:0.2}
+// Start camera pointing at Orion (RA~5.5h, Dec~0°) - always spectacular
+// Munich lat=48°, Orion transits at ~alt=42° (spectacular!)
+let cam = {az:0, alt:0.7, fov:60*D2R, targetAlt:0.7, targetAz:0}
 let showConstell=true, showNames=true, showPlanets=true, showGrid=true, showMW=true, showCompass=true
 let animating=false, animDir=1, animSpeed=1
 let observer = {lat:48.1374*D2R, lon:11.5755*D2R, name:'München, Deutschland'}
@@ -601,8 +603,11 @@ function projectStar(ra, dec, lst){
 }
 
 function drawBackground(){
-  // Dunkler Nachthimmel mit subtiler Vignette
-  // ctx.setTransform(1, 0, 0, 1, 0, 0) entfernt - nutzt DPR-Transform aus render()
+  // Dunkler Nachthimmel mit subtiler Vignette - ALWAYS draw explicit dark bg
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
+  ctx.fillStyle = '#030310'
+  ctx.fillRect(0, 0, W/DPR, H/DPR)
+  
   const grad = ctx.createRadialGradient(W/(2*DPR), H/(2*DPR), 0, W/(2*DPR), H/(2*DPR), Math.max(W,H)/(2*DPR));
   grad.addColorStop(0, '#080818');
   grad.addColorStop(1, '#020208');
@@ -613,9 +618,9 @@ function drawBackground(){
 function drawMilkyWay(lst){
   if(!showMW) return
   ctx.save()
-  ctx.globalAlpha=0.04
+  ctx.globalAlpha=0.08
   ctx.strokeStyle='#fff'
-  ctx.lineWidth=60
+  ctx.lineWidth=80
   ctx.lineCap='round'
   ctx.beginPath()
   let first=true
@@ -698,19 +703,19 @@ function drawStars(lst){
   for(const s of STARS){
     const p = projectStar(s.ra, s.dec, lst)
     if(p){
-      // Größe basierend auf Magnitude
-            const baseSize = Math.max(2, 8 - s.mag*1.5)
-            const size = baseSize * (0.5 + 0.5*p.dist) * (60/cam.fov*R2D)
-            visible.push({...s, ...p, size})
+      // Größe basierend auf Magnitude - larger and more visible
+      const baseSize = Math.max(3, 10 - s.mag*1.2)
+      const size = baseSize * (0.6 + 0.4*p.dist) * (60/cam.fov*R2D)
+      visible.push({...s, ...p, size})
     }
   }
   visible.sort((a,b)=>b.mag - a.mag)
 
   for(const s of visible){
           const brightness = Math.pow(2.512, -s.mag) * s.dist
-          const alpha = Math.min(1, brightness * 3)
-          const twinkle = 0.8 + 0.2*Math.sin(Date.now()*0.001 + s.ra*100)
-          const r = Math.max(1.5, s.size*twinkle)
+          const alpha = Math.min(1, brightness * 5)
+          const twinkle = 0.9 + 0.1*Math.sin(Date.now()*0.001 + s.ra*100)
+          const r = Math.max(2, s.size*twinkle)
 
           // 🔧 VIEWPORT CLIPPING: Skip stars whose glow would be off-screen
           const cvsW = W/DPR, cvsH = H/DPR
@@ -852,7 +857,7 @@ function render(){
   cam.alt += (cam.targetAlt - cam.alt) * 0.05
   cam.az += (cam.targetAz - cam.az) * 0.05
   
-  // 🔧 EXPLIZITES CLEAR + DUNKER HINTERGRUND (fixes white canvas)
+  // 🔧 ALWAYS clear with dark background FIRST
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
   ctx.fillStyle = '#030310'
   ctx.fillRect(0, 0, W/DPR, H/DPR)
