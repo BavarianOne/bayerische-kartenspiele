@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-03T09:46:32.014201",
+  "timestamp": "2026-08-03T10:26:54.927036",
   "file": "metzger-angebote.html",
-  "anzahl_metzger": 5,
-  "gesamt_angebote": 51,
+  "anzahl_metzger": 6,
+  "gesamt_angebote": 63,
   "metzger": [
     {
       "name": "Metzgerei Brandl",
@@ -28,6 +28,11 @@
       "name": "Metzgerei Hahn",
       "city": "Eggenfelden",
       "website": "https://metzgerei-hahn.de/Lauterbachstrasse"
+    },
+    {
+      "name": "Brunner Metzgerei",
+      "city": "Landshut",
+      "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
     }
   ]
 }
