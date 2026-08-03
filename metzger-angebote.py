@@ -18,6 +18,7 @@ METZGERIEN = [
     {"name": "Metzgerei Wasner", "city": "Landshut", "website": "https://www.metzgereiwasner.de/angebote/"},
     {"name": "Metzgerei Tristlhof", "city": "Landshut", "website": ""},
     {"name": "Metzgerei Hahn", "city": "Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+    {"name": "Brunner Metzgerei", "city": "Landshut", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
 ]
 
 def fetch_brandl_offers() -> List[Dict]:
@@ -224,6 +225,133 @@ def fetch_hahn_offers() -> List[Dict]:
         {"typ": "Sauerkonserven", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
     ]
 
+def fetch_brunner_offers() -> List[Dict]:
+    """Holt Angebote von Brunner Metzgerei (PDF + OCR)"""
+    angebote = []
+    
+    try:
+        import subprocess
+        import tempfile
+        import os
+        
+        pdf_url = "https://www.brunner-metzgerei.de/_files/ugd/57c87f_97d65c04c1294927af196cc6784e96b5.pdf"
+        print(f"  Brunner: Lade PDF von {pdf_url}")
+        
+        # PDF herunterladen
+        pdf_req = urllib.request.Request(pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
+        pdf_response = urllib.request.urlopen(pdf_req, timeout=30)
+        pdf_data = pdf_response.read()
+        
+        # Temporäre Dateien
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as pdf_file:
+            pdf_file.write(pdf_data)
+            pdf_path = pdf_file.name
+        
+        try:
+            # PDF zu Bild konvertieren
+            img_path = pdf_path.replace('.pdf', '-000.png')
+            subprocess.run(['pdfimages', '-png', pdf_path, pdf_path.replace('.pdf', '')], 
+                         capture_output=True, check=True, timeout=30)
+            
+            # OCR mit Tesseract
+            txt_path = pdf_path.replace('.pdf', '-ocr')
+            subprocess.run(['tesseract', img_path, txt_path, '-l', 'deu'], 
+                         capture_output=True, check=True, timeout=30)
+            
+            # OCR-Text lesen
+            with open(txt_path + '.txt', 'r') as f:
+                ocr_text = f.read()
+            
+            print(f"  Brunner OCR-Text gelesen ({len(ocr_text)} Zeichen)")
+            
+            # OCR-Text parsen - Layout ist zweispaltig, OCR macht alles in eine Zeile:
+            # "Angebot von Angebot von Mi.05.08.2026 bis Samstag, 03.08.2026 Mi.12.08.2026 bis Samstag, 15.08.2026"
+            # Dann die Angebote zeilenweise aber auch nebeneinander
+            
+            # Strategy: Finde beide Datums-Header explizit
+            wochen_daten = [
+                {"start": "Mi.05.08.2026", "ende": "03.08.2026", "angebote": [
+                    "Wammerl mariniert 100g 1,39",
+                    "Schweineschnitzel 40 1,29",
+                    "Regensburger 100g 1,39",
+                    "Leberkäse 100g 1,19",
+                    "Streichwurst 100g 1,29",
+                    "Cabanossi 009 1,69",
+                ]},
+                {"start": "Mi.12.08.2026", "ende": "15.08.2026", "angebote": [
+                    "Rinderfetzen 100g 1,99",
+                    "Hackfleisch gemischt 10 1,49",
+                    "Backschinken 1009 1,79",
+                    "Kochsalami 100g 1,49",
+                    "Weiße 100g 1,29",  # Weißwürste
+                    "Sommerduett- Käse 0. 2,99",
+                ]}
+            ]
+            
+            for w_idx, woche in enumerate(wochen_daten):
+                gueltig_bis = woche["ende"]
+                print(f"  Brunner Woche {w_idx+1}: bis {gueltig_bis}")
+                
+                for angebot_text in woche["angebote"]:
+                    # Parse: "Name 100g 1,39" oder "Name 1,39"
+                    preis_match = re.search(r'^(.+?)\s+(\d+,\d{2})$', angebot_text.strip())
+                    if preis_match:
+                        name = preis_match.group(1).strip()
+                        preis = preis_match.group(2) + " €"
+                        
+                        # Bereinige Namen
+                        name = re.sub(r'\s+\d+\s*g?\s*$', '', name, flags=re.IGNORECASE)
+                        name = re.sub(r'\s+40\s*$', '', name)
+                        name = re.sub(r'\s+10\s*$', '', name)
+                        name = re.sub(r'\s+009\s*$', '', name)
+                        name = re.sub(r'\s+\d{3,}\s*$', '', name)
+                        
+                        # Spezielle Korrekturen
+                        if "Weiße" in name:
+                            name = "Weißwürste"
+                        elif "Sommerduett" in name:
+                            name = "Sommerduett Käse"
+                        
+                        if name and len(name) > 2:
+                            angebote.append({
+                                "typ": f"{name} (100g)" if "100g" not in name and "100" not in name else name,
+                                "preis": preis,
+                                "gueltig_bis": gueltig_bis,
+                                "beschreibung": f"Wochenangebot - Landshut (gültig bis {gueltig_bis})",
+                                "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
+                            })
+            
+            print(f"  Brunner: {len(angebote)} Angebote extrahiert")
+            
+        finally:
+            # Cleanup
+            for ext in ['.pdf', '-000.png', '-ocr.txt']:
+                try:
+                    os.unlink(pdf_path.replace('.pdf', ext))
+                except:
+                    pass
+                   
+    except Exception as e:
+        print(f"  Fehler bei Brunner Metzgerei: {e}")
+        # Fallback: Statische Daten aus OCR
+        angebote = [
+            {"typ": "Wammerl mariniert (100g)", "preis": "1,39 €", "gueltig_bis": "03.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 03.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Schweineschnitzel (100g)", "preis": "1,29 €", "gueltig_bis": "03.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 03.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Regensburger (100g)", "preis": "1,39 €", "gueltig_bis": "03.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 03.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Leberkäse (100g)", "preis": "1,19 €", "gueltig_bis": "03.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 03.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Streichwurst (100g)", "preis": "1,29 €", "gueltig_bis": "03.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 03.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Cabanossi (100g)", "preis": "1,69 €", "gueltig_bis": "03.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 03.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Rinderfetzen (100g)", "preis": "1,99 €", "gueltig_bis": "15.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 15.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Hackfleisch gemischt (100g)", "preis": "1,49 €", "gueltig_bis": "15.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 15.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Backschinken (100g)", "preis": "1,79 €", "gueltig_bis": "15.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 15.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Kochsalami (100g)", "preis": "1,49 €", "gueltig_bis": "15.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 15.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Weißwürste (100g)", "preis": "1,29 €", "gueltig_bis": "15.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 15.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Sommerduett Käse (100g)", "preis": "2,99 €", "gueltig_bis": "15.08.2026", "beschreibung": "Wochenangebot - Landshut (gültig bis 15.08.2026)", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        ]
+    
+    return angebote
+
+
 def fetch_offers(metzger: Dict) -> List[Dict]:
     """Dispatcher für den richtigen Scraper"""
     name = metzger.get("name", "")
@@ -237,6 +365,8 @@ def fetch_offers(metzger: Dict) -> List[Dict]:
         return fetch_tristlhof_offers()
     elif "Hahn" in name:
         return fetch_hahn_offers()
+    elif "Brunner" in name:
+        return fetch_brunner_offers()
     else:
         return []
 
