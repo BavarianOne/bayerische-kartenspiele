@@ -14,6 +14,7 @@ const GAMES = [
   { file: 'sternhimmel.html', name: 'Sternenhimmel', checks: ['canvas', 'stars'] },
   { file: '2048.html', name: '2048', checks: ['grid', 'score', 'best'] },
   { file: 'schafkopf.html', name: 'Schafkopf', checks: ['canvas', 'gamePhase', 'hand'] },
+  { file: 'schafkopf2.html', name: 'Schafkopf 2', checks: ['gamePhase', 'hand'] },
 ];
 
 const HUB_PAGES = [
@@ -84,7 +85,7 @@ async function testGame(browser, game, baseUrl) {
         } else {
           errors.push('No grid div found for 2048');
         }
-      } else if (game.file === 'schafkopf.html') {
+      } else if (game.file === 'schafkopf.html' || game.file === 'schafkopf2.html') {
         // Schafkopf uses DOM-based rendering (no canvas)
         console.log('  ✓ DOM-based rendering (no canvas expected)');
       } else {
@@ -157,7 +158,7 @@ async function testGame(browser, game, baseUrl) {
           }
         }
 
-        if (game.file === 'schafkopf.html') {
+        if (game.file === 'schafkopf.html' || game.file === 'schafkopf2.html') {
               // Check that game elements exist (DOM-based rendering, not canvas)
               const schafkopfDebug = await page.evaluate(() => {
                 const hand = document.querySelector('#player-0-area');
