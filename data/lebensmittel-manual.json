@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Frische Vollmilch 3,5% 1l",
+    "category": "Milch & Milchprodukte",
+    "price": 1.09,
+    "currency": "EUR",
+    "retailer": "Metzgerei Brandl (Regional)",
+    "retailer_key": "metzgerei-brandl",
+    "retailer_category": "Metzgerei",
+    "valid_from": "2026-08-04T00:00:00",
+    "valid_to": "2026-08-10T23:59:59",
+    "description": "Von regionalen Bauern, tagesfrisch",
+    "manual": true
+  },
+  {
+    "name": "Bauernbutter 250g",
+    "category": "Butter, Margarine & Streichfette",
+    "price": 2.49,
+    "currency": "EUR",
+    "retailer": "Metzgerei Rümenapf",
+    "retailer_key": "metzgerei-ruemenapf",
+    "retailer_category": "Metzgerei",
+    "valid_from": "2026-08-04T00:00:00",
+    "valid_to": "2026-08-10T23:59:59",
+    "description": "Süßrahmbutter, handgeschöpft",
+    "manual": true
+  },
+  {
+    "name": "Bio-Vollmilch 1l",
+    "category": "Milch & Milchprodukte",
+    "price": 1.39,
+    "currency": "EUR",
+    "retailer": "Bäckerei Huber (Landshut)",
+    "retailer_key": "baeckerei-huber",
+    "retailer_category": "Bäckerei",
+    "valid_from": "2026-08-04T00:00:00",
+    "valid_to": "2026-08-10T23:59:59",
+    "description": "Demeter-zertifiziert, von Hofgut Oberndorf",
+    "manual": true
+  },
+  {
+    "name": "Kräuterquark 200g",
+    "category": "Käse & Quark",
+    "price": 0.89,
+    "currency": "EUR",
+    "retailer": "Metzgerei Wasner",
+    "retailer_key": "metzgerei-wasner",
+    "retailer_category": "Metzgerei",
+    "valid_from": "2026-08-04T00:00:00",
+    "valid_to": "2026-08-10T23:59:59",
+    "description": "Hausgemacht mit frischen Kräutern",
+    "manual": true
+  }
+]
