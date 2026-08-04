@@ -1,0 +1,1715 @@
+1|<!DOCTYPE html>
+2|<html lang="de">
+3|<head>
+4|<meta charset="UTF-8">
+5|<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+6|<title>🌌 Space Explorer 3D – Fliegen & Entdecken</title>
+7|<meta name="apple-mobile-web-app-capable" content="yes">
+8|<meta name="apple-mobile-web-app-status-bar-style" content="default">
+9|<meta name="apple-mobile-web-app-title" content="Space Explorer">
+10|<style>
+11|*{margin:0;padding:0;box-sizing:border-box}
+12|html,body{overflow:hidden;height:100%;background:#000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+13|canvas{display:block;width:100%;height:100%}
+14|
+15|/* HUD */
+16|#hud{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:10}
+17|#topBar{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+18|#location{background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:1px solid rgba(0,255,200,0.2);border-radius:10px;padding:6px 12px;color:#0fc;font-size:0.75rem;letter-spacing:0.05em;flex:1;min-width:0;overflow:hidden}
+19|#location .name{font-weight:700;font-size:0.85rem;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+20|#location .hint{color:rgba(255,255,255,0.4);font-size:0.65rem;margin-top:2px}
+21|#speedometer{background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:6px 10px;text-align:right;min-width:70px;flex-shrink:0}
+22|#speedometer .val{font-size:1.1rem;font-weight:700;color:#fc0;font-variant-numeric:tabular-nums}
+23|#speedometer .unit{font-size:0.6rem;color:rgba(255,200,0,0.5);text-transform:uppercase;letter-spacing:0.1em}
+24|#speedometer .label{font-size:0.6rem;color:rgba(255,200,0,0.4);text-transform:uppercase}
+25|
+26|/* Minimap / Radar */
+27|#minimap{position:absolute;top:10px;right:10px;width:140px;height:140px;background:rgba(0,8,20,0.85);backdrop-filter:blur(8px);border:2px solid rgba(0,255,200,0.15);border-radius:50%;overflow:hidden;pointer-events:none;z-index:11;display:none}
+28|#minimap.show{display:block}
+29|#minimap canvas{width:100%;height:100%;display:block}
+30|#minimapLabel{position:absolute;top:10px;right:10px;color:rgba(0,255,200,0.25);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;z-index:12;pointer-events:none;display:none}
+31|#minimapLabel.show{display:block}
+32|
+33|/* Help overlay */
+34|#helpOverlay{position:absolute;bottom:50%;left:50%;transform:translate(-50%,50%);background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:2px solid rgba(0,255,200,0.2);border-radius:14px;padding:16px 24px;text-align:center;transition:opacity 1.5s;pointer-events:none;z-index:15;max-width:310px}
+35|#helpOverlay.hidden{opacity:0}
+36|#helpOverlay .title{font-size:1.1rem;color:#0fc;font-weight:700;margin-bottom:6px}
+37|#helpOverlay .hint{font-size:0.8rem;color:rgba(255,255,255,0.6);line-height:1.5}
+38|#helpOverlay .arrow{font-size:2rem;display:block;margin:8px 0;animation:floatArrow 2s ease-in-out infinite}
+39|@keyframes floatArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+40|
+41|/* Planet Info Card */
+42|#planetInfo{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);max-width:320px;width:90vw;background:rgba(0,10,30,0.92);backdrop-filter:blur(12px);border:2px solid rgba(0,255,200,0.3);border-radius:16px;padding:16px;box-shadow:0 0 40px rgba(0,255,200,0.1);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);opacity:0;pointer-events:none;transform:translateX(-50%) translateY(20px)}
+43|#planetInfo.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+44|#planetInfo .title{font-size:1.2rem;font-weight:700;color:#0fc;margin-bottom:4px}
+45|#planetInfo .sub{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:8px}
+46|#planetInfo .desc{font-size:0.85rem;color:rgba(255,255,255,0.8);line-height:1.4;margin-bottom:8px}
+47|#planetInfo .stats{display:flex;flex-wrap:wrap;gap:4px}
+48|#planetInfo .stat{background:rgba(0,255,200,0.1);border:1px solid rgba(0,255,200,0.15);border-radius:6px;padding:3px 8px;font-size:0.7rem;color:rgba(255,255,255,0.6)}
+49|#planetInfo .stat span{color:#0fc;font-weight:600}
+50|#planetInfo .close{position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:1.2rem;cursor:pointer;pointer-events:auto}
+51|#planetInfo .close:hover{color:#fff}
+52|
+53|/* Landing / Launch button */
+54|#landBtn{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,200,255,0.15);backdrop-filter:blur(8px);border:2px solid rgba(0,255,200,0.4);border-radius:14px;padding:14px 28px;color:#0fc;font-size:1.1rem;font-weight:700;letter-spacing:0.05em;pointer-events:auto;z-index:15;opacity:0;transition:all 0.4s;cursor:pointer;white-space:nowrap}
+55|#landBtn.show{opacity:1}
+56|#landBtn:active{transform:translateX(-50%) scale(0.95)}
+57|#landBtn.land{background:rgba(0,255,100,0.15);border-color:#0f6;color:#0f6}
+58|#landBtn.launch{background:rgba(255,200,0,0.15);border-color:#fc0;color:#fc0}
+59|
+60|/* Landing zone indicator */
+61|#landingZone{position:absolute;pointer-events:none;z-index:9;border-radius:50%;border:2px dashed rgba(0,255,200,0.2);top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;animation:pulseRing 1.5s ease-in-out infinite;display:none}
+62|#landingZone.show{display:block}
+63|#landingZone.pulse{animation:pulseRing 1s ease-in-out infinite}
+64|@keyframes pulseRing{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.6}50%{transform:translate(-50%,-50%) scale(1.3);opacity:0.2}}
+65|
+66|/* Boost + Brake Buttons */
+67|#btnRow{position:fixed;bottom:24px;left:0;right:0;display:flex;justify-content:space-between;padding:0 16px;pointer-events:none;z-index:20}
+68|#btnRow button{pointer-events:auto;border:none;border-radius:14px;font-size:0.85rem;font-weight:700;letter-spacing:0.05em;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.12s}
+69|#btnRow button:active{transform:scale(0.92)}
+70|#brakeBtn{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,100,50,0.3);background:rgba(40,10,0,0.8);backdrop-filter:blur(6px);color:#f84;font-size:1.6rem}
+71|#brakeBtn:active,#brakeBtn.active{background:rgba(255,80,20,0.3);border-color:#f84}
+72|#boostBtn{width:80px;height:80px;border-radius:50%;border:3px solid rgba(0,255,200,0.3);background:rgba(0,20,40,0.8);backdrop-filter:blur(6px);color:#0fc;font-size:1.6rem}
+73|#boostBtn:active,#boostBtn.active{background:rgba(0,255,200,0.2);border-color:#0fc;box-shadow:0 0 30px rgba(0,255,200,0.4)}
+74|#btnLabels{position:fixed;bottom:6px;left:16px;right:16px;display:flex;justify-content:space-between;color:rgba(255,255,255,0.2);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.1em;pointer-events:none;z-index:20}
+75|#btnLabels .l{text-align:left}
+76|#btnLabels .r{text-align:right}
+77|
+78|/* Touch indicator ring */
+79|#touchRing{position:fixed;width:60px;height:60px;border:3px solid rgba(0,255,200,0.4);border-radius:50%;pointer-events:none;z-index:25;transform:translate(-50%,-50%);transition:opacity 0.3s;opacity:0}
+80|#touchRing.show{opacity:1}
+81|#touchRing .inner{position:absolute;top:50%;left:50%;width:12px;height:12px;background:rgba(0,255,200,0.6);border-radius:50%;transform:translate(-50%,-50%)}
+82|
+83|/* Prograde / Retrograde Markers */
+84|#progradeMarker{position:absolute;width:18px;height:18px;border:2px solid rgba(0,255,100,0.8);border-radius:50%;pointer-events:none;z-index:8;transform:translate(-50%,-50%);display:none}
+85|#progradeMarker::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(0,255,100,0.6);border-radius:50%;transform:translate(-50%,-50%)}
+86|#progradeMarker.show{display:block}
+87|#retrogradeMarker{position:absolute;width:20px;height:20px;pointer-events:none;z-index:8;transform:translate(-50%,-50%);display:none}
+88|#retrogradeMarker::before{content:'✕';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;color:rgba(255,80,50,0.8);font-weight:700}
+89|#retrogradeMarker.show{display:block}
+90|
+91|/* Relative velocity hint */
+92|#relVelHint{position:absolute;top:68px;left:10px;background:rgba(0,10,30,0.85);backdrop-filter:blur(8px);border:1px solid rgba(0,255,200,0.15);border-radius:8px;padding:4px 10px;font-size:0.7rem;color:rgba(255,255,255,0.5);pointer-events:none;z-index:12;display:none;white-space:nowrap}
+93|#relVelHint.show{display:block}
+94|#relVelHint .val{color:#fc0;font-weight:600}
+95|#relVelHint .icon{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+96|
+97|/* Landing state overlay */
+98|#landedUI{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:12;opacity:0;transition:opacity 0.5s}
+99|#landedUI.show{opacity:1}
+100|#landedUI .planetName{font-size:1.8rem;color:#0fc;font-weight:700}
+101|#landedUI .sub{font-size:0.9rem;color:rgba(255,255,255,0.5);margin-top:6px}
+102|#landedUI .launchHint{font-size:0.8rem;color:rgba(255,200,0,0.6);margin-top:10px}
+103|
+104|/* Surface exploration mode UI */
+105|#surfaceUI{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:12;opacity:0;transition:opacity 0.5s}
+106|#surfaceUI.show{opacity:1}
+107|#surfaceUI .modeTitle{font-size:1.5rem;color:#0f6;font-weight:700;margin-bottom:10px}
+108|#surfaceUI .hint{font-size:0.85rem;color:rgba(255,255,255,0.7);line-height:1.4}
+109|
+110|/* Surface mode toggle button */
+111|#surfaceModeBtn{position:absolute;bottom:140px;left:50%;transform:translateX(-50%);background:rgba(0,200,100,0.15);backdrop-filter:blur(8px);border:2px solid rgba(0,255,100,0.4);border-radius:14px;padding:10px 20px;color:#0f6;font-size:0.95rem;font-weight:700;pointer-events:auto;z-index:15;opacity:0;transition:all 0.4s;cursor:pointer;white-space:nowrap}
+112|#surfaceModeBtn.show{opacity:1}
+113|#surfaceModeBtn:hover{background:rgba(0,255,100,0.25)}
+114|
+115|/* First-person toggle */
+116|#fpBtn{position:absolute;bottom:180px;left:50%;transform:translateX(-50%);background:rgba(100,100,200,0.15);backdrop-filter:blur(8px);border:2px solid rgba(150,150,255,0.4);border-radius:14px;padding:10px 20px;color:#aaf;font-size:0.95rem;font-weight:700;pointer-events:auto;z-index:15;opacity:0;transition:all 0.4s;cursor:pointer;white-space:nowrap}
+117|#fpBtn.show{opacity:1}
+118|#fpBtn.active{background:rgba(150,150,255,0.25);border-color:rgba(200,200,255,0.6)}
+119|
+120|/* Sequence status overlay */
+121|#seqStatus{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,10,30,0.9);backdrop-filter:blur(8px);border:2px solid rgba(0,255,200,0.3);border-radius:12px;padding:10px 22px;color:#0fc;font-size:1.1rem;font-weight:700;text-align:center;pointer-events:none;z-index:16;opacity:0;transition:opacity 0.3s;letter-spacing:0.05em}
+122|#seqStatus.show{opacity:1}
+123|
+124|@media(max-width:768px){
+125|  #boostBtn,#brakeBtn{width:70px;height:70px;font-size:1.3rem}
+126|  #topBar{padding:6px}
+127|  #location{font-size:0.7rem;padding:4px 10px}
+128|  #speedometer{padding:4px 8px;min-width:60px}
+129|  #speedometer .val{font-size:0.95rem}
+130|  #minimap{width:100px;height:100px;top:6px;right:6px}
+131|  #planetInfo{bottom:170px;padding:12px;max-width:280px}
+132|  #helpOverlay{padding:12px 16px;max-width:260px}
+133|  #helpOverlay .title{font-size:0.95rem}
+134|  #helpOverlay .hint{font-size:0.75rem}
+135|  #landedUI .planetName{font-size:1.4rem}
+136|}
+137|</style>
+138|</head>
+139|<body>
+140|
+141|<div id="hud">
+142|  <div id="topBar">
+143|    <div id="location">
+144|      <div class="name" id="locName">🚀 Im All</div>
+145|      <div class="hint" id="nearHint">–</div>
+146|    </div>
+147|    <div id="speedometer">
+148|      <div class="label">Geschw.</div>
+149|      <div class="val" id="speedVal">0</div>
+150|      <div class="unit">km/s</div>
+151|    </div>
+152|  </div>
+153|
+154|  <div id="minimap" class="show"><canvas id="mapCanvas" width="140" height="140"></canvas></div>
+155|  <div id="minimapLabel" class="show">RADAR</div>
+156|
+157|  <div id="progradeMarker"></div>
+158|  <div id="retrogradeMarker"></div>
+159|  <div id="relVelHint"></div>
+160|
+161|  <div id="helpOverlay">
+162|  <div class="title">🚀 Space Explorer 3D</div>
+163|  <div class="arrow">👆</div>
+164|  <div class="hint">Finger auf Bildschirm & ziehen → fliegen<br>⛔ = Bremsen · ⚡ = Boost<br>🪐 Planet anfliegen & ⬇️ Landen drücken<br>🖱️ WASD + Maus · Shift=Boost · Space=Bremse<br><br>🌍 <strong>Auf Planeten:</strong><br>E = Oberflächenmodus · Enter = Starten<br>WASD = Bewegen · Space = Springen · Tab = Kamera<br>Maus = Schauen (First-Person)</div>
+165|  </div>
+166|
+167|  <div id="landingZone"></div>
+168|
+169|  <div id="planetInfo">
+170|    <button class="close" onclick="closePlanetInfo()">✕</button>
+171|    <div class="title" id="piTitle">🌍 Planet</div>
+172|    <div class="sub" id="piSub">–</div>
+173|    <div class="desc" id="piDesc">–</div>
+174|    <div class="stats" id="piStats"></div>
+175|  </div>
+176|
+177|  <div id="seqStatus">⬇️ LANDUNG</div>
+178|
+179|  <div id="landedUI">
+180|   <div class="planetName" id="landPlanetName">🪐 Planet</div>
+181|   <div class="sub">Gelandet! 🛸</div>
+182|   <div class="launchHint">👆 🚀 Starten (Enter) · 🚶 Erkunden (E)</div>
+183|  </div>
+184|
+185|  <div id="surfaceUI">
+186|   <div class="modeTitle">🌍 Oberflächenmodus</div>
+187|   <div class="hint">WASD/Joystick: Bewegen · Space: Springen · Maus: Schauen · E: Zurück zum Schiff · Tab: Kamera wechseln</div>
+188|  </div>
+189|  </div>
+190|
+191|  <button id="landBtn" onclick="doLandOrLaunch()">⬇️ Landen</button>
+192|
+193|  <button id="surfaceModeBtn" onclick="toggleSurfaceMode()">🚶 Oberflächenmodus</button>
+194|  <button id="fpBtn" onclick="toggleFirstPerson()">👁️ 1. Person</button>
+195|
+196|<div id="touchRing"><div class="inner"></div></div>
+197|
+198|<div id="btnRow">
+199|  <button id="brakeBtn" ontouchstart="brakeDown=true;event.preventDefault()" ontouchend="brakeDown=false;event.preventDefault()" onmousedown="brakeDown=true" onmouseup="brakeDown=false">⛔</button>
+200|  <button id="boostBtn" ontouchstart="boostDown=true;event.preventDefault()" ontouchend="boostDown=false;event.preventDefault()" onmousedown="boostDown=true" onmouseup="boostDown=false">⚡</button>
+201|</div>
+202|<div id="btnLabels"><span class="l">⛔ Bremsen (Space)</span><span class="r">⚡ Boost (Shift)</span></div>
+203|
+204|<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+205|<script>
+206|// ===================== CONFIG =====================
+207|const CFG = {
+208| world: { asteroidCount: 200, starCount: 3000, nebulaCount: 8 },
+209| player: { thrust: 18, boostMultiplier: 3, brakePower: 50,
+210| maxSpeed: 45, maxBoostSpeed: 140,
+211| turnSensitivity: 0.014, maxPitch: 1.5, damping: 0.985 },
+212| camera: { fov: 70, near: 0.5, far: 5000, followSpeed: 0.07 },
+213| landing: { approachSpeed: 12, autoLandSpeed: 4, planetLandDist: 1.2,
+214| approachAltitude: 8, descentDuration: 3 },
+215| minimap: { radius: 55, range: 800, updateInterval: 3 },
+216| surface: {
+217| terrainSegments: 128, terrainScale: 0.08, surfaceGravity: 9.8,
+218| surfaceMoveSpeed: 5, surfaceTurnSpeed: 0.02, surfaceJumpForce: 8,
+219| surfaceFriction: 0.95, firstPersonMode: true
+220| }
+221|};
+222|
+223|// ===================== STATE =====================
+224|const state = {
+225| pos: new THREE.Vector3(0, 8, 0),
+226| vel: new THREE.Vector3(0, 0, -6),
+227| yaw: 0, pitch: 0,
+228| speed: 0,
+229| landed: false, landedOn: null,
+230| nearPlanet: null, nearDist: Infinity,
+231| // Controls
+232| touchId: -1, touchActive: false,
+233| touchCX: 0, touchCY: 0,
+234| boostDown: false, brakeDown: false,
+235| frameCount: 0, mapFrame: 0,
+236| camDist: 4,
+237| autoApproach: false, approachTarget: null,
+238| // 3D Landing sequence state machine
+239| seqState: 0, // 0=idle, 1=approach, 2=descent, 3=flare/touchdown, 4=landed, 5=liftoff, 6=climb
+240| seqPlanet: null,
+241| seqTimer: 0,
+242| seqStartPos: null,
+243| seqLandingPos: null,
+244| seqEndPos: null,
+245| seqStartVel: null,
+246| // Surface exploration state
+247| surfaceMode: false, // true when exploring planet surface on foot
+248| surfaceYaw: 0, surfacePitch: 0,
+249| surfaceVelocity: new THREE.Vector3(0, 0, 0),
+250| surfaceOnGround: true,
+251| surfaceJumping: false,
+252| surfaceJumpTimer: 0,
+253| firstPerson: false // First-person camera mode on surface
+254|};
+255|
+256|// ===================== THREE SETUP =====================
+257|const scene = new THREE.Scene();
+258|const camera = new THREE.PerspectiveCamera(CFG.camera.fov, window.innerWidth/window.innerHeight, CFG.camera.near, CFG.camera.far);
+259|const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+260|renderer.setSize(window.innerWidth, window.innerHeight);
+261|renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+262|renderer.toneMapping = THREE.ACESFilmicToneMapping;
+263|renderer.toneMappingExposure = 1.2;
+264|document.body.prepend(renderer.domElement);
+265|camera.position.set(0, 2, 6);
+266|
+267|// ===================== STARS =====================
+268|const starGeom = new THREE.BufferGeometry();
+269|const sp = new Float32Array(CFG.world.starCount * 3);
+270|const sc = new Float32Array(CFG.world.starCount * 3);
+271|for(let i=0; i<CFG.world.starCount; i++){
+272|  const theta = Math.random()*Math.PI*2, phi = Math.acos(Math.random()*2-1), r = 800+Math.random()*4000;
+273|  sp[i*3]=r*Math.sin(phi)*Math.cos(theta); sp[i*3+1]=r*Math.sin(phi)*Math.sin(theta); sp[i*3+2]=r*Math.cos(phi);
+274|  const c = 0.6+Math.random()*0.4; sc[i*3]=c; sc[i*3+1]=c; sc[i*3+2]=0.7+Math.random()*0.3;
+275|}
+276|starGeom.setAttribute('position', new THREE.BufferAttribute(sp,3));
+277|starGeom.setAttribute('color', new THREE.BufferAttribute(sc,3));
+278|scene.add(new THREE.Points(starGeom, new THREE.PointsMaterial({size:0.5,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false})));
+279|
+280|// ===================== NEBULAE =====================
+281|for(let n=0; n<CFG.world.nebulaCount; n++){
+282|  const g=new THREE.BufferGeometry(), p=new Float32Array(600*3), c=new Float32Array(600*3);
+283|  const hue=Math.random(),cx=(Math.random()-0.5)*2000,cy=(Math.random()-0.5)*2000,cz=(Math.random()-0.5)*2000,spread=200+Math.random()*400;
+284|  for(let i=0; i<600; i++){
+285|    p[i*3]=cx+(Math.random()-0.5)*spread;p[i*3+1]=cy+(Math.random()-0.5)*spread*0.5;p[i*3+2]=cz+(Math.random()-0.5)*spread;
+286|    const rgb=new THREE.Color().setHSL(hue+(Math.random()-0.5)*0.2,0.6,0.12+Math.random()*0.12);
+287|    c[i*3]=rgb.r;c[i*3+1]=rgb.g;c[i*3+2]=rgb.b;
+288|  }
+289|  g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setAttribute('color',new THREE.BufferAttribute(c,3));
+290|  scene.add(new THREE.Points(g,new THREE.PointsMaterial({size:6+Math.random()*12,sizeAttenuation:true,vertexColors:true,transparent:true,opacity:0.12,blending:THREE.AdditiveBlending,depthWrite:false})));
+291|}
+292|
+293|// ===================== PLANETS =====================
+294|const planets = [];
+295|const planetData = [
+296| { name:'Merkur', color:0xaaaaaa, size:8, dist:120, orbSpeed:0.008, desc:'Kleinster Planet, voller Krater. Tagsüber bis 430°C!', landColor:0x888888, terrainSeed: 12345, terrainScale: 0.12 },
+297| { name:'Venus', color:0xe6b85c, size:10, dist:180, orbSpeed:0.005, desc:'Heißester Planet! Giftige Wolken aus Schwefelsäure.', landColor:0xc8a050, terrainSeed: 23456, terrainScale: 0.10 },
+298| { name:'Erde', color:0x4488cc, size:12, dist:240, orbSpeed:0.003, desc:'Unser Zuhause! 71% Wasser, grüne Kontinente. 🌍', landColor:0x3366aa, terrainSeed: 34567, terrainScale: 0.10 },
+299| { name:'Mars', color:0xcc5533, size:9, dist:320, orbSpeed:0.002, desc:'Der Rote Planet. Höchster Berg: Olympus Mons!', landColor:0xaa4420, terrainSeed: 45678, terrainScale: 0.15 },
+300| { name:'Jupiter', color:0xccaa77, size:20, dist:450, orbSpeed:0.001, desc:'Größter Planet! 1300 Erden passen rein.', landColor:0xbb9955, terrainSeed: 56789, terrainScale: 0.08 },
+301| { name:'Saturn', color:0xeedd99, size:18, dist:580, orbSpeed:0.0007, desc:'Wunderschöne Ringe! Würde im Wasser schwimmen.', landColor:0xddcc88, terrainSeed: 67890, terrainScale: 0.06 }
+302|];
+303|
+304|// Procedural noise function for terrain
+305|function seededRandom(seed) {
+306|  let x = Math.sin(seed) * 10000;
+307|  return x - Math.floor(x);
+308|}
+309|
+310|function noise2D(x, y, seed) {
+311|  const nx = x * 0.1, ny = y * 0.1;
+312|  const ix = Math.floor(nx), iy = Math.floor(ny);
+313|  const fx = nx - ix, fy = ny - iy;
+314|  
+315|  const a = seededRandom(seed + ix * 12345 + iy * 67890);
+316|  const b = seededRandom(seed + (ix+1) * 12345 + iy * 67890);
+317|  const c = seededRandom(seed + ix * 12345 + (iy+1) * 67890);
+318|  const d = seededRandom(seed + (ix+1) * 12345 + (iy+1) * 67890);
+319|  
+320|  const u = fx * fx * (3 - 2 * fx);
+321|  const v = fy * fy * (3 - 2 * fy);
+322|  
+323|  return a * (1-u) * (1-v) + b * u * (1-v) + c * (1-u) * v + d * u * v;
+324|}
+325|
+326|function fbm(x, y, seed, octaves=5) {
+327|  let value = 0, amplitude = 1, frequency = 1, maxValue = 0;
+328|  for(let i=0; i<octaves; i++) {
+329|    value += amplitude * noise2D(x * frequency, y * frequency, seed + i * 1000);
+330|    maxValue += amplitude;
+331|    amplitude *= 0.5;
+332|    frequency *= 2;
+333|  }
+334|  return value / maxValue;
+335|}
+336|
+337| // Create terrain mesh with procedural displacement
+338|function createPlanetTerrain(pd) {
+339| const radius = pd.size;
+340| const segments = 128; // Hohe Auflösung für detailliertes Terrain
+341| const geom = new THREE.SphereGeometry(radius, segments, segments);
+342| const positions = geom.attributes.position;
+343|
+344| // Store original positions for raycasting
+345| const originalPositions = new Float32Array(positions.array.length);
+346| originalPositions.set(positions.array);
+347| geom.setAttribute('originalPosition', new THREE.BufferAttribute(originalPositions.slice(), 3));
+348|
+349| // Apply displacement mit mehr Details
+350| for(let i=0; i<positions.count; i++) {
+351| const x = positions.getX(i);
+352| const y = positions.getY(i);
+353| const z = positions.getZ(i);
+354|
+355| // Convert to spherical coordinates
+356| const lat = Math.asin(y / radius);
+357| const lon = Math.atan2(z, x);
+358|
+359| // Sample noise at this position mit mehr Octaves für Details
+360| const h = fbm(lon * 15, lat * 15, pd.terrainSeed, 8);
+361| const displacement = h * pd.size * pd.terrainScale;
+362|
+363| // Displace along normal
+364| const len = Math.sqrt(x*x + y*y + z*z);
+365| const nx = x / len, ny = y / len, nz = z / len;
+366|
+367| positions.setXYZ(i, x + nx * displacement, y + ny * displacement, z + nz * displacement);
+368| }
+369|
+370| geom.computeVertexNormals();
+371| geom.computeBoundingSphere();
+372|  
+373|  // Create material with terrain coloring based on height
+374|  const terrainMaterial = new THREE.MeshPhongMaterial({
+375|    color: pd.color,
+376|    emissive: pd.color,
+377|    emissiveIntensity: 0.05,
+378|    shininess: 30,
+379|    flatShading: true,
+380|    vertexColors: true
+381|  });
+382|  
+383|  // Add vertex colors based on height - verbessert für realistischere Oberfläche
+384|  const colors = new Float32Array(positions.count * 3);
+385|  const landColor = new THREE.Color(pd.landColor);
+386|  const baseColor = new THREE.Color(pd.color);
+387|  const mountainColor = new THREE.Color().setRGB(0.8, 0.8, 0.8); // Hell für Berge
+388|  const valleyColor = new THREE.Color().setRGB(0.3, 0.3, 0.3); // Dunkel für Täler
+389|
+390|  for(let i=0; i<positions.count; i++) {
+391|  const origX = originalPositions[i*3];
+392|  const origY = originalPositions[i*3+1];
+393|  const origZ = originalPositions[i*3+2];
+394|  const newX = positions.getX(i);
+395|  const newY = positions.getY(i);
+396|  const newZ = positions.getZ(i);
+397|
+398|  const origLen = Math.sqrt(origX*origX + origY*origY + origZ*origZ);
+399|  const newLen = Math.sqrt(newX*newX + newY*newY + newZ*newZ);
+400|  const heightRatio = (newLen - origLen) / (pd.size * pd.terrainScale);
+401|
+402|  // Realistischere Farbverläufe basierend auf Höhe
+403|  let r, g, b;
+404|  if (heightRatio > 0.5) {
+405|  // Sehr hohe Berge - fast weiß/hellgrau
+406|  const mountainFactor = Math.min(1, (heightRatio - 0.5) * 2);
+407|  r = THREE.MathUtils.lerp(landColor.r, mountainColor.r, mountainFactor);
+408|  g = THREE.MathUtils.lerp(landColor.g, mountainColor.g, mountainFactor);
+409|  b = THREE.MathUtils.lerp(landColor.b, mountainColor.b, mountainFactor);
+410|  } else if (heightRatio > 0.1) {
+411|  // Normale Hügel - Basislandfarbe
+412|  r = landColor.r;
+413|  g = landColor.g;
+414|  b = landColor.b;
+415|  } else if (heightRatio > -0.3) {
+416|  // Flaches Land - leicht dunkler
+417|  const flatFactor = 1 - Math.abs(heightRatio);
+418|  r = landColor.r * (0.7 + flatFactor * 0.3);
+419|  g = landColor.g * (0.7 + flatFactor * 0.3);
+420|  b = landColor.b * (0.7 + flatFactor * 0.3);
+421|  } else {
+422|  // Täler/Krater - sehr dunkel
+423|  const valleyFactor = Math.min(1, (-heightRatio - 0.3) * 2);
+424|  r = THREE.MathUtils.lerp(landColor.r, valleyColor.r, valleyFactor);
+425|  g = THREE.MathUtils.lerp(landColor.g, valleyColor.g, valleyFactor);
+426|  b = THREE.MathUtils.lerp(landColor.b, valleyColor.b, valleyFactor);
+427|  }
+428|  colors[i*3] = r;
+429|  colors[i*3+1] = g;
+430|  colors[i*3+2] = b;
+431|  }
+432|  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+433|  
+434|  const mesh = new THREE.Mesh(geom, terrainMaterial);
+435|  mesh.castShadow = true;
+436|  mesh.receiveShadow = true;
+437|  
+438|  // Store terrain data for raycasting during landing
+439|  mesh.userData.terrainData = {
+440|    originalPositions: originalPositions,
+441|    radius: radius,
+442|    seed: pd.terrainSeed,
+443|    scale: pd.terrainScale,
+444|    landColor: pd.landColor
+445|  };
+446|  
+447|  return mesh;
+448|}
+449|
+450|planetData.forEach((pd, idx) => {
+451|  const group = new THREE.Group();
+452|  
+453|  // Create terrain mesh instead of simple sphere
+454|  const terrainMesh = createPlanetTerrain(pd);
+455|  group.add(terrainMesh);
+456|  
+457|  // Add atmosphere glow for Earth
+458|  if(idx===2){
+459|    group.add(new THREE.Mesh(new THREE.SphereGeometry(pd.size*1.08,32,32),
+460|      new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.1,side:THREE.BackSide,depthWrite:false})));
+461|  }
+462|  if(idx===5){
+463|    const ring=new THREE.Mesh(new THREE.RingGeometry(pd.size*1.4,pd.size*2.4,64),
+464|      new THREE.MeshBasicMaterial({color:0xeedd99,side:THREE.DoubleSide,transparent:true,opacity:0.6,depthWrite:false}));
+465|    ring.rotation.x=Math.PI*0.4; group.add(ring);
+466|  }
+467|  const angle=Math.random()*Math.PI*2;
+468|  group.position.set(pd.dist*Math.cos(angle),0,pd.dist*Math.sin(angle));
+469|  scene.add(group);
+470|  planets.push({group,mesh:terrainMesh,data:pd,idx,angle,dist:pd.dist,orbSpeed:pd.orbSpeed});
+471|});
+472|
+473|// ===================== SUN =====================
+474|const sun=new THREE.Mesh(new THREE.SphereGeometry(12,32,32),new THREE.MeshBasicMaterial({color:0xffdd44}));
+475|scene.add(sun);
+476|for(let i=0;i<3;i++) scene.add(new THREE.Mesh(new THREE.SphereGeometry(12+(i+1)*6,32,32),new THREE.MeshBasicMaterial({color:0xffaa22,transparent:true,opacity:0.1-i*0.025,side:THREE.BackSide})));
+477|
+478|// Bessere Beleuchtung für realistischere 3D-Oberfläche
+479|const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+480|sunLight.position.set(2000, 1000, 2000);
+481|sunLight.castShadow = true;
+482|sunLight.shadow.mapSize.width = 2048;
+483|sunLight.shadow.mapSize.height = 2048;
+484|sunLight.shadow.camera.near = 0.5;
+485|sunLight.shadow.camera.far = 5000;
+486|sunLight.shadow.camera.left = -2000;
+487|sunLight.shadow.camera.right = 2000;
+488|sunLight.shadow.camera.top = 2000;
+489|sunLight.shadow.camera.bottom = -2000;
+490|scene.add(sunLight);
+491|
+492|scene.add(new THREE.PointLight(0xffeedd,2,2000));
+493|scene.add(new THREE.AmbientLight(0x444466,0.5));
+494|
+495|// Enable shadow rendering
+496|renderer.shadowMap.enabled = true;
+497|renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+498|
+499|// ===================== ASTEROIDS =====================
+500|const astGroup=new THREE.Group(); scene.add(astGroup);
+501|const asteroids=[];
+502|function createAsteroid(size,pos){
+503|  const geom=new THREE.DodecahedronGeometry(size,0),a=geom.attributes.position;
+504|  for(let i=0;i<a.count;i++) a.setXYZ(i,a.getX(i)+(Math.random()-0.5)*size*0.3,a.getY(i)+(Math.random()-0.5)*size*0.3,a.getZ(i)+(Math.random()-0.5)*size*0.3);
+505|  geom.computeVertexNormals();
+506|  const mesh=new THREE.Mesh(geom,new THREE.MeshPhongMaterial({color:new THREE.Color().setHSL(0.08,0.05+Math.random()*0.1,0.2+Math.random()*0.3),emissiveIntensity:0.02,flatShading:true}));
+507|  mesh.position.copy(pos);mesh.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
+508|  mesh.userData={rotSpeed:new THREE.Vector3((Math.random()-0.5)*0.01,(Math.random()-0.5)*0.01,(Math.random()-0.5)*0.01)};
+509|  astGroup.add(mesh); asteroids.push(mesh);
+510|}
+511|for(let i=0;i<CFG.world.asteroidCount;i++) createAsteroid(0.5+Math.random()*3,new THREE.Vector3((280+Math.random()*180)*Math.cos(Math.random()*Math.PI*2),(Math.random()-0.5)*40,(280+Math.random()*180)*Math.sin(Math.random()*Math.PI*2)));
+512|
+513|// ===================== SHIP =====================
+514|const shipGroup = new THREE.Group();
+515|shipGroup.position.copy(state.pos);
+516|const body = new THREE.Mesh(new THREE.ConeGeometry(0.6,1.8,6),new THREE.MeshPhongMaterial({color:0x88ddff,emissive:0x226688,emissiveIntensity:0.15,shininess:60}));
+517|body.rotation.x=Math.PI*0.5; body.castShadow = true; body.receiveShadow = true; shipGroup.add(body);
+518|const cockpit=new THREE.Mesh(new THREE.SphereGeometry(0.35,12,12,0,Math.PI*2,0,Math.PI*0.5),new THREE.MeshPhongMaterial({color:0x88eeff,emissive:0x44aacc,emissiveIntensity:0.3,transparent:true,opacity:0.7,shininess:100}));
+519|cockpit.position.set(0,0.25,0.6);cockpit.rotation.x=-0.3; cockpit.castShadow = true; shipGroup.add(cockpit);
+520|const wings=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.05,0.3),new THREE.MeshPhongMaterial({color:0x66bbdd,emissive:0x114466,emissiveIntensity:0.1,shininess:40}));
+521|wings.position.set(0,-0.05,-0.1); wings.castShadow = true; shipGroup.add(wings);
+522|
+523|// Flame
+524|const flameGroup = new THREE.Group(); shipGroup.add(flameGroup);
+525|flameGroup.position.set(0,0,-1.0);
+526|const flameCore = new THREE.Mesh(new THREE.ConeGeometry(0.3,0.8,8),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.9}));
+527|flameCore.rotation.x=-Math.PI*0.5; flameGroup.add(flameCore);
+528|const flameMid = new THREE.Mesh(new THREE.ConeGeometry(0.45,1.2,8),new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:0.7}));
+529|flameMid.rotation.x=-Math.PI*0.5; flameGroup.add(flameMid);
+530|const flameOuter = new THREE.Mesh(new THREE.ConeGeometry(0.6,1.6,8),new THREE.MeshBasicMaterial({color:0xff3300,transparent:true,opacity:0.4}));
+531|flameOuter.rotation.x=-Math.PI*0.5; flameGroup.add(flameOuter);
+532|for(let side=-1;side<=1;side+=2){
+533|  const sf=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.3,6),new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:0.5}));
+534|  sf.rotation.x=-Math.PI*0.5;sf.position.set(side*0.35,0,0.1);flameGroup.add(sf);sf.userData={side};
+535|}
+536|const shipLight = new THREE.PointLight(0x00ccff,0.5,20);
+537|shipLight.position.set(0,0,-1.5);shipGroup.add(shipLight);
+538|
+539|// Landing legs (hidden until touchdown)
+540|const legGroup = new THREE.Group(); shipGroup.add(legGroup);
+541|legGroup.visible = false;
+542|for(let i=0; i<3; i++){
+543|  const angle = (i/3)*Math.PI*2;
+544|  const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.06,0.6,4),
+545|    new THREE.MeshPhongMaterial({color:0x888888,emissive:0x444444,emissiveIntensity:0.1}));
+546|  leg.position.set(Math.sin(angle)*0.5,-0.6,-0.1);
+547|  leg.rotation.z = -Math.sin(angle)*0.3;
+548|  leg.rotation.x = Math.cos(angle)*0.3;
+549|  legGroup.add(leg);
+550|  // foot pad
+551|  const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.12,0.05,6),
+552|    new THREE.MeshPhongMaterial({color:0x666666}));
+553|  foot.position.set(Math.sin(angle)*0.7,-0.85,-0.1);
+554|  legGroup.add(foot);
+555|}
+556|
+557|// Dust particles for touchdown
+558|const dustCount = 60;
+559|const dustGeom = new THREE.BufferGeometry();
+560|const dustPos = new Float32Array(dustCount * 3);
+561|const dustVel = new Float32Array(dustCount * 3);
+562|const dustLife = new Float32Array(dustCount);
+563|for(let i=0;i<dustCount;i++){
+564|  dustPos[i*3]=0; dustPos[i*3+1]=-100; dustPos[i*3+2]=0; // hidden off screen
+565|  dustVel[i*3]=0; dustVel[i*3+1]=0; dustVel[i*3+2]=0;
+566|  dustLife[i]=0;
+567|}
+568|dustGeom.setAttribute('position', new THREE.BufferAttribute(dustPos,3));
+569|const dustMat = new THREE.PointsMaterial({color:0xccaa88,size:0.08,transparent:true,opacity:0.6,blending:THREE.AdditiveBlending,depthWrite:false});
+570|const dustParticles = new THREE.Points(dustGeom,dustMat);
+571|dustParticles.visible = false;
+572|scene.add(dustParticles);
+573|// Store for animation
+574|const dustState = { positions: dustPos, velocities: dustVel, lifetimes: dustLife, count: dustCount, active: false };
+575|
+576|function emitDustBurst(worldPos, count=30){
+577|  dustParticles.visible = true;
+578|  dustParticles.position.copy(worldPos);
+579|  const pos = dustState.positions;
+580|  const vel = dustState.velocities;
+581|  const life = dustState.lifetimes;
+582|  for(let i=0; i<count && i<dustCount; i++){
+583|    pos[i*3] = (Math.random()-0.5)*0.5;
+584|    pos[i*3+1] = (Math.random()-0.5)*0.2;
+585|    pos[i*3+2] = (Math.random()-0.5)*0.5;
+586|    vel[i*3] = (Math.random()-0.5)*2;
+587|    vel[i*3+1] = Math.random()*3+1;
+588|    vel[i*3+2] = (Math.random()-0.5)*2;
+589|    life[i] = 0.5 + Math.random()*0.8;
+590|  }
+591|  dustParticles.geometry.attributes.position.needsUpdate = true;
+592|}
+593|
+594|function updateDust(delta){
+595|  if(!dustParticles.visible) return;
+596|  const pos = dustState.positions;
+597|  const vel = dustState.velocities;
+598|  const life = dustState.lifetimes;
+599|  let anyAlive = false;
+600|  for(let i=0; i<dustCount; i++){
+601|    if(life[i] > 0){
+602|      life[i] -= delta;
+603|      pos[i*3] += vel[i*3]*delta;
+604|      pos[i*3+1] += vel[i*3+1]*delta;
+605|      pos[i*3+2] += vel[i*3+2]*delta;
+606|      vel[i*3+1] -= 3*delta; // gravity
+607|      if(life[i] > 0) anyAlive = true;
+608|    }else{
+609|      // Reset below ground
+610|      if(!anyAlive && i === dustCount-1){
+611|        pos[i*3] = 0; pos[i*3+1] = -100; pos[i*3+2] = 0;
+612|      }
+613|    }
+614|  }
+615|  dustParticles.geometry.attributes.position.needsUpdate = true;
+616|  if(!anyAlive){
+617|    dustParticles.visible = false;
+618|    dustState.active = false;
+619|  }
+620|}
+621|
+622|scene.add(shipGroup);
+623|
+624|// ===================== CONTROLS =====================
+625|const touchRing = document.getElementById('touchRing');
+626|let boostDown = false, brakeDown = false;
+627|
+628|document.addEventListener('touchstart', e => { if(state.landed) return;
+629|  if(state.touchActive) return;const t=e.changedTouches[0];
+630|  state.touchId=t.identifier;state.touchActive=true;state.touchCX=0;state.touchCY=0;
+631|  touchRing.classList.add('show');touchRing.style.left=t.clientX+'px';touchRing.style.top=t.clientY+'px';
+632|},{passive:true});
+633|document.addEventListener('touchmove', e => { for(let t of e.changedTouches){if(t.identifier===state.touchId){
+634|  e.preventDefault();const cx=window.innerWidth/2,cy=window.innerHeight/2;
+635|  state.touchCX=Math.max(-1,Math.min(1,(t.clientX-cx)/cx));
+636|  state.touchCY=Math.max(-1,Math.min(1,(t.clientY-cy)/cy));
+637|  touchRing.style.left=t.clientX+'px';touchRing.style.top=t.clientY+'px';
+638|}}},{passive:false});
+639|document.addEventListener('touchend', e => {for(let t of e.changedTouches){if(t.identifier===state.touchId){
+640|  state.touchActive=false;state.touchId=-1;state.touchCX=0;state.touchCY=0;touchRing.classList.remove('show');
+641|}}},{passive:true});
+642|document.addEventListener('touchcancel', e => {state.touchActive=false;state.touchId=-1;state.touchCX=0;state.touchCY=0;touchRing.classList.remove('show');},{passive:true});
+643|
+644|const keys={};
+645|document.addEventListener('keydown',e=>{
+646| keys[e.key.toLowerCase()]=true;
+647| if(e.key==='Shift') boostDown=true;
+648| if(e.key===' '||e.key==='Space'){brakeDown=true;e.preventDefault()}
+649| if((e.key==='Enter')&&state.landed) doLandOrLaunch();
+650| if(e.key==='L'||e.key==='l'){if(!state.landed)doLandOrLaunch();}
+651| if(e.key==='E'||e.key==='e'){if(state.landed)toggleSurfaceMode();}
+652| if(e.key==='Tab'){if(state.landed&&state.surfaceMode)toggleFirstPerson();e.preventDefault();}
+653|});
+654|document.addEventListener('keyup',e=>{
+655| keys[e.key.toLowerCase()]=false;
+656| if(e.key==='Shift') boostDown=false;
+657| if(e.key===' '||e.key==='Space') brakeDown=false;
+658|});
+659|
+660|let mouseDown=false;
+661|renderer.domElement.addEventListener('mousedown',e=>{if(state.landed)return;mouseDown=true;state.touchActive=true;
+662| const cx=window.innerWidth/2,cy=window.innerHeight/2;
+663| state.touchCX=Math.max(-1,Math.min(1,(e.clientX-cx)/cx));
+664| state.touchCY=Math.max(-1,Math.min(1,(e.clientY-cy)/cy));
+665|});
+666|document.addEventListener('mousemove',e=>{
+667| if(mouseDown){
+668| const cx=window.innerWidth/2,cy=window.innerHeight/2;
+669| state.touchCX=Math.max(-1,Math.min(1,(e.clientX-cx)/cx));
+670| state.touchCY=Math.max(-1,Math.min(1,(e.clientY-cy)/cy));
+671| }
+672| // First-person camera control on surface
+673| if(state.surfaceMode && state.firstPerson && state.landedOn) {
+674| state.surfaceYaw -= e.movementX * CFG.surface.surfaceTurnSpeed;
+675| state.surfacePitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, 
+676| state.surfacePitch - e.movementY * CFG.surface.surfaceTurnSpeed));
+677| }
+678|});
+679|document.addEventListener('mouseup',()=>{mouseDown=false;state.touchActive=false;state.touchCX=0;state.touchCY=0;});
+680|function doLandOrLaunch(){
+681|  if(state.landed){ startLaunchSequence(); return; }
+682|  if(state.seqState !== 0) return; // Bereits in Sequence
+683|  if(state.autoApproach){
+684|    cancelApproach();
+685|    return;
+686|  }
+687|  let nearest=null,nearDist=Infinity;
+688|  planets.forEach(p=>{const d=state.pos.distanceTo(p.group.position);if(d<nearDist){nearDist=d;nearest=p;}});
+689|  if(!nearest) return;
+690|  // Direkte Landesequenz starten, sobald nah genug (Größe + 40 Einheiten)
+691|  startLandingSequence(nearest);
+692|}
+693|
+694|function startApproach(planet){
+695|  state.autoApproach=true;
+696|  state.approachTarget=planet;
+697|  document.getElementById('nearHint').textContent=`🛰️ NAV: ${planet.data.name}`;
+698|  document.getElementById('landBtn').textContent='✕ Abbrechen';
+699|  document.getElementById('landBtn').className='show';
+700|  document.getElementById('seqStatus').textContent=`🛰️ Anflug ${planet.data.name}`;
+701|  document.getElementById('seqStatus').className='show';
+702|}
+703|
+704|function cancelApproach(){
+705| state.autoApproach=false;
+706| state.approachTarget=null;
+707| document.getElementById('nearHint').textContent='–';
+708| document.getElementById('seqStatus').className='';
+709| detectLandingState();
+710|}
+711|
+712|// ===================== SURFACE EXPLORATION FUNCTIONS =====================
+713|function toggleSurfaceMode() {
+714| if(!state.landed || !state.landedOn) return;
+715| 
+716| state.surfaceMode = !state.surfaceMode;
+717| 
+718| if(state.surfaceMode) {
+719| // Enter surface exploration mode
+720| state.firstPerson = false;
+721| document.getElementById('surfaceModeBtn').textContent = '🚀 Zurück zum Schiff';
+722| document.getElementById('surfaceModeBtn').className = 'show';
+723| document.getElementById('fpBtn').className = 'show';
+724| document.getElementById('landBtn').classList.remove('show');
+725| document.getElementById('surfaceUI').classList.add('show');
+726| document.getElementById('landedUI').classList.remove('show');
+727| 
+728| // Position camera at surface level
+729| const p = state.landedOn;
+730| const terrainNormal = state.seqLandingNormal || new THREE.Vector3(0, 1, 0);
+731| state.surfaceYaw = state.yaw;
+732| state.surfacePitch = 0;
+733| state.surfaceVelocity.set(0, 0, 0);
+734| state.surfaceOnGround = true;
+735| 
+736| // Hide ship, show surface camera
+737| shipGroup.visible = false;
+738| } else {
+739| // Exit surface exploration mode
+740| document.getElementById('surfaceModeBtn').textContent = '🚶 Oberflächenmodus';
+741| document.getElementById('surfaceModeBtn').className = '';
+742| document.getElementById('fpBtn').className = '';
+743| document.getElementById('landBtn').className = 'show launch';
+744| document.getElementById('surfaceUI').classList.remove('show');
+745| document.getElementById('landedUI').classList.add('show');
+746| state.firstPerson = false;
+747| 
+748| // Show ship again
+749| shipGroup.visible = true;
+750| }
+751|}
+752|
+753|function toggleFirstPerson() {
+754| if(!state.surfaceMode || !state.landedOn) return;
+755| 
+756| state.firstPerson = !state.firstPerson;
+757| document.getElementById('fpBtn').classList.toggle('active', state.firstPerson);
+758|}
+759|
+760|// Raycast to find terrain height at a given position
+761|function getTerrainHeight(planet, worldPos) {
+762| const raycaster = new THREE.Raycaster();
+763| const dir = planet.group.position.clone().sub(worldPos).normalize();
+764| raycaster.set(worldPos, dir.negate());
+765| 
+766| const intersects = raycaster.intersectObject(planet.mesh, true);
+767| if(intersects.length > 0) {
+768| return intersects[0].distance;
+769| }
+770| return planet.data.size; // Fallback to base radius
+771|}
+772|
+773|// Get terrain normal at a given position
+774|function getTerrainNormal(planet, worldPos) {
+775| const raycaster = new THREE.Raycaster();
+776| const dir = planet.group.position.clone().sub(worldPos).normalize();
+777| raycaster.set(worldPos, dir.negate());
+778| 
+779| const intersects = raycaster.intersectObject(planet.mesh, true);
+780| if(intersects.length > 0 && intersects[0].face) {
+781| return intersects[0].face.normal.clone().applyMatrix3(
+782| new THREE.Matrix3().getNormalMatrix(planet.mesh.matrixWorld)
+783| );
+784| }
+785| return new THREE.Vector3(0, 1, 0); // Fallback
+786|}
+787|
+788|// ===================== 3D LANDING SEQUENCE (WITH REAL TERRAIN) =====================
+789|function startLandingSequence(planet){
+790| if(!planet) return;
+791| state.autoApproach = false;
+792| state.approachTarget = null;
+793|
+794| document.getElementById('landBtn').classList.remove('show');
+795| document.getElementById('locName').textContent=`🛸 Landung ${planet.data.name}`;
+796| document.getElementById('seqStatus').textContent='⬇️ Sinkflug';
+797| document.getElementById('seqStatus').className='show';
+798|
+799| // Raycast gegen echtes Terrain-Mesh für echte Landeposition
+800| const terrainMesh = planet.mesh;
+801| const raycaster = new THREE.Raycaster();
+802| const dirFromShip = planet.group.position.clone().sub(state.pos).normalize();
+803| const rayOrigin = state.pos.clone();
+804| raycaster.set(rayOrigin, dirFromShip.negate()); // Ray from ship toward planet
+805| 
+806| const intersects = raycaster.intersectObject(terrainMesh, true);
+807| let landingPos, landingNormal;
+808|
+809| if(intersects.length > 0) {
+810| // Landung auf echter Terrain-Oberfläche
+811| landingPos = intersects[0].point.clone();
+812| landingNormal = intersects[0].face ? intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(terrainMesh.matrixWorld)) : dirFromShip.clone();
+813| } else {
+814| // Fallback: Kugel-Oberfläche - EXAKT auf der Oberfläche (nicht darüber!)
+815| landingPos = planet.group.position.clone().add(dirFromShip.clone().multiplyScalar(planet.data.size));
+816| landingNormal = dirFromShip.clone();
+817| }
+818|
+819| // STATE MACHINE auf Approach setzen (neue Phase 1 für Animation)
+820| state.seqState = 1; // approach
+821| state.seqPlanet = planet;
+822| state.seqTimer = 0;
+823| state.seqStartPos = state.pos.clone();
+824| state.seqLandingPos = landingPos.clone();
+825| state.seqLandingNormal = landingNormal.clone();
+826|
+827| // Schiff langsam abbremsen und ausrichten
+828| state.pitch = 0.5;
+829| const toPlanet = dirFromShip;
+830| state.yaw = Math.atan2(toPlanet.x, toPlanet.z);
+831|
+832| // Ship rotation anpassen für bessere Landeanimation
+833| shipGroup.rotation.set(state.pitch, state.yaw, 0);
+834|}
+835|
+836|function updateLandingSequence(delta){
+837| const p = state.seqPlanet;
+838| if(!p) return;
+839| state.seqTimer += delta;
+840|
+841| if(state.seqState === 1){
+842| // ======= APPROACH: Langsames Annähern an den Planeten =======
+843| const approachDuration = 2.0;
+844| const t = Math.min(1, state.seqTimer / approachDuration);
+845| const st = t * t; // ease-in für sanfte Annäherung
+846|
+847| // Zielposition: etwas über der Landezone (für bessere Animation)
+848| const approachHeight = 5;
+849| const approachTarget = state.seqLandingPos.clone().add(
+850| state.seqLandingNormal.clone().multiplyScalar(approachHeight)
+851| );
+852|
+853| // Schiff zur Approach-Position bewegen
+854| state.pos.lerpVectors(state.seqStartPos, approachTarget, st);
+855|
+856| // Schiff ausrichten: Nase leicht nach oben, auf Planet zielen
+857| state.pitch += (0.3 - state.pitch) * 0.05;
+858| const toPlanet = p.group.position.clone().sub(state.pos).normalize();
+859| state.yaw += (Math.atan2(toPlanet.x, toPlanet.z) - state.yaw) * 0.05;
+860|
+861| // Geschwindigkeit reduzieren
+862| state.vel.multiplyScalar(0.95);
+863| state.speed = state.vel.length();
+864|
+865| document.getElementById('seqStatus').textContent='🎯 Anflug';
+866| document.getElementById('nearHint').textContent=`🛸 Anflug: ${Math.round((1-st)*100)}%`;
+867|
+868| if(t >= 1){
+869| // Approach fertig, Descent starten
+870| state.seqState = 2;
+871| state.seqTimer = 0;
+872| state.seqStartPos = state.pos.clone();
+873| document.getElementById('seqStatus').textContent='⬇️ Sinkflug';
+874| }
+875| } else if(state.seqState === 2){
+876| // ======= DESCENT: Sanfter Sinkflug auf ECHTER Terrain-Oberfläche =======
+877| const duration = CFG.landing.descentDuration;
+878| const t = Math.min(1, state.seqTimer / duration);
+879| const st = t * t * (3 - 2 * t); // smoothstep
+880|
+881| // Verwende VORBERECHNETE echte Terrain-Landeposition und -Normale
+882| const landingPos = state.seqLandingPos.clone();
+883| const landingNormal = state.seqLandingNormal.clone();
+884|
+885| // Position interpolieren
+886| state.pos.lerpVectors(state.seqStartPos, landingPos, st);
+887|
+888| // Ship-Orientierung: Nase nach oben, aber an Terrain-Normale angepasst
+889| // Ziel: Schiff "steht" auf der Oberfläche (Up-Vektor = Terrain-Normale)
+890| const targetUp = landingNormal.clone();
+891| const targetForward = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
+892| 
+893| // Pitch hochziehen (Nase zeigt nach oben) & langsam zurücknehmen für Flare
+894| const pitchCurve = 1.0 - Math.min(0.8, t * t * 2.5);
+895| state.pitch += (pitchCurve * 1.2 - state.pitch) * 0.08;
+896|
+897| // Yaw leicht an Terrain anpassen (für Seitwärts-Neigung bei Hängen)
+898| state.yaw += Math.sin(state.seqTimer * 3) * 0.004;
+899|
+900| // Gear ausfahren bei ~50%
+901|    if(st > 0.5 && !legGroup.visible){
+902|      legGroup.visible = true;
+903|      // Landing Gear an Terrain-Normale ausrichten
+904|      legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), landingNormal));
+905|      document.getElementById('seqStatus').textContent='🦿 Fahrwerk';
+906|      setTimeout(()=>{document.getElementById('seqStatus').textContent='⬇️ Landen';},400);
+907|    }
+908|
+909|    // Bei ~75% → Flare-Phase (Pitch flach + leicht absenken)
+910|    if(st > 0.7){
+911|      state.seqState = 3;
+912|      state.seqTimer = 0;
+913|      state.seqStartPos = state.pos.clone();
+914|      document.getElementById('seqStatus').textContent='🔄 Abfangen';
+915|    }
+916|
+917|    // Distanz-Info (echte Höhe über Terrain)
+918|    const dist = state.pos.distanceTo(p.group.position);
+919|    // Use getTerrainHeight for accurate height above actual terrain surface
+920|    const currentTerrainHeight = getTerrainHeight(p, state.pos);
+921|    const heightAboveTerrain = Math.max(0, dist - currentTerrainHeight);
+922|    const heightM = Math.round(heightAboveTerrain * 1000);
+    let hintText = `🛸 ${heightM} m`;
+    if (state.seqState === 3 && heightM < 2000 && state.speed > 10) {
+      hintText += ` ⚠️ LANGSAME! (${Math.round(state.speed)} km/s)`;
+    }
+    document.getElementById('nearHint').textContent = hintText;
+923|  }
+924|  else if(state.seqState === 3){
+925|    // ======= FLARE + TOUCHDOWN auf ECHTEM Terrain =======
+926|    const duration = 1.0;
+927|    const t = Math.min(1, state.seqTimer / duration);
+928|    const st = t * t * (3 - 2 * t);
+929|
+930|    // Verwende VORBERECHNETE echte Terrain-Position
+931|    const landingPos = state.seqLandingPos.clone();
+932|    const landingNormal = state.seqLandingNormal.clone();
+933|
+934|    state.pos.lerpVectors(state.seqStartPos, landingPos, st);
+935|
+936|    // Pitch nach unten zur Horizontalen (relativ zur Terrain-Normale)
+937|    state.pitch *= 0.9;
+938|    if(Math.abs(state.pitch) < 0.05) state.pitch = 0;
+939|
+940|    // Landing Gear an Terrain anpassen
+941|    if(legGroup.visible) {
+942|      legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), landingNormal));
+943|    }
+944|
+945|    // Vibration kurz vor Touchdown
+946|    if(st > 0.85){
+947|    const vib = (1 - st) * 0.05;
+948|    state.pos.x += (Math.random()-0.5) * vib;
+949|    // state.pos.y += (Math.random()-0.5) * vib; // REMOVED: Keine Y-Vibration, sonst schwebt das Schiff!
+950|    state.pos.z += (Math.random()-0.5) * vib;
+951|    }
+952|
+953|    // Distanz-Info (echte Höhe über Terrain)
+954|    const dist = state.pos.distanceTo(p.group.position);
+955|    // Use getTerrainHeight for accurate height above actual terrain surface
+956|    const currentTerrainHeight = getTerrainHeight(p, state.pos);
+957|    const heightAboveTerrain = Math.max(0, dist - currentTerrainHeight);
+958|    const heightM = Math.round(heightAboveTerrain * 1000);
+    let hintText = `🛸 ${heightM} m`;
+    if (state.seqState === 3 && heightM < 2000 && state.speed > 10) {
+      hintText += ` ⚠️ LANGSAME! (${Math.round(state.speed)} km/s)`;
+    }
+    document.getElementById('nearHint').textContent = hintText;
+959|
+960|    // Touchdown!
+961|    if(t >= 1){
+962|    // NOCHMALS Raycast für EXAKTE Terrain-Position (Terrain könnte sich bewegt haben)
+963|    const finalRaycaster = new THREE.Raycaster();
+964|    const finalDir = p.group.position.clone().sub(state.pos).normalize();
+965|    finalRaycaster.set(state.pos.clone(), finalDir.negate());
+966|    const finalIntersects = finalRaycaster.intersectObject(p.mesh, true);
+967| 
+968|    let finalLandingPos = landingPos.clone();
+969|    if(finalIntersects.length > 0) {
+970|    finalLandingPos = finalIntersects[0].point.clone();
+971|    } else {
+972|    // Fallback: Berechne Position auf der Kugel-Oberfläche
+973|    const distToCenter = state.pos.distanceTo(p.group.position);
+974|    finalLandingPos = p.group.position.clone().add(
+975|    finalDir.clone().multiplyScalar(Math.max(p.data.size, distToCenter))
+976|    );
+977|    }
+978| 
+979|    // Schiff EXAKT auf Terrain-Oberfläche setzen
+980|    state.pos.copy(finalLandingPos);
+981| 
+982|    // WICHTIG: Schiff-Position relativ zum Planeten speichern für Oberflächenmodus
+983|    state.seqLandingPos = finalLandingPos.clone();
+984|    state.seqLandingNormal = finalIntersects.length > 0 && finalIntersects[0].face ?
+985|    finalIntersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld)) :
+986|    finalDir.clone();
+987|
+988|    state.vel.set(0,0,0);
+989|    state.speed = 0;
+990|
+991|      // Landing-Gear fest an Terrain-Normale ausrichten
+992|      legGroup.visible = true;
+993|      legGroup.rotation.setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), landingNormal));
+994|
+995|      // Dust an Touchdown-Position
+996|      const dustWorldPos = landingPos.clone().add(landingNormal.clone().multiplyScalar(-0.1));
+997|      emitDustBurst(dustWorldPos, 45);
+998|
+999|      // Landed setzen
+1000|      state.seqState = 4;
+1001|      state.landed = true;
+1002|      state.landedOn = p;
+1003|
+1004|      // UI
+1005|      document.getElementById('landBtn').textContent='🚀 Starten (Enter)';
+1006|      document.getElementById('landBtn').className='show launch';
+1007|      document.getElementById('locName').textContent=`🛸 ${p.data.name}`;
+1008|      document.getElementById('landPlanetName').textContent=`🪐 ${p.data.name}`;
+1009|      document.getElementById('landedUI').classList.add('show');
+1010|      document.getElementById('landingZone').classList.remove('show');
+1011|      document.getElementById('seqStatus').textContent='✅ Gelandet!';
+1012|      document.getElementById('nearHint').textContent='–';
+1013|      setTimeout(()=>{document.getElementById('seqStatus').className='';},2000);
+1014|      closePlanetInfo();
+1015|    }
+1016|  }
+1017|}
+1018|
+1019|// ===================== 3D LAUNCH SEQUENCE =====================
+1020|function startLaunchSequence(){
+1021|  if(!state.landed || !state.landedOn) return;
+1022|
+1023|  state.seqState = 7; // liftoff
+1024|  state.seqPlanet = state.landedOn;
+1025|  state.seqTimer = 0;
+1026|  state.landed = false;
+1027|
+1028|  const p = state.landedOn;
+1029|  state.seqStartPos = state.pos.clone();
+1030|  state.landedOn = null;
+1031|
+1032|  // Endposition: etwas über der Oberfläche (entlang der Terrain-Normale), dann Wechsel zu Phase 6
+1033|  // Verwende die gespeicherte Terrain-Normale vom Landepunkt
+1034|  const upDir = state.seqLandingNormal.clone(); // Echte Terrain-Normale!
+1035|  state.seqEndPos = p.group.position.clone().add(upDir.clone().multiplyScalar(p.data.size + CFG.landing.approachAltitude));
+1036|
+1037|  document.getElementById('landBtn').classList.remove('show','launch','land');
+1038|  document.getElementById('landedUI').classList.remove('show');
+1039|  document.getElementById('seqStatus').textContent='🚀 Start!';
+1040|  document.getElementById('seqStatus').className='show';
+1041|  document.getElementById('locName').textContent=`🚀 Start von ${p.data.name}`;
+1042|
+1043|  // Gear einfahren
+1044|  legGroup.visible = false;
+1045|
+1046|  // Dust beim Abheben an Terrain-Position
+1047|  const dustWorldPos = state.seqStartPos.clone().add(upDir.clone().multiplyScalar(-0.1));
+1048|  emitDustBurst(dustWorldPos, 35);
+1049|}
+1050|
+1051|function updateLaunchSequence(delta){
+1052|  const p = state.seqPlanet;
+1053|  if(!p) return;
+1054|  state.seqTimer += delta;
+1055|
+1056|  if(state.seqState === 6){
+1057|    // ======= LIFTOFF: Senkrechtstart aus der Atmosphäre =======
+1058|    const duration = 2.0;
+1059|    const t = Math.min(1, state.seqTimer / duration);
+1060|    const st = t * t; // ease-in
+1061|
+1062|    // Nach oben fliegen
+1063|    state.pos.lerpVectors(state.seqStartPos, state.seqEndPos, st);
+1064|
+1065|    // Pitch von 0 auf langsam schräg (fliegen weg)
+1066|    if(t > 0.3){
+1067|      state.pitch = (t - 0.3) * 0.4;
+1068|    }
+1069|
+1070|    // Geschwindigkeit aufbauen
+1071|    const upDir = state.pos.clone().sub(p.group.position).normalize();
+1072|    state.vel.copy(upDir).multiplyScalar(8 + t * 20);
+1073|
+1074|    // Flamme
+1075|    boostDown = true;
+1076|
+1077|    document.getElementById('nearHint').textContent=`🚀 ${Math.round((1-st)*100)}% Schub`;
+1078|
+1079|    if(t >= 1){
+1080|      // Genug Abstand – in den Orbit fliegen
+1081|      state.seqState = 7;
+1082|      state.seqTimer = 0;
+1083|      state.seqStartPos = state.pos.clone();
+1084|      // Zielrichtung: weg vom Planeten, aber mit Kurve
+1085|      const awayDir = state.pos.clone().sub(p.group.position).normalize();
+1086|      state.vel.copy(awayDir).multiplyScalar(15);
+1087|      document.getElementById('seqStatus').textContent='🚀 Orbit einnehmen';
+1088|    }
+1089|  }
+1090|  else if(state.seqState === 7){
+1091|    // ======= CLIMB: In den Orbit beschleunigen =======
+1092|    const duration = 1.5;
+1093|    const t = Math.min(1, state.seqTimer / duration);
+1094|
+1095|    // Weiter beschleunigen
+1096|    const awayDir = state.pos.clone().sub(p.group.position).normalize();
+1097|    state.vel.lerp(new THREE.Vector3(awayDir.x * 25, Math.abs(awayDir.y * 15) + 12, awayDir.z * 25), 0.05);
+1098|    state.pos.add(state.vel.clone().multiplyScalar(delta));
+1099|
+1100|    // Pitch langsam nach vorne
+1101|    state.pitch *= 0.95;
+1102|    state.speed = state.vel.length();
+1103|
+1104|    if(t >= 1 && state.pos.distanceTo(p.group.position) > p.data.size + 20){
+1105|      // Launch fertig
+1106|      state.seqState = 0;
+1107|      state.seqPlanet = null;
+1108|      state.autoApproach = false;
+1109|      state.approachTarget = null;
+1110|      boostDown = false;
+1111|      document.getElementById('seqStatus').className='';
+1112|      document.getElementById('locName').textContent='🚀 Im All';
+1113|      document.getElementById('nearHint').textContent='–';
+1114|    }
+1115|  }
+1116|}
+1117|
+1118|// ===================== UPDATE =====================
+1119|function update(delta){
+1120|  state.frameCount++;
+1121|  delta=Math.min(delta,0.05);
+1122|
+1123|  // ===== LANDING/LAUNCH SEQUENCE ACTIVE? =====
+1124|  if(state.seqState >= 1 && state.seqState <= 3){
+1125|    updateLandingSequence(delta);
+1126|    updateDust(delta);
+1127|    // Ship vis update
+1128|    shipGroup.position.copy(state.pos);
+1129|    shipGroup.rotation.set(state.pitch,state.yaw,0);
+1130|    // Camera während Landing-Sequenz
+1131|    if(state.seqState === 1){
+1132|      // Während Approach: normale Chase-Cam
+1133|      const targetDist=4;
+1134|      state.camDist+=(targetDist-state.camDist)*0.08;
+1135|      const horizontalOnly=new THREE.Vector3(0,state.camDist*0.4,state.camDist);
+1136|      horizontalOnly.applyEuler(new THREE.Euler(0,state.yaw,0,'YXZ'));
+1137|      const camPos=state.pos.clone().add(horizontalOnly);
+1138|      camPos.y+=1.5+state.camDist*0.08;
+1139|      camera.position.lerp(camPos,0.15);
+1140|      const camLook=state.pos.clone().add(new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(0,state.yaw,0,'YXZ')).multiplyScalar(3));
+1141|      camera.lookAt(camLook);
+1142|      } else if(state.seqState === 2) {
+1143|      // Während Descent: Kamera nah an der Oberfläche für bessere 3D-Wirkung
+1144|      const camOffset = new THREE.Vector3(0, 0.8, 2);
+1145|      camOffset.applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
+1146|      const camPos = state.pos.clone().add(camOffset);
+1147|      camera.position.lerp(camPos, 0.15);
+1148|      const lookTarget = state.pos.clone().add(new THREE.Vector3(0, 0, -3).applyEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ')));
+1149|      camera.lookAt(lookTarget);
+1150|      } else if(state.seqState === 3) {
+1151|      } else if(state.seqState === 3) {
+1152|      // Während Flare/Touchdown: Sehr nah für dramatische Landung
+1153|      const landingNormal = state.seqLandingNormal.clone();
+1154|      const sideOffset = new THREE.Vector3(-landingNormal.z, 0, landingNormal.x).normalize().multiplyScalar(1.5);
+1155|      const camPos = state.pos.clone().add(landingNormal.clone().multiplyScalar(1.2)).add(sideOffset);
+1156|      camera.position.lerp(camPos, 0.2);
+1157|      camera.lookAt(state.pos.clone().add(landingNormal.clone().multiplyScalar(0.1)));
+1158|    }
+1159|    // HUD
+1160|    document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;
+1161|    // Kein normales Update während Sequence
+1162|    // (Planeten etc. weiterrotieren lassen)
+1163|    planets.forEach((p,idx)=>{p.angle+=p.orbSpeed*delta*30;
+1164|      p.group.position.x=p.dist*Math.cos(p.angle);p.group.position.z=p.dist*Math.sin(p.angle);
+1165|      p.group.children[0].rotation.y+=delta*0.5;
+1166|      if(p.group.children.length>1&&idx===5)p.group.children[1].rotation.z+=delta*0.3;
+1167|    });
+1168|    asteroids.forEach(a=>{a.rotation.x+=a.userData.rotSpeed.x;a.rotation.y+=a.userData.rotSpeed.y;a.rotation.z+=a.userData.rotSpeed.z;});
+1169|    sun.rotation.y+=delta*0.1;
+1170|    state.mapFrame++;
+1171|    if(state.mapFrame%CFG.minimap.updateInterval===0) drawMinimap();
+1172|    return; // Skip rest
+1173|  }
+1174|
+1175|  // ===== LAUNCH SEQUENCE =====
+1176|  if(state.seqState >= 5){
+1177|    updateLaunchSequence(delta);
+1178|    updateDust(delta);
+1179|    shipGroup.position.copy(state.pos);
+1180|    shipGroup.rotation.set(state.pitch,state.yaw,0);
+1181|    // Camera
+1182|    const camPos=state.pos.clone().add(new THREE.Vector3(0.5,1.5,3));
+1183|    camera.position.lerp(camPos,0.15);
+1184|    camera.lookAt(state.pos);
+1185|    document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;
+1186|    planets.forEach((p,idx)=>{p.angle+=p.orbSpeed*delta*30;
+1187|      p.group.position.x=p.dist*Math.cos(p.angle);p.group.position.z=p.dist*Math.sin(p.angle);});
+1188|    state.mapFrame++;
+1189|    if(state.mapFrame%CFG.minimap.updateInterval===0) drawMinimap();
+1190|    return;
+1191|  }
+1192|
+1193|  if(!state.landed){
+1194|    // ---------- AUTO-APPROACH (Autopilot) ----------
+1195|    if(state.autoApproach&&state.approachTarget){
+1196|      const target=state.approachTarget.group.position;
+1197|      const toTarget=target.clone().sub(state.pos);
+1198|      const dist=toTarget.length();
+1199|      // Force-Land bei extremer Nähe (starte 3D-Landing)
+1200|      if(dist<state.approachTarget.data.size+4){
+1201|        const landTarget=state.approachTarget;
+1202|        cancelApproach();
+1203|        startLandingSequence(landTarget);
+1204|        boostDown=false;brakeDown=false;
+1205|        return;
+1206|      }
+1207|      // Ziel-Yaw und -Pitch berechnen
+1208|      const targetYaw=-Math.atan2(toTarget.x,toTarget.z);
+1209|      const targetPitch=-Math.atan2(toTarget.y,Math.sqrt(toTarget.x*toTarget.x+toTarget.z*toTarget.z));
+1210|      // Smooth interpolieren (langsam für Kurskorrektur)
+1211|      let dy=targetYaw-state.yaw; while(dy>Math.PI)dy-=Math.PI*2; while(dy<-Math.PI)dy+=Math.PI*2;
+1212|      state.yaw+=dy*0.5*delta;
+1213|      state.pitch+=(targetPitch-state.pitch)*0.3*delta;
+1214|      state.pitch=Math.max(-CFG.player.maxPitch,Math.min(CFG.player.maxPitch,state.pitch));
+1215|      // Speed anpassen: näher = langsamer
+1216|      const wantSpeed=Math.min(40,Math.max(2,dist*0.1));
+1217|      boostDown=state.speed<wantSpeed;
+1218|      brakeDown=state.speed>wantSpeed+1;
+1219|      // Distanz für HUD
+1220|      const pct=dist/(state.approachTarget.data.size+25);
+1221|      document.getElementById('nearHint').textContent=`🛰️ NAV: ${state.approachTarget.data.name} ⏎ ${Math.round(dist)} km ${pct<0.5?'🟢':'🟡'}`;
+1222|      // Autopilot-Schub/Bremse anwenden
+1223|      const forward=new THREE.Vector3(0,0,-1);
+1224|      forward.applyEuler(new THREE.Euler(state.pitch,state.yaw,0,'YXZ'));
+1225|      if(brakeDown){
+1226|        state.vel.add(forward.clone().multiplyScalar(-CFG.player.brakePower*delta*2));
+1227|        state.vel.multiplyScalar(0.9);
+1228|      }else{
+1229|        const thrust=CFG.player.thrust;
+1230|        const maxSpd=Math.min(40,wantSpeed+3);
+1231|        state.vel.add(forward.clone().multiplyScalar(thrust*delta));
+1232|        state.vel.multiplyScalar(0.98);
+1233|        if(state.vel.length()>maxSpd) state.vel.setLength(maxSpd);
+1234|      }
+1235|      state.pos.add(state.vel.clone().multiplyScalar(delta));
+1236|      shipGroup.position.copy(state.pos);
+1237|      shipGroup.rotation.set(state.pitch,state.yaw,0);
+1238|      state.speed=state.vel.length();
+1239|      // Automatisch Landung starten wenn nah genug & langsam genug
+1240|      if(dist<state.approachTarget.data.size+25&&state.speed<CFG.landing.approachSpeed){
+1241|        const landTarget=state.approachTarget;
+1242|        cancelApproach();
+1243|        startLandingSequence(landTarget);
+1244|        boostDown=false;brakeDown=false;
+1245|        return;
+1246|      }
+1247|    }else{
+1248|      // Manual steering (Touch / WASD) - kein Autopilot
+1249|      if(state.touchActive){
+1250|        state.yaw-=state.touchCX*CFG.player.turnSensitivity*delta*60;
+1251|        state.pitch=Math.max(-CFG.player.maxPitch,Math.min(CFG.player.maxPitch,
+1252|          state.pitch+state.touchCY*CFG.player.turnSensitivity*delta*60));
+1253|      }
+1254|      if(keys['a']||keys['arrowleft']) state.yaw+=CFG.player.turnSensitivity*delta*50;
+1255|      if(keys['d']||keys['arrowright']) state.yaw-=CFG.player.turnSensitivity*delta*50;
+1256|      if(keys['w']||keys['arrowup']) state.pitch=Math.max(-CFG.player.maxPitch,state.pitch-CFG.player.turnSensitivity*delta*50);
+1257|      if(keys['s']||keys['arrowdown']) state.pitch=Math.min(CFG.player.maxPitch,state.pitch+CFG.player.turnSensitivity*delta*50);
+1258|
+1259|      const boosting=boostDown,braking=brakeDown;
+1260|      const forward=new THREE.Vector3(0,0,-1);
+1261|      forward.applyEuler(new THREE.Euler(state.pitch,state.yaw,0,'YXZ'));
+1262|      if(braking){
+1263|        state.vel.add(forward.clone().multiplyScalar(-CFG.player.brakePower*delta));
+1264|        state.vel.multiplyScalar(0.94);
+1265|      }else{
+1266|        const thrust=boosting?CFG.player.thrust*CFG.player.boostMultiplier:CFG.player.thrust;
+1267|        const maxSpd=boosting?CFG.player.maxBoostSpeed:CFG.player.maxSpeed;
+1268|        state.vel.add(forward.clone().multiplyScalar(thrust*delta));
+1269|        state.vel.multiplyScalar(CFG.player.damping);
+1270|        if(state.vel.length()>maxSpd) state.vel.setLength(maxSpd);
+1271|      }
+1272|      state.pos.add(state.vel.clone().multiplyScalar(delta));
+1273|      shipGroup.position.copy(state.pos);
+1274|      shipGroup.rotation.set(state.pitch,state.yaw,0);
+1275|      state.speed=state.vel.length();
+1276|    }
+1277|    detectLandingState();
+1278|    }
+1279|
+1280|    // ===== SURFACE EXPLORATION MODE =====
+1281|    if(state.surfaceMode && state.landedOn) {
+1282|    const p = state.landedOn;
+1283| 
+1284|    // Get current position relative to planet center
+1285|    const surfacePos = state.pos.clone();
+1286|    const planetCenter = p.group.position.clone();
+1287| 
+1288|    // Surface movement controls
+1289|    const moveSpeed = CFG.surface.surfaceMoveSpeed;
+1290|    const forwardDir = new THREE.Vector3(
+1291|    Math.sin(state.surfaceYaw) * Math.cos(state.surfacePitch),
+1292|    Math.sin(state.surfacePitch),
+1293|    Math.cos(state.surfaceYaw) * Math.cos(state.surfacePitch)
+1294|    );
+1295|    const rightDir = new THREE.Vector3(
+1296|    Math.sin(state.surfaceYaw + Math.PI/2),
+1297|    0,
+1298|    Math.cos(state.surfaceYaw + Math.PI/2)
+1299|    );
+1300| 
+1301|    // WASD movement
+1302|    if(keys['w'] || keys['arrowup']) {
+1303|    state.surfaceVelocity.add(forwardDir.clone().multiplyScalar(moveSpeed * delta));
+1304|    }
+1305|    if(keys['s'] || keys['arrowdown']) {
+1306|    state.surfaceVelocity.add(forwardDir.clone().negate().multiplyScalar(moveSpeed * delta));
+1307|    }
+1308|    if(keys['a'] || keys['arrowleft']) {
+1309|    state.surfaceVelocity.add(rightDir.clone().multiplyScalar(moveSpeed * delta));
+1310|    }
+1311|    if(keys['d'] || keys['arrowright']) {
+1312|    state.surfaceVelocity.add(rightDir.clone().negate().multiplyScalar(moveSpeed * delta));
+1313|    }
+1314| 
+1315|    // Jump
+1316|    if((keys[' '] || keys['space']) && state.surfaceOnGround && !state.surfaceJumping) {
+1317|    state.surfaceVelocity.y = CFG.surface.surfaceJumpForce;
+1318|    state.surfaceOnGround = false;
+1319|    state.surfaceJumping = true;
+1320|    state.surfaceJumpTimer = 0;
+1321|    }
+1322| 
+1323|    // Apply gravity
+1324|    state.surfaceVelocity.y -= CFG.surface.surfaceGravity * delta;
+1325| 
+1326|    // Apply friction to horizontal movement
+1327|    state.surfaceVelocity.x *= CFG.surface.surfaceFriction;
+1328|    state.surfaceVelocity.z *= CFG.surface.surfaceFriction;
+1329| 
+1330|    // Update position
+1331|    const newPos = surfacePos.clone().add(state.surfaceVelocity.clone().multiplyScalar(delta));
+1332| 
+1333|    // Raycast to find terrain height and normal at new position
+1334|    const raycaster = new THREE.Raycaster();
+1335|    const toPlanet = newPos.clone().sub(planetCenter).normalize();
+1336|    const rayOrigin = newPos.clone().add(toPlanet.clone().multiplyScalar(10));
+1337|    raycaster.set(rayOrigin, toPlanet.clone().negate());
+1338| 
+1339|    const intersects = raycaster.intersectObject(p.mesh, true);
+1340|    let terrainNormal = new THREE.Vector3(0, 1, 0);
+1341|    let onGround = false;
+1342| 
+1343|    if(intersects.length > 0) {
+1344|    terrainNormal = intersects[0].face ? 
+1345|    intersects[0].face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld)) :
+1346|    toPlanet.clone().negate();
+1347| 
+1348|    const hitDist = intersects[0].distance;
+1349|    // Check if we're close enough to be on ground
+1350|    if(hitDist < 1.5) {
+1351|    onGround = true;
+1352|    // Adjust position to be on surface
+1353|    const surfaceOffset = toPlanet.clone().multiplyScalar(hitDist - 0.2);
+1354|    state.pos.copy(rayOrigin.clone().add(surfaceOffset));
+1355|    state.surfaceVelocity.y = 0;
+1356|    state.surfaceOnGround = true;
+1357|    state.surfaceJumping = false;
+1358|    } else {
+1359|    state.pos.copy(newPos);
+1360|    state.surfaceOnGround = false;
+1361|    }
+1362|    } else {
+1363|    state.pos.copy(newPos);
+1364|    state.surfaceOnGround = false;
+1365|    }
+1366| 
+1367|    // Camera for surface mode
+1368|    if(state.firstPerson) {
+1369|    // First-person camera
+1370|    camera.position.copy(state.pos);
+1371|    camera.rotation.set(state.surfacePitch, state.surfaceYaw, 0);
+1372|    camera.translateZ(-0.5); // Slightly behind to avoid clipping
+1373|    camera.translateY(1.7); // Eye level
+1374|    camera.lookAt(state.pos.clone().add(forwardDir.clone().multiplyScalar(1)));
+1375|    } else {
+1376|    // Third-person camera
+1377|    const camOffset = new THREE.Vector3(0, 2, 5);
+1378|    camOffset.applyEuler(new THREE.Euler(state.surfacePitch, state.surfaceYaw, 0, 'YXZ'));
+1379|    const camPos = state.pos.clone().add(camOffset);
+1380|    camera.position.lerp(camPos, 0.12);
+1381|    camera.lookAt(state.pos.clone().add(new THREE.Vector3(0, 0.5, 0)));
+1382|    }
+1383| 
+1384|    // Update HUD for surface mode
+1385|    document.getElementById('speedVal').textContent = Math.round(state.surfaceVelocity.length() * 10) / 10;
+1386|    document.getElementById('locName').textContent = `🪐 ${p.data.name} - Oberflächenmodus`;
+1387| 
+1388|    // Update planets and other objects
+1389|    planets.forEach((pl,idx)=>{pl.angle+=pl.orbSpeed*delta*30;
+1390|    pl.group.position.x=pl.dist*Math.cos(pl.angle);pl.group.position.z=pl.dist*Math.sin(pl.angle);
+1391|    if(idx === p.idx) {
+1392|    // Rotate the planet we're on very slowly for realism
+1393|    pl.group.children[0].rotation.y += delta * 0.01;
+1394|    } else {
+1395|    pl.group.children[0].rotation.y += delta * 0.5;
+1396|    }
+1397|    if(pl.group.children.length>1&&idx===5)pl.group.children[1].rotation.z+=delta*0.3;
+1398|    });
+1399|    asteroids.forEach(a=>{a.rotation.x+=a.userData.rotSpeed.x;a.rotation.y+=a.userData.rotSpeed.y;a.rotation.z+=a.userData.rotSpeed.z;});
+1400|    sun.rotation.y+=delta*0.1;
+1401|    return; // Skip normal camera and ship updates
+1402|    }
+1403|
+1404|    // Camera - Chase Mode: nur Yaw folgen, Pitch ignorieren → Schiff bleibt stabil
+1405|  // Gelandet: Kamera um das Schiff auf der Planetenoberfläche
+1406|  if(state.landed&&state.landedOn){
+1407|    const p = state.landedOn;
+1408|    // Raycast für aktuelle Terrain-Normale unter dem Schiff
+1409|    const raycaster = new THREE.Raycaster();
+1410|    const downDir = state.pos.clone().sub(p.group.position).normalize().negate();
+1411|    raycaster.set(state.pos.clone().add(new THREE.Vector3(0, 10, 0)), downDir);
+1412|    const intersects = raycaster.intersectObject(p.mesh, true);
+1413|    
+1414|    let terrainNormal = state.pos.clone().sub(p.group.position).normalize(); // Fallback
+1415|    if(intersects.length > 0) {
+1416|      const face = intersects[0].face;
+1417|      if(face) {
+1418|        terrainNormal = face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(p.mesh.matrixWorld));
+1419|      }
+1420|    }
+1421|    
+1422|    // Kamera positioniert sich seitlich/oben relativ zur Terrain-Normale
+1423|    // NAH DRAUF für bessere 3D-Oberflächen-Wirkung
+1424|    const sideOffset = new THREE.Vector3(-terrainNormal.z, 0, terrainNormal.x).normalize().multiplyScalar(2);
+1425|    const camTarget = state.pos.clone().add(terrainNormal.clone().multiplyScalar(1.5)).add(sideOffset);
+1426|    camTarget.y += 0.8;
+1427|    camera.position.lerp(camTarget, 0.2);
+1428|    camera.lookAt(state.pos.clone().add(terrainNormal.clone().multiplyScalar(0.3)));
+1429|  }else{
+1430|    // Smooth distance
+1431|    const targetDist=Math.max(3.5,Math.min(6.5,5-state.speed/50));
+1432|    state.camDist+=(targetDist-state.camDist)*0.08;
+1433|    // Horizontal: nur Yaw, kein Pitch → kein "Schiff dreht sich" beim Pitchen
+1434|    const horizontalOnly=new THREE.Vector3(0,state.camDist*0.4,state.camDist);
+1435|    horizontalOnly.applyEuler(new THREE.Euler(0,state.yaw,0,'YXZ'));
+1436|    const camPos=state.pos.clone().add(horizontalOnly);
+1437|    // Leichtes Hochziehen: Kamera etwas über dem Schiff
+1438|    camPos.y+=1.5+state.camDist*0.08;
+1439|    camera.position.lerp(camPos,CFG.camera.followSpeed*delta*30);
+1440|    // LookAt: etwas voraus (Lead-Target) für besseres Gefühl
+1441|    const leadDir=new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(0,state.yaw,0,'YXZ'));
+1442|    const lookTarget=state.pos.clone().add(leadDir.multiplyScalar(5));
+1443|    lookTarget.y+=0.3;
+1444|    camera.lookAt(lookTarget);
+1445|  }
+1446|
+1447|  // Update planets
+1448|  planets.forEach((p,idx)=>{p.angle+=p.orbSpeed*delta*30;
+1449|  p.group.position.x=p.dist*Math.cos(p.angle);p.group.position.z=p.dist*Math.sin(p.angle);
+1450|  p.group.children[0].rotation.y+=delta*0.5;
+1451|  if(p.group.children.length>1&&idx===5)p.group.children[1].rotation.z+=delta*0.3;
+1452| 
+1453|  // WICHTIG: Wenn Schiff auf diesem Planeten gelandet ist, mitbewegen!
+1454|  if(state.landed && state.landedOn === p && !state.surfaceMode) {
+1455|  // Schiff bewegt sich mit dem Planeten (Umlaufbahn + Rotation)
+1456|  // Aber bleibt relativ zur Landeposition auf der Oberfläche
+1457|  const relativePos = state.pos.clone().sub(p.group.position);
+1458|  // Planet hat sich bewegt, also Schiff-Position anpassen
+1459|  state.pos.copy(p.group.position.clone().add(relativePos));
+1460|  shipGroup.position.copy(state.pos);
+1461|  shipGroup.rotation.set(state.pitch, state.yaw, 0);
+1462|  }
+1463|  });
+1464|  asteroids.forEach(a=>{a.rotation.x+=a.userData.rotSpeed.x;a.rotation.y+=a.userData.rotSpeed.y;a.rotation.z+=a.userData.rotSpeed.z;});
+1465|  sun.rotation.y+=delta*0.1;
+1466|
+1467|  // Flames
+1468|  const isBoosting=boostDown,speedNorm=state.landed?0:Math.min(1,state.speed/20);
+1469|  const flameI=state.landed?0.15:(isBoosting?1.0:0.2+speedNorm*0.8);
+1470|  flameCore.material.opacity=flameI*0.9;flameMid.material.opacity=flameI*0.7;flameOuter.material.opacity=flameI*0.4;
+1471|  const flameLen=state.landed?0.5:(isBoosting?2.5:0.8+speedNorm*1.2);
+1472|  flameCore.scale.set(1,flameLen,1);flameMid.scale.set(1,flameLen*0.9,1);flameOuter.scale.set(1,flameLen*0.8,1);
+1473|  const bt=isBoosting?1:0.2;
+1474|  flameCore.material.color.setHSL(0.10-bt*0.08,1,0.5+bt*0.5);
+1475|  flameMid.material.color.setHSL(0.08,1,0.4+bt*0.2);
+1476|  flameOuter.material.color.setHSL(0.04,1,0.2+bt*0.1);
+1477|  flameGroup.children.forEach(c=>{if(c.userData&&c.userData.side!==undefined)c.material.opacity=flameI*(0.3+Math.sin(state.frameCount*0.3+c.userData.side*2)*0.2);});
+1478|  if(brakeDown&&!state.landed){shipLight.color.setHex(0xff4400);shipLight.intensity=1.0;}
+1479|  else{shipLight.color.setHex(0x00ccff);shipLight.intensity=0.3+speedNorm*0.5;}
+1480|
+1481|  // HUD
+1482|  document.getElementById('speedVal').textContent=Math.round(state.speed*10)/10;
+1483|  if(state.frameCount>480) document.getElementById('helpOverlay').classList.add('hidden');
+1484|
+1485|  // Minimap update every 3 frames
+1486|  state.mapFrame++;
+1487|  if(state.mapFrame%CFG.minimap.updateInterval===0) drawMinimap();
+1488|
+1489|  // Prograde / Retrograde Marker + Relativgeschwindigkeit
+1490|  if(!state.landed&&state.speed>0.5){
+1491|    // Prograde = velocity direction, Retrograde = -velocity direction
+1492|    const velDir=state.vel.clone().normalize();
+1493|    const retroDir=velDir.clone().negate();
+1494|
+1495|    // Project to screen
+1496|    const progWorld=state.pos.clone().add(velDir.multiplyScalar(30));
+1497|    const retroWorld=state.pos.clone().add(retroDir.multiplyScalar(30));
+1498|
+1499|    const progScreen=progWorld.clone().project(camera);
+1500|    const retroScreen=retroWorld.clone().project(camera);
+1501|
+1502|    const pm=document.getElementById('progradeMarker');
+1503|    const rm=document.getElementById('retrogradeMarker');
+1504|
+1505|    const sx=s=>Math.round((s.x*0.5+0.5)*window.innerWidth);
+1506|    const sy=s=>Math.round((-s.y*0.5+0.5)*window.innerHeight);
+1507|
+1508|    if(progScreen.z<1){
+1509|      pm.classList.add('show');pm.style.left=sx(progScreen)+'px';pm.style.top=sy(progScreen)+'px';
+1510|    }else pm.classList.remove('show');
+1511|
+1512|    if(retroScreen.z<1){
+1513|      rm.classList.add('show');rm.style.left=sx(retroScreen)+'px';rm.style.top=sy(retroScreen)+'px';
+1514|    }else rm.classList.remove('show');
+1515|
+1516|    // Relative velocity to nearest planet
+1517|    const rvHint=document.getElementById('relVelHint');
+1518|    if(state.nearPlanet&&state.nearDist<state.nearPlanet.data.size+60){
+1519|      const toPlanet=state.nearPlanet.group.position.clone().sub(state.pos);
+1520|      const radialVel=state.vel.dot(toPlanet.normalize());
+1521|      const closing=radialVel<0;
+1522|      rvHint.innerHTML=`<span class="icon" style="background:${closing?'#0f0':'#ff0'}"></span>Relativ: <span class="val">${Math.abs(radialVel).toFixed(1)}</span> km/s ${closing?'⏎ nähernd':'↗ entfernend'}`;
+1523|      rvHint.classList.add('show');
+1524|    }else{
+1525|      rvHint.classList.remove('show');
+1526|    }
+1527|  }else{
+1528|    document.getElementById('progradeMarker').classList.remove('show');
+1529|    document.getElementById('retrogradeMarker').classList.remove('show');
+1530|    document.getElementById('relVelHint').classList.remove('show');
+1531|  }
+1532|}
+1533|
+1534|// ===================== LANDING STATE =====================
+1535|function detectLandingState(){
+1536|  if(state.landed) return;
+1537|  let nearest=null,nearDist=Infinity;
+1538|  planets.forEach(p=>{const d=state.pos.distanceTo(p.group.position);if(d<nearDist){nearDist=d;nearest=p;}});
+1539|  state.nearPlanet=nearest;state.nearDist=nearDist;
+1540|
+1541|  const landBtn=document.getElementById('landBtn');
+1542|  const lz=document.getElementById('landingZone');
+1543|
+1544|  // Button immer zeigen, sobald ein Planet in Sichtweite (< 60 Einheiten)
+1545|  if(nearest && nearDist < nearest.data.size + 60){
+1546|    // PlanetInfo bei ausreichender Nähe
+1547|    if(nearDist < nearest.data.size + 14) showPlanetInfo(nearest);
+1548|
+1549|    // Immer "Landen"-Button → startLandingSequence macht den Rest
+1550|    landBtn.textContent=`⬇️ Landen (${nearest.data.name}) [L]`;
+1551|    landBtn.className='show land';
+1552|
+1553|    // Lande-Zone-Fadenkreuz zeigen wenn nah genug
+1554|    if(nearDist < nearest.data.size + 30){
+1555|      const planetScreenPos = nearest.group.position.clone().project(camera);
+1556|      const sx = (planetScreenPos.x*0.5+0.5)*window.innerWidth;
+1557|      const sy = (-planetScreenPos.y*0.5+0.5)*window.innerHeight;
+1558|      if(planetScreenPos.z<1){
+1559|        lz.classList.add('show');
+1560|        lz.style.left=sx+'px'; lz.style.top=sy+'px';
+1561|      } else lz.classList.remove('show');
+1562|    } else lz.classList.remove('show');
+1563|
+1564|    // Auto-Land wenn extrem nah & langsam
+1565|    if(nearDist < nearest.data.size + 3.5 && state.speed < CFG.landing.autoLandSpeed && !state.touchActive){
+1566|      startLandingSequence(nearest);
+1567|      return;
+1568|    }
+1569|
+1570|    document.getElementById('nearHint').textContent=`🪐 ${nearest.data.name} (${Math.round(nearDist)} km)`;
+1571|    document.getElementById('locName').textContent=`🚀 ➔ ${nearest.data.name}`;
+1572|  } else {
+1573|    landBtn.classList.remove('show','land','launch');
+1574|    lz.classList.remove('show');
+1575|    document.getElementById('nearHint').textContent='–';
+1576|    if(!state.landed) document.getElementById('locName').textContent='🚀 Im All';
+1577|    closePlanetInfo();
+1578|  }
+1579|}
+1580|
+1581|// ===================== MINIMAP =====================
+1582|function drawMinimap(){
+1583|  const canvas=document.getElementById('mapCanvas');
+1584|  const ctx=canvas.getContext('2d');
+1585|  const R=CFG.minimap.radius, cx=70, cy=70, range=CFG.minimap.range;
+1586|
+1587|  ctx.clearRect(0,0,140,140);
+1588|
+1589|  // Background circle
+1590|  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
+1591|  ctx.fillStyle='rgba(0,20,40,0.3)'; ctx.fill();
+1592|  ctx.strokeStyle='rgba(0,255,200,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+1593|
+1594|  // Range rings
+1595|  [0.33,0.66].forEach(f=>{
+1596|    ctx.beginPath(); ctx.arc(cx,cy,R*f,0,Math.PI*2);
+1597|    ctx.strokeStyle='rgba(0,255,200,0.06)'; ctx.lineWidth=1; ctx.stroke();
+1598|  });
+1599|
+1600|  // Crosshair
+1601|  ctx.strokeStyle='rgba(0,255,200,0.05)'; ctx.lineWidth=0.5;
+1602|  ctx.beginPath(); ctx.moveTo(cx-R,cy); ctx.lineTo(cx+R,cy); ctx.stroke();
+1603|  ctx.beginPath(); ctx.moveTo(cx,cy-R); ctx.lineTo(cx,cy+R); ctx.stroke();
+1604|
+1605|  // Draw planets
+1606|  planets.forEach(p=>{
+1607|    const dx=p.group.position.x-state.pos.x;
+1608|    const dz=p.group.position.z-state.pos.z;
+1609|    const dist=Math.sqrt(dx*dx+dz*dz);
+1610|    if(dist>range) return;
+1611|    const scale=dist/range;
+1612|    const px=cx+dx/range*R;
+1613|    const py=cy+dz/range*R;
+1614|    const size=Math.max(3,p.data.size*2);
+1615|    ctx.beginPath(); ctx.arc(px,py,size,0,Math.PI*2);
+1616|    const col=new THREE.Color(p.data.color);
+1617|    ctx.fillStyle=`rgb(${col.r*255|0},${col.g*255|0},${col.b*255|0})`;
+1618|    ctx.fill();
+1619|    ctx.strokeStyle='rgba(0,255,200,0.4)'; ctx.lineWidth=1; ctx.stroke();
+1620|    // Label
+1621|    ctx.fillStyle='rgba(0,255,200,0.7)'; ctx.font='7px sans-serif'; ctx.textAlign='center';
+1622|    ctx.fillText(p.data.name,px,py+size+9);
+1623|  });
+1624|
+1625|  // Draw nearest asteroid (up to 3)
+1626|  asteroids.sort((a,b)=>state.pos.distanceTo(a.position)-state.pos.distanceTo(b.position));
+1627|  for(let i=0;i<3&&i<asteroids.length;i++){
+1628|    const a=asteroids[i];const d=state.pos.distanceTo(a.position);
+1629|    if(d>range) continue;
+1630|    const dx=a.position.x-state.pos.x, dz=a.position.z-state.pos.z;
+1631|    const px=cx+dx/range*R, py=cy+dz/range*R;
+1632|    ctx.beginPath(); ctx.arc(px,py,1.5,0,Math.PI*2);
+1633|    ctx.fillStyle='rgba(150,150,150,0.4)'; ctx.fill();
+1634|  }
+1635|
+1636|  // Sun (always visible at edges)
+1637|  const sdx=-state.pos.x, sdz=-state.pos.z, sdist=Math.sqrt(sdx*sdx+sdz*sdz);
+1638|  if(sdist>range){
+1639|    const angle=Math.atan2(sdz,sdx);
+1640|    const px=cx+Math.cos(angle)*(R-5), py=cy+Math.sin(angle)*(R-5);
+1641|    ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2);
+1642|    ctx.fillStyle='rgba(255,200,50,0.8)'; ctx.fill();
+1643|    ctx.fillStyle='rgba(255,200,50,0.5)'; ctx.font='6px sans-serif'; ctx.textAlign='center';
+1644|    ctx.fillText('☀️',px,py+12);
+1645|  } else {
+1646|    const px=cx+sdx/range*R, py=cy+sdz/range*R;
+1647|    ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2);
+1648|    ctx.fillStyle='rgba(255,200,50,0.6)'; ctx.fill();
+1649|  }
+1650|
+1651|  // Player ship (center)
+1652|  ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2);
+1653|  ctx.fillStyle='#0fc'; ctx.fill();
+1654|  ctx.strokeStyle='rgba(0,255,200,0.3)'; ctx.lineWidth=1; ctx.stroke();
+1655|
+1656|  // Direction indicator (triangle)
+1657|  const dirAngle = -state.yaw;
+1658|  ctx.save(); ctx.translate(cx,cy); ctx.rotate(dirAngle);
+1659|  ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(-4,4); ctx.lineTo(4,4); ctx.closePath();
+1660|  ctx.fillStyle='rgba(0,255,200,0.5)'; ctx.fill();
+1661|  ctx.restore();
+1662|
+1663|  // Text: scale + north
+1664|  ctx.fillStyle='rgba(0,255,200,0.15)'; ctx.font='6px sans-serif'; ctx.textAlign='center';
+1665|  ctx.fillText(`${range}km`,cx,R-4);
+1666|}
+1667|
+1668|// ===================== PLANET INFO =====================
+1669|function showPlanetInfo(p){
+1670|  const pi=document.getElementById('planetInfo');
+1671|  document.getElementById('piTitle').textContent=`🪐 ${p.data.name}`;
+1672|  document.getElementById('piSub').textContent=`Planet · ${(state.pos.distanceTo(p.group.position)).toFixed(0)} km entfernt`;
+1673|  document.getElementById('piDesc').textContent=p.data.desc;
+1674|  document.getElementById('piStats').innerHTML=`
+1675|    <div class="stat">Größe: <span>${p.data.size.toFixed(1)}</span></div>
+1676|    <div class="stat">Bahn: <span>${p.data.dist} AE</span></div>
+1677|    <div class="stat">Geschw.: <span>${(p.orbSpeed*1000).toFixed(0)} km/s</span></div>`;
+1678|  pi.classList.add('open');
+1679|}
+1680|function closePlanetInfo(){document.getElementById('planetInfo').classList.remove('open');}
+1681|
+1682|// ===================== RESIZE =====================
+1683|window.addEventListener('resize',()=>{
+1684|  camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();
+1685|  renderer.setSize(window.innerWidth,window.innerHeight);
+1686|});
+1687|
+1688|// ===================== GAME LOOP =====================
+1689|let lastTime=0;
+1690|function animate(time){
+1691|  const delta=(time-lastTime)/1000;lastTime=time;
+1692|  update(delta);renderer.render(scene,camera);
+1693|  requestAnimationFrame(animate);
+1694|}
+1695|animate(0);
+1696|
+1697|// ===================== WAKE LOCK =====================
+1698|if(navigator.wakeLock){let wl;
+1699|  (async()=>{try{wl=await navigator.wakeLock.request('screen');}catch(e){}})();
+1700|  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&wl)wl.release().then(()=>{}).catch(()=>{});});
+1701|}
+1702|console.log('🚀 Space Explorer 3D – Fliegen, Landen, Planeten erkunden! [L]=Landen [Space]=Bremse [Shift]=Boost [E]=Oberflächenmodus [Tab]=Kamera wechseln');
+1703|</script>
+1704|</body>
+1705|</html>

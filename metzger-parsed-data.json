@@ -1,0 +1,896 @@
+{
+  "Woche bis 01.08.26": [
+    {
+      "metzger": "Metzgerei Brandl",
+      "city": "📍 Landshut",
+      "items": [
+        {
+          "name": "Hackfleisch gemischt",
+          "preis": "1,59 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Farmerschinken",
+          "preis": "1,89 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Dicke",
+          "preis": "1,39 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Polnische",
+          "preis": "1,59 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Kochsalami",
+          "preis": "1,59 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Woche bis 08.08.26": [
+    {
+      "metzger": "Metzgerei Brandl",
+      "city": "📍 Landshut",
+      "items": [
+        {
+          "name": "Hochrippe",
+          "preis": "1,75 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Geräuchertes gekocht",
+          "preis": "1,85 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Dultwürstl",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Regensburger",
+          "preis": "1,49 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Presssack gemischt",
+          "preis": "1,25 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Woche bis 15.08.26": [
+    {
+      "metzger": "Metzgerei Brandl",
+      "city": "📍 Landshut",
+      "items": [
+        {
+          "name": "Schweine-Filet",
+          "preis": "1,69 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Lachsschinken",
+          "preis": "1,95 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Schweinswürstl",
+          "preis": "1,39 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Gelbwurst",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Emmentaler",
+          "preis": "1,49 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Woche bis 08.08.2026": [
+    {
+      "metzger": "Metzgerei Rümenapf",
+      "city": "📍 Ergolding",
+      "items": [
+        {
+          "name": "Wammerl mariniert (100 g)",
+          "preis": "1,39 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Schweineschnitzel (100 g)",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Stadtwurst (100 g)",
+          "preis": "1,39 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Leberkäs fein (100 g)",
+          "preis": "1,19 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Leberwurst i. Golddarm (100 g)",
+          "preis": "1,25 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Kabanossi (100 g)",
+          "preis": "1,69 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    },
+    {
+      "metzger": "Metzgerei Tristlhof",
+      "city": "📍 Landshut",
+      "items": [
+        {
+          "name": "frische Hähnchenbrust (natur oder gewürzt)",
+          "preis": "1,49 € / 100 g",
+          "desc": "frisch und eiweißreich",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Salami-Aufschnitt (gut gemischt, gut gereift)",
+          "preis": "1,99 € / 100 g",
+          "desc": "Frisch aus Stadler's Wurstküche",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Dicke oder Regensburger (hausgemacht, frisch vom Rauch)",
+          "preis": "1,19 € / 100 g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Leberkäse (täglich frisch)",
+          "preis": "1,19 € / 100 g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "🥩 Hackfleischtag (Mo): Mageres Schwein & Rind",
+          "preis": "4,98 € / 500 g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "🥩 Haxentag (Sa): Frisch & kross",
+          "preis": "0,79 € / 100 g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    },
+    {
+      "metzger": "Metzgerei Hahn",
+      "city": "📍 Eggenfelden",
+      "items": [
+        {
+          "name": "Färsen-Hackfleisch",
+          "preis": "12,00 € / kg (500g = 6,00 €)",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Frischwurst-Aufschnitt",
+          "preis": "9,90 € / kg (500g = 4,95 €)",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Gyros-Pfanne",
+          "preis": "10,99 €",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Lyoner-Stange",
+          "preis": "3,99 €",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Schweinelendchen im Ganzen",
+          "preis": "6,99 €",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Rauchfrische Wiener",
+          "preis": "10,49 €",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Unsere Scharfen",
+          "preis": "9,99 €",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Grillfleisch",
+          "preis": "Preis auf Anfrage",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Ententeile gefroren",
+          "preis": "Preis auf Anfrage",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Fisch gefroren",
+          "preis": "Preis auf Anfrage",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Sauerkonserven",
+          "preis": "Preis auf Anfrage",
+          "desc": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Woche bis 15.08.2026": [
+    {
+      "metzger": "Metzgerei Rümenapf",
+      "city": "📍 Ergolding",
+      "items": [
+        {
+          "name": "Ochsenfetz’n (100 g)",
+          "preis": "1,99 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Hackfleisch gem. (100 g)",
+          "preis": "1,49 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Backschinken (100 g)",
+          "preis": "1,79 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Kochsalami (100 g)",
+          "preis": "1,49 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Weißwürste (100 g)",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Sommerduett Käse Tomate - Basilikum (100 g)",
+          "preis": "2,59 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    },
+    {
+      "metzger": "Brunner Metzgerei",
+      "city": "📍 Landshut",
+      "items": [
+        {
+          "name": "Rinderfetzen (100g)",
+          "preis": "1,99 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Hackfleisch gemischt (100g)",
+          "preis": "1,49 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Backschinken (100g)",
+          "preis": "1,79 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Kochsalami (100g)",
+          "preis": "1,49 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Weißwürste (100g)",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Sommerduett Käse (100g)",
+          "preis": "2,99 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Woche bis 22.08.2026": [
+    {
+      "metzger": "Metzgerei Rümenapf",
+      "city": "📍 Ergolding",
+      "items": [
+        {
+          "name": "Schweinekrustenbraten (100 g)",
+          "preis": "1,09 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Hähnchenbrustfilet (100 g)",
+          "preis": "1,59 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Wiener (100 g)",
+          "preis": "1,49 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Stuttgarter Leberkäs (100 g)",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Streichwurst grob (100 g)",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Bayer. Käseaufstrich (100 g)",
+          "preis": "1,65 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Wochenangebote (Plakat KW 32/33) | 03.08.-15.08.2026": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "OKTOBERFEST-KRUSTENBRATEN",
+          "preis": "0,89 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "HAXE",
+          "preis": "8,90 €/Stück",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "PUTENSCHNITZEL",
+          "preis": "1,39 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "PIZZALEBERKÄSE",
+          "preis": "1,19 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "NUDELSALAT",
+          "preis": "0,99 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "OBAZDA",
+          "preis": "0,99 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Wochenangebote (Plakat KW 32/33 - Seite 2) | 03.08.-15.08.2026": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "REGENSBURGER",
+          "preis": "0,99 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "GESCHWOLLENE HÜTTENSPECK",
+          "preis": "1,19 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "BIERKUGEL",
+          "preis": "1,29 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "FEUERTEUFEL",
+          "preis": "1,69 €/100g",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Grillhaxe Angebot | 03.08.-15.08.2026": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "GRILLHAXE mit Beilage",
+          "preis": "€/Portion (genauer Preis OCR-unscharf)",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Brotzeit & Wurstplatte (Passau Flyer) | KW 32/33": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "BROTZEITPLATTN",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "WÜRSTLPARADE",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "SCHWEINESCHNITZEL",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Wasners Bayrische Wurstspezialitäten | KW 32/33": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "KÄSEKRAINER",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "FEUERWEHRGRILLER (scharf)",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "SCHWEINSBRATWÜRSTL",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Sortiment: Fleisch & Wurstwaren | KW 32/33": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "PUTENSCHNITZEL (zart geschnitten)",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "SCHWEINEKOTELETT",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "SCHWEINEKRUSTENBRATEN (aus der Schutter)",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "GRILLBAUCHSCHEIBEN",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "BAYR. LEBERKÄSE (fein, ofengebacken)",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "HAUSSALAMI",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "PRESSSACK (weiß und rot)",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "BIERSCHINKEN",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "BROTZEITPLATTN",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Tagesangebote / Wochenaktion | Montag bis Samstag": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "1/2 HENDL",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "KRUSTENBRATEN",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "HAXE",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "BAYRISCHER OBAZDA",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "APFEL-GRIEBEN-WURSTSALAT",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "SCHMALZ (1909-Becher)",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Volksfestpaket",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Wochenmenüplan (Mittagstisch) | Woche 32 | 03.08. bis 08.08.2026": [
+    {
+      "metzger": "Metzgerei Wasner",
+      "city": "📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen",
+      "items": [
+        {
+          "name": "Montag: Cordon bleu mit Pommes",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Montag: Spaghetti Carbonara",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Dienstag: Spanferkelbraten mit Knödel und Kraut",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Dienstag: Nudelauflauf mit Tomatensoße",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Mittwoch: Rinderroulade mit Blaukraut und Knödel",
+          "preis": "10,00 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Mittwoch: Putensteak mit Ratatouille und Reis",
+          "preis": "10,00 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Donnerstag: Gebratene Leber in Zwiebelsoße mit Kartoffelpüree",
+          "preis": "4,90 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Donnerstag: Hähnchenkeule mit Pommes",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Freitag: Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße",
+          "preis": "12,90 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Freitag: Schweinerückensteaks mit Spätzle und Buttergemüse",
+          "preis": "10,30 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Samstag: Haxenfleisch mit Zwiebelsoße und Beilage",
+          "preis": "",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Samstag: Filettöpfle mit Eierknöpfle und kleinem grünem Salat",
+          "preis": "10,80 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Woche bis 03.08.2026": [
+    {
+      "metzger": "Brunner Metzgerei",
+      "city": "📍 Landshut",
+      "items": [
+        {
+          "name": "Wammerl mariniert (100g)",
+          "preis": "1,39 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Schweineschnitzel (100g)",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Regensburger (100g)",
+          "preis": "1,39 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Leberkäse (100g)",
+          "preis": "1,19 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Streichwurst (100g)",
+          "preis": "1,29 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Cabanossi (100g)",
+          "preis": "1,69 €",
+          "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ]
+}

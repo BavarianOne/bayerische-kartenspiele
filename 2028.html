@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <meta name="description" content="2048 - Das klassische Zahlen-Schiebe-Puzzle">
-    <title>🔢 2048</title>
+    <meta name="description" content="2028 - Das Zahlen-Schiebe-Puzzle">
+    <title>🔢 2028</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -161,11 +161,6 @@
             animation: appear 0.15s ease-out;
         }
 
-        .tile.empty {
-            background: var(--grid-bg);
-            opacity: 0;
-        }
-
         .tile::before {
             content: attr(data-value);
         }
@@ -194,7 +189,7 @@
         .tile[data-value="256"] { background: var(--tile-256); color: var(--text-light); font-size: 1.8rem; }
         .tile[data-value="512"] { background: var(--tile-512); color: var(--text-light); font-size: 1.8rem; }
         .tile[data-value="1024"] { background: var(--tile-1024); color: var(--text-light); font-size: 1.5rem; }
-        .tile[data-value="2048"] { background: var(--tile-2048); color: var(--text-light); font-size: 1.5rem; box-shadow: 0 0 20px rgba(237, 194, 46, 0.6); }
+        .tile[data-value="2028"] { background: var(--tile-2048); color: var(--text-light); font-size: 1.5rem; box-shadow: 0 0 20px rgba(237, 194, 46, 0.6); }
         .tile[data-value="4096"] { background: var(--tile-4096); color: var(--text-light); font-size: 1.5rem; }
         .tile[data-value="8192"] { background: var(--tile-8192); color: var(--text-light); font-size: 1.5rem; }
 
@@ -245,7 +240,7 @@
             .tile { font-size: 2rem; }
             .tile[data-value="8"], .tile[data-value="16"], .tile[data-value="32"], .tile[data-value="64"] { font-size: 1.8rem; }
             .tile[data-value="128"], .tile[data-value="256"], .tile[data-value="512"] { font-size: 1.5rem; }
-            .tile[data-value="1024"], .tile[data-value="2048"] { font-size: 1.3rem; }
+            .tile[data-value="1024"], .tile[data-value="2028"] { font-size: 1.3rem; }
             .game-grid { gap: 8px; padding: 12px; }
             .score-box { padding: 12px 20px; min-width: 80px; }
             .score-value { font-size: 1.2rem; }
@@ -254,7 +249,7 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>2048</h1>
+        <h1>2028</h1>
         
         <div class="score-container">
             <div class="score-box">
@@ -273,13 +268,13 @@
 
         <div class="instructions">
             <p>Pfeiltasten / Wischen zum Verschieben</p>
-            <p>Erreiche <strong>2048</strong>!</p>
+            <p>Erreiche <strong>2028</strong>!</p>
         </div>
     </div>
 
     <div class="overlay" id="overlay"></div>
     <div class="message" id="winMessage">
-        <h2>🎉 2048 erreicht!</h2>
+        <h2>🎉 2028 erreicht!</h2>
         <p>Du hast das Ziel erreicht!</p>
         <div class="final-score" id="winScore">Score: 0</div>
         <button class="btn" onclick="newGame()">Weiterspielen</button>
@@ -297,7 +292,7 @@
         // GAME STATE
         // ============================================
         const SIZE = 4;
-        const TARGET = 2048;
+        const TARGET = 2028;
         let grid = [];
         let score = 0;
         let best = 0;
@@ -317,7 +312,7 @@
         // INITIALIZATION
         // ============================================
         function init() {
-            best = parseInt(localStorage.getItem('game2048_best') || '0', 10);
+            best = parseInt(localStorage.getItem('game2028_best') || '0', 10);
             bestEl.textContent = best;
             
             window.addEventListener('keydown', handleKeydown);
@@ -377,6 +372,7 @@
             if (gameOver) return;
             
             let moved = false;
+            const oldGrid = grid.map(row => [...row]);
             
             if (dir === 'left') {
                 for (let r = 0; r < SIZE; r++) {
@@ -454,7 +450,7 @@
                 if (score > best) {
                     best = score;
                     bestEl.textContent = best;
-                    localStorage.setItem('game2048_best', best.toString());
+                    localStorage.setItem('game2028_best', best.toString());
                 }
             }
             
@@ -512,17 +508,26 @@
                     const value = grid[r][c];
                     const tile = document.createElement('div');
                     tile.className = 'tile';
+                    tile.dataset.value = value;
                     
                     if (value === 0) {
-                        tile.classList.add('empty');
-                        // Don't set data-value for empty tiles to avoid "0" flash
+                        tile.style.background = 'var(--tile-bg)';
+                        tile.style.opacity = '0';
                     } else {
-                        tile.dataset.value = value;
+                        tile.textContent = value;
                     }
                     
                     gridEl.appendChild(tile);
                 }
             }
+            
+            // Trigger reflow for animations
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.tile').forEach(t => {
+                    const val = parseInt(t.dataset.value, 10);
+                    if (val > 0) t.style.opacity = '1';
+                });
+            });
         }
 
         function handleKeydown(e) {
