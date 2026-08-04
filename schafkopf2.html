@@ -742,7 +742,41 @@ function startNewGame() {
 }
 
 // Init
-document.addEventListener('DOMContentLoaded', () => { renderAllHands(); addLog('system', 'Willkommen beim Schafkopf! Klicke "Neues Spiel" um zu beginnen.'); });
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial render (leere Hände)
+    renderAllHands();
+    addLog('system', 'Willkommen beim Schafkopf! Klicke "Neues Spiel" um zu beginnen.');
+    
+    // Auto-start für Debug: Erste Runde automatisch starten
+    // setTimeout(() => startNewGame(), 500); // Auskommentieren für manuellen Start
+});
+
+// Touch & Click Support für Buttons
+function addButtonEvents() {
+    const newGameBtn = document.getElementById('new-game-btn');
+    const nextRoundBtn = document.getElementById('next-round-btn');
+    const rulesBtn = document.getElementById('rules-btn');
+    
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', startNewGame);
+        newGameBtn.addEventListener('touchend', (e) => { e.preventDefault(); startNewGame(); });
+    }
+    if (nextRoundBtn) {
+        nextRoundBtn.addEventListener('click', nextRound);
+        nextRoundBtn.addEventListener('touchend', (e) => { e.preventDefault(); nextRound(); });
+    }
+    if (rulesBtn) {
+        rulesBtn.addEventListener('click', showRules);
+        rulesBtn.addEventListener('touchend', (e) => { e.preventDefault(); showRules(); });
+    }
+}
+
+// Call after DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addButtonEvents);
+} else {
+    addButtonEvents();
+}
 </script>
 </body>
 </html>
