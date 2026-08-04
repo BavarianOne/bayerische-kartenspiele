@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Weekli.de Scraper für Grundnahrungsmittel (Milch, Butter, Käse, etc.)
-Extrahiert Angebote von EDEKA, REWE, Lidl, Aldi, Penny, Kaufland, Norma
+Weekli.de Scraper - holt nur Prospekt-URLs als Referenz
+Strukturierte Produktdaten kommen aus manual.json (Supermärkte)
 """
 
 import requests
@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-# Konfiguration
+# Supermärkte mit ihren Weekli-URLs für Prospekt-Links
 SUPERMARKETS = {
     'edeka': {'name': 'EDEKA', 'url': 'https://www.weekli.de/supermaerkte/edeka/alle-angebote', 'category': 'Supermarkt'},
     'rewe': {'name': 'REWE', 'url': 'https://www.weekli.de/supermaerkte/rewe/alle-angebote', 'category': 'Supermarkt'},
@@ -21,20 +21,6 @@ SUPERMARKETS = {
     'penny': {'name': 'PENNY', 'url': 'https://www.weekli.de/discounter/penny/alle-angebote', 'category': 'Discounter'},
     'kaufland': {'name': 'Kaufland', 'url': 'https://www.weekli.de/supermaerkte/kaufland/alle-angebote', 'category': 'Supermarkt'},
     'norma': {'name': 'NORMA', 'url': 'https://www.weekli.de/discounter/norma/alle-angebote', 'category': 'Discounter'},
-}
-
-# Suchbegriffe für Grundnahrungsmittel
-KEYWORDS = {
-    'Milch & Milchprodukte': ['milch', 'vollmilch', 'teilentrahmt', 'fettarm', 'h-milch', 'haltbar'],
-    'Butter, Margarine & Streichfette': ['butter', 'margarine', 'streichfett', 'pflanzenfett', 'butterschmalz'],
-    'Käse & Quark': ['käse', 'quark', 'topfen', 'frischkäse', 'schnittkäse', 'hartkäse', 'weichkäse', 'mozzarella', 'gouda', 'emmentaler'],
-    'Joghurt, Quark & Desserts': ['joghurt', 'skyr', 'grießbrei', 'pudding', 'dessert', 'quarkspeise'],
-    'Eier': ['ei', 'eier', 'freilandei', 'bodenei', 'bio-ei'],
-    'Brot & Backwaren': ['brot', 'brötchen', 'toast', 'vollkornbrot', 'roggenbrot', 'dinkelbrot'],
-    'Fleisch & Wurst (Supermarkt)': ['fleisch', 'wurst', 'aufschnitt', 'schinken', 'salami', 'bratwurst', 'leberkäse'],
-    'Obst & Gemüse': ['apfel', 'banane', 'tomate', 'gurke', 'kartoffel', 'zwiebel', 'karotte', 'salat', 'paprika'],
-    'Getränke': ['wasser', 'saft', 'limonade', 'cola', 'bier', 'wein', 'schorle'],
-    'Vorrat & Trockenprodukte': ['mehl', 'zucker', 'reis', 'nudeln', 'öl', 'essig', 'salz', 'gewürz', 'konserve'],
 }
 
 HEADERS = {
@@ -50,133 +36,61 @@ OUTPUT_FILE = OUTPUT_DIR / 'lebensmittel-angebote.json'
 MANUAL_FILE = OUTPUT_DIR / 'lebensmittel-manual.json'
 
 
-def extract_json_ld(html):
-    """Extrahiert JSON-LD aus HTML"""
-    pattern = r'<script type="application/ld\+json">(.*?)</script>'
-    matches = re.findall(pattern, html, re.DOTALL)
-    for match in matches:
-        try:
-            data = json.loads(match.strip())
-            return data
-        except json.JSONDecodeError:
-            continue
-    return None
-
-
-def categorize_product(name):
-    """Kategorisiert Produkt basierend auf Namen"""
-    name_lower = name.lower()
-    for category, keywords in KEYWORDS.items():
-        for kw in keywords:
-            if kw in name_lower:
-                return category
-    return 'Sonstiges'
-
-
-def parse_weekli_offers(html, market_key, market_info):
-    """Parst Angebote von einer Weekli-Seite"""
-    data = extract_json_ld(html)
-    if not data:
-        print(f"  ⚠️ Kein JSON-LD gefunden für {market_info['name']}")
-        return []
-
-    offers = []
+def get_prospekt_urls(html, market_key, market_info):
+    """Extrahiert Prospekt-URLs aus der Übersichtsseite"""
+    prospekts = []
     
-    # JSON-LD Structure durchsuchen
-    def find_offers(obj):
-        if isinstance(obj, dict):
-            if obj.get('@type') == 'ItemList' and 'itemListElement' in obj:
-                for element in obj['itemListElement']:
-                    item = element.get('item', {})
-                    if item.get('@type') in ['Product', 'CreativeWork']:
-                        name = item.get('name', '')
-                        if not name:
-                            continue
-                        
-                        # Preis extrahieren
-                        price = None
-                        old_price = None
-                        offers_data = item.get('offers', {})
-                        if isinstance(offers_data, dict):
-                            price = offers_data.get('price')
-                            old_price = offers_data.get('priceValidUntil')  # manchmal hier
-                        elif isinstance(offers_data, list) and offers_data:
-                            price = offers_data[0].get('price')
-                        
-                        # Gültigkeit
-                        valid_from = None
-                        valid_to = None
-                        if isinstance(offers_data, dict):
-                            valid_from = offers_data.get('validFrom')
-                            valid_to = offers_data.get('validThrough')
-                        
-                        # Bild
-                        image = item.get('image', '')
-                        if isinstance(image, list):
-                            image = image[0] if image else ''
-                        
-                        # Händler
-                        retailer = market_info['name']
-                        publisher = item.get('publisher', {})
-                        if isinstance(publisher, dict):
-                            retailer = publisher.get('name', retailer)
-                        
-                        # URL
-                        url = item.get('url', '')
-                        
-                        offers.append({
-                            'id': f"{market_key}_{len(offers)}",
-                            'name': name,
-                            'category': categorize_product(name),
-                            'price': price,
-                            'old_price': old_price,
-                            'currency': 'EUR',
-                            'retailer': retailer,
-                            'retailer_key': market_key,
-                            'retailer_category': market_info['category'],
-                            'valid_from': valid_from,
-                            'valid_to': valid_to,
-                            'image': image,
-                            'url': url,
-                            'scraped_at': datetime.now().isoformat(),
-                        })
+    # Finde alle Prospekt-Links
+    prospekt_urls = re.findall(r'href="(/prospekt/[^"]+)"', html)
+    
+    seen = set()
+    for url in prospekt_urls:
+        full_url = f"https://www.weekli.de{url}"
+        if full_url not in seen:
+            seen.add(full_url)
+            # Extrahiere Titel aus URL oder alt-Text
+            title_match = re.search(r'c\d+-d(\d+)', url)
+            prospekt_id = title_match.group(1) if title_match else 'unknown'
             
-            # Rekursiv weiter suchen
-            for v in obj.values():
-                find_offers(v)
-        elif isinstance(obj, list):
-            for item in obj:
-                find_offers(item)
+            prospekts.append({
+                'id': f"{market_key}_{prospekt_id}",
+                'title': f"Prospekt {prospekt_id}",
+                'url': full_url,
+                'retailer': market_info['name'],
+                'retailer_key': market_key,
+                'retailer_category': market_info['category'],
+                'scraped_at': datetime.now().isoformat(),
+            })
     
-    find_offers(data)
-    return offers
+    return prospekts
 
 
 def scrape_market(market_key, market_info):
-    """Scraped einen einzelnen Markt"""
-    print(f"🔍 Scrape {market_info['name']}...")
+    """Holt Prospekt-URLs für einen Markt"""
+    print(f"🔍 Hole Prospekte für {market_info['name']}...")
     try:
-        resp = requests.get(market_info['url'], headers=HEADERS, timeout=30)
+        resp = requests.get(market_info['url'], headers={'User-Agent': HEADERS['User-Agent']}, timeout=30)
         resp.raise_for_status()
-        offers = parse_weekli_offers(resp.text, market_key, market_info)
-        print(f"  ✅ {len(offers)} Angebote gefunden")
-        return offers
+        prospekts = get_prospekt_urls(resp.text, market_key, market_info)
+        print(f"  ✅ {len(prospekts)} Prospekte gefunden")
+        return prospekts
     except Exception as e:
         print(f"  ❌ Fehler bei {market_info['name']}: {e}")
         return []
 
 
 def load_manual_offers():
-    """Lädt manuelle Zusatz-Angebote"""
+    """Lädt manuelle Produkt-Angebote"""
     if MANUAL_FILE.exists():
         with open(MANUAL_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return []
 
 
-def save_offers(all_offers):
-    """Speichert alle Angebote"""
-    # Nach Kategorien gruppieren
+def save_data(all_prospekts, all_offers):
+    """Speichert Prospekte und manuelle Angebote"""
+    
+    # Angebote nach Kategorien gruppieren
     by_category = {}
     for offer in all_offers:
         cat = offer['category']
@@ -184,16 +98,17 @@ def save_offers(all_offers):
             by_category[cat] = []
         by_category[cat].append(offer)
     
-    # Nach Wochen gruppieren (gültig ab Datum)
+    # Nach Wochen gruppieren
     by_week = {}
     for offer in all_offers:
-        week_key = 'Unbekannt'
-        if offer['valid_from']:
+        week_key = 'Aktuelle Woche'
+        if offer.get('valid_from'):
             try:
                 dt = datetime.fromisoformat(offer['valid_from'].replace('Z', '+00:00'))
-                week_key = f"Woche {dt.strftime('%V')} ({dt.strftime('%d.%m.')}-{(dt.replace(day=dt.day+6)).strftime('%d.%m.%Y')})"
+                week_key = f"Woche {dt.strftime('%V')} ({dt.strftime('%d.%m.')}-{(dt.replace(day=min(dt.day+6,28))).strftime('%d.%m.%Y')})"
             except:
                 pass
+        
         if week_key not in by_week:
             by_week[week_key] = []
         by_week[week_key].append(offer)
@@ -201,44 +116,41 @@ def save_offers(all_offers):
     output = {
         'meta': {
             'scraped_at': datetime.now().isoformat(),
+            'total_prospekts': len(all_prospekts),
             'total_offers': len(all_offers),
-            'categories': list(by_category.keys()),
-            'retailers': list(set(o['retailer'] for o in all_offers)),
+            'categories': sorted(list(by_category.keys())),
+            'retailers': sorted(list(set(o['retailer'] for o in all_offers))),
         },
+        'prospekts': all_prospekts,
         'by_category': by_category,
         'by_week': by_week,
-        'all_offers': all_offers,
+        'offers': all_offers,
     }
     
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
     print(f"\n💾 Gespeichert: {OUTPUT_FILE}")
-    print(f"   Kategorien: {len(by_category)}")
-    print(f"   Wochen: {len(by_week)}")
-    print(f"   Gesamt: {len(all_offers)} Angebote")
+    print(f"   Prospekte: {len(all_prospekts)}")
+    print(f"   Angebote: {len(all_offers)}")
 
 
 def main():
-    print("🚀 Starte Weekli.de Scraper für Grundnahrungsmittel")
+    print("🚀 Starte Weekli.de Prospekt-Scraper")
     print("=" * 60)
     
-    all_offers = []
+    all_prospekts = []
     
-    # Alle Märkte scrapen
     for market_key, market_info in SUPERMARKETS.items():
-        offers = scrape_market(market_key, market_info)
-        all_offers.extend(offers)
+        prospekts = scrape_market(market_key, market_info)
+        all_prospekts.extend(prospekts)
     
-    # Manuelle Angebote hinzufügen
+    # Manuelle Produkt-Angebote laden (Supermarkt-Produkte mit Preisen)
     manual_offers = load_manual_offers()
-    if manual_offers:
-        print(f"\n📝 Füge {len(manual_offers)} manuelle Angebote hinzu...")
-        all_offers.extend(manual_offers)
+    print(f"\n📝 Lade {len(manual_offers)} manuelle Produkt-Angebote...")
     
     # Speichern
-    save_offers(all_offers)
-    
+    save_data(all_prospekts, manual_offers)
     print("\n✅ Fertig!")
 
 
