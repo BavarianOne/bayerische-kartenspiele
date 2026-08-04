@@ -1,0 +1,68 @@
+name: Weekly Lebensmittel-Angebote Update
+
+on:
+  schedule:
+    # Jeden Sonntag um 06:00 UTC (08:00 CEST / 07:00 CET)
+    - cron: '0 6 * * 0'
+  workflow_dispatch:  # Manuell auslösbar
+
+permissions:
+  contents: write  # Für git push
+
+jobs:
+  update-angebote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Python Setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Dependencies installieren
+        run: |
+          pip install requests --quiet
+
+      - name: Scraper ausführen
+        run: |
+          cd ${{ github.workspace }}
+          python3 scraper/weekli_scraper.py
+
+      - name: Prüfen auf Änderungen
+        id: changes
+        run: |
+          if git diff --quiet data/lebensmittel-angebote.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "Keine Änderungen an den Angeboten."
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Änderungen erkannt!"
+          fi
+
+      - name: Commit & Push bei Änderungen
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add data/lebensmittel-angebote.json
+          git commit -m "🤖 Auto-Update: Lebensmittel-Angebote $(date '+%d.%m.%Y')"
+          git push origin master
+          echo "✅ Änderungen gepusht - GitHub Pages baut neu (~1-2 Min)"
+
+      - name: Zusammenfassung
+        run: |
+          echo "## Weekly Update Ergebnis" >> $GITHUB_STEP_SUMMARY
+          echo "- **Datum**: $(date '+%d.%m.%Y %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.changes.outputs.changed }}" = "true" ]; then
+            echo "- **Status**: ✅ Angebote aktualisiert & deployed" >> $GITHUB_STEP_SUMMARY
+            echo "- **Live unter**: https://bavarianone.github.io/bayerische-kartenspiele/lebensmittel-angebote.html" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ⏭️ Keine Änderungen nötig" >> $GITHUB_STEP_SUMMARY
+          fi
