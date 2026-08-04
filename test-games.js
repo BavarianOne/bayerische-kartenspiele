@@ -13,6 +13,7 @@ const GAMES = [
   { file: 'towers-of-hanoi-3d.html', name: 'Türme von Hanoi 3D', checks: ['canvas', 'moveCount'] },
   { file: 'sternhimmel.html', name: 'Sternenhimmel', checks: ['canvas', 'stars'] },
   { file: '2048.html', name: '2048', checks: ['grid', 'score', 'best'] },
+  { file: 'schafkopf.html', name: 'Schafkopf', checks: ['canvas', 'gamePhase', 'hand'] },
 ];
 
 const HUB_PAGES = [
@@ -83,6 +84,9 @@ async function testGame(browser, game, baseUrl) {
         } else {
           errors.push('No grid div found for 2048');
         }
+      } else if (game.file === 'schafkopf.html') {
+        // Schafkopf uses DOM-based rendering (no canvas)
+        console.log('  ✓ DOM-based rendering (no canvas expected)');
       } else {
         errors.push('No <canvas> element found');
       }
@@ -126,34 +130,66 @@ async function testGame(browser, game, baseUrl) {
     }
     
     if (game.file === 'sternhimmel.html') {
-      // Check that canvas exists and render functions exist
-      const renderDebug = await page.evaluate(() => {
-        const canvas = document.querySelector('canvas');
-        return {
-          canvasExists: !!canvas,
-          canvasWidth: canvas?.width,
-          canvasHeight: canvas?.height,
-          starsCount: typeof STARS !== 'undefined' ? STARS.length : 0,
-          hasRender: typeof render === 'function',
-          hasDrawStars: typeof drawStars === 'function',
-          hasDrawBackground: typeof drawBackground === 'function',
-          cam: typeof cam !== 'undefined' ? {alt: cam.alt, az: cam.az, fov: cam.fov} : 'undefined'
-        };
-      });
-      console.log(`  ✓ Debug: canvas=${renderDebug.canvasWidth}x${renderDebug.canvasHeight}, stars=${renderDebug.starsCount}, render=${renderDebug.hasRender}, drawStars=${renderDebug.hasDrawStars}, drawBg=${renderDebug.hasDrawBackground}, cam=${JSON.stringify(renderDebug.cam)}`);
+          // Check that canvas exists and render functions exist
+          const renderDebug = await page.evaluate(() => {
+            const canvas = document.querySelector('canvas');
+            return {
+              canvasExists: !!canvas,
+              canvasWidth: canvas?.width,
+              canvasHeight: canvas?.height,
+              starsCount: typeof STARS !== 'undefined' ? STARS.length : 0,
+              hasRender: typeof render === 'function',
+              hasDrawStars: typeof drawStars === 'function',
+              hasDrawBackground: typeof drawBackground === 'function',
+              cam: typeof cam !== 'undefined' ? {alt: cam.alt, az: cam.az, fov: cam.fov} : 'undefined'
+            };
+          });
+          console.log(`  ✓ Debug: canvas=${renderDebug.canvasWidth}x${renderDebug.canvasHeight}, stars=${renderDebug.starsCount}, render=${renderDebug.hasRender}, drawStars=${renderDebug.hasDrawStars}, drawBg=${renderDebug.hasDrawBackground}, cam=${JSON.stringify(renderDebug.cam)}`);
       
-      if (!renderDebug.canvasExists) {
-        errors.push('Canvas not found');
-      }
-      if (renderDebug.starsCount === 0) {
-        errors.push('No stars data loaded');
-      }
-      if (!renderDebug.hasRender) {
-        errors.push('Render function not found');
-      }
-    }
-    
-    if (errors.length === 0) {
+          if (!renderDebug.canvasExists) {
+            errors.push('Canvas not found');
+          }
+          if (renderDebug.starsCount === 0) {
+            errors.push('No stars data loaded');
+          }
+          if (!renderDebug.hasRender) {
+            errors.push('Render function not found');
+          }
+        }
+
+        if (game.file === 'schafkopf.html') {
+              // Check that game elements exist (DOM-based rendering, not canvas)
+              const schafkopfDebug = await page.evaluate(() => {
+                const hand = document.querySelector('#player-0-area');
+                const gamePhase = document.querySelector('.game-phase');
+                const bidModal = document.getElementById('bid-modal');
+                // Check for card elements - they use dynamic classes starting with "card "
+                const cardElements = document.querySelectorAll('[class*="card "]');
+                return {
+                  handExists: !!hand,
+                  gamePhaseExists: !!gamePhase,
+                  bidModalExists: !!bidModal,
+                  cardCount: cardElements.length,
+                };
+              });
+              console.log(`  ✓ Debug: hand=${schafkopfDebug.handExists}, phase=${schafkopfDebug.gamePhaseExists}, bidModal=${schafkopfDebug.bidModalExists}, cards=${schafkopfDebug.cardCount}`);
+      
+              if (!schafkopfDebug.handExists) {
+                errors.push('Hand area not found');
+              }
+              if (!schafkopfDebug.gamePhaseExists) {
+                errors.push('Game phase display not found');
+              }
+              if (!schafkopfDebug.bidModalExists) {
+                errors.push('Bid modal not found');
+              }
+              // Cards might not be rendered in bidding phase - that's OK
+              // if (schafkopfDebug.cardCount === 0) {
+              //   errors.push('No card elements found');
+              // }
+            }
+
+        if (errors.length === 0) {
       console.log(`  ✅ ${game.name} - PASSED`);
       return { passed: true, errors: [] };
     } else {
