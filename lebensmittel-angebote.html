@@ -500,6 +500,18 @@
                         manEl.textContent = '📝 Manuell';
                         metaDiv.appendChild(manEl);
                     }
+
+                    // Source link
+                    if (offer.source_url) {
+                        const sourceLink = document.createElement('a');
+                        sourceLink.href = offer.source_url;
+                        sourceLink.target = '_blank';
+                        sourceLink.rel = 'noopener';
+                        sourceLink.className = 'offer-source-link';
+                        sourceLink.textContent = '🔗 Zur Quelle';
+                        sourceLink.style.cssText = 'display:inline-block;margin-top:6px;padding:3px 8px;background:#2e7d32;color:white;border-radius:4px;font-size:0.7em;text-decoration:none;';
+                        metaDiv.appendChild(sourceLink);
+                    }
                     offerEl.appendChild(metaDiv);
 
                     // Beschreibung

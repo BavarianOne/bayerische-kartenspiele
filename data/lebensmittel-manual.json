@@ -10,6 +10,7 @@
     "valid_from": "2026-08-04T00:00:00",
     "valid_to": "2026-08-10T23:59:59",
     "description": "EDEKA Eigenmarke, 3,5% Fett",
+    "source_url": "https://www.edeka.de/eh/suedbayern/angebote/",
     "manual": true
   },
   {
@@ -23,6 +24,7 @@
     "valid_from": "2026-08-04T00:00:00",
     "valid_to": "2026-08-10T23:59:59",
     "description": "REWE Bio Vollmilch 3,5%, 1l",
+    "source_url": "https://www.rewe.de/angebote/",
     "manual": true
   },
   {
@@ -36,6 +38,7 @@
     "valid_from": "2026-08-04T00:00:00",
     "valid_to": "2026-08-10T23:59:59",
     "description": "Milbona Bauernbutter, 250g",
+    "source_url": "https://www.lidl.de/angebote/",
     "manual": true
   },
   {
@@ -49,6 +52,7 @@
     "valid_from": "2026-08-04T00:00:00",
     "valid_to": "2026-08-10T23:59:59",
     "description": "PENNY Kräuterquark 20%, 200g",
+    "source_url": "https://www.penny.de/angebote/",
     "manual": true
   },
   {
@@ -62,6 +66,7 @@
     "valid_from": "2026-08-04T00:00:00",
     "valid_to": "2026-08-10T23:59:59",
     "description": "ALDI SÜD Gouda, 150g",
+    "source_url": "https://www.aldi-sued.de/angebote/",
     "manual": true
   },
   {
@@ -75,6 +80,7 @@
     "valid_from": "2026-08-04T00:00:00",
     "valid_to": "2026-08-10T23:59:59",
     "description": "K-Bio Freilandeier, 10 Stück",
+    "source_url": "https://www.kaufland.de/angebote/",
     "manual": true
   }
 ]
