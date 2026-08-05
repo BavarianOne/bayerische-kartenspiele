@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """
 Weekli.de Scraper - holt nur Prospekt-URLs als Referenz
-Strukturierte Produktdaten kommen aus manual.json (Supermärkte)
+Strukturierte Produktdaten kommen aus manual.json + marktguru.de (Supermärkte)
 """
 
 import requests
 import json
 import re
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
+
+# Pfad für marktguru_scraper import
+sys.path.insert(0, str(Path(__file__).parent))
 
 # Supermärkte mit ihren Weekli-URLs für Prospekt-Links
 SUPERMARKETS = {
@@ -87,6 +91,20 @@ def load_manual_offers():
     return []
 
 
+def load_marktguru_offers():
+    """Lädt marktguru-Angebote (automatisch gescrapt)"""
+    try:
+        from marktguru_scraper import scrape_marktguru_products, convert_to_manual_format
+        print("🔍 Lade marktguru Produkt-Angebote (alle konfigurierten Produkte)...")
+        offers = scrape_marktguru_products()
+        manual_offers = convert_to_manual_format(offers)
+        print(f"  ✅ {len(manual_offers)} marktguru-Angebote geladen")
+        return manual_offers
+    except Exception as e:
+        print(f"  ❌ Fehler beim Laden von marktguru: {e}")
+        return []
+
+
 def save_data(all_prospekts, all_offers):
     """Speichert Prospekte und manuelle Angebote"""
     
@@ -136,7 +154,7 @@ def save_data(all_prospekts, all_offers):
 
 
 def main():
-    print("🚀 Starte Weekli.de Prospekt-Scraper")
+    print("🚀 Starte Weekli.de Prospekt-Scraper + marktguru.de Produkt-Scraper")
     print("=" * 60)
     
     all_prospekts = []
@@ -149,8 +167,14 @@ def main():
     manual_offers = load_manual_offers()
     print(f"\n📝 Lade {len(manual_offers)} manuelle Produkt-Angebote...")
     
+    # marktguru-Angebote laden (automatisch gescrapt)
+    marktguru_offers = load_marktguru_offers()
+    
+    # Zusammenführen (marktguru ergänzt manuell, manuell hat Vorrang bei Duplikaten)
+    all_offers = manual_offers + marktguru_offers
+    
     # Speichern
-    save_data(all_prospekts, manual_offers)
+    save_data(all_prospekts, all_offers)
     print("\n✅ Fertig!")
 
 

@@ -1,30 +1,62 @@
-node_modules/
-package-lock.json
-test_controls.js
-test_movement.js
-three.min.js
-maze3d.js.restore
-opencode.json
-temp_output.txt
-schafkopf_wiki.html
-schafkopf_text2.txt
-extract_wiki.ps1
-extract_wiki2.ps1
-extract_wiki3.ps1
-extract_wiki4.ps1
-schafkopf_rules.txt
-schafkopf_text.txt
-test-memory.js
-earth-dashboard.html.backup3
-earth-dashboard.html.backup2
-tests/watten-fix.spec.js
-test-results/tests-watten-fix-Watten-Full-round-playthrough/error-context.md
-test-results/tests-watten-fix-Watten-Pl-71606-ore-declaring-Schlag-Trumpf/error-context.md
-test-results/.last-run.json
-package.json
-test-watten-fix.js
-playwright.config.js
-package.json
-nul
-viergewinnt.html.backup
-viergewinnt.html.corrupted
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+env/
+ENV/
+
+# Backups & Temp
+*.backup
+*.backup*
+*.bak
+*~
+*.swp
+*.swo
+*~.orig
+*.backup2
+
+# Test files
+test_*.py
+*_test.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data - Raw/Intermediate (keep final JSON)
+data/metzger/*/raw/
+data/metzger/*/ocr_results.json
+data/metzger/*/svg_ocr_results.json
+data/metzger/*/metadata.json
+data/metzger/*/offer-*.png
+data/metzger/*/offer-*.jpg
+data/metzger/*/offer-*.svg
+data/metzger/*/structured_offers.json
+metzger-parsed-data.json
+
+# Scripts used for generation
+apply_*.py
+test_*.py
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
