@@ -38,6 +38,10 @@ test_*.py
 .DS_Store
 Thumbs.db
 
+# Node.js
+node_modules/
+package-lock.json
+
 # Data - Raw/Intermediate (keep final JSON)
 data/metzger/*/raw/
 data/metzger/*/ocr_results.json
