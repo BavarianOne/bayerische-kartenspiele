@@ -336,6 +336,7 @@ def convert_to_manual_format(offers: List[dict]) -> List[dict]:
             'source_url': offer['source_url'],
             'source_note': offer['source_note'],
             'manual': False,  # Kennzeichnung: automatisiert von marktguru
+            'brand': offer['brand'],  # Marke für prominente Anzeige
         })
     return manual_offers
 
