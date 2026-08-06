@@ -78,6 +78,11 @@ def extract_offers_from_brand_page(data: dict) -> List[dict]:
         except KeyError as e:
             print(f"  ⚠️ Ungültiges Angebot übersprungen: {e}")
             continue
+    
+    # Kategorie für jedes Angebot hinzufügen
+    for o in offers:
+        o['category'] = categorize_offer(o)
+    
     return offers
 
 
@@ -109,54 +114,73 @@ def extract_offers_from_search_page(data: dict) -> List[dict]:
                 })
             except KeyError as e:
                 continue
+    
+    # Kategorie für jedes Angebot hinzufügen
+    for o in offers:
+        o['category'] = categorize_offer(o)
+    
     return offers
 
 
+def categorize_offer(offer: dict) -> str:
+    """Kategorisiert ein Angebot basierend auf Name und Marke"""
+    name_lower = offer['name'].lower()
+    brand_lower = offer['brand'].lower()
+    
+    # Milch & Milchprodukte
+    if any(kw in name_lower or kw in brand_lower for kw in ['milch', 'berchtesgadener', 'joghurt', 'skyr', 'topfen', 'buttermilch', 'kaffee-milch', 'kakao', 'eiskaffee', 'speisequark', 'fettarme milch', 'vollmilch', 'weidemilch', 'lactosefrei', 'reis-milch', 'milch reis']):
+        return 'Milch & Milchprodukte'
+    # Butter, Margarine & Streichfette
+    elif any(kw in name_lower or kw in brand_lower for kw in ['butter', 'streichfett', 'margarine', 'landliebe', 'weihenstephan', 'baerenmarke', 'kerrygold', 'meggle', 'tortenbutter', 'kr\u00e4uterbutter', 'streichzart', 'baguette', 'irische butter', 'irischer', 'schlagsahne', 'koch sahne', 'rahmjoghurt']):
+        return 'Butter, Margarine & Streichfette'
+    # Käse
+    elif any(kw in name_lower or kw in brand_lower for kw in ['emmentaler', 'almhammer', 'almdammer', 'almzeit', 'kaese', 'k\u00e4se', 'bergader', 'alte meister', 'bonifaz', 'bergbauern k\u00e4se', 'bavaria blu', 'pizzak\u00e4se', 'reibek\u00e4se', 'schnittk\u00e4se', 'original irischer k\u00e4se', 'original irischer cheddar', 'tilsiter', 'ziegenweichk\u00e4se', 'bio k\u00e4sescheiben', 'landk\u00e4se']):
+        return 'K\u00e4se'
+    # Nüsse & Kerne
+    elif any(kw in name_lower or kw in brand_lower for kw in ['pekannuss', 'pecan', 'pistazien', 'pistazie', 'pistachio', 'nuss', 'n\u00fcss', 'seeberger', 'kluth', 'zentis', 'studentenfutter', 'vital-kerne', 'mangostreifen', 'erdbeeren', 'popcorn', 'mango', 'pinienkerne', 'cashew', 'cashewkerne', 'nuss-mix', 'cashew-cranberry', 'macadamias', 'salatveredler', 'feigen', 'aachener', 'fr\u00fchst\u00fccks', 'konfit\u00fcre', 'aufstrich', 'sesamini', 'mandelmus', 'kokosmilch', 'wildheidelbeeren', 'hummus', 'tofu', 'streichcreme', 'tomatenst\u00fccke', 'gem\u00fcsekonserven', 'linsen', 'basmati', 'fr\u00fchlingsrollen', 'dinkel', 'gr\u00fcnkern', 'brot']):
+        return 'N\u00fcsse & Kerne'
+    # Teigwaren & Reis
+    elif any(kw in name_lower or kw in brand_lower for kw in ['nudeln', 'pasta', 'spaghetti', 'penne', 'fusilli', 'farfalle', 'tagliatelle', 'rigatoni', 'barilla', 'birkel', 'de cecco', 'de-cecco', 'rummo', 'garofalo', 'vitalis', 'eigner', 'muellers', 'harta', 'teigwaren', 'pesto', 'nudel', 'hartweizen', 'eiernudeln', 'frischei', 'lasagne', 'pizzateig', 'kn\u00e4ckebrot']):
+        return 'Teigwaren & Reis'
+    
+    return 'Sonstiges'
+
+
 # ============================================================
-# PRODUKT-KONFIGURATION - nur diese Produkte werden gescrapt
+# PRODUKT-KONFIGURATION - nur diese 4 Produkte werden gescrapt
 # ============================================================
 TARGET_PRODUCTS = {
-    'berchtesgadener_milch': {
-        'name': 'Berchtesgadener Milch',
-        'brands': ['berchtesgadener-land'],
-        'search_terms': ['berchtesgadener milch', 'berchtesgadener land milch'],
-        'category': 'Milch & Milchprodukte',
-    },
     'butter': {
         'name': 'Butter',
         'brands': ['berchtesgadener-land', 'landliebe', 'weihenstephan', 'mueller', 'baerenmarke', 'schwarzwaldmilch', 'ramseier', 'meggle', 'kerrygold'],
         'search_terms': ['butter', 'suessrahmbutter', 'saure rahmbutter', 'kraeuterbutter'],
         'category': 'Butter, Margarine & Streichfette',
+        'filter_keywords': ['butter', 'suessrahmbutter', 'saure rahmbutter', 'kräuterbutter'],
+        'exclude_keywords': ['sahne', 'schlagsahne', 'konfitüre', 'baguette', 'brot', 'streichzart', 'cremig', 'margarine', 'streichfett', 'chedder', 'käse', 'extra xxl'],
+    },
+    'milch': {
+        'name': 'Milch (Vollmilch, Bio-Milch)',
+        'brands': ['berchtesgadener-land', 'landliebe', 'weihenstephan', 'mueller', 'baerenmarke', 'schwarzwaldmilch', 'ramseier', 'meggle', 'ja', 'gut-guenstig', 'dm-bio', 'alnatura'],
+        'search_terms': ['vollmilch', 'bio milch', 'frischmilch', 'h-milch', 'haltbare milch'],
+        'category': 'Milch & Milchprodukte',
+        'filter_keywords': ['milch', 'vollmilch', 'bio milch', 'frischmilch', 'h-milch', 'haltbare milch', 'weidemilch', 'bauernmilch'],
+        'exclude_keywords': ['joghurt', 'skyr', 'topfen', 'buttermilch', 'kaffee', 'kakao', 'eiskaffee', 'speisequark', 'reis-milch', 'milch reis', 'müllermilch', 'bananen', 'schokoladen', 'lactosefrei', 'fettarme', 'fettarm', 'drink', 'mix', 'shake'],
     },
     'emmentaler': {
         'name': 'Emmentaler',
-        'brands': ['berchtesgadener-land', 'bergader', 'alte-meister', 'hohenloher', 'gmundner', 'sennerei'],
+        'brands': ['berchtesgadener-land', 'bergader', 'alte-meister', 'hohenloher', 'gmundner', 'sennerei', 'ja', 'gut-guenstig', 'milram', 'hochstaden'],
         'search_terms': ['emmentaler', 'emmentaler kaese', 'emmental'],
         'category': 'Käse',
-    },
-    'almhammer': {
-        'name': 'Almhammer / Almdammer',
-        'brands': ['almhammer', 'almdammer', 'bergader', 'alte-meister'],
-        'search_terms': ['almhammer', 'almdammer', 'almkaese', 'almer kaese'],
-        'category': 'Käse',
-    },
-    'pekannuss': {
-        'name': 'Pekannüsse',
-        'brands': ['seeberger', 'kluth', 'american-heritage', 'zentis', 'rapunzel', 'dm-bio', 'alnatura'],
-        'search_terms': ['pekannuss', 'pekannuesse', 'pecan', 'pecannuesse'],
-        'category': 'Nüsse & Kerne',
-    },
-    'pistazien': {
-        'name': 'Pistazien',
-        'brands': ['seeberger', 'kluth', 'zentis', 'american-heritage', 'rapunzel', 'dm-bio', 'alnatura', 'pistachio'],
-        'search_terms': ['pistazien', 'pistazie', 'pistachio', 'gruene pistazien'],
-        'category': 'Nüsse & Kerne',
+        'filter_keywords': ['emmentaler', 'emmental'],
+        'exclude_keywords': ['almzeit', 'almdammer', 'almhammer', 'bergbauern', 'pizzakäse', 'reibekäse', 'schnittkäse', 'tilsiter', 'ziegen', 'weiche', 'bavaria blu', 'bonifaz', 'original irischer', 'cheddar', 'käsescheiben', 'käse', 'grilltaler', 'hotties', 'körniger', 'frischkäse'],
     },
     'nudeln': {
         'name': 'Nudeln / Pasta',
         'brands': ['barilla', 'birkel', 'de-cecco', 'rummo', 'garofalo', 'vitalis', 'ja', 'gut-guenstig', 'eigner', 'muellers-muehle', 'harta'],
         'search_terms': ['nudeln', 'pasta', 'spaghetti', 'penne', 'fusilli', 'farfalle', 'tagliatelle', 'rigatoni'],
         'category': 'Teigwaren & Reis',
+        'filter_keywords': ['nudeln', 'pasta', 'spaghetti', 'penne', 'fusilli', 'farfalle', 'tagliatelle', 'rigatoni', 'teigwaren', 'lasagne'],
+        'exclude_keywords': ['pesto', 'sauce', 'soße', 'pizzateig', 'knäckebrot', 'bolognese', 'xxl', 'frischer'],
     },
 }
 
@@ -189,6 +213,9 @@ def scrape_marktguru_products(
         product_name = product_config['name']
         brands = product_config['brands']
         search_terms = product_config['search_terms']
+        target_category = product_config['category']
+        filter_keywords = product_config.get('filter_keywords', [])
+        exclude_keywords = product_config.get('exclude_keywords', [])
         
         print(f"\n📦 Produkt: {product_name}")
         
@@ -202,8 +229,16 @@ def scrape_marktguru_products(
                 if retailer_filter:
                     offers = [o for o in offers if retailer_filter.lower() in o['retailer_key'].lower()]
                 if offers:
-                    all_offers.extend(offers)
-                    print(f"    ✅ {len(offers)} Angebote von {brand}")
+                    # Post-filter: Nur Angebote in der Zielkategorie behalten
+                    offers = [o for o in offers if o['category'] == target_category]
+                    # Zusätzlicher Produkt-Namen-Filter
+                    if filter_keywords:
+                        offers = [o for o in offers if any(kw in o['name'].lower() for kw in filter_keywords)]
+                    if exclude_keywords:
+                        offers = [o for o in offers if not any(kw in o['name'].lower() for kw in exclude_keywords)]
+                    if offers:
+                        all_offers.extend(offers)
+                        print(f"    ✅ {len(offers)} Angebote von {brand}")
         
         # 2. Suchseiten für Suchbegriffe
         for search_term in search_terms:
@@ -215,8 +250,16 @@ def scrape_marktguru_products(
                 if retailer_filter:
                     offers = [o for o in offers if retailer_filter.lower() in o['retailer_key'].lower()]
                 if offers:
-                    all_offers.extend(offers)
-                    print(f"    ✅ {len(offers)} Angebote aus Suche '{search_term}'")
+                    # Post-filter: Nur Angebote in der Zielkategorie behalten
+                    offers = [o for o in offers if o['category'] == target_category]
+                    # Zusätzlicher Produkt-Namen-Filter
+                    if filter_keywords:
+                        offers = [o for o in offers if any(kw in o['name'].lower() for kw in filter_keywords)]
+                    if exclude_keywords:
+                        offers = [o for o in offers if not any(kw in o['name'].lower() for kw in exclude_keywords)]
+                    if offers:
+                        all_offers.extend(offers)
+                        print(f"    ✅ {len(offers)} Angebote aus Suche '{search_term}'")
     
     # Duplikate entfernen (basierend auf name+retailer+valid_to)
     seen = set()

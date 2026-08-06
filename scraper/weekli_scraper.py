@@ -107,6 +107,22 @@ def load_marktguru_offers():
 
 def save_data(all_prospekts, all_offers):
     """Speichert Prospekte und manuelle Angebote"""
+    from datetime import datetime
+    
+    # Filter: Nur aktuelle/zukünftige Angebote (valid_to >= heute)
+    today = datetime.now().date()
+    filtered_offers = []
+    for offer in all_offers:
+        try:
+            valid_to = datetime.fromisoformat(offer['valid_to'].replace('Z', '+00:00')).date()
+            if valid_to >= today:
+                filtered_offers.append(offer)
+            else:
+                print(f"  ⏭️  Überspringe abgelaufenes Angebot: {offer['name']} (bis {offer['valid_to'][:10]})")
+        except:
+            filtered_offers.append(offer)  # Bei Parse-Fehler behalten
+    
+    all_offers = filtered_offers
     
     # Angebote nach Kategorien gruppieren
     by_category = {}
@@ -150,7 +166,7 @@ def save_data(all_prospekts, all_offers):
     
     print(f"\n💾 Gespeichert: {OUTPUT_FILE}")
     print(f"   Prospekte: {len(all_prospekts)}")
-    print(f"   Angebote: {len(all_offers)}")
+    print(f"   Angebote: {len(all_offers)} (nach Datum gefiltert)")
 
 
 def main():
