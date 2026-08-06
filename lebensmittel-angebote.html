@@ -626,7 +626,54 @@
                 metaDiv.appendChild(manEl);
               }
 
-              // Source link / info - besserer Link zum echten Angebot
+              // Source links - prioritize direct retailer links
+              const linksContainer = document.createElement("div");
+              linksContainer.style.display = "flex";
+              linksContainer.style.gap = "6px";
+              linksContainer.style.flexWrap = "wrap";
+              linksContainer.style.marginTop = "6px";
+
+              // 1. Direkter Händler-Link (z.B. rewe.de, lidl.de)
+              const retailerUrls = {
+                "REWE": "https://www.rewe.de/suche/?search=",
+                "REWE Bio": "https://www.rewe.de/suche/?search=",
+                "Lidl": "https://www.lidl.de/suche?query=",
+                "EDEKA": "https://www.edeka.de/suche?query=",
+                "EDEKA (Regional)": "https://www.edeka.de/suche?query=",
+                "ALDI SÜD": "https://www.aldi-sued.de/suche.html?query=",
+                "ALDI Nord": "https://www.aldi-nord.de/suche.html?query=",
+                "Kaufland": "https://www.kaufland.de/suche/suchergebnisse.html?query=",
+                "PENNY": "https://www.penny.de/suche?query=",
+                "Netto Marken-Discount": "https://www.netto-online.de/suche?query=",
+                "nahkauf": "https://www.nahkauf.de/suche?query=",
+                "Handelshof": "https://www.handelshof.de/suche?query=",
+                "Norma": "https://www.norma-online.de/suche?query=",
+              };
+
+              const retailerKey = offer.retailer_key || offer.retailer.toLowerCase().replace(/\s+/g, '-');
+              let retailerUrl = "";
+              
+              // Find matching retailer URL
+              for (const [name, url] of Object.entries(retailerUrls)) {
+                if (offer.retailer.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(offer.retailer.toLowerCase())) {
+                  retailerUrl = url + encodeURIComponent(offer.name);
+                  break;
+                }
+              }
+
+              if (retailerUrl) {
+                const retailerLink = document.createElement("a");
+                retailerLink.href = retailerUrl;
+                retailerLink.target = "_blank";
+                retailerLink.rel = "noopener";
+                retailerLink.className = "offer-source-link";
+                retailerLink.textContent = "🛍 Zum Händler (" + offer.retailer + ")";
+                retailerLink.title = "Suche nach diesem Produkt auf " + offer.retailer;
+                retailerLink.style.cssText = "display:inline-block;padding:3px 8px;background:#1976d2;color:white;border-radius:4px;font-size:0.7em;text-decoration:none;";
+                linksContainer.appendChild(retailerLink);
+              }
+
+              // 2. marktguru Suche als Fallback
               if (offer.source_url) {
                 const sourceLink = document.createElement("a");
                 sourceLink.href = offer.source_url;
@@ -634,24 +681,21 @@
                 sourceLink.rel = "noopener";
                 sourceLink.className = "offer-source-link";
 
-                // Prüfen ob direkter Produkt-Link oder nur Suche
                 const isDirectLink = offer.source_url.includes("marktguru.de") && 
                   !offer.source_url.includes("?q=");
                 
                 if (isDirectLink) {
-                  sourceLink.textContent = "🎯 Zum Produkt";
+                  sourceLink.textContent = "🎯 Zum Produkt (marktguru)";
                   sourceLink.title = "Direkter Link zum Produkt auf marktguru.de";
-                } else if (offer.source_url.includes("marktguru.de")) {
-                  sourceLink.textContent = "🔍 Suche auf marktguru";
-                  sourceLink.title = "Produktsuche auf marktguru.de (kein Deep-Link verfügbar)";
                 } else {
-                  sourceLink.textContent = "🔗 Zur Angebots-Seite";
-                  sourceLink.title = offer.source_note || "Allgemeine Händler-Seite";
+                  sourceLink.textContent = "🔍 Auf marktguru suchen";
+                  sourceLink.title = "Produktsuche auf marktguru.de";
                 }
-                sourceLink.style.cssText =
-                  "display:inline-block;margin-top:6px;padding:3px 8px;background:#2e7d32;color:white;border-radius:4px;font-size:0.7em;text-decoration:none;";
-                metaDiv.appendChild(sourceLink);
+                sourceLink.style.cssText = "display:inline-block;padding:3px 8px;background:#2e7d32;color:white;border-radius:4px;font-size:0.7em;text-decoration:none;";
+                linksContainer.appendChild(sourceLink);
               }
+
+              metaDiv.appendChild(linksContainer);
               offerEl.appendChild(metaDiv);
 
               // Beschreibung
