@@ -467,61 +467,52 @@
         const container = document.getElementById("angebote-inhalt");
         container.innerHTML = "";
 
-        // Nach Wochen sortiert rendern
-        const weeks = data.by_week || {};
-        const sortedWeeks = Object.keys(weeks).sort().reverse(); // Neueste zuerst
+        // Produkte nach Kategorie und dann nach Händler gruppieren
+        const byCategory = {};
+        for (const offer of data.offers || []) {
+          const cat = offer.category;
+          if (!byCategory[cat]) byCategory[cat] = {};
+          
+          const retailerKey = offer.retailer_key || offer.retailer;
+          if (!byCategory[cat][retailerKey]) byCategory[cat][retailerKey] = [];
+          byCategory[cat][retailerKey].push(offer);
+        }
 
-        const weekColors = [
-          "week-green",
-          "week-blue",
-          "week-orange",
-          "week-purple",
-          "week-teal",
-          "week-red",
+        // Kategorien-Reihenfolge definieren
+        const categoryOrder = [
+          "Butter, Margarine & Streichfette",
+          "Milch & Milchprodukte",
+          "Käse",
+          "Teigwaren & Reis"
         ];
-        let colorIdx = 0;
 
-        for (const weekKey of sortedWeeks) {
-          const offers = weeks[weekKey];
-          if (!offers.length) continue;
+        for (const category of categoryOrder) {
+          const retailers = byCategory[category];
+          if (!retailers) continue;
 
-          const weekCard = document.createElement("div");
-          weekCard.className = `week-card ${weekColors[colorIdx % weekColors.length]}`;
-          colorIdx++;
+          const categoryCard = document.createElement("div");
+          categoryCard.className = "week-card week-green";
 
-          const weekHeader = document.createElement("div");
-          weekHeader.className = "week-header";
-          weekHeader.textContent = weekKey;
-          weekCard.appendChild(weekHeader);
+          const categoryHeader = document.createElement("div");
+          categoryHeader.className = "week-header";
+          categoryHeader.textContent = "🛒 " + category;
+          categoryCard.appendChild(categoryHeader);
 
-          // Nach Händler gruppieren
-          const byRetailer = {};
-          for (const offer of offers) {
-            const key = offer.retailer_key || offer.retailer;
-            if (!byRetailer[key]) byRetailer[key] = [];
-            byRetailer[key].push(offer);
-          }
-
-          // Händler sortieren: Supermärkte zuerst, dann Discounter, dann manuelle
-          const retailerOrder = Object.keys(byRetailer).sort((a, b) => {
-            const aCat = byRetailer[a][0]?.retailer_category || "";
-            const bCat = byRetailer[b][0]?.retailer_category || "";
-            const order = {
-              Supermarkt: 0,
-              Discounter: 1,
-              Metzgerei: 2,
-              Bäckerei: 3,
-              Sonstiges: 4,
-            };
+          // Händler sortieren: Supermärkte zuerst, dann Discounter
+          const retailerOrder = Object.keys(retailers).sort((a, b) => {
+            const aCat = retailers[a][0]?.retailer_category || "";
+            const bCat = retailers[b][0]?.retailer_category || "";
+            const order = { Supermarkt: 0, Discounter: 1, Sonstiges: 2 };
             return (order[aCat] || 99) - (order[bCat] || 99);
           });
 
           for (const retailerKey of retailerOrder) {
-            const retailerOffers = byRetailer[retailerKey];
+            const retailerOffers = retailers[retailerKey];
+            if (!retailerOffers.length) continue;
+            
             const first = retailerOffers[0];
             const retailerName = first.retailer;
             const retailerCat = first.retailer_category || "Sonstiges";
-            const retailerUrl = first.url || "";
 
             const section = document.createElement("div");
             section.className = "retailer-section";
@@ -531,16 +522,7 @@
 
             const nameEl = document.createElement("div");
             nameEl.className = "retailer-name";
-            if (retailerUrl) {
-              const link = document.createElement("a");
-              link.href = retailerUrl;
-              link.target = "_blank";
-              link.rel = "noopener";
-              link.textContent = retailerName;
-              nameEl.appendChild(link);
-            } else {
-              nameEl.textContent = retailerName;
-            }
+            nameEl.textContent = retailerName;
             header.appendChild(nameEl);
 
             const meta = document.createElement("div");
@@ -550,19 +532,28 @@
             catBadge.textContent = retailerCat;
             meta.appendChild(catBadge);
 
-            const typeBadge = document.createElement("span");
-            typeBadge.className = "retailer-type";
-            typeBadge.textContent = retailerOffers.length + " Angebote";
-            meta.appendChild(typeBadge);
+            const countBadge = document.createElement("span");
+            countBadge.className = "retailer-type";
+            countBadge.textContent = retailerOffers.length + " Artikel";
+            meta.appendChild(countBadge);
             header.appendChild(meta);
 
             section.appendChild(header);
 
-            // Angebote Grid
+            // Angebote Grid - pro Händler nur die besten Preise je Produkt
             const grid = document.createElement("div");
             grid.className = "offer-grid";
 
+            // Nach Produktnamen gruppieren, günstigsten nehmen
+            const byProduct = {};
             for (const offer of retailerOffers) {
+              const key = offer.name.toLowerCase().trim();
+              if (!byProduct[key] || offer.price < byProduct[key].price) {
+                byProduct[key] = offer;
+              }
+            }
+
+            for (const offer of Object.values(byProduct)) {
               const offerEl = document.createElement("div");
               offerEl.className = "offer";
 
@@ -606,14 +597,9 @@
               offerHeader.appendChild(priceContainer);
               offerEl.appendChild(offerHeader);
 
-              // Meta: Kategorie, Gültigkeit, Manual
+              // Meta: Gültigkeit, Manual
               const metaDiv = document.createElement("div");
               metaDiv.className = "offer-meta";
-
-              const catEl = document.createElement("span");
-              catEl.className = "offer-category";
-              catEl.textContent = offer.category;
-              metaDiv.appendChild(catEl);
 
               if (offer.valid_from || offer.valid_to) {
                 const valEl = document.createElement("span");
@@ -640,7 +626,7 @@
                 metaDiv.appendChild(manEl);
               }
 
-              // Source link / info
+              // Source link / info - besserer Link zum echten Angebot
               if (offer.source_url) {
                 const sourceLink = document.createElement("a");
                 sourceLink.href = offer.source_url;
@@ -648,11 +634,19 @@
                 sourceLink.rel = "noopener";
                 sourceLink.className = "offer-source-link";
 
-                if (offer.source_note) {
-                  sourceLink.textContent = "🔗 Zur Angebots-Seite";
-                  sourceLink.title = offer.source_note;
+                // Prüfen ob direkter Produkt-Link oder nur Suche
+                const isDirectLink = offer.source_url.includes("marktguru.de") && 
+                  !offer.source_url.includes("?q=");
+                
+                if (isDirectLink) {
+                  sourceLink.textContent = "🎯 Zum Produkt";
+                  sourceLink.title = "Direkter Link zum Produkt auf marktguru.de";
+                } else if (offer.source_url.includes("marktguru.de")) {
+                  sourceLink.textContent = "🔍 Suche auf marktguru";
+                  sourceLink.title = "Produktsuche auf marktguru.de (kein Deep-Link verfügbar)";
                 } else {
-                  sourceLink.textContent = "🔗 Zur Quelle";
+                  sourceLink.textContent = "🔗 Zur Angebots-Seite";
+                  sourceLink.title = offer.source_note || "Allgemeine Händler-Seite";
                 }
                 sourceLink.style.cssText =
                   "display:inline-block;margin-top:6px;padding:3px 8px;background:#2e7d32;color:white;border-radius:4px;font-size:0.7em;text-decoration:none;";
@@ -672,13 +666,13 @@
             }
 
             section.appendChild(grid);
-            weekCard.appendChild(section);
+            categoryCard.appendChild(section);
           }
 
-          container.appendChild(weekCard);
+          container.appendChild(categoryCard);
         }
 
-        if (!sortedWeeks.length) {
+        if (!Object.keys(byCategory).length) {
           container.innerHTML =
             '<p style="text-align:center;color:#666;padding:40px;">Keine Angebote gefunden. Scraper ausführen: <code>python3 scraper/weekli_scraper.py</code></p>';
         }
