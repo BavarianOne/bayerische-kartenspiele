@@ -216,6 +216,13 @@ def scrape_marktguru_products(
     if products is None:
         products = list(TARGET_PRODUCTS.keys())
 
+    # Händler-Filter für PLZ 84034 (Landshut/Ergolding)
+    # Händler die es in Landshut NICHT gibt
+    EXCLUDED_RETAILERS_PLZ_84034 = {
+        'handelshof',      # Großhandel, nicht in Landshut
+        'nahkauf',         # nicht in Landshut
+    }
+    
     all_offers = []
 
     for product_key in products:
@@ -277,6 +284,14 @@ def scrape_marktguru_products(
                         all_offers.extend(offers)
                         print(f"    ✅ {len(offers)} Angebote aus Suche '{search_term}'")
 
+    # PLZ-spezifische Händler-Filter anwenden
+    if plz == "84034" and EXCLUDED_RETAILERS_PLZ_84034:
+        before_count = len(all_offers)
+        all_offers = [o for o in all_offers if o['retailer_key'].lower() not in EXCLUDED_RETAILERS_PLZ_84034]
+        filtered_count = before_count - len(all_offers)
+        if filtered_count > 0:
+            print(f"  🚫 {filtered_count} Angebote von nicht-lokalen Händlern ({', '.join(EXCLUDED_RETAILERS_PLZ_84034)}) für PLZ {plz} entfernt")
+
     # Duplikate entfernen (basierend auf name+retailer+valid_to)
     seen = set()
     unique_offers = []
@@ -329,7 +344,7 @@ def convert_to_manual_format(offers: List[dict]) -> List[dict]:
             'currency': 'EUR',
             'retailer': offer['retailer'],
             'retailer_key': offer['retailer_key'],
-            'retailer_category': 'Supermarkt' if offer['retailer_key'] in ['edeka', 'rewe', 'kaufland', 'edeka-frischemarkt', 'edeka-foodservice', 'edeka-center', 'nahkauf', 'marktkauf', 'combi', 'hiebers-frische-center', 'scheck-in-center', 'aez', 'handelshof', 'edeka center', 'e center', 'rewe center', 'rewe petz', 'famila-nordwest', 'budni', 'rossmann', 'netto marken-discount', 'penny', 'lidl', 'aldi s\u00fcd', 'aldi nord', 'norma'] else 'Discounter',
+            'retailer_category': 'Supermarkt' if offer['retailer_key'] in ['edeka', 'rewe', 'kaufland', 'edeka-frischemarkt', 'edeka-foodservice', 'edeka-center', 'marktkauf', 'combi', 'hiebers-frische-center', 'scheck-in-center', 'aez', 'edeka center', 'e center', 'rewe center', 'rewe petz', 'famila-nordwest', 'budni', 'rossmann', 'netto marken-discount', 'penny', 'lidl', 'aldi s\u00fcd', 'aldi nord', 'norma'] else 'Discounter',
             'valid_from': offer['valid_from'] + 'T00:00:00',
             'valid_to': offer['valid_to'] + 'T23:59:59',
             'description': offer['description'] or f"{offer['brand']} - {offer['volume']}{offer['unit']}",
