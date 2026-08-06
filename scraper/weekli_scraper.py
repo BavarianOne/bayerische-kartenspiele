@@ -96,7 +96,8 @@ def load_marktguru_offers():
     try:
         from marktguru_scraper import scrape_marktguru_products, convert_to_manual_format
         print("🔍 Lade marktguru Produkt-Angebote (alle konfigurierten Produkte)...")
-        offers = scrape_marktguru_products()
+        # PLZ 84034 für Landshut/Ergolding
+        offers = scrape_marktguru_products(plz="84034")
         manual_offers = convert_to_manual_format(offers)
         print(f"  ✅ {len(manual_offers)} marktguru-Angebote geladen")
         return manual_offers

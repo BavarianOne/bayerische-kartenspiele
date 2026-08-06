@@ -40,17 +40,23 @@ def fetch_marktguru_page(url: str) -> Optional[dict]:
     return None
 
 
-def build_brand_url(brand: str) -> str:
+def build_brand_url(brand: str, plz: Optional[str] = None) -> str:
     """Baut eine gültige Brand-URL mit URL-Encoding"""
     # marktguru Brand-URLs nutzen kebab-case ohne Leerzeichen/Sonderzeichen
     encoded_brand = brand.lower().replace(' ', '-').replace("'", '').replace('&', '').replace('ü', 'ue').replace('ä', 'ae').replace('ö', 'oe').replace('ß', 'ss')
-    return f'https://www.marktguru.de/b/{encoded_brand}'
+    url = f'https://www.marktguru.de/b/{encoded_brand}'
+    if plz:
+        url += f'?plz={plz}'
+    return url
 
 
-def build_search_url(search_term: str) -> str:
+def build_search_url(search_term: str, plz: Optional[str] = None) -> str:
     """Baut eine gültige Such-URL mit URL-Encoding"""
     encoded_term = urllib.parse.quote(search_term)
-    return f'https://www.marktguru.de/angebote?q={encoded_term}'
+    url = f'https://www.marktguru.de/angebote?q={encoded_term}'
+    if plz:
+        url += f'&plz={plz}'
+    return url
 
 
 def extract_offers_from_brand_page(data: dict) -> List[dict]:
@@ -60,6 +66,9 @@ def extract_offers_from_brand_page(data: dict) -> List[dict]:
     
     for offer in props:
         try:
+            # externalUrl für direkten Produkt-Link verwenden
+            source_url = offer.get('externalUrl') or f"https://www.marktguru.de/angebote?q={offer['product']['name']}"
+            
             offers.append({
                 'name': offer['product']['name'],
                 'price': offer['price'],
@@ -72,7 +81,7 @@ def extract_offers_from_brand_page(data: dict) -> List[dict]:
                 'valid_from': offer['validFrom'][:10],
                 'valid_to': offer['validTo'][:10],
                 'description': offer.get('description', ''),
-                'source_url': f"https://www.marktguru.de/angebote?q={offer['product']['name']}",
+                'source_url': source_url,
                 'source_note': 'marktguru.de (strukturierte Daten)',
             })
         except KeyError as e:
@@ -97,6 +106,9 @@ def extract_offers_from_search_page(data: dict) -> List[dict]:
         
         for offer in retailer_group['offers']:
             try:
+                # externalUrl für direkten Produkt-Link verwenden
+                source_url = offer.get('externalUrl') or f"https://www.marktguru.de/angebote?q={offer['product']['name']}"
+                
                 offers.append({
                     'name': offer['product']['name'],
                     'price': offer['price'],
@@ -109,7 +121,7 @@ def extract_offers_from_search_page(data: dict) -> List[dict]:
                     'valid_from': offer['validFrom'][:10],
                     'valid_to': offer['validTo'][:10],
                     'description': offer.get('description', ''),
-                    'source_url': f"https://www.marktguru.de/angebote?q={offer['product']['name']}",
+                    'source_url': source_url,
                     'source_note': 'marktguru.de (strukturierte Daten)',
                 })
             except KeyError as e:
@@ -187,28 +199,30 @@ TARGET_PRODUCTS = {
 
 def scrape_marktguru_products(
     products: Optional[List[str]] = None,
-    retailer_filter: Optional[str] = None
+    retailer_filter: Optional[str] = None,
+    plz: Optional[str] = None
 ) -> List[dict]:
     """
     Scrapt die konfigurierten Produkte von marktguru.de
-    
+
     Args:
         products: Liste der Produkt-Keys aus TARGET_PRODUCTS (None = alle)
         retailer_filter: Optional - nur bestimmter Händler (z.B. 'edeka', 'rewe', 'lidl')
-    
+        plz: Optional - PLZ für lokale Angebote (z.B. '84034')
+
     Returns:
         Liste von Angebots-Dicts
     """
     if products is None:
         products = list(TARGET_PRODUCTS.keys())
-    
+
     all_offers = []
-    
+
     for product_key in products:
         if product_key not in TARGET_PRODUCTS:
             print(f"  ⚠️ Unbekanntes Produkt: {product_key}")
             continue
-            
+
         product_config = TARGET_PRODUCTS[product_key]
         product_name = product_config['name']
         brands = product_config['brands']
@@ -216,12 +230,14 @@ def scrape_marktguru_products(
         target_category = product_config['category']
         filter_keywords = product_config.get('filter_keywords', [])
         exclude_keywords = product_config.get('exclude_keywords', [])
-        
+
         print(f"\n📦 Produkt: {product_name}")
-        
+        if plz:
+            print(f"  📍 PLZ-Filter: {plz}")
+
         # 1. Brand-Seiten prüfen
         for brand in brands:
-            url = build_brand_url(brand)
+            url = build_brand_url(brand, plz)
             print(f"  🔍 Prüfe Marke: {brand}...")
             data = fetch_marktguru_page(url)
             if data:
@@ -239,11 +255,11 @@ def scrape_marktguru_products(
                     if offers:
                         all_offers.extend(offers)
                         print(f"    ✅ {len(offers)} Angebote von {brand}")
-        
+
         # 2. Suchseiten für Suchbegriffe
         for search_term in search_terms:
             print(f"  🔍 Suche nach '{search_term}'...")
-            search_url = build_search_url(search_term)
+            search_url = build_search_url(search_term, plz)
             data = fetch_marktguru_page(search_url)
             if data:
                 offers = extract_offers_from_search_page(data)
@@ -260,7 +276,7 @@ def scrape_marktguru_products(
                     if offers:
                         all_offers.extend(offers)
                         print(f"    ✅ {len(offers)} Angebote aus Suche '{search_term}'")
-    
+
     # Duplikate entfernen (basierend auf name+retailer+valid_to)
     seen = set()
     unique_offers = []
@@ -269,7 +285,7 @@ def scrape_marktguru_products(
         if key not in seen:
             seen.add(key)
             unique_offers.append(offer)
-    
+
     print(f"\n📦 Gesamt: {len(unique_offers)} eindeutige Angebote")
     return unique_offers
 
