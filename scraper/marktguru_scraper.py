@@ -139,12 +139,12 @@ def categorize_offer(offer: dict) -> str:
     name_lower = offer['name'].lower()
     brand_lower = offer['brand'].lower()
     
-    # Milch & Milchprodukte
-    if any(kw in name_lower or kw in brand_lower for kw in ['milch', 'berchtesgadener', 'joghurt', 'skyr', 'topfen', 'buttermilch', 'kaffee-milch', 'kakao', 'eiskaffee', 'speisequark', 'fettarme milch', 'vollmilch', 'weidemilch', 'lactosefrei', 'reis-milch', 'milch reis']):
-        return 'Milch & Milchprodukte'
-    # Butter, Margarine & Streichfette
-    elif any(kw in name_lower or kw in brand_lower for kw in ['butter', 'streichfett', 'margarine', 'landliebe', 'weihenstephan', 'baerenmarke', 'kerrygold', 'meggle', 'tortenbutter', 'kr\u00e4uterbutter', 'streichzart', 'baguette', 'irische butter', 'irischer', 'schlagsahne', 'koch sahne', 'rahmjoghurt']):
+    # Butter, Margarine & Streichfette - PRÜFEN VOR MILCH!
+    if any(kw in name_lower or kw in brand_lower for kw in ['butter', 'streichfett', 'margarine', 'landliebe', 'weihenstephan', 'baerenmarke', 'kerrygold', 'meggle', 'tortenbutter', 'kr\u00e4uterbutter', 'streichzart', 'baguette', 'irische butter', 'irischer', 'schlagsahne', 'koch sahne', 'rahmjoghurt', 'bergbauern butter', 'bauernbutter', 'tannenbutter', 'tafelbutter']):
         return 'Butter, Margarine & Streichfette'
+    # Milch & Milchprodukte
+    elif any(kw in name_lower or kw in brand_lower for kw in ['milch', 'berchtesgadener', 'joghurt', 'skyr', 'topfen', 'buttermilch', 'kaffee-milch', 'kakao', 'eiskaffee', 'speisequark', 'fettarme milch', 'vollmilch', 'weidemilch', 'lactosefrei', 'reis-milch', 'milch reis']):
+        return 'Milch & Milchprodukte'
     # Käse
     elif any(kw in name_lower or kw in brand_lower for kw in ['emmentaler', 'almhammer', 'almdammer', 'almzeit', 'kaese', 'k\u00e4se', 'bergader', 'alte meister', 'bonifaz', 'bergbauern k\u00e4se', 'bavaria blu', 'pizzak\u00e4se', 'reibek\u00e4se', 'schnittk\u00e4se', 'original irischer k\u00e4se', 'original irischer cheddar', 'tilsiter', 'ziegenweichk\u00e4se', 'bio k\u00e4sescheiben', 'landk\u00e4se']):
         return 'K\u00e4se'
@@ -329,18 +329,18 @@ def convert_to_manual_format(offers: List[dict]) -> List[dict]:
         name_lower = offer['name'].lower()
         brand_lower = offer['brand'].lower()
         
-        # Milch & Milchprodukte
-        if any(kw in name_lower or kw in brand_lower for kw in ['milch', 'berchtesgadener', 'joghurt', 'skyr', 'topfen', 'buttermilch', 'kaffee-milch', 'kakao', 'eiskaffee', 'speisequark', 'fettarme milch', 'vollmilch', 'weidemilch', 'lactosefrei', 'reis-milch', 'milch reis']):
-            category = 'Milch & Milchprodukte'
-        # Butter, Margarine & Streichfette
-        elif any(kw in name_lower or kw in brand_lower for kw in ['butter', 'streichfett', 'margarine', 'landliebe', 'weihenstephan', 'baerenmarke', 'kerrygold', 'meggle', 'tortenbutter', 'kr\u00e4uterbutter', 'streichzart', 'baguette', 'irische butter', 'irischer', 'schlagsahne', 'koch sahne', 'rahmjoghurt']):
+        # Butter, Margarine & Streichfette - PRÜFEN VOR MILCH!
+        if any(kw in name_lower or kw in brand_lower for kw in ['butter', 'streichfett', 'margarine', 'landliebe', 'weihenstephan', 'baerenmarke', 'kerrygold', 'meggle', 'tortenbutter', 'kr\u00e4uterbutter', 'streichzart', 'baguette', 'irische butter', 'irischer', 'schlagsahne', 'koch sahne', 'rahmjoghurt', 'bergbauern butter', 'bauernbutter', 'tannenbutter', 'tafelbutter']):
             category = 'Butter, Margarine & Streichfette'
+        # Milch & Milchprodukte
+        elif any(kw in name_lower or kw in brand_lower for kw in ['milch', 'berchtesgadener', 'joghurt', 'skyr', 'topfen', 'buttermilch', 'kaffee-milch', 'kakao', 'eiskaffee', 'speisequark', 'fettarme milch', 'vollmilch', 'weidemilch', 'lactosefrei', 'reis-milch', 'milch reis']):
+            category = 'Milch & Milchprodukte'
         # Käse
         elif any(kw in name_lower or kw in brand_lower for kw in ['emmentaler', 'almhammer', 'almdammer', 'almzeit', 'kaese', 'k\u00e4se', 'bergader', 'alte meister', 'bonifaz', 'bergbauern k\u00e4se', 'bavaria blu', 'pizzak\u00e4se', 'reibek\u00e4se', 'schnittk\u00e4se', 'original irischer k\u00e4se', 'original irischer cheddar', 'tilsiter', 'ziegenweichk\u00e4se', 'bio k\u00e4sescheiben', 'landk\u00e4se']):
-            category = 'Käse'
+            category = 'K\u00e4se'
         # Nüsse & Kerne
         elif any(kw in name_lower or kw in brand_lower for kw in ['pekannuss', 'pecan', 'pistazien', 'pistazie', 'pistachio', 'nuss', 'n\u00fcss', 'seeberger', 'kluth', 'zentis', 'studentenfutter', 'vital-kerne', 'mangostreifen', 'erdbeeren', 'popcorn', 'mango', 'pinienkerne', 'cashew', 'cashewkerne', 'nuss-mix', 'cashew-cranberry', 'macadamias', 'salatveredler', 'feigen', 'aachener', 'fr\u00fchst\u00fccks', 'konfit\u00fcre', 'aufstrich', 'sesamini', 'mandelmus', 'kokosmilch', 'wildheidelbeeren', 'hummus', 'tofu', 'streichcreme', 'tomatenst\u00fccke', 'gem\u00fcsekonserven', 'linsen', 'basmati', 'fr\u00fchlingsrollen', 'dinkel', 'gr\u00fcnkern', 'brot']):
-            category = 'Nüsse & Kerne'
+            category = 'N\u00fcsse & Kerne'
         # Teigwaren & Reis
         elif any(kw in name_lower or kw in brand_lower for kw in ['nudeln', 'pasta', 'spaghetti', 'penne', 'fusilli', 'farfalle', 'tagliatelle', 'rigatoni', 'barilla', 'birkel', 'de cecco', 'de-cecco', 'rummo', 'garofalo', 'vitalis', 'eigner', 'muellers', 'harta', 'teigwaren', 'pesto', 'nudel', 'hartweizen', 'eiernudeln', 'frischei', 'lasagne', 'pizzateig', 'kn\u00e4ckebrot']):
             category = 'Teigwaren & Reis'
