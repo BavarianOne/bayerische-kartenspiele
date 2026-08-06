@@ -173,10 +173,18 @@ TARGET_PRODUCTS = {
     'milch': {
         'name': 'Milch (Vollmilch, Bio-Milch)',
         'brands': ['berchtesgadener-land', 'landliebe', 'weihenstephan', 'mueller', 'baerenmarke', 'schwarzwaldmilch', 'ramseier', 'meggle', 'ja', 'gut-guenstig', 'dm-bio', 'alnatura'],
-        'search_terms': ['vollmilch', 'bio milch', 'frischmilch', 'h-milch', 'haltbare milch'],
+        'search_terms': ['vollmilch', 'bio milch', 'frischmilch', 'h-milch', 'haltbare milch', 'milch'],
         'category': 'Milch & Milchprodukte',
         'filter_keywords': ['milch', 'vollmilch', 'bio milch', 'frischmilch', 'h-milch', 'haltbare milch', 'weidemilch', 'bauernmilch'],
         'exclude_keywords': ['joghurt', 'skyr', 'topfen', 'buttermilch', 'kaffee', 'kakao', 'eiskaffee', 'speisequark', 'reis-milch', 'milch reis', 'müllermilch', 'bananen', 'schokoladen', 'lactosefrei', 'fettarme', 'fettarm', 'drink', 'mix', 'shake'],
+    },
+    'nuesse': {
+        'name': 'Nüsse & Kerne',
+        'brands': ['seeberger', 'kluth', 'zentis', 'studentenfutter', 'vital-kerne', 'pekan', 'pecan', 'pistazie', 'cashew', 'mandel', 'walnuss', 'haselnuss', 'macadamia'],
+        'search_terms': ['nuss', 'nüsse', 'mandeln', 'walnüsse', 'haselnüsse', 'cashew', 'pistazien', 'pekannuss', 'macadamia', 'studentenfutter', 'nussmischung'],
+        'category': 'Nüsse & Kerne',
+        'filter_keywords': ['nuss', 'nüsse', 'mandel', 'walnuss', 'haselnuss', 'cashew', 'pistazie', 'pekannuss', 'macadamia', 'studentenfutter'],
+        'exclude_keywords': ['schokolade', 'schoko', 'gekaramellisiert', 'geröstet und gesalzen', 'chips', 'flips', 'erdnuss'],
     },
     'emmentaler': {
         'name': 'Emmentaler',
