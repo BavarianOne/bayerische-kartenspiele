@@ -146,7 +146,7 @@
             position: absolute;
             top: 16px;
             right: 16px;
-            z-index: 250;
+            z-index: 320;
             background: rgba(27,42,74,0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(0,180,216,0.2);
@@ -430,7 +430,8 @@
                     <div class="layer-label">Basiskarte</div>
                     <div class="layer-btns">
                         <button class="layer-btn active" data-layer="satellite" title="Satellit">🛰️ Satellit</button>
-                        <button class="layer-btn" data-layer="osm" title="OpenStreetMap">🗺️ Karte</button>
+                        <button class="layer-btn" data-layer="osmde" title="OpenStreetMap DE">🗺️ Karte</button>
+                        <button class="layer-btn" data-layer="osm" title="OpenStreetMap">🌍 Weltkarte</button>
                         <button class="layer-btn" data-layer="terrain" title="Gelände">🏔️ Gelände</button>
                     </div>
                 </div>
@@ -543,6 +544,11 @@
                     attribution: '© OpenStreetMap contributors',
                     maxZoom: 19
                 },
+                osmde: {
+                    url: 'https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png',
+                    attribution: '© OpenStreetMap Deutschland',
+                    maxZoom: 18
+                },
                 terrain: {
                     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                     attribution: '© OpenTopoMap contributors',
@@ -551,34 +557,39 @@
             },
             overlayLayers: {
                 clouds: {
-                    url: 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_CloudCover&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    attribution: '© DWD',
                     maxZoom: 18,
-                    name: 'Wolken'
+                    name: 'Wolken',
+                    type: 'wms'
                 },
                 rain: {
-                    url: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_Precipitation&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    attribution: '© DWD',
                     maxZoom: 18,
-                    name: 'Regen'
+                    name: 'Regen',
+                    type: 'wms'
                 },
                 wind: {
                     url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
                     attribution: '© OpenWeatherMap',
                     maxZoom: 18,
-                    name: 'Wind'
+                    name: 'Wind',
+                    type: 'xyz'
                 },
                 storm: {
-                    url: 'https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_WindWarning&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    attribution: '© DWD',
                     maxZoom: 18,
-                    name: 'Sturm/Druck'
+                    name: 'Sturmwarnung',
+                    type: 'wms'
                 },
                 temp: {
-                    url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_Temperature&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    attribution: '© DWD',
                     maxZoom: 18,
-                    name: 'Temperatur'
+                    name: 'Temperatur',
+                    type: 'wms'
                 }
             },
             weatherIcons: {
@@ -662,11 +673,22 @@
 
             // Overlay layers (initially hidden)
             Object.entries(CONFIG.overlayLayers).forEach(([key, cfg]) => {
-                overlayLayers[key] = L.tileLayer(cfg.url, {
-                    ...cfg,
-                    opacity: 0.7,
-                    visible: false
-                });
+                if (cfg.type === 'wms') {
+                    overlayLayers[key] = L.tileLayer.wms(cfg.url, {
+                        layers: cfg.url.includes('LAYERS=') ? cfg.url.split('LAYERS=')[1].split('&')[0] : '',
+                        format: 'image/png',
+                        transparent: true,
+                        attribution: cfg.attribution,
+                        maxZoom: cfg.maxZoom,
+                        opacity: 0.7
+                    });
+                } else {
+                    overlayLayers[key] = L.tileLayer(cfg.url, {
+                        ...cfg,
+                        opacity: 0.7,
+                        visible: false
+                    });
+                }
             });
 
             // Location marker
@@ -874,6 +896,7 @@
 
         function toggleOverlay(type) {
             const layer = overlayLayers[type];
+            const cfg = CONFIG.overlayLayers[type];
             if (!layer) return;
 
             const isActive = document.querySelector(`[data-overlay="${type}"]`).classList.contains('active');
@@ -886,7 +909,11 @@
                 Object.values(overlayLayers).forEach(l => map.removeLayer(l));
                 document.querySelectorAll('[data-overlay]').forEach(btn => btn.classList.remove('active'));
                 
-                layer.setOpacity(els.opacitySlider.value / 100);
+                if (cfg?.type === 'wms') {
+                    layer.setParams({ opacity: els.opacitySlider.value / 100 });
+                } else {
+                    layer.setOpacity(els.opacitySlider.value / 100);
+                }
                 layer.addTo(map);
                 currentOverlay = type;
             }
@@ -897,7 +924,14 @@
 
         function setOpacity(val) {
             els.opacityValue.textContent = `${val}%`;
-            Object.values(overlayLayers).forEach(l => l.setOpacity(val / 100));
+            Object.entries(overlayLayers).forEach(([key, layer]) => {
+                const cfg = CONFIG.overlayLayers[key];
+                if (cfg?.type === 'wms') {
+                    layer.setParams({ opacity: val / 100 });
+                } else {
+                    layer.setOpacity(val / 100);
+                }
+            });
         }
 
         // ============ LOCATION SEARCH ============
