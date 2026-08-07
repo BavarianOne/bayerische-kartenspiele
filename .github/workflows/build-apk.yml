@@ -36,7 +36,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
       - name: Install npm dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install @capacitor/core @capacitor/android
+          npm install -D @capacitor/cli
 
       - name: Prepare www folder
         run: |
@@ -44,12 +47,15 @@ jobs:
           cp *.html *.js *.css www/ 2>/dev/null || true
           cp -r data www/ 2>/dev/null || true
 
-      - name: Capacitor add and sync (Android)
+      - name: Initialize and Sync Capacitor
         run: |
-          if [ ! -d "android" ]; then
-            npx --yes @capacitor/cli add android
+          if [ ! -f "capacitor.config.json" ] && [ ! -f "capacitor.config.ts" ]; then
+            npx cap init "Bayerische Kartenspiele" "com.bayerische.kartenspiele" --web-dir "www"
           fi
-          npx --yes @capacitor/cli sync android
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
 
       - name: Make Gradle wrapper executable
         run: chmod +x android/gradlew
