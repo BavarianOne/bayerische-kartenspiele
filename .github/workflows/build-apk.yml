@@ -44,8 +44,12 @@ jobs:
           cp *.html *.js *.css www/ 2>/dev/null || true
           cp -r data www/ 2>/dev/null || true
 
-      - name: Capacitor sync (Android)
-        run: npx --yes @capacitor/cli sync android
+      - name: Capacitor add and sync (Android)
+        run: |
+          if [ ! -d "android" ]; then
+            npx --yes @capacitor/cli add android
+          fi
+          npx --yes @capacitor/cli sync android
 
       - name: Make Gradle wrapper executable
         run: chmod +x android/gradlew
