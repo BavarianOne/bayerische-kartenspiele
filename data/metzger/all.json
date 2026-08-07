@@ -1,5 +1,5 @@
 {
-  "scraped_at": "2026-08-07T12:00:00Z",
+  "scraped_at": "2026-08-07T15:05:30.662409",
   "source": "https://github.com/BavarianOne/bayerische-kartenspiele",
   "metzgereien": [
     {
@@ -14,12 +14,30 @@
           "gueltig": "03.08.-15.08.2026",
           "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_260708.jpg",
           "produkte": [
-            {"name": "OKTOBERFEST-KRUSTENBRATEN", "preis": "0,89 €/100g"},
-            {"name": "HAXE", "preis": "8,90 €/Stück"},
-            {"name": "PUTENSCHNITZEL", "preis": "1,39 €/100g"},
-            {"name": "PIZZALEBERKÄSE", "preis": "1,19 €/100g"},
-            {"name": "NUDELSALAT", "preis": "0,99 €/100g"},
-            {"name": "OBAZDA", "preis": "0,99 €/100g"}
+            {
+              "name": "OKTOBERFEST-KRUSTENBRATEN",
+              "preis": "0,89 €/100g"
+            },
+            {
+              "name": "HAXE",
+              "preis": "8,90 €/Stück"
+            },
+            {
+              "name": "PUTENSCHNITZEL",
+              "preis": "1,39 €/100g"
+            },
+            {
+              "name": "PIZZALEBERKÄSE",
+              "preis": "1,19 €/100g"
+            },
+            {
+              "name": "NUDELSALAT",
+              "preis": "0,99 €/100g"
+            },
+            {
+              "name": "OBAZDA",
+              "preis": "0,99 €/100g"
+            }
           ]
         },
         {
@@ -27,10 +45,22 @@
           "gueltig": "03.08.-15.08.2026",
           "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607082.jpg",
           "produkte": [
-            {"name": "REGENSBURGER", "preis": "0,99 €/100g"},
-            {"name": "GESCHWOLLENE HÜTTENSPECK", "preis": "1,19 €/100g"},
-            {"name": "BIERKUGEL", "preis": "1,29 €/100g"},
-            {"name": "FEUERTEUFEL", "preis": "1,69 €/100g"}
+            {
+              "name": "REGENSBURGER",
+              "preis": "0,99 €/100g"
+            },
+            {
+              "name": "GESCHWOLLENE HÜTTENSPECK",
+              "preis": "1,19 €/100g"
+            },
+            {
+              "name": "BIERKUGEL",
+              "preis": "1,29 €/100g"
+            },
+            {
+              "name": "FEUERTEUFEL",
+              "preis": "1,69 €/100g"
+            }
           ]
         },
         {
@@ -38,7 +68,10 @@
           "gueltig": "03.08.-15.08.2026",
           "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607083.jpg",
           "produkte": [
-            {"name": "GRILLHAXE mit Beilage", "preis": "€/Portion"}
+            {
+              "name": "GRILLHAXE mit Beilage",
+              "preis": "€/Portion"
+            }
           ]
         },
         {
@@ -46,9 +79,18 @@
           "gueltig": "KW 32/33",
           "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607022.jpg",
           "produkte": [
-            {"name": "BROTZEITPLATTN", "preis": "k.A."},
-            {"name": "WÜRSTLPARADE", "preis": "k.A."},
-            {"name": "SCHWEINESCHNITZEL", "preis": "k.A."}
+            {
+              "name": "BROTZEITPLATTN",
+              "preis": "k.A."
+            },
+            {
+              "name": "WÜRSTLPARADE",
+              "preis": "k.A."
+            },
+            {
+              "name": "SCHWEINESCHNITZEL",
+              "preis": "k.A."
+            }
           ]
         },
         {
@@ -56,9 +98,18 @@
           "gueltig": "KW 32/33",
           "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607023.jpg",
           "produkte": [
-            {"name": "KÄSEKRAINER", "preis": "k.A."},
-            {"name": "FEUERWEHRGRILLER (scharf)", "preis": "k.A."},
-            {"name": "SCHWEINSBRATWÜRSTL", "preis": "k.A."}
+            {
+              "name": "KÄSEKRAINER",
+              "preis": "k.A."
+            },
+            {
+              "name": "FEUERWEHRGRILLER (scharf)",
+              "preis": "k.A."
+            },
+            {
+              "name": "SCHWEINSBRATWÜRSTL",
+              "preis": "k.A."
+            }
           ]
         },
         {
@@ -66,16 +117,46 @@
           "gueltig": "KW 32/33",
           "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607024.jpg",
           "produkte": [
-            {"name": "PUTENSCHNITZEL (zart geschnitten)", "preis": "k.A."},
-            {"name": "SCHWEINEKOTELETT", "preis": "k.A."},
-            {"name": "SCHWEINEKRUSTENBRATEN (aus der Schutter)", "preis": "k.A."},
-            {"name": "SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)", "preis": "k.A."},
-            {"name": "GRILLBAUCHSCHEIBEN", "preis": "k.A."},
-            {"name": "BAYR. LEBERKÄSE (fein, ofengebacken)", "preis": "k.A."},
-            {"name": "HAUSSALAMI", "preis": "k.A."},
-            {"name": "PRESSSACK (weiß und rot)", "preis": "k.A."},
-            {"name": "BIERSCHINKEN", "preis": "k.A."},
-            {"name": "BROTZEITPLATTN", "preis": "k.A."}
+            {
+              "name": "PUTENSCHNITZEL (zart geschnitten)",
+              "preis": "k.A."
+            },
+            {
+              "name": "SCHWEINEKOTELETT",
+              "preis": "k.A."
+            },
+            {
+              "name": "SCHWEINEKRUSTENBRATEN (aus der Schutter)",
+              "preis": "k.A."
+            },
+            {
+              "name": "SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)",
+              "preis": "k.A."
+            },
+            {
+              "name": "GRILLBAUCHSCHEIBEN",
+              "preis": "k.A."
+            },
+            {
+              "name": "BAYR. LEBERKÄSE (fein, ofengebacken)",
+              "preis": "k.A."
+            },
+            {
+              "name": "HAUSSALAMI",
+              "preis": "k.A."
+            },
+            {
+              "name": "PRESSSACK (weiß und rot)",
+              "preis": "k.A."
+            },
+            {
+              "name": "BIERSCHINKEN",
+              "preis": "k.A."
+            },
+            {
+              "name": "BROTZEITPLATTN",
+              "preis": "k.A."
+            }
           ]
         },
         {
@@ -83,13 +164,34 @@
           "gueltig": "Montag bis Samstag",
           "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_260702.jpg",
           "produkte": [
-            {"name": "1/2 HENDL", "preis": "k.A."},
-            {"name": "KRUSTENBRATEN", "preis": "k.A."},
-            {"name": "HAXE", "preis": "k.A."},
-            {"name": "BAYRISCHER OBAZDA", "preis": "k.A."},
-            {"name": "APFEL-GRIEBEN-WURSTSALAT", "preis": "k.A."},
-            {"name": "SCHMALZ (1909-Becher)", "preis": "k.A."},
-            {"name": "Volksfestpaket", "preis": "k.A."}
+            {
+              "name": "1/2 HENDL",
+              "preis": "k.A."
+            },
+            {
+              "name": "KRUSTENBRATEN",
+              "preis": "k.A."
+            },
+            {
+              "name": "HAXE",
+              "preis": "k.A."
+            },
+            {
+              "name": "BAYRISCHER OBAZDA",
+              "preis": "k.A."
+            },
+            {
+              "name": "APFEL-GRIEBEN-WURSTSALAT",
+              "preis": "k.A."
+            },
+            {
+              "name": "SCHMALZ (1909-Becher)",
+              "preis": "k.A."
+            },
+            {
+              "name": "Volksfestpaket",
+              "preis": "k.A."
+            }
           ]
         },
         {
@@ -97,18 +199,66 @@
           "gueltig": "Woche 32 | 03.08. bis 08.08.2026",
           "quelle_bild": "wasner_menueplan_a1_kw31_32_v01_cc_2607082.jpg",
           "produkte": [
-            {"tag": "Montag", "gericht": "Cordon bleu mit Pommes", "preis": "k.A."},
-            {"tag": "Montag", "gericht": "Spaghetti Carbonara", "preis": "k.A."},
-            {"tag": "Dienstag", "gericht": "Spanferkelbraten mit Knödel und Kraut", "preis": "k.A."},
-            {"tag": "Dienstag", "gericht": "Nudelauflauf mit Tomatensoße", "preis": "k.A."},
-            {"tag": "Mittwoch", "gericht": "Rinderroulade mit Blaukraut und Knödel", "preis": "10,00 €"},
-            {"tag": "Mittwoch", "gericht": "Putensteak mit Ratatouille und Reis", "preis": "10,00 €"},
-            {"tag": "Donnerstag", "gericht": "Gebratene Leber in Zwiebelsoße mit Kartoffelpüree", "preis": "4,90 €"},
-            {"tag": "Donnerstag", "gericht": "Hähnchenkeule mit Pommes", "preis": "k.A."},
-            {"tag": "Freitag", "gericht": "Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße", "preis": "12,90 €"},
-            {"tag": "Freitag", "gericht": "Schweinerückensteaks mit Spätzle und Buttergemüse", "preis": "10,30 €"},
-            {"tag": "Samstag", "gericht": "Haxenfleisch mit Zwiebelsoße und Beilage", "preis": "k.A."},
-            {"tag": "Samstag", "gericht": "Filettöpfle mit Eierknöpfle und kleinem grünem Salat", "preis": "10,80 €"}
+            {
+              "tag": "Montag",
+              "gericht": "Cordon bleu mit Pommes",
+              "preis": "k.A."
+            },
+            {
+              "tag": "Montag",
+              "gericht": "Spaghetti Carbonara",
+              "preis": "k.A."
+            },
+            {
+              "tag": "Dienstag",
+              "gericht": "Spanferkelbraten mit Knödel und Kraut",
+              "preis": "k.A."
+            },
+            {
+              "tag": "Dienstag",
+              "gericht": "Nudelauflauf mit Tomatensoße",
+              "preis": "k.A."
+            },
+            {
+              "tag": "Mittwoch",
+              "gericht": "Rinderroulade mit Blaukraut und Knödel",
+              "preis": "10,00 €"
+            },
+            {
+              "tag": "Mittwoch",
+              "gericht": "Putensteak mit Ratatouille und Reis",
+              "preis": "10,00 €"
+            },
+            {
+              "tag": "Donnerstag",
+              "gericht": "Gebratene Leber in Zwiebelsoße mit Kartoffelpüree",
+              "preis": "4,90 €"
+            },
+            {
+              "tag": "Donnerstag",
+              "gericht": "Hähnchenkeule mit Pommes",
+              "preis": "k.A."
+            },
+            {
+              "tag": "Freitag",
+              "gericht": "Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße",
+              "preis": "12,90 €"
+            },
+            {
+              "tag": "Freitag",
+              "gericht": "Schweinerückensteaks mit Spätzle und Buttergemüse",
+              "preis": "10,30 €"
+            },
+            {
+              "tag": "Samstag",
+              "gericht": "Haxenfleisch mit Zwiebelsoße und Beilage",
+              "preis": "k.A."
+            },
+            {
+              "tag": "Samstag",
+              "gericht": "Filettöpfle mit Eierknöpfle und kleinem grünem Salat",
+              "preis": "10,80 €"
+            }
           ],
           "hinweis": "Alle Speisen auch zum Mitnehmen. Catering für Familienfeiern verfügbar."
         }
@@ -122,14 +272,115 @@
       "logo": null,
       "angebote": [
         {
-          "typ": "Wochenangebote",
-          "gueltig": "Aktuelle Woche",
+          "typ": "Wochenangebot",
+          "gueltig": "03.08. - 08.08.2026",
+          "quelle_pdf": "https://www.metzgerei-brandl.de/uploads/media/6a69b358a2bae/speisekarte-vom-03-08-07-08-26.pdf",
           "produkte": [
-            {"name": "Hackfleisch gemischt", "preis": "1,59 €/100g"},
-            {"name": "Farmerschinken", "preis": "1,89 €/100g"},
-            {"name": "Dicke Rippe", "preis": "1,39 €/100g"},
-            {"name": "Polnische", "preis": "1,59 €/100g"},
-            {"name": "Kochsalami", "preis": "1,59 €/100g"}
+            {
+              "name": "Hackfleisch gemischt",
+              "preis": "1,59 €/100g"
+            },
+            {
+              "name": "Farmerschinken",
+              "preis": "1,89 €/100g"
+            },
+            {
+              "name": "Dicke",
+              "preis": "1,39 €/100g"
+            },
+            {
+              "name": "Polnische",
+              "preis": "1,59 €/100g"
+            },
+            {
+              "name": "Kochsalami",
+              "preis": "1,59 €/100g"
+            },
+            {
+              "name": "Schweine-Filet",
+              "preis": "1,69 €/100g"
+            }
+          ]
+        },
+        {
+          "typ": "Wochenangebot",
+          "gueltig": "10.08. - 15.08.2026",
+          "quelle_pdf": "https://www.metzgerei-brandl.de/uploads/media/6a69b35b6f2ea/angebot-vom-10-08-15-08-26.pdf",
+          "produkte": [
+            {
+              "name": "Schweine-Filet",
+              "preis": "1,69 €/100g"
+            },
+            {
+              "name": "Lachsschinken",
+              "preis": "1,95 €/100g"
+            },
+            {
+              "name": "Schweinswürstl",
+              "preis": "1,39 €/100g"
+            },
+            {
+              "name": "Gelbwurst",
+              "preis": "1,29 €/100g"
+            },
+            {
+              "name": "Emmentaler",
+              "preis": "1,49 €/100g"
+            }
+          ]
+        },
+        {
+          "typ": "Mittags-Menü",
+          "gueltig": "03.08. - 07.08.2026",
+          "quelle_pdf": "https://www.metzgerei-brandl.de/uploads/media/6a69b358a2bae/speisekarte-vom-03-08-07-08-26.pdf",
+          "produkte": [
+            {
+              "name": "Hühnerfrikassee mit Reis und Salat",
+              "preis": "7,90 €"
+            },
+            {
+              "name": "Geschnetzeltes mit Nudeln und Salat",
+              "preis": "7,90 €"
+            },
+            {
+              "name": "Holzfällersteak mit Bratkartoffeln und Gemüse",
+              "preis": "7,90 €"
+            },
+            {
+              "name": "Schweinebraten mit Knödel und Kraut",
+              "preis": "7,90 €"
+            },
+            {
+              "name": "Tiroler Gröstl mit Salat",
+              "preis": "7,90 €"
+            }
+          ]
+        },
+        {
+          "typ": "Wochenangebot",
+          "gueltig": "27.07. - 01.08.2026",
+          "quelle_pdf": "https://www.metzgerei-brandl.de/uploads/media/6a58a3f777767/angebot-vom-27-07-01-08-26.pdf",
+          "produkte": [
+            {
+              "name": "Hackfleisch gemischt",
+              "preis": "1,59 €/100g"
+            },
+            {
+              "name": "Farmerschinken",
+              "preis": "1,89 €/100g"
+            },
+            {
+              "name": "Dicke",
+              "preis": "1,39 €/100g"
+            },
+            {
+              "name": "Polnische",
+              "preis": "1,59 €/100g"
+            },
+            {
+              "name": "Kochsalami",
+              "preis": "1,59 €/100g"
+            }
           ]
         }
       ]
@@ -142,15 +393,63 @@
       "logo": null,
       "angebote": [
         {
-          "typ": "Wochenangebote",
-          "gueltig": "Aktuelle Woche",
+          "typ": "Wochenangebot",
+          "gueltig": "Mi.05.08. - Sa.08.08.2026",
           "produkte": [
-            {"name": "Wammerl mariniert (100g)", "preis": "1,39 €"},
-            {"name": "Schweineschnitzel (100g)", "preis": "1,29 €"},
-            {"name": "Regensburger (100g)", "preis": "1,39 €"},
-            {"name": "Leberkäse (100g)", "preis": "1,19 €"},
-            {"name": "Streichwurst (100g)", "preis": "1,29 €"},
-            {"name": "Cabanossi (100g)", "preis": "1,69 €"}
+            {
+              "name": "Wammerl mariniert",
+              "preis": "1,99 €/100g"
+            },
+            {
+              "name": "Schweineschnitzel",
+              "preis": "1,29 €/100g"
+            },
+            {
+              "name": "Regensburger",
+              "preis": "1,39 €/100g"
+            },
+            {
+              "name": "Leberkäse",
+              "preis": "1,19 €/100g"
+            },
+            {
+              "name": "Streichwurst",
+              "preis": "1,29 €/100g"
+            },
+            {
+              "name": "Cabanossi",
+              "preis": "0,89 €/100g"
+            }
+          ]
+        },
+        {
+          "typ": "Wochenangebot",
+          "gueltig": "Mi.12.08. - Sa.15.08.2026",
+          "produkte": [
+            {
+              "name": "Rinderfetzen",
+              "preis": "1,99 €/100g"
+            },
+            {
+              "name": "Hackfleisch gemischt",
+              "preis": "1,49 €/100g"
+            },
+            {
+              "name": "Backschinken",
+              "preis": "1,79 €/100g"
+            },
+            {
+              "name": "Kochsalami",
+              "preis": "1,49 €/100g"
+            },
+            {
+              "name": "Weiße",
+              "preis": "1,29 €/100g"
+            },
+            {
+              "name": "Sommerduett Käse",
+              "preis": "2,99 €"
+            }
           ]
         }
       ]
@@ -164,8 +463,81 @@
       "angebote": [
         {
           "typ": "Wochenangebote",
-          "gueltig": "Aktuelle Woche",
-          "produkte": []
+          "gueltig": "07.08.2026 - 07.08.2026",
+          "produkte": [
+            {
+              "name": "Wammerl mariniert",
+              "preis": "1,39 â¬"
+            },
+            {
+              "name": "Schweineschnitzel",
+              "preis": "1,29 â¬"
+            },
+            {
+              "name": "Stadtwurst",
+              "preis": "1,39 â¬"
+            },
+            {
+              "name": "LeberkÃ¤s fein",
+              "preis": "1,19 â¬"
+            },
+            {
+              "name": "Leberwurst i. Golddarm",
+              "preis": "1,25 â¬"
+            },
+            {
+              "name": "Kabanossi",
+              "preis": "1,69 â¬"
+            },
+            {
+              "name": "Ochsenfetzân",
+              "preis": "1,99 â¬"
+            },
+            {
+              "name": "Hackfleisch gem.",
+              "preis": "1,49 â¬"
+            },
+            {
+              "name": "Backschinken",
+              "preis": "1,79 â¬"
+            },
+            {
+              "name": "Kochsalami",
+              "preis": "1,49 â¬"
+            },
+            {
+              "name": "WeiÃwÃ¼rste",
+              "preis": "1,29 â¬"
+            },
+            {
+              "name": "Sommerduett KÃ¤se Tomate - Basilikum",
+              "preis": "2,59 â¬"
+            },
+            {
+              "name": "Schweinekrustenbraten",
+              "preis": "1,09 â¬"
+            },
+            {
+              "name": "HÃ¤hnchenbrustfilet",
+              "preis": "1,59 â¬"
+            },
+            {
+              "name": "Wiener",
+              "preis": "1,49 â¬"
+            },
+            {
+              "name": "Stuttgarter LeberkÃ¤s",
+              "preis": "1,29 â¬"
+            },
+            {
+              "name": "Streichwurst grob",
+              "preis": "1,29 â¬"
+            },
+            {
+              "name": "Bayer. KÃ¤seaufstrich",
+              "preis": "1,65 â¬"
+            }
+          ]
         }
       ]
     },
