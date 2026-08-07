@@ -331,8 +331,8 @@ async function shareFullContent() {
 }
 
 // Live-Daten laden
-const DATA_URL = 'data/metzger/wasner.json'; // Relativ zur GitHub Pages URL
-const FALLBACK_URL = 'https://raw.githubusercontent.com/BavarianOne/bayerische-kartenspiele/master/data/metzger/wasner.json';
+const DATA_URL = 'data/metzger/all.json'; // Relativ zur GitHub Pages URL
+const FALLBACK_URL = 'https://raw.githubusercontent.com/BavarianOne/bayerische-kartenspiele/master/data/metzger/all.json';
 
 async function loadData() {
   const container = document.getElementById('angebote-inhalt');
@@ -391,7 +391,7 @@ async function loadData() {
 function renderData(data) {
   const container = document.getElementById('angebote-inhalt');
   
-  if (!data.angebote || data.angebote.length === 0) {
+  if (!data.metzgereien || data.metzgereien.length === 0) {
     container.innerHTML = '<p class="empty-week">Keine aktuellen Angebote verfügbar.</p>';
     return;
   }
@@ -404,63 +404,82 @@ function renderData(data) {
   ];
   
   let html = '';
-  let weekIndex = 0;
   
-  // Gruppieren nach Woche (gueltig Feld)
-  const weeks = {};
-  data.angebote.forEach(angebot => {
-    const weekKey = angebot.gueltig || 'Unbekannt';
-    if (!weeks[weekKey]) weeks[weekKey] = [];
-    weeks[weekKey].push(angebot);
-  });
-  
-  for (const [weekName, angebote] of Object.entries(weeks)) {
-    const colorClass = weekColors[weekIndex % 13];
-    weekIndex++;
+  // Für jede Metzgerei eine Week-Card
+  data.metzgereien.forEach((metzger, metzgerIndex) => {
+    const colorClass = weekColors[metzgerIndex % 13];
     
     html += `<div class="week-card ${colorClass}">`;
-    html += `<div class="week-header">${escapeHtml(weekName)}</div>`;
+    html += `<div class="week-header">${escapeHtml(metzger.name)}</div>`;
     
-    // Gruppieren nach Metzger
-    const metzgerGroups = {};
-    angebote.forEach(a => {
-      const key = a.metzgerei || a.typ || 'Unbekannt';
-      if (!metzgerGroups[key]) metzgerGroups[key] = { typ: a.typ, standort: '', angebote: [] };
-      metzgerGroups[key].angebote.push(a);
-    });
-    
-    for (const [metzgerName, group] of Object.entries(metzgerGroups)) {
+    if (metzger.standort) {
+      html += `<div class="metzger-section"><div class="city">📍 ${escapeHtml(metzger.standort)}</div>`;
+    } else {
       html += `<div class="metzger-section">`;
-      html += `<div class="metzger-name">${escapeHtml(metzgerName)}</div>`;
-      if (group.standort) {
-        html += `<div class="city">📍 ${escapeHtml(group.standort)}</div>`;
-      }
-      
-      group.angebote.forEach(a => {
-        html += `<div class="angebot">`;
-        html += `<div class="angebot-header">`;
-        html += `<span class="angebot-name">${escapeHtml(a.name)}</span>`;
-        if (a.preis) html += `<span class="angebot-preis">${escapeHtml(a.preis)}</span>`;
-        html += `</div>`;
-        if (a.preis && a.preis.includes('/')) {
-          // schon im Preis enthalten
-        } else if (a.preis_pro_kg || a.preis_pro_stueck) {
-          html += `<div class="angebot-desc">${escapeHtml(a.preis_pro_kg || a.preis_pro_stueck)}</div>`;
-        }
-        if (a.beschreibung) {
-          html += `<div class="angebot-desc">${escapeHtml(a.beschreibung)}</div>`;
-        }
-        if (a.link) {
-          html += `<a href="${escapeHtml(a.link)}" class="angebot-link" target="_blank" rel="noopener">Zum Angebot</a>`;
-        }
-        html += `</div>`;
-      }
-      
-      html += `</div>`;
     }
     
-    html += `</div>`;
-  }
+    if (metzger.website) {
+      html += `<div class="metzger-name"><a href="${escapeHtml(metzger.website)}" target="_blank" rel="noopener">${escapeHtml(metzger.name)}</a></div>`;
+    } else {
+      html += `<div class="metzger-name">${escapeHtml(metzger.name)}</div>`;
+    }
+    
+    if (!metzger.angebote || metzger.angebote.length === 0) {
+      html += `<p class="empty-week">Keine aktuellen Angebote verfügbar.</p>`;
+    } else {
+      metzger.angebote.forEach(angebot => {
+        html += `<div class="metzger-section">`;
+        
+        if (angebot.typ) {
+          html += `<div class="angebot-header" style="margin-bottom:8px;">`;
+          html += `<span class="angebot-name" style="font-size:0.85em;background:#e8e8e8;padding:2px 6px;border-radius:3px;">${escapeHtml(angebot.typ)}</span>`;
+          if (angebot.gueltig) {
+            html += `<span class="angebot-preis" style="background:#666;font-size:0.75em;">${escapeHtml(angebot.gueltig)}</span>`;
+          }
+          html += `</div>`;
+        }
+        
+        if (angebot.produkte && angebot.produkte.length > 0) {
+          angebot.produkte.forEach(p => {
+            html += `<div class="angebot">`;
+            html += `<div class="angebot-header">`;
+            html += `<span class="angebot-name">${escapeHtml(p.name)}</span>`;
+            if (p.preis) html += `<span class="angebot-preis">${escapeHtml(p.preis)}</span>`;
+            html += `</div>`;
+            if (p.beschreibung) {
+              html += `<div class="angebot-desc">${escapeHtml(p.beschreibung)}</div>`;
+            }
+            if (p.tag) {
+              html += `<div class="angebot-desc"><strong>${escapeHtml(p.tag)}:</strong> ${escapeHtml(p.gericht)}</div>`;
+            } else if (p.gericht) {
+              html += `<div class="angebot-desc">${escapeHtml(p.gericht)}</div>`;
+            }
+            if (p.preis && !p.preis.includes('k.A.') && !p.preis.includes('€/')) {
+              // Preis schon oben
+            }
+            if (p.preis_pro_kg || p.preis_pro_stueck) {
+              html += `<div class="angebot-desc">${escapeHtml(p.preis_pro_kg || p.preis_pro_stueck)}</div>`;
+            }
+            if (p.beschreibung) {
+              html += `<div class="angebot-desc">${escapeHtml(p.beschreibung)}</div>`;
+            }
+            if (p.link) {
+              html += `<a href="${escapeHtml(p.link)}" class="angebot-link" target="_blank" rel="noopener">Zum Angebot</a>`;
+            }
+            html += `</div>`;
+          });
+        }
+        
+        if (angebot.hinweis) {
+          html += `<div class="angebot-desc" style="font-style:italic;margin-top:8px;">${escapeHtml(angebot.hinweis)}</div>`;
+        }
+        
+        html += `</div>`;
+      });
+    }
+    
+    html += `</div></div>`;
+  });
   
   document.getElementById('angebote-inhalt').innerHTML = html;
 }
