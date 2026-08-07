@@ -60,17 +60,6 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Lösche alte Releases
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release list --limit 100 --json tagName --jq '.[3:] | .[].tagName' | while read -r tag; do
-            if [ -n "$tag" ]; then
-              echo "Lösche altes Release: $tag"
-              gh release delete "$tag" --cleanup-tag --yes
-            fi
-          done
-
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v2
         with:
