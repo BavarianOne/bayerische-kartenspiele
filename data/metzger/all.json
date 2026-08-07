@@ -581,9 +581,48 @@
                   "name": "Unsere Scharfen",
                   "preis": "9,99 €/kg"
                 }
-              ]
-            }
-                  ]
-                }
-              ]
-            }
+                                  ]
+                                }
+                              ]
+                            },
+                    {
+                      "id": "tristlhof",
+                      "name": "Metzgerei Tristlhof",
+                      "standort": "Landshut",
+                      "website": "https://www.metzgerei-tristlhof.de/",
+                      "logo": null,
+                      "angebote": [
+                        {
+                          "typ": "Wochenangebote",
+                          "gueltig": "10.08.-15.08.2026",
+                          "produkte": [
+                            {
+                              "name": "Schweinelendchen",
+                              "preis": "1,09 €/100g"
+                            },
+                            {
+                              "name": "Wammerl",
+                              "preis": "0,99 €/100g"
+                            },
+                            {
+                              "name": "Hackfleisch (mageres Schwein und Rind) – Nur am Montag",
+                              "preis": "4,98 €/500g"
+                            },
+                            {
+                              "name": "Haxe – Nur am Samstag (Haxentag)",
+                              "preis": "0,79 €/100g"
+                            },
+                            {
+                              "name": "Delikatess Leberwurst (im Golddarm, extra cremig)",
+                              "preis": "1,18 €/100g"
+                            },
+                            {
+                              "name": "Currywurst (frisch vom Rauch, schön knackig)",
+                              "preis": "1,19 €/100g"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                              ]
+                            }
