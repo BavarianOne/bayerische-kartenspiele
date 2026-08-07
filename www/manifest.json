@@ -1,18 +1,18 @@
 {
-  "name": "Metzger-Angebote",
-  "short_name": "Metzger",
-  "description": "Aktuelle Fleisch & Wurst-Angebote aus bayerischen Metzgereien – live, offline-fähig, mit Benachrichtigungen",
-  "start_url": "metzger-angebote.html",
+  "name": "Wetter Radar",
+  "short_name": "Wetter",
+  "description": "Werbefreie Wetter-App mit Satellit, Wolken, Regen, Wind & Sturm-Radar. Offline-fähig, installierbar, Open Data.",
+  "start_url": "wetter.html",
   "display": "standalone",
-  "background_color": "#f5f5f5",
-  "theme_color": "#8b4513",
+  "background_color": "#0d1b2a",
+  "theme_color": "#1e3a5f",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "de",
-  "categories": ["shopping", "food", "lifestyle"],
+  "categories": ["weather", "utilities"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥩</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
@@ -20,18 +20,18 @@
   ],
   "shortcuts": [
     {
-      "name": "Diese Woche",
-      "short_name": "Woche",
-      "description": "Angebote der aktuellen Woche anzeigen",
-      "url": "metzger-angebote.html#woche",
-      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>", "sizes": "96x96" }]
+      "name": "Aktuelles Wetter",
+      "short_name": "Jetzt",
+      "description": "Aktuelles Wetter am Standort anzeigen",
+      "url": "wetter.html#current",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>", "sizes": "96x96" }]
     },
     {
-      "name": "Metzgereien",
-      "short_name": "Metzgereien",
-      "description": "Alle Metzgereien im Überblick",
-      "url": "metzger-angebote.html#metzgereien",
-      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏪</text></svg>", "sizes": "96x96" }]
+      "name": "Satellit & Radar",
+      "short_name": "Radar",
+      "description": "Satellitenbild mit Wolken, Regen, Wind Overlays",
+      "url": "wetter.html#map",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>", "sizes": "96x96" }]
     }
   ],
   "prefer_related_applications": false,
