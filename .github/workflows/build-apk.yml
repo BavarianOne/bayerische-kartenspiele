@@ -45,7 +45,7 @@ jobs:
           cp -r data www/ 2>/dev/null || true
 
       - name: Capacitor sync (Android)
-        run: npx cap sync android
+        run: npx --yes @capacitor/cli sync android
 
       - name: Make Gradle wrapper executable
         run: chmod +x android/gradlew
