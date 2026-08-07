@@ -285,10 +285,7 @@ async function shareFullContent() {
     bodyText = "Schau dir diese aktuellen Angebote an!";
   }
 
-  const fullMessage = `${bodyText}
-
-👉 Hier online ansehen:
-${window.location.href}`;
+  const fullMessage = `${bodyText}\n\n👉 Hier online ansehen:\n${window.location.href}`;
 
   if (navigator.share) {
     try {
@@ -304,6 +301,124 @@ ${window.location.href}`;
     window.open(fallbackUrl, '_blank');
   }
 }
+
+// Funktion 3: Metzger-Daten von GitHub laden und rendern
+async function loadMetzgerData() {
+  const container = document.getElementById('angebote-inhalt');
+  const updateEl = document.querySelector('.last-update');
+  
+  try {
+    const response = await fetch('https://raw.githubusercontent.com/BavarianOne/bayerische-kartenspiele/master/data/metzger/all.json');
+    if (!response.ok) throw new Error('Netzwerk-Fehler');
+    const data = await response.json();
+    
+    // Update timestamp
+    if (updateEl && data.scraped_at) {
+      const date = new Date(data.scraped_at);
+      updateEl.textContent = `Letzte Aktualisierung: ${date.toLocaleString('de-DE')} (live von GitHub)`;
+    }
+    
+    // Render metzgereien grouped by week (simplified: just render all)
+    if (data.metzgereien) {
+      container.innerHTML = '';
+      
+      // Group by validity week
+      const weeksMap = new Map();
+      
+      data.metzgereien.forEach(metzger => {
+        metzger.angebote.forEach(angebot => {
+          const key = angebot.gueltig || 'Unbekannt';
+          if (!weeksMap.has(key)) weeksMap.set(key, []);
+          weeksMap.get(key).push({ metzger, angebot });
+        });
+      });
+      
+      const weekColors = ['week-orange', 'week-green', 'week-blue', 'week-purple', 'week-teal', 'week-pink'];
+      let colorIdx = 0;
+      
+      weeksMap.forEach((entries, weekKey) => {
+        const weekCard = document.createElement('div');
+        weekCard.className = `week-card ${weekColors[colorIdx % weekColors.length]}`;
+        colorIdx++;
+        
+        const header = document.createElement('div');
+        header.className = 'week-header';
+        header.textContent = weekKey;
+        weekCard.appendChild(header);
+        
+        // Group by metzger
+        const metzgerMap = new Map();
+        entries.forEach(e => {
+          if (!metzgerMap.has(e.metzger.id)) metzgerMap.set(e.metzger.id, { metzger: e.metzger, angebote: [] });
+          metzgerMap.get(e.metzger.id).angebote.push(e.angebot);
+        });
+        
+        metzgerMap.forEach(m => {
+          const section = document.createElement('div');
+          section.className = 'metzger-section';
+          
+          const nameDiv = document.createElement('div');
+          nameDiv.className = 'metzger-name';
+          if (m.metzger.website) {
+            const a = document.createElement('a');
+            a.href = m.metzger.website;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = m.metzger.name;
+            nameDiv.appendChild(a);
+          } else {
+            nameDiv.textContent = m.metzger.name;
+          }
+          section.appendChild(nameDiv);
+          
+          if (m.metzger.standort) {
+            const cityDiv = document.createElement('div');
+            cityDiv.className = 'city';
+            cityDiv.textContent = `📍 ${m.metzger.standort}`;
+            section.appendChild(cityDiv);
+          }
+          
+          m.angebote.forEach(angebot => {
+            angebot.produkte.forEach(prod => {
+              const angebotDiv = document.createElement('div');
+              angebotDiv.className = 'angebot';
+              
+              const headerDiv = document.createElement('div');
+              headerDiv.className = 'angebot-header';
+              
+              const nameSpan = document.createElement('span');
+              nameSpan.className = 'angebot-name';
+              nameSpan.textContent = prod.name;
+              headerDiv.appendChild(nameSpan);
+              
+              const preisSpan = document.createElement('span');
+              preisSpan.className = 'angebot-preis';
+              preisSpan.textContent = prod.preis;
+              headerDiv.appendChild(preisSpan);
+              
+              angebotDiv.appendChild(headerDiv);
+              section.appendChild(angebotDiv);
+            });
+          });
+          
+          weekCard.appendChild(section);
+        });
+        
+        container.appendChild(weekCard);
+      });
+    }
+  } catch (err) {
+    console.error('Fehler beim Laden der Metzger-Daten:', err);
+    if (updateEl) {
+      updateEl.textContent = 'Fehler beim Laden der Live-Daten. Zeige Offline-Version.';
+      updateEl.style.color = '#f44336';
+    }
+    // Static HTML remains as fallback
+  }
+}
+
+// Beim Laden der Seite Daten holen
+document.addEventListener('DOMContentLoaded', loadMetzgerData);
 </script>
 
     <h1>🥩 Metzger-Angebote aus Bayern</h1>
