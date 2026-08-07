@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Neon Velocity: Chrono Run - 3D Neon Cyberpunk Lane Runner">
+    <meta name="theme-color" content="#0a0a1a">
+    <title>Neon Velocity: Chrono Run</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-magenta: #ff00ff;
+            --neon-yellow: #ffff00;
+            --neon-green: #00ff00;
+            --neon-orange: #ff8800;
+            --neon-red: #ff4444;
+            --bg-dark: #0a0a1a;
+            --bg-darker: #050510;
+            --text-glow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
+        }
+        
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor; }
+            50% { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 80px currentColor; }
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        
+        @keyframes levelUpFlash {
+            0% { background: var(--bg-dark); }
+            25% { background: var(--flash-color); }
+            50% { background: var(--bg-dark); }
+            75% { background: var(--flash-color); }
+            100% { background: var(--bg-dark); }
+        }
+        
+        @keyframes buttonPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px currentColor; }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px currentColor, 0 0 40px currentColor; }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+        
+        @keyframes coinSpin {
+            0% { transform: scaleX(1); }
+            50% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+            font-family: 'Courier New', 'Courier', monospace;
+            touch-action: none;
+            overscroll-behavior: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.15) 2px,
+                rgba(0,0,0,0.15) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanline 3s linear infinite;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+        
+        #game-canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top, 10px) env(safe-area-inset-right, 10px) env(safe-area-inset-bottom, 10px) env(safe-area-inset-left, 10px);
+        }
+        
+        #hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px;
+            pointer-events: none;
+        }
+        
+        .hud-panel {
+            background: linear-gradient(135deg, rgba(10,10,26,0.9), rgba(10,10,26,0.7));
+            border: 1px solid var(--neon-cyan);
+            border-radius: 8px;
+            padding: 8px 16px;
+            box-shadow: 0 0 15px rgba(0,255,255,0.3), inset 0 0 15px rgba(0,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hud-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--neon-cyan);
+            opacity: 0.7;
+        }
+        
+        .hud-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--neon-yellow);
+            text-shadow: var(--text-glow);
+            font-family: 'Courier New', monospace;
+        }
+        
+        #hud-distance .hud-value { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
+        #hud-level .hud-value { color: var(--neon-magenta); text-shadow: 0 0 10px var(--neon-magenta), 0 0 20px var(--neon-magenta); }
+        #hud-multiplier .hud-value { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange), 0 0 20px var(--neon-orange); }
+        
+        .lane-indicator {
+            position: absolute;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .lane-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0,255,255,0.3);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0,255,255,0.5);
+            transition: all 0.15s ease;
+        }
+        
+        .lane-dot.active {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+            transform: scale(1.3);
+        }
+        
+        #start-screen, #game-over-screen, #level-up-screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(10,10,26,0.95), rgba(5,5,16,0.98));
+            z-index: 20;
+            pointer-events: auto;
+            padding: 20px;
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        #level-up-screen {
+            animation: levelUpFlash 1.5s ease-out;
+            pointer-events: none;
+        }
+        
+        .screen-title {
+            font-size: clamp(28px, 8vw, 56px);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            line-height: 1.1;
+            margin-bottom: 10px;
+            animation: neonPulse 2s ease-in-out infinite;
+        }
+        
+        .title-line { display: block; }
+        
+        .title-main { color: var(--neon-cyan); }
+        .title-sub { color: var(--neon-magenta); font-size: 0.6em; letter-spacing: 8px; margin-top: -10px; }
+        
+        .screen-subtitle {
+            font-size: clamp(14px, 3vw, 18px);
+            color: var(--neon-yellow);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            opacity: 0.8;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        .btn {
+            background: transparent;
+            border: 2px solid;
+            border-radius: 50px;
+            padding: 16px 48px;
+            font-family: inherit;
+            font-size: clamp(14px, 3vw, 18px);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 10px;
+            min-height: 56px;
+            min-width: 180px;
+            touch-action: manipulation;
+        }
+        
+        .btn-primary { border-color: var(--neon-cyan); color: var(--neon-cyan); animation: buttonPulse 2s ease-in-out infinite; }
+        .btn-primary:active { transform: scale(0.95); box-shadow: 0 0 30px var(--neon-cyan), inset 0 0 30px rgba(0,255,255,0.3); }
+        
+        .btn-secondary { border-color: var(--neon-magenta); color: var(--neon-magenta); }
+        .btn-secondary:active { transform: scale(0.95); box-shadow: 0 0 30px var(--neon-magenta), inset 0 0 30px rgba(255,0,255,0.3); }
+        
+        .btn-danger { border-color: #ff4444; color: #ff4444; }
+        
+        .stats-panel {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .stat-item {
+            background: rgba(0,255,255,0.05);
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 12px;
+            padding: 20px 30px;
+            min-width: 140px;
+        }
+        
+        .stat-label { font-size: 11px; color: var(--neon-cyan); text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
+        .stat-value { font-size: 28px; font-weight: bold; color: var(--neon-yellow); text-shadow: var(--text-glow); font-family: monospace; }
+        
+        .level-up-text {
+            font-size: clamp(32px, 10vw, 64px);
+            font-weight: 900;
+            color: var(--flash-color, var(--neon-yellow));
+            text-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 0 0 80px currentColor;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            animation: pulseGlow 0.3s ease-in-out infinite alternate;
+        }
+        
+        .level-number {
+            font-size: clamp(48px, 15vw, 120px);
+            font-weight: 900;
+            color: var(--flash-color, var(--neon-cyan));
+            text-shadow: 0 0 30px currentColor, 0 0 60px currentColor;
+            line-height: 1;
+            margin: 20px 0;
+        }
+        
+        .controls-hint {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .key-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+        
+        .key-hint kbd {
+            background: rgba(0,255,255,0.1);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: inherit;
+            color: var(--neon-cyan);
+        }
+        
+        .hidden { display: none !important; }
+        
+        @media (max-width: 768px) {
+            #hud-top { padding: 5px; }
+            .hud-panel { padding: 6px 12px; }
+            .hud-value { font-size: 18px; }
+            .controls-hint { display: none; }
+            .lane-dot { width: 10px; height: 10px; }
+        }
+        
+        @media (max-width: 480px) {
+            .lane-dot { width: 8px; height: 8px; }
+        }
+        
+        @media (orientation: portrait) and (max-width: 768px) {
+            #game-canvas { transform: rotate(90deg); transform-origin: center; width: 100vh; height: 100vw; max-width: 100vh; max-height: 100vw; }
+            #game-container { overflow: hidden; }
+        }
+        
+        @media (prefers-contrast: high) {
+            :root { --neon-cyan: #00ffff; --neon-magenta: #ff00ff; --neon-yellow: #ffff00; }
+            .hud-panel { border-width: 2px; }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="ui-overlay">
+            <div id="hud-top" class="hidden">
+                <div id="hud-distance" class="hud-panel">
+                    <div class="hud-label">Distance</div>
+                    <div id="distance-value" class="hud-value">0m</div>
+                </div>
+                <div id="hud-level" class="hud-panel">
+                    <div class="hud-label">Phase</div>
+                    <div id="level-value" class="hud-value">1</div>
+                </div>
+                <div id="hud-multiplier" class="hud-panel">
+                    <div class="hud-label">Multiplier</div>
+                    <div id="multiplier-value" class="hud-value">x1</div>
+                </div>
+            </div>
+            
+            <div class="lane-indicator" id="lane-indicator">
+                <div class="lane-dot" data-lane="-1"></div>
+                <div class="lane-dot active" data-lane="0"></div>
+                <div class="lane-dot" data-lane="1"></div>
+            </div>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1 class="screen-title">
+                <span class="title-line title-main">NEON VELOCITY</span>
+                <span class="title-line title-sub">CHRONO RUN</span>
+            </h1>
+            <p class="screen-subtitle">3D CYBERPUNK LANE RUNNER</p>
+            <button class="btn btn-primary" id="btn-start">Start Run</button>
+            <div class="controls-hint" id="desktop-hint">
+                <div class="key-hint"><kbd>←</kbd> / <kbd>A</kbd> Left Lane</div>
+                <div class="key-hint"><kbd>→</kbd> / <kbd>D</kbd> Right Lane</div>
+            </div>
+            <div class="controls-hint" id="mobile-hint" style="display:none;">
+                <div class="key-hint">Tap Left Side → Move Left</div>
+                <div class="key-hint">Tap Right Side → Move Right</div>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="hidden">
+            <h1 class="screen-title" style="color: #ff4444; text-shadow: 0 0 20px #ff4444, 0 0 40px #ff4444;">
+                <span class="title-line">SYSTEM</span>
+                <span class="title-line title-sub">CRASH</span>
+            </h1>
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-label">Distance</div>
+                    <div id="final-distance" class="stat-value">0m</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Best Distance</div>
+                    <div id="best-distance" class="stat-value">0m</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Phase Reached</div>
+                    <div id="final-level" class="stat-value">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Coins</div>
+                    <div id="final-coins" class="stat-value">0</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="btn-restart">Restart Run</button>
+            <button class="btn btn-secondary" id="btn-menu">Main Menu</button>
+        </div>
+        
+        <!-- Level Up Screen -->
+        <div id="level-up-screen" class="hidden">
+            <div class="level-up-text">PHASE SHIFT</div>
+            <div class="level-number" id="level-up-number">02</div>
+            <div class="screen-subtitle" style="color: var(--flash-color, var(--neon-cyan));">SPEED INCREASED • NEW THREATS</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // NEON VELOCITY: CHRONO RUN - 3D LANE RUNNER
+        // ============================================
+        
+        // ============================================
+        // CONFIGURATION & CONSTANTS
+        // ============================================
+        const CONFIG = {
+            // Canvas & Design Resolution
+            DESIGN_WIDTH: 800,
+            DESIGN_HEIGHT: 450,
+            
+            // 3D Camera & Projection
+            FOCAL_LENGTH: 350,          // Perspective focal length (pixels)
+            HORIZON_Y_RATIO: 0.3,       // Horizon at 30% from top
+            CAMERA_Z: -10,              // Camera behind player
+            CAMERA_HEIGHT: 1.8,         // Camera height (eye level)
+            PLAYER_Z: 0,                // Player at origin Z
+            
+            // Lane System
+            LANE_COUNT: 3,
+            LANE_WIDTH: 2.5,            // World units between lane centers
+            LANE_POSITIONS: [-2.5, 0, 2.5], // Left, Center, Right
+            LANE_SWITCH_TIME: 0.15,     // Seconds to switch lanes
+            
+            // World
+            WORLD_UNIT: 50,             // Pixels per world unit at Z=0
+            HORIZON_Z: 120,             // Spawn distance
+            DESPAWN_Z: -20,             // Remove behind camera
+            GROUND_Y: 0,                // Ground level
+            
+            // Player
+            PLAYER_HEIGHT: 1.8,
+            PLAYER_WIDTH: 0.6,
+            PLAYER_DEPTH: 0.5,
+            LANE_SWITCH_EASING: 'cubicOut',
+            
+            // Gameplay
+            INITIAL_SPEED: 25,          // World units per second
+            SPEED_INCREMENT: 0.8,       // Per phase
+            MAX_SPEED_MULTIPLIER: 4.0,
+            BASE_SPAWN_INTERVAL: 1200,  // ms
+            MIN_SPAWN_INTERVAL: 300,    // ms
+            PHASE_DISTANCE_BASE: 1000,  // meters per phase
+            PHASE_DISTANCE_INCREMENT: 500,
+            MAX_HP: 1,                  // One-hit death (Subway Surfers style)
+            INVINCIBILITY_TIME: 1000,   // ms after hit
+            
+            // Scoring
+            DISTANCE_SCORE_RATE: 1,     // Points per meter
+            COIN_VALUE: 50,
+            COIN_MAGNET_RANGE: 8,       // World units
+            MULTIPLIER_MAX: 30,
+            MULTIPLIER_INCREMENT: 1,
+            MULTIPLIER_DECAY: 0.5,      // Per second when not collecting
+            
+            // Visual
+            PARTICLE_MAX: 200,
+            TRAIL_LENGTH: 12,
+            GROUND_GRID_LINES: 40,
+            BUILDING_COUNT: 30,
+            
+            // Colors (Neon Palette)
+            COLORS: {
+                CYAN: '#00ffff',
+                MAGENTA: '#ff00ff',
+                YELLOW: '#ffff00',
+                GREEN: '#00ff00',
+                ORANGE: '#ff8800',
+                RED: '#ff4444',
+                WHITE: '#ffffff',
+                BG_DARK: '#0a0a1a',
+                BG_DARKER: '#050510',
+            },
+            
+            // Phase Color Schemes
+            PHASE_COLORS: [
+                { name: 'NEON CITY', sky: '#0a0a1a', horizon: '#1a0a2a', ground: '#001122', primary: '#00ffff', secondary: '#ff00ff', accent: '#ffff00', building: ['#004466', '#006688', '#003355'] },
+                { name: 'MAGENTA ZONE', sky: '#1a001a', horizon: '#2a002a', ground: '#220022', primary: '#ff00ff', secondary: '#ffff00', accent: '#00ffff', building: ['#660066', '#880088', '#440044'] },
+                { name: 'GOLDEN AGE', sky: '#1a1a00', horizon: '#2a2a00', ground: '#222200', primary: '#ffff00', secondary: '#00ffff', accent: '#ff00ff', building: ['#666600', '#888800', '#444400'] },
+                { name: 'CYBER VOID', sky: '#001a1a', horizon: '#002a2a', ground: '#002222', primary: '#00ffff', secondary: '#00ff00', accent: '#ff00ff', building: ['#006666', '#008888', '#004444'] },
+                { name: 'RED ALERT', sky: '#1a0000', horizon: '#2a0000', ground: '#220000', primary: '#ff4444', secondary: '#ff8800', accent: '#ffff00', building: ['#660000', '#880000', '#440000'] },
+                { name: 'VIOLET SECTOR', sky: '#0a0a2a', horizon: '#1a0a3a', ground: '#001133', primary: '#8844ff', secondary: '#00ffff', accent: '#ff00ff', building: ['#331166', '#442288', '#220044'] }
+            ],
+            
+            // Obstacle Types
+            OBSTACLE_TYPES: {
+                BARRIER: { width: 2.2, height: 1.5, depth: 0.5, color: 'primary', lethal: true, model: 'barrier' },
+                TRAIN_CAR: { width: 2.4, height: 2.2, depth: 6, color: 'secondary', lethal: true, model: 'train' },
+                PILLAR: { width: 0.6, height: 3, depth: 0.6, color: 'accent', lethal: true, model: 'pillar' },
+                WALL_LOW: { width: 2.5, height: 0.8, depth: 0.4, color: 'primary', lethal: true, model: 'wall_low' },
+                SIGN: { width: 2.8, height: 1.2, depth: 0.3, color: 'secondary', lethal: false, model: 'sign' }, // Duckable in original, here just visual
+            },
+            
+            // Collectible Types
+            COLLECTIBLE_TYPES: {
+                COIN: { size: 0.5, value: 50, color: '#ffff00', glow: '#ffaa00', model: 'coin' },
+                COIN_STACK: { size: 0.7, value: 150, color: '#ffdd00', glow: '#ffaa00', model: 'coin_stack' },
+                MAGNET: { size: 0.8, value: 0, color: '#ff00ff', glow: '#ff00ff', model: 'magnet', powerup: 'magnet', duration: 8000 },
+                JETPACK: { size: 0.8, value: 0, color: '#00ffff', glow: '#00ffff', model: 'jetpack', powerup: 'jetpack', duration: 6000 },
+                SUPER_SNEAKERS: { size: 0.8, value: 0, color: '#00ff00', glow: '#00ff00', model: 'sneakers', powerup: 'sneakers', duration: 5000 },
+                MULTIPLIER_2X: { size: 0.7, value: 0, color: '#ff8800', glow: '#ff8800', model: 'multiplier', powerup: 'multiplier', duration: 10000 },
+                SHIELD: { size: 0.7, value: 0, color: '#00ffff', glow: '#00ffff', model: 'shield', powerup: 'shield', duration: 10000 },
+            },
+            
+            // Spawn Patterns per Phase
+            PHASE_PATTERNS: {
+                1: { obstacles: ['BARRIER'], weights: [1], collectibles: ['COIN'], coinWeight: 1 },
+                2: { obstacles: ['BARRIER', 'PILLAR'], weights: [3, 1], collectibles: ['COIN', 'COIN_STACK'], coinWeight: 1 },
+                3: { obstacles: ['BARRIER', 'PILLAR', 'TRAIN_CAR'], weights: [3, 2, 1], collectibles: ['COIN', 'COIN_STACK', 'MAGNET'], coinWeight: 1 },
+                4: { obstacles: ['BARRIER', 'PILLAR', 'TRAIN_CAR', 'WALL_LOW'], weights: [3, 2, 1, 1], collectibles: ['COIN', 'COIN_STACK', 'MAGNET', 'JETPACK'], coinWeight: 1 },
+                5: { obstacles: ['BARRIER', 'PILLAR', 'TRAIN_CAR', 'WALL_LOW', 'SIGN'], weights: [2, 2, 1, 1, 1], collectibles: ['COIN', 'COIN_STACK', 'MAGNET', 'JETPACK', 'SUPER_SNEAKERS', 'MULTIPLIER_2X'], coinWeight: 1 },
+            }
+        };
+        
+        // Phase distance thresholds
+        function getPhaseThreshold(phase) {
+            if (phase <= 1) return 0;
+            let dist = 0;
+            for (let i = 2; i <= phase; i++) {
+                dist += CONFIG.PHASE_DISTANCE_BASE + (i - 2) * CONFIG.PHASE_DISTANCE_INCREMENT;
+            }
+            return dist;
+        }
+        
+        function getPhaseFromDistance(distance) {
+            let phase = 1;
+            while (getPhaseThreshold(phase + 1) <= distance) phase++;
+            return Math.min(phase, 20);
+        }
+        
+        // ============================================
+        // 3D MATH UTILITIES
+        // ============================================
+        const Math3D = {
+            // Perspective projection: world -> screen
+            project(x, y, z, canvasWidth, canvasHeight, focalLength) {
+                const horizonY = canvasHeight * CONFIG.HORIZON_Y_RATIO;
+                const centerX = canvasWidth * 0.5;
+                
+                const denom = z + focalLength;
+                if (denom <= 1) return { x: centerX, y: horizonY, scale: 0, visible: false };
+                
+                const scale = focalLength / denom;
+                const screenX = centerX + x * scale * CONFIG.WORLD_UNIT;
+                const screenY = horizonY - y * scale * CONFIG.WORLD_UNIT;
+                
+                return { x: screenX, y: screenY, scale, visible: true };
+            },
+            
+            // Lerp with easing
+            lerp(a, b, t) { return a + (b - a) * t; },
+            
+            easeCubicOut(t) { return 1 - Math.pow(1 - t, 3); },
+            easeQuadOut(t) { return 1 - (1 - t) * (1 - t); },
+            
+            clamp(v, min, max) { return Math.max(min, Math.min(max, v)); },
+            
+            random(min, max) { return Math.random() * (max - min) + min; },
+            randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; },
+            randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; },
+            
+            // Weighted random choice
+            weightedChoice(items, weights) {
+                const total = weights.reduce((a, b) => a + b, 0);
+                let r = Math.random() * total;
+                for (let i = 0; i < items.length; i++) {
+                    r -= weights[i];
+                    if (r <= 0) return items[i];
+                }
+                return items[items.length - 1];
+            },
+            
+            hexToRgba(hex, alpha = 1) {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+        };
+        
+        // ============================================
+        // INPUT MANAGER - Lane-based Controls
+        // ============================================
+        class InputManager {
+            constructor() {
+                this.laneChange = 0; // -1 left, +1 right, 0 none
+                this.keys = { left: false, right: false };
+                this.touchStartX = 0;
+                this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                               ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+                this.init();
+            }
+            
+            init() {
+                // Keyboard
+                window.addEventListener('keydown', (e) => this.onKeyDown(e));
+                window.addEventListener('keyup', (e) => this.onKeyUp(e));
+                
+                // Touch - screen halves
+                const canvas = document.getElementById('game-canvas');
+                canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
+                canvas.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: false });
+                canvas.addEventListener('click', (e) => this.onClick(e));
+                
+                // Prevent context menu
+                canvas.addEventListener('contextmenu', e => e.preventDefault());
+                
+                // Show mobile hint
+                if (this.isMobile) {
+                    document.getElementById('desktop-hint').style.display = 'none';
+                    document.getElementById('mobile-hint').style.display = 'flex';
+                }
+            }
+            
+            onKeyDown(e) {
+                if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+                    e.preventDefault();
+                    this.keys.left = true;
+                    this.laneChange = -1;
+                }
+                if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+                    e.preventDefault();
+                    this.keys.right = true;
+                    this.laneChange = 1;
+                }
+            }
+            
+            onKeyUp(e) {
+                if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
+                if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
+            }
+            
+            onTouchStart(e) {
+                const touch = e.touches[0];
+                this.touchStartX = touch.clientX;
+            }
+            
+            onTouchEnd(e) {
+                if (e.changedTouches.length === 0) return;
+                const touch = e.changedTouches[0];
+                const dx = touch.clientX - this.touchStartX;
+                const threshold = 30;
+                
+                if (Math.abs(dx) > threshold) {
+                    this.laneChange = dx < 0 ? -1 : 1;
+                    // Haptic feedback
+                    if (navigator.vibrate) navigator.vibrate(30);
+                }
+            }
+            
+            onClick(e) {
+                if (this.isMobile) return; // Use touch on mobile
+                const rect = e.target.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                this.laneChange = e.clientX < centerX ? -1 : 1;
+            }
+            
+            // Consume lane change (call once per frame)
+            consumeLaneChange() {
+                const change = this.laneChange;
+                this.laneChange = 0;
+                return change;
+            }
+        }
+        
+        // ============================================
+        // PARTICLE SYSTEM
+        // ============================================
+        class ParticleSystem {
+            constructor(maxParticles = CONFIG.PARTICLE_MAX) {
+                this.particles = [];
+                this.maxParticles = maxParticles;
+                this.pool = [];
+                this.initPool();
+            }
+            
+            initPool() {
+                for (let i = 0; i < this.maxParticles; i++) {
+                    this.pool.push(this.createParticle());
+                }
+            }
+            
+            createParticle() {
+                return {
+                    x: 0, y: 0, vx: 0, vy: 0,
+                    life: 0, maxLife: 1,
+                    size: 2, color: CONFIG.COLORS.CYAN,
+                    alpha: 1, gravity: 0, fade: true,
+                    active: false, rotation: 0, rotSpeed: 0
+                };
+            }
+            
+            getParticle() {
+                let p = this.pool.find(p => !p.active);
+                if (!p && this.particles.length < this.maxParticles) {
+                    p = this.createParticle();
+                    this.pool.push(p);
+                }
+                return p;
+            }
+            
+            emit(x, y, options = {}) {
+                const count = options.count || 1;
+                for (let i = 0; i < count; i++) {
+                    const p = this.getParticle();
+                    if (!p) continue;
+                    
+                    p.x = x + (options.offsetX || 0) + Math3D.random(-options.spreadX || 0, options.spreadX || 0);
+                    p.y = y + (options.offsetY || 0) + Math3D.random(-options.spreadY || 0, options.spreadY || 0);
+                    p.vx = Math3D.random(options.vxMin || -100, options.vxMax || 100);
+                    p.vy = Math3D.random(options.vyMin || -100, options.vyMax || 100);
+                    p.life = 0;
+                    p.maxLife = Math3D.random(options.lifeMin || 0.3, options.lifeMax || 1);
+                    p.size = Math3D.random(options.sizeMin || 2, options.sizeMax || 6);
+                    p.color = options.color || CONFIG.COLORS.CYAN;
+                    p.alpha = 1;
+                    p.gravity = options.gravity || 0;
+                    p.fade = options.fade !== false;
+                    p.rotation = Math3D.random(0, Math.PI * 2);
+                    p.rotSpeed = Math3D.random(-5, 5);
+                    p.active = true;
+                    this.particles.push(p);
+                }
+            }
+            
+            // Lane change trail
+            addLaneTrail(x, y, color) {
+                this.emit(x, y, {
+                    count: 6, vxMin: -50, vxMax: 50, vyMin: -30, vyMax: 30,
+                    lifeMin: 0.2, lifeMax: 0.4, sizeMin: 4, sizeMax: 10,
+                    color, gravity: 0, fade: true, spreadX: 10, spreadY: 10
+                });
+            }
+            
+            // Coin collect burst
+            addCollect(x, y, color) {
+                this.emit(x, y, {
+                    count: 12, vxMin: -150, vxMax: 150, vyMin: -200, vyMax: 50,
+                    lifeMin: 0.4, lifeMax: 1, sizeMin: 4, sizeMax: 12,
+                    color, gravity: 80, fade: true
+                });
+            }
+            
+            // Crash effect
+            addCrash(x, y, color) {
+                this.emit(x, y, {
+                    count: 25, vxMin: -300, vxMax: 300, vyMin: -300, vyMax: 100,
+                    lifeMin: 0.5, lifeMax: 1.5, sizeMin: 6, sizeMax: 18,
+                    color, gravity: 200, fade: true
+                });
+            }
+            
+            // Phase shift burst
+            addPhaseShift(x, y, colors) {
+                for (const color of colors) {
+                    this.emit(x, y, {
+                        count: 20, vxMin: -400, vxMax: 400, vyMin: -400, vyMax: 400,
+                        lifeMin: 1, lifeMax: 2, sizeMin: 8, sizeMax: 20,
+                        color, gravity: 50, fade: true
+                    });
+                }
+            }
+            
+            // Powerup collected
+            addPowerup(x, y, color) {
+                this.emit(x, y, {
+                    count: 20, vxMin: -200, vxMax: 200, vyMin: -250, vyMax: 50,
+                    lifeMin: 0.6, lifeMax: 1.5, sizeMin: 6, sizeMax: 16,
+                    color, gravity: 100, fade: true
+                });
+            }
+            
+            update(dt) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.life += dt;
+                    const t = p.life / p.maxLife;
+                    
+                    if (t >= 1) {
+                        p.active = false;
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.vy += p.gravity * dt;
+                    p.rotation += p.rotSpeed * dt;
+                    
+                    if (p.fade) p.alpha = 1 - t;
+                }
+            }
+            
+            render(ctx, scale) {
+                for (const p of this.particles) {
+                    const t = p.life / p.maxLife;
+                    const size = p.size * (1 - t * 0.3) * scale;
+                    const alpha = p.alpha * (1 - t);
+                    
+                    if (size < 0.5) continue;
+                    
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.translate(p.x * scale, p.y * scale);
+                    ctx.rotate(p.rotation);
+                    
+                    // Draw particle as glowing square/diamond
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 10 * scale;
+                    
+                    const s = size * 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -s);
+                    ctx.lineTo(s, 0);
+                    ctx.lineTo(0, s);
+                    ctx.lineTo(-s, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+            }
+        }
+        
+        // ============================================
+        // BACKGROUND - 3D Cyberpunk City
+        // ============================================
+        class Background3D {
+            constructor() {
+                this.buildings = [];
+                this.gridLines = [];
+                this.phaseColorIndex = 0;
+                this.targetPhaseColorIndex = 0;
+                this.colorTransition = 0;
+                this.generateBuildings();
+                this.generateGrid();
+            }
+            
+            generateBuildings() {
+                this.buildings = [];
+                for (let i = 0; i < CONFIG.BUILDING_COUNT; i++) {
+                    const side = Math.random() < 0.5 ? -1 : 1;
+                    const x = side * Math3D.random(4, 15);
+                    const z = Math3D.random(-10, CONFIG.HORIZON_Z + 50);
+                    const height = Math3D.random(8, 25);
+                    const width = Math3D.random(2, 5);
+                    const depth = Math3D.random(3, 8);
+                    this.buildings.push({ x, z, height, width, depth, side, windows: this.generateWindows(width, height, depth) });
+                }
+                // Sort by Z for painter's algorithm
+                this.buildings.sort((a, b) => b.z - a.z);
+            }
+            
+            generateWindows(width, height, depth) {
+                const windows = [];
+                const cols = Math.floor(width / 0.8);
+                const rows = Math.floor(height / 1.2);
+                for (let c = 0; c < cols; c++) {
+                    for (let r = 0; r < rows; r++) {
+                        if (Math.random() < 0.7) {
+                            windows.push({ col: c, row: r, lit: Math.random() < 0.6, color: Math.random() < 0.5 ? '#ffff88' : '#88ffff' });
+                        }
+                    }
+                }
+                return windows;
+            }
+            
+            generateGrid() {
+                this.gridLines = [];
+                // Ground grid lines parallel to lanes
+                for (let i = -20; i <= 20; i++) {
+                    this.gridLines.push({ type: 'lat', x: i * 1.5, zStart: -20, zEnd: CONFIG.HORIZON_Z });
+                }
+                // Longitudinal lines (lane markers)
+                for (let lane = -1; lane <= 1; lane++) {
+                    this.gridLines.push({ type: 'long', lane, zStart: -20, zEnd: CONFIG.HORIZON_Z });
+                }
+            }
+            
+            setPhase(phase) {
+                this.targetPhaseColorIndex = (phase - 1) % CONFIG.PHASE_COLORS.length;
+                this.colorTransition = 0;
+            }
+            
+            update(dt, speed, distance) {
+                // Color transition
+                if (this.phaseColorIndex !== this.targetPhaseColorIndex) {
+                    this.colorTransition = Math.min(1, this.colorTransition + dt * 1.5);
+                    if (this.colorTransition >= 1) this.phaseColorIndex = this.targetPhaseColorIndex;
+                }
+                
+                // Move grid lines toward camera
+                for (const line of this.gridLines) {
+                    line.zStart -= speed * dt;
+                    line.zEnd -= speed * dt;
+                }
+                // Recycle grid lines - check all lines, not just first
+                for (let i = this.gridLines.length - 1; i >= 0; i--) {
+                    if (this.gridLines[i].zEnd < CONFIG.DESPAWN_Z) {
+                        const line = this.gridLines.splice(i, 1)[0];
+                        line.zStart += CONFIG.HORIZON_Z + 20;
+                        line.zEnd += CONFIG.HORIZON_Z + 20;
+                        this.gridLines.push(line);
+                    }
+                }
+                
+                // Move buildings
+                for (const b of this.buildings) {
+                    b.z -= speed * dt * 0.3; // Parallax - buildings move slower
+                }
+                // Recycle buildings
+                while (this.buildings.length > 0 && this.buildings[0].z < CONFIG.DESPAWN_Z - 10) {
+                    const b = this.buildings.shift();
+                    b.z += CONFIG.HORIZON_Z + 60;
+                    b.x = (Math.random() < 0.5 ? -1 : 1) * Math3D.random(4, 15);
+                    b.height = Math3D.random(8, 25);
+                    this.buildings.push(b);
+                }
+                // Re-sort by Z
+                this.buildings.sort((a, b) => b.z - a.z);
+            }
+            
+            getColors() {
+                const c1 = CONFIG.PHASE_COLORS[this.phaseColorIndex];
+                const c2 = CONFIG.PHASE_COLORS[this.targetPhaseColorIndex];
+                const t = this.colorTransition;
+                return {
+                    sky: this.lerpColor(c1.sky, c2.sky, t),
+                    horizon: this.lerpColor(c1.horizon, c2.horizon, t),
+                    ground: this.lerpColor(c1.ground, c2.ground, t),
+                    primary: this.lerpColor(c1.primary, c2.primary, t),
+                    secondary: this.lerpColor(c1.secondary, c2.secondary, t),
+                    accent: this.lerpColor(c1.accent, c2.accent, t),
+                    building: c1.building // Use current phase buildings
+                };
+            }
+            
+            lerpColor(c1, c2, t) {
+                const r1 = parseInt(c1.slice(1, 3), 16), g1 = parseInt(c1.slice(3, 5), 16), b1 = parseInt(c1.slice(5, 7), 16);
+                const r2 = parseInt(c2.slice(1, 3), 16), g2 = parseInt(c2.slice(3, 5), 16), b2 = parseInt(c2.slice(5, 7), 16);
+                const r = Math.round(r1 + (r2 - r1) * t);
+                const g = Math.round(g1 + (g2 - g1) * t);
+                const b = Math.round(b1 + (b2 - b1) * t);
+                return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+            }
+            
+            render(ctx, canvasWidth, canvasHeight, focalLength) {
+                const colors = this.getColors();
+                const horizonY = canvasHeight * CONFIG.HORIZON_Y_RATIO;
+                const centerX = canvasWidth * 0.5;
+                
+                // Sky gradient
+                const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+                skyGrad.addColorStop(0, colors.sky);
+                skyGrad.addColorStop(1, colors.horizon);
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, canvasWidth, horizonY);
+                
+                // Ground gradient
+                const groundGrad = ctx.createLinearGradient(0, horizonY, 0, canvasHeight);
+                groundGrad.addColorStop(0, colors.horizon);
+                groundGrad.addColorStop(1, colors.ground);
+                ctx.fillStyle = groundGrad;
+                ctx.fillRect(0, horizonY, canvasWidth, canvasHeight - horizonY);
+                
+                // Draw buildings (far to near)
+                for (const b of this.buildings) {
+                    this.renderBuilding(ctx, b, canvasWidth, canvasHeight, focalLength, colors);
+                }
+                
+                // Draw ground grid
+                this.renderGrid(ctx, canvasWidth, canvasHeight, focalLength, colors);
+            }
+            
+            renderBuilding(ctx, b, canvasWidth, canvasHeight, focalLength, colors) {
+                const proj = Math3D.project(b.x, 0, b.z, canvasWidth, canvasHeight, focalLength);
+                const projTop = Math3D.project(b.x, b.height, b.z, canvasWidth, canvasHeight, focalLength);
+                const projBack = Math3D.project(b.x, 0, b.z + b.depth, canvasWidth, canvasHeight, focalLength);
+                const projBackTop = Math3D.project(b.x, b.height, b.z + b.depth, canvasWidth, canvasHeight, focalLength);
+                
+                if (!proj.visible || !projTop.visible) return;
+                
+                const scale = proj.scale;
+                if (scale < 0.02) return;
+                
+                const buildingColor = Math3D.randomChoice(colors.building);
+                const windowColor = Math3D.randomChoice(['#ffff88', '#88ffff', '#ff88ff']);
+                
+                // Building sides
+                ctx.save();
+                ctx.fillStyle = buildingColor;
+                ctx.strokeStyle = colors.primary;
+                ctx.lineWidth = Math.max(1, 2 * scale);
+                ctx.shadowColor = colors.primary;
+                ctx.shadowBlur = 10 * scale;
+                
+                // Front face
+                const fw = b.width * scale * CONFIG.WORLD_UNIT;
+                const fh = (proj.y - projTop.y);
+                ctx.fillRect(proj.x - fw/2, projTop.y, fw, fh);
+                ctx.strokeRect(proj.x - fw/2, projTop.y, fw, fh);
+                
+                // Windows
+                ctx.fillStyle = windowColor;
+                ctx.shadowColor = windowColor;
+                ctx.shadowBlur = 5 * scale;
+                const winW = fw / Math.max(1, Math.floor(b.width / 0.8));
+                const winH = fh / Math.max(1, Math.floor(b.height / 1.2));
+                for (const w of b.windows) {
+                    if (!w.lit) continue;
+                    const wx = proj.x - fw/2 + w.col * winW + winW * 0.1;
+                    const wy = projTop.y + w.row * winH + winH * 0.1;
+                    ctx.fillRect(wx, wy, winW * 0.8, winH * 0.8);
+                }
+                ctx.restore();
+            }
+            
+            renderGrid(ctx, canvasWidth, canvasHeight, focalLength, colors) {
+                const horizonY = canvasHeight * CONFIG.HORIZON_Y_RATIO;
+                
+                ctx.save();
+                ctx.strokeStyle = Math3D.hexToRgba(colors.primary, 0.3);
+                ctx.lineWidth = 1;
+                ctx.shadowColor = colors.primary;
+                ctx.shadowBlur = 5;
+                
+                // Longitudinal lines (lane markers)
+                for (let lane = -1; lane <= 1; lane++) {
+                    const x = CONFIG.LANE_POSITIONS[lane + 1];
+                    ctx.beginPath();
+                    for (const line of this.gridLines) {
+                        if (line.type !== 'long' || line.lane !== lane) continue;
+                        const p1 = Math3D.project(x, 0, line.zStart, canvasWidth, canvasHeight, focalLength);
+                        const p2 = Math3D.project(x, 0, line.zEnd, canvasWidth, canvasHeight, focalLength);
+                        if (p1.visible && p2.visible) {
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                        }
+                    }
+                    ctx.stroke();
+                }
+                
+                // Latitudinal lines
+                ctx.strokeStyle = Math3D.hexToRgba(colors.secondary, 0.2);
+                ctx.shadowColor = colors.secondary;
+                for (const line of this.gridLines) {
+                    if (line.type !== 'lat') continue;
+                    const p1 = Math3D.project(line.x, 0, line.zStart, canvasWidth, canvasHeight, focalLength);
+                    const p2 = Math3D.project(line.x, 0, line.zEnd, canvasWidth, canvasHeight, focalLength);
+                    if (p1.visible && p2.visible) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+                
+                // Lane glow lines at ground level
+                ctx.shadowBlur = 15;
+                for (let lane = -1; lane <= 1; lane++) {
+                    const x = CONFIG.LANE_POSITIONS[lane + 1];
+                    const p = Math3D.project(x, 0, 0, canvasWidth, canvasHeight, focalLength);
+                    const pFar = Math3D.project(x, 0, 10, canvasWidth, canvasHeight, focalLength);
+                    if (p.visible && pFar.visible) {
+                        ctx.strokeStyle = Math3D.hexToRgba(colors.primary, 0.6);
+                        ctx.lineWidth = Math.max(2, 4 * p.scale);
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(pFar.x, pFar.y);
+                        ctx.stroke();
+                    }
+                }
+                ctx.restore();
+            }
+        }
+        
+        // ============================================
+        // PLAYER - 3D Lane Runner
+        // ============================================
+        class Player3D {
+            constructor() {
+                this.lane = 1; // 0=left, 1=center, 2=right
+                this.targetLane = 1;
+                this.laneSwitchProgress = 0; // 0 to 1
+                this.x = CONFIG.LANE_POSITIONS[1];
+                this.y = CONFIG.GROUND_Y;
+                this.z = CONFIG.PLAYER_Z;
+                this.height = CONFIG.PLAYER_HEIGHT;
+                this.width = CONFIG.PLAYER_WIDTH;
+                this.depth = CONFIG.PLAYER_DEPTH;
+                this.bobOffset = 0;
+                this.bobSpeed = 12;
+                this.invincible = false;
+                this.invincibleTimer = 0;
+                this.blinkTimer = 0;
+                this.visible = true;
+                this.trail = [];
+                this.maxTrail = CONFIG.TRAIL_LENGTH;
+                this.color = CONFIG.COLORS.CYAN;
+                this.glowColor = CONFIG.COLORS.CYAN;
+            }
+            
+            setPhase(phase) {
+                const colors = CONFIG.PHASE_COLORS[(phase - 1) % CONFIG.PHASE_COLORS.length];
+                this.color = colors.primary;
+                this.glowColor = colors.secondary;
+            }
+            
+            update(dt, input, speed) {
+                // Lane switching
+                const laneChange = input.consumeLaneChange();
+                if (laneChange !== 0) {
+                    const newLane = Math3D.clamp(this.targetLane + laneChange, 0, CONFIG.LANE_COUNT - 1);
+                    if (newLane !== this.targetLane) {
+                        this.targetLane = newLane;
+                        this.laneSwitchProgress = 0;
+                        // Trail effect on lane change
+                        game.particles.addLaneTrail(this.x * CONFIG.WORLD_UNIT + canvasWidth/2, canvasHeight * 0.75, this.glowColor);
+                        if (navigator.vibrate) navigator.vibrate(20);
+                    }
+                }
+                
+                // Smooth lane interpolation
+                if (this.laneSwitchProgress < 1) {
+                    this.laneSwitchProgress = Math.min(1, this.laneSwitchProgress + dt / CONFIG.LANE_SWITCH_TIME);
+                    const eased = Math3D.easeCubicOut(this.laneSwitchProgress);
+                    this.x = Math3D.lerp(CONFIG.LANE_POSITIONS[this.lane], CONFIG.LANE_POSITIONS[this.targetLane], eased);
+                    if (this.laneSwitchProgress >= 1) this.lane = this.targetLane;
+                }
+                
+                // Running bob animation
+                this.bobOffset += dt * this.bobSpeed * (speed / CONFIG.INITIAL_SPEED);
+                
+                // Invincibility
+                if (this.invincible) {
+                    this.invincibleTimer -= dt * 1000;
+                    this.blinkTimer += dt * 1000;
+                    this.visible = Math.floor(this.blinkTimer / 80) % 2 === 0;
+                    if (this.invincibleTimer <= 0) {
+                        this.invincible = false;
+                        this.visible = true;
+                    }
+                }
+                
+                // Trail
+                this.trail.unshift({ x: this.x, y: this.y + Math.sin(this.bobOffset) * 0.1, time: Date.now() });
+                if (this.trail.length > this.maxTrail) this.trail.pop();
+            }
+            
+            makeInvincible() {
+                this.invincible = true;
+                this.invincibleTimer = CONFIG.INVINCIBILITY_TIME;
+                this.blinkTimer = 0;
+            }
+            
+            getScreenPos(canvasWidth, canvasHeight, focalLength) {
+                return Math3D.project(this.x, this.y + Math.sin(this.bobOffset) * 0.1, this.z, canvasWidth, canvasHeight, focalLength);
+            }
+            
+            getHitbox(canvasWidth, canvasHeight, focalLength) {
+                const proj = this.getScreenPos(canvasWidth, canvasHeight, focalLength);
+                const scale = proj.scale;
+                const w = this.width * scale * CONFIG.WORLD_UNIT;
+                const h = this.height * scale * CONFIG.WORLD_UNIT;
+                return {
+                    x: proj.x - w/2,
+                    y: proj.y - h,
+                    w: w,
+                    h: h,
+                    scale: scale
+                };
+            }
+            
+            render(ctx, canvasWidth, canvasHeight, focalLength) {
+                const proj = this.getScreenPos(canvasWidth, canvasHeight, focalLength);
+                if (!proj.visible) return;
+                
+                const scale = proj.scale;
+                const centerX = proj.x;
+                const feetY = proj.y;
+                const headY = proj.y - this.height * scale * CONFIG.WORLD_UNIT;
+                const bodyW = this.width * scale * CONFIG.WORLD_UNIT;
+                const bodyH = feetY - headY;
+                
+                // Trail
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    const trailProj = Math3D.project(t.x, t.y, this.z, canvasWidth, canvasHeight, focalLength);
+                    if (!trailProj.visible) continue;
+                    const alpha = (1 - i / this.maxTrail) * 0.4;
+                    const tScale = trailProj.scale;
+                    const tw = this.width * tScale * CONFIG.WORLD_UNIT * 0.8;
+                    ctx.fillStyle = Math3D.hexToRgba(this.glowColor, alpha);
+                    ctx.shadowColor = this.glowColor;
+                    ctx.shadowBlur = 10 * tScale;
+                    ctx.fillRect(trailProj.x - tw/2, trailProj.y - 5 * tScale, tw, 10 * tScale);
+                }
+                ctx.restore();
+                
+                // Player body (neon runner silhouette)
+                ctx.save();
+                ctx.shadowColor = this.glowColor;
+                ctx.shadowBlur = 15 * scale;
+                
+                // Legs (animated)
+                const legPhase = this.bobOffset * 2;
+                const legOffset = Math.sin(legPhase) * 0.15 * scale * CONFIG.WORLD_UNIT;
+                
+                // Left leg
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(centerX - bodyW * 0.25, feetY);
+                ctx.lineTo(centerX - bodyW * 0.25 + legOffset, feetY + bodyH * 0.4);
+                ctx.lineTo(centerX - bodyW * 0.15 + legOffset, feetY + bodyH * 0.4);
+                ctx.lineTo(centerX - bodyW * 0.15, feetY);
+                ctx.fill();
+                
+                // Right leg
+                ctx.beginPath();
+                ctx.moveTo(centerX + bodyW * 0.25, feetY);
+                ctx.lineTo(centerX + bodyW * 0.25 - legOffset, feetY + bodyH * 0.4);
+                ctx.lineTo(centerX + bodyW * 0.15 - legOffset, feetY + bodyH * 0.4);
+                ctx.lineTo(centerX + bodyW * 0.15, feetY);
+                ctx.fill();
+                
+                // Body
+                const bodyGrad = ctx.createLinearGradient(centerX - bodyW/2, headY, centerX + bodyW/2, feetY);
+                bodyGrad.addColorStop(0, this.color);
+                bodyGrad.addColorStop(0.5, this.glowColor);
+                bodyGrad.addColorStop(1, this.color);
+                ctx.fillStyle = bodyGrad;
+                ctx.fillRect(centerX - bodyW/2, headY, bodyW, bodyH);
+                
+                // Neon outline
+                ctx.strokeStyle = this.glowColor;
+                ctx.lineWidth = Math.max(1, 2 * scale);
+                ctx.strokeRect(centerX - bodyW/2, headY, bodyW, bodyH);
+                
+                // Head
+                const headR = bodyW * 0.6;
+                ctx.beginPath();
+                ctx.arc(centerX, headY - headR * 0.3, headR, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Visor glow
+                ctx.fillStyle = Math3D.hexToRgba(this.glowColor, 0.8);
+                ctx.shadowColor = this.glowColor;
+                ctx.shadowBlur = 20 * scale;
+                ctx.fillRect(centerX - headR * 0.8, headY - headR * 0.5, headR * 1.6, headR * 0.4);
+                
+                // Lane indicator glow under feet
+                if (!this.invincible || this.visible) {
+                    ctx.shadowColor = this.glowColor;
+                    ctx.shadowBlur = 20 * scale;
+                    ctx.fillStyle = Math3D.hexToRgba(this.glowColor, 0.5);
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, feetY + 5 * scale, bodyW * 0.8, 5 * scale, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+        }
+        
+        // ============================================
+        // ENTITY 3D BASE CLASS
+        // ============================================
+        class Entity3D {
+            constructor(lane, z, type, config) {
+                this.lane = lane; // 0, 1, 2
+                this.x = CONFIG.LANE_POSITIONS[lane];
+                this.y = config.height ? config.height / 2 : 0;
+                this.z = z;
+                this.width = config.width || 1;
+                this.height = config.height || 1;
+                this.depth = config.depth || 1;
+                this.type = type;
+                this.config = config;
+                this.color = config.color;
+                this.lethal = config.lethal || false;
+                this.collected = false;
+                this.rotation = 0;
+                this.rotSpeed = config.rotSpeed || 0;
+                this.bobOffset = Math.random() * Math.PI * 2;
+                this.bobSpeed = config.bobSpeed || 2;
+                this.scale = 1;
+                this.alpha = 1;
+            }
+            
+            update(dt, speed) {
+                this.z -= speed * dt;
+                this.rotation += this.rotSpeed * dt;
+                this.bobOffset += this.bobSpeed * dt;
+            }
+            
+            getScreenPos(canvasWidth, canvasHeight, focalLength) {
+                const y = this.y + (this.config.bobAmount || 0) * Math.sin(this.bobOffset);
+                return Math3D.project(this.x, y, this.z, canvasWidth, canvasHeight, focalLength);
+            }
+            
+            getHitbox(canvasWidth, canvasHeight, focalLength) {
+                const proj = this.getScreenPos(canvasWidth, canvasHeight, focalLength);
+                if (!proj.visible) return null;
+                const scale = proj.scale;
+                const w = this.width * scale * CONFIG.WORLD_UNIT;
+                const h = this.height * scale * CONFIG.WORLD_UNIT;
+                return {
+                    x: proj.x - w/2,
+                    y: proj.y - h,
+                    w: w,
+                    h: h,
+                    scale: scale,
+                    proj: proj
+                };
+            }
+            
+            isBehindCamera() { return this.z < CONFIG.DESPAWN_Z; }
+            isAtHorizon() { return this.z > CONFIG.HORIZON_Z + 10; }
+            
+            render(ctx, canvasWidth, canvasHeight, focalLength, colors) {
+                const proj = this.getScreenPos(canvasWidth, canvasHeight, focalLength);
+                if (!proj.visible) return;
+                this.renderModel(ctx, proj, colors);
+            }
+            
+            renderModel(ctx, proj, colors) {
+                // Override in subclasses
+            }
+        }
+        
+        // ============================================
+        // OBSTACLE 3D
+        // ============================================
+        class Obstacle3D extends Entity3D {
+            constructor(lane, z, typeName) {
+                const config = CONFIG.OBSTACLE_TYPES[typeName];
+                super(lane, z, typeName, config);
+                this.modelType = config.model;
+            }
+            
+            renderModel(ctx, proj, colors) {
+                const color = colors[this.color] || this.color;
+                const glowColor = colors[this.color === 'primary' ? 'secondary' : 'accent'] || color;
+                const scale = proj.scale;
+                const w = this.width * scale * CONFIG.WORLD_UNIT;
+                const h = this.height * scale * CONFIG.WORLD_UNIT;
+                const cx = proj.x;
+                const bottomY = proj.y;
+                const topY = bottomY - h;
+                
+                ctx.save();
+                ctx.shadowColor = glowColor;
+                ctx.shadowBlur = 15 * scale;
+                
+                switch (this.modelType) {
+                    case 'barrier':
+                        this.renderBarrier(ctx, cx, topY, bottomY, w, h, color, glowColor, scale);
+                        break;
+                    case 'train':
+                        this.renderTrain(ctx, cx, topY, bottomY, w, h, color, glowColor, scale);
+                        break;
+                    case 'pillar':
+                        this.renderPillar(ctx, cx, topY, bottomY, w, h, color, glowColor, scale);
+                        break;
+                    case 'wall_low':
+                        this.renderWallLow(ctx, cx, topY, bottomY, w, h, color, glowColor, scale);
+                        break;
+                    case 'sign':
+                        this.renderSign(ctx, cx, topY, bottomY, w, h, color, glowColor, scale);
+                        break;
+                }
+                ctx.restore();
+            }
+            
+            renderBarrier(ctx, cx, topY, bottomY, w, h, color, glowColor, scale) {
+                // Main barrier
+                const grad = ctx.createLinearGradient(cx - w/2, topY, cx + w/2, bottomY);
+                grad.addColorStop(0, color);
+                grad.addColorStop(0.5, glowColor);
+                grad.addColorStop(1, color);
+                ctx.fillStyle = grad;
+                ctx.fillRect(cx - w/2, topY, w, h);
+                
+                // Neon edges
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = Math.max(2, 3 * scale);
+                ctx.strokeRect(cx - w/2, topY, w, h);
+                
+                // Hazard stripes
+                ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.RED, 0.7);
+                const stripeW = w / 8;
+                for (let i = 0; i < 8; i += 2) {
+                    ctx.fillRect(cx - w/2 + i * stripeW, topY, stripeW, h);
+                }
+                
+                // Top warning light
+                const lightR = 4 * scale;
+                const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 100);
+                ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.RED, pulse);
+                ctx.shadowColor = CONFIG.COLORS.RED;
+                ctx.shadowBlur = 15 * scale;
+                ctx.beginPath();
+                ctx.arc(cx, topY + lightR, lightR, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            renderTrain(ctx, cx, topY, bottomY, w, h, color, glowColor, scale) {
+                // Train car body (long)
+                const carDepth = this.depth * scale * CONFIG.WORLD_UNIT;
+                const carW = w;
+                const carH = h;
+                
+                // Side view - main body
+                const grad = ctx.createLinearGradient(cx - carW/2, topY, cx + carW/2, bottomY);
+                grad.addColorStop(0, color);
+                grad.addColorStop(0.5, glowColor);
+                grad.addColorStop(1, color);
+                ctx.fillStyle = grad;
+                ctx.fillRect(cx - carW/2, topY, carW, carH);
+                
+                // Neon trim
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = Math.max(2, 3 * scale);
+                ctx.strokeRect(cx - carW/2, topY, carW, carH);
+                
+                // Windows
+                ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.CYAN, 0.8);
+                ctx.shadowColor = CONFIG.COLORS.CYAN;
+                ctx.shadowBlur = 8 * scale;
+                const winH = carH * 0.5;
+                const winW = carW * 0.25;
+                const winY = topY + carH * 0.15;
+                for (let i = 0; i < 3; i++) {
+                    const wx = cx - carW/2 + carW * 0.15 + i * carW * 0.3;
+                    ctx.fillRect(wx, winY, winW, winH);
+                }
+                
+                // Front lights
+                ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.YELLOW, 1);
+                ctx.shadowColor = CONFIG.COLORS.YELLOW;
+                ctx.shadowBlur = 20 * scale;
+                ctx.beginPath();
+                ctx.arc(cx - carW/2, topY + carH * 0.3, 5 * scale, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx - carW/2, topY + carH * 0.7, 5 * scale, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            renderPillar(ctx, cx, topY, bottomY, w, h, color, glowColor, scale) {
+                // Cylindrical pillar
+                const grad = ctx.createLinearGradient(cx - w/2, topY, cx + w/2, topY);
+                grad.addColorStop(0, color);
+                grad.addColorStop(0.5, glowColor);
+                grad.addColorStop(1, color);
+                ctx.fillStyle = grad;
+                
+                // Pillar as rounded rect
+                const r = w * 0.3;
+                ctx.beginPath();
+                ctx.moveTo(cx - w/2 + r, topY);
+                ctx.lineTo(cx + w/2 - r, topY);
+                ctx.quadraticCurveTo(cx + w/2, topY, cx + w/2, topY + r);
+                ctx.lineTo(cx + w/2, bottomY - r);
+                ctx.quadraticCurveTo(cx + w/2, bottomY, cx + w/2 - r, bottomY);
+                ctx.lineTo(cx - w/2 + r, bottomY);
+                ctx.quadraticCurveTo(cx - w/2, bottomY, cx - w/2, bottomY - r);
+                ctx.lineTo(cx - w/2, topY + r);
+                ctx.quadraticCurveTo(cx - w/2, topY, cx - w/2 + r, topY);
+                ctx.fill();
+                
+                // Neon rings
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = Math.max(1, 2 * scale);
+                for (let i = 0; i < 4; i++) {
+                    const ry = topY + h * (i / 3);
+                    ctx.beginPath();
+                    ctx.ellipse(cx, ry, w/2, 3 * scale, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            renderWallLow(ctx, cx, topY, bottomY, w, h, color, glowColor, scale) {
+                // Low barrier
+                const grad = ctx.createLinearGradient(cx - w/2, topY, cx + w/2, bottomY);
+                grad.addColorStop(0, color);
+                grad.addColorStop(1, glowColor);
+                ctx.fillStyle = grad;
+                ctx.fillRect(cx - w/2, topY, w, h);
+                
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = Math.max(2, 3 * scale);
+                ctx.strokeRect(cx - w/2, topY, w, h);
+                
+                // Hazard pattern
+                ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.YELLOW, 0.6);
+                const pw = w / 12;
+                for (let i = 0; i < 12; i += 2) {
+                    ctx.fillRect(cx - w/2 + i * pw, topY, pw, h);
+                }
+            }
+            
+            renderSign(ctx, cx, topY, bottomY, w, h, color, glowColor, scale) {
+                // Hovering sign
+                const poleW = 4 * scale;
+                const poleH = bottomY - topY;
+                
+                // Pole
+                ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.WHITE, 0.3);
+                ctx.fillRect(cx - poleW/2, topY, poleW, poleH);
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = 1 * scale;
+                ctx.strokeRect(cx - poleW/2, topY, poleW, poleH);
+                
+                // Sign board
+                const boardW = w;
+                const boardH = h * 0.6;
+                const boardY = topY + h * 0.1;
+                
+                ctx.fillStyle = color;
+                ctx.shadowColor = glowColor;
+                ctx.shadowBlur = 10 * scale;
+                ctx.fillRect(cx - boardW/2, boardY, boardW, boardH);
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = 2 * scale;
+                ctx.strokeRect(cx - boardW/2, boardY, boardW, boardH);
+                
+                // Arrow
+                ctx.fillStyle = CONFIG.COLORS.WHITE;
+                ctx.shadowColor = CONFIG.COLORS.WHITE;
+                ctx.shadowBlur = 5 * scale;
+                ctx.beginPath();
+                ctx.moveTo(cx, boardY + boardH * 0.3);
+                ctx.lineTo(cx - boardW * 0.2, boardY + boardH * 0.7);
+                ctx.lineTo(cx + boardW * 0.2, boardY + boardH * 0.7);
+                ctx.fill();
+            }
+        }
+        
+        // ============================================
+        // COLLECTIBLE 3D
+        // ============================================
+        class Collectible3D extends Entity3D {
+            constructor(lane, z, typeName) {
+                const config = CONFIG.COLLECTIBLE_TYPES[typeName];
+                super(lane, z, typeName, config);
+                this.modelType = config.model;
+                this.value = config.value || 0;
+                this.powerup = config.powerup || null;
+                this.duration = config.duration || 0;
+                this.spinSpeed = 3;
+                this.pulsePhase = Math.random() * Math.PI * 2;
+            }
+            
+            update(dt, speed) {
+                super.update(dt, speed);
+                this.pulsePhase += dt * 4;
+                this.scale = 1 + 0.15 * Math.sin(this.pulsePhase);
+            }
+            
+            renderModel(ctx, proj, colors) {
+                const color = this.config.color;
+                const glowColor = this.config.glow;
+                const scale = proj.scale * this.scale;
+                const cx = proj.x;
+                const cy = proj.y;
+                const size = this.config.size * scale * CONFIG.WORLD_UNIT;
+                
+                ctx.save();
+                ctx.shadowColor = glowColor;
+                ctx.shadowBlur = 20 * scale;
+                
+                // Rotating coin/spin effect
+                const spinScaleX = Math.abs(Math.cos(this.rotation));
+                const spinScaleY = 1;
+                
+                switch (this.modelType) {
+                    case 'coin':
+                        this.renderCoin(ctx, cx, cy, size, spinScaleX, color, glowColor);
+                        break;
+                    case 'coin_stack':
+                        this.renderCoinStack(ctx, cx, cy, size, spinScaleX, color, glowColor);
+                        break;
+                    case 'magnet':
+                        this.renderMagnet(ctx, cx, cy, size, color, glowColor);
+                        break;
+                    case 'jetpack':
+                        this.renderJetpack(ctx, cx, cy, size, color, glowColor);
+                        break;
+                    case 'sneakers':
+                        this.renderSneakers(ctx, cx, cy, size, color, glowColor);
+                        break;
+                    case 'multiplier':
+                        this.renderMultiplier(ctx, cx, cy, size, color, glowColor);
+                        break;
+                    case 'shield':
+                        this.renderShield(ctx, cx, cy, size, color, glowColor);
+                        break;
+                }
+                ctx.restore();
+            }
+            
+            renderCoin(ctx, cx, cy, size, spinScaleX, color, glowColor) {
+                ctx.translate(cx, cy);
+                ctx.scale(spinScaleX, spinScaleY);
+                
+                // Coin body
+                const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
+                grad.addColorStop(0, glowColor);
+                grad.addColorStop(0.5, color);
+                grad.addColorStop(1, '#aa8800');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(0, 0, size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner glow ring
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = Math.max(1, 2 * spinScaleX);
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.8, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // $ symbol
+                ctx.fillStyle = '#222';
+                ctx.font = `bold ${size * 1.2}px Courier New`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('$', 0, size * 0.1);
+            }
+            
+            renderCoinStack(ctx, cx, cy, size, spinScaleX, color, glowColor) {
+                ctx.translate(cx, cy);
+                ctx.scale(spinScaleX, spinScaleY);
+                
+                // Three coins stacked
+                for (let i = 0; i < 3; i++) {
+                    const offset = (i - 1) * size * 0.7;
+                    const s = size * (1 - i * 0.15);
+                    const grad = ctx.createRadialGradient(0, offset, 0, 0, offset, s);
+                    grad.addColorStop(0, glowColor);
+                    grad.addColorStop(0.5, color);
+                    grad.addColorStop(1, '#aa8800');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(0, offset, s, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = glowColor;
+                    ctx.lineWidth = Math.max(1, 1.5 * spinScaleX);
+                    ctx.beginPath();
+                    ctx.arc(0, offset, s * 0.8, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            renderMagnet(ctx, cx, cy, size, color, glowColor) {
+                ctx.translate(cx, cy);
+                // U-shape magnet
+                ctx.fillStyle = color;
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = Math.max(2, 3);
+                
+                const w = size * 1.5;
+                const h = size * 1.8;
+                const r = w * 0.3;
+                
+                ctx.beginPath();
+                ctx.moveTo(-w/2, -h/2);
+                ctx.lineTo(-w/2, h/2 - r);
+                ctx.quadraticCurveTo(-w/2, h/2, -w/2 + r, h/2);
+                ctx.lineTo(w/2 - r, h/2);
+                ctx.quadraticCurveTo(w/2, h/2, w/2, h/2 - r);
+                ctx.lineTo(w/2, -h/2 + r);
+                ctx.quadraticCurveTo(w/2, -h/2, w/2 - r, -h/2);
+                ctx.lineTo(-w/2 + r, -h/2);
+                ctx.quadraticCurveTo(-w/2, -h/2, -w/2, -h/2 + r);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Poles
+                ctx.fillStyle = CONFIG.COLORS.RED;
+                ctx.fillRect(-w/2 + 2, -h/2 + 2, w * 0.4, 8);
+                ctx.fillStyle = CONFIG.COLORS.CYAN;
+                ctx.fillRect(w/2 - 2 - w * 0.4, -h/2 + 2, w * 0.4, 8);
+            }
+            
+            renderJetpack(ctx, cx, cy, size, color, glowColor) {
+                ctx.translate(cx, cy);
+                // Jetpack body
+                const w = size * 1.6;
+                const h = size * 1.4;
+                
+                ctx.fillStyle = color;
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 15;
+                
+                // Main pack
+                ctx.beginPath();
+                ctx.roundRect(-w/2, -h/2, w, h, 4);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Nozzles
+                ctx.fillStyle = CONFIG.COLORS.ORANGE;
+                ctx.shadowColor = CONFIG.COLORS.ORANGE;
+                ctx.shadowBlur = 10;
+                ctx.fillRect(-w/2 + 4, h/2 - 8, 10, 12);
+                ctx.fillRect(w/2 - 14, h/2 - 8, 10, 12);
+                
+                // Flame particles (animated)
+                const flameH = 10 + Math.sin(Date.now() / 50) * 5;
+                ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.ORANGE, 0.8);
+                ctx.beginPath();
+                ctx.moveTo(-w/2 + 9, h/2);
+                ctx.lineTo(-w/2 + 4, h/2 + flameH);
+                ctx.lineTo(-w/2 + 14, h/2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(w/2 - 9, h/2);
+                ctx.lineTo(w/2 - 4, h/2 + flameH);
+                ctx.lineTo(w/2 - 14, h/2);
+                ctx.fill();
+            }
+            
+            renderSneakers(ctx, cx, cy, size, color, glowColor) {
+                ctx.translate(cx, cy);
+                // Two sneakers side by side
+                const shoeW = size * 1.2;
+                const shoeH = size * 0.8;
+                const gap = size * 0.3;
+                
+                for (let side = -1; side <= 1; side += 2) {
+                    const x = side * (shoeW/2 + gap/2);
+                    ctx.fillStyle = color;
+                    ctx.strokeStyle = glowColor;
+                    ctx.lineWidth = 2;
+                    ctx.shadowBlur = 10;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x - shoeW/2, 0);
+                    ctx.lineTo(x - shoeW/2, -shoeH);
+                    ctx.lineTo(x + shoeW/2, -shoeH * 0.6);
+                    ctx.lineTo(x + shoeW/2, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Sole
+                    ctx.fillStyle = Math3D.hexToRgba(CONFIG.COLORS.WHITE, 0.9);
+                    ctx.fillRect(x - shoeW/2, -2, shoeW, 4);
+                }
+                
+                // Wings
+                ctx.fillStyle = glowColor;
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                ctx.moveTo(-shoeW - gap, -shoeH/2);
+                ctx.lineTo(-shoeW - gap - 10, -shoeH);
+                ctx.lineTo(-shoeW - gap, -shoeH * 0.2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(shoeW + gap, -shoeH/2);
+                ctx.lineTo(shoeW + gap + 10, -shoeH);
+                ctx.lineTo(shoeW + gap, -shoeH * 0.2);
+                ctx.fill();
+            }
+            
+            renderMultiplier(ctx, cx, cy, size, color, glowColor) {
+                ctx.translate(cx, cy);
+                // Diamond shape
+                const s = size * 1.5;
+                ctx.fillStyle = color;
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 15;
+                
+                ctx.beginPath();
+                ctx.moveTo(0, -s);
+                ctx.lineTo(s, 0);
+                ctx.lineTo(0, s);
+                ctx.lineTo(-s, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                // 2X text
+                ctx.fillStyle = CONFIG.COLORS.WHITE;
+                ctx.font = `bold ${s * 0.8}px Courier New`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('2X', 0, s * 0.1);
+            }
+            
+            renderShield(ctx, cx, cy, size, color, glowColor) {
+                ctx.translate(cx, cy);
+                const s = size * 1.4;
+                
+                // Hexagon shield
+                ctx.fillStyle = Math3D.hexToRgba(color, 0.3);
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 20;
+                
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+                    const x = Math.cos(angle) * s;
+                    const y = Math.sin(angle) * s;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                // Inner pulse
+                const pulse = 0.8 + 0.2 * Math.sin(Date.now() / 200);
+                ctx.strokeStyle = Math3D.hexToRgba(glowColor, pulse);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+                    const x = Math.cos(angle) * s * 0.6;
+                    const y = Math.sin(angle) * s * 0.6;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+        
+        // ============================================
+        // GAME MANAGER
+        // ============================================
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let canvasWidth = CONFIG.DESIGN_WIDTH;
+        let canvasHeight = CONFIG.DESIGN_HEIGHT;
+        
+        // Game State
+        const GAME_STATES = { START: 0, PLAYING: 1, LEVEL_UP: 2, GAME_OVER: 3 };
+        let gameState = GAME_STATES.START;
+        let animationId = null;
+        let lastTime = 0;
+        
+        // Game Objects
+        let input = null;
+        let particles = null;
+        let background = null;
+        let player = null;
+        let obstacles = [];
+        let collectibles = [];
+        
+        // Game Variables
+        let score = 0;
+        let distance = 0;
+        let phase = 1;
+        let speed = CONFIG.INITIAL_SPEED;
+        let spawnTimer = 0;
+        let spawnInterval = CONFIG.BASE_SPAWN_INTERVAL;
+        let multiplier = 1;
+        let multiplierTimer = 0;
+        let coins = 0;
+        let bestDistance = parseInt(localStorage.getItem('nv_best_distance') || '0');
+        let bestCoins = parseInt(localStorage.getItem('nv_best_coins') || '0');
+        let phaseTransition = false;
+        let phaseTransitionTimer = 0;
+        
+        // Power-ups
+        let activePowerups = {
+            magnet: 0,
+            jetpack: 0,
+            sneakers: 0,
+            multiplier: 0,
+            shield: 0
+        };
+        
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const levelUpScreen = document.getElementById('level-up-screen');
+        const hudTop = document.getElementById('hud-top');
+        const laneIndicator = document.getElementById('lane-indicator');
+        const distanceValue = document.getElementById('distance-value');
+        const levelValue = document.getElementById('level-value');
+        const multiplierValue = document.getElementById('multiplier-value');
+        const finalDistance = document.getElementById('final-distance');
+        const bestDistanceEl = document.getElementById('best-distance');
+        const finalLevel = document.getElementById('final-level');
+        const finalCoins = document.getElementById('final-coins');
+        const levelUpNumber = document.getElementById('level-up-number');
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            input = new InputManager();
+            particles = new ParticleSystem();
+            background = new Background3D();
+            player = new Player3D();
+            
+            // Event listeners
+            document.getElementById('btn-start').addEventListener('click', startGame);
+            document.getElementById('btn-restart').addEventListener('click', startGame);
+            document.getElementById('btn-menu').addEventListener('click', showStartScreen);
+            
+            // Touch control for lane change (screen halves)
+            canvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
+            canvas.addEventListener('click', handleCanvasClick);
+            
+            updateBestDistanceDisplay();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const rect = container.getBoundingClientRect();
+            const maxWidth = rect.width;
+            const maxHeight = rect.height;
+            
+            // Maintain 16:9 aspect ratio
+            const aspectRatio = CONFIG.DESIGN_WIDTH / CONFIG.DESIGN_HEIGHT;
+            let width = maxWidth;
+            let height = width / aspectRatio;
+            
+            if (height > maxHeight) {
+                height = maxHeight;
+                width = height * aspectRatio;
+            }
+            
+            canvasWidth = width;
+            canvasHeight = height;
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+        
+        function handleCanvasTouch(e) {
+            if (gameState !== GAME_STATES.PLAYING) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const laneChange = touch.clientX < centerX ? -1 : 1;
+            
+            const newLane = Math3D.clamp(player.targetLane + laneChange, 0, CONFIG.LANE_COUNT - 1);
+            if (newLane !== player.targetLane) {
+                player.targetLane = newLane;
+                player.laneSwitchProgress = 0;
+                const proj = player.getScreenPos(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+                particles.addLaneTrail(proj.x, proj.y, player.glowColor);
+                if (navigator.vibrate) navigator.vibrate(20);
+            }
+        }
+        
+        function handleCanvasClick(e) {
+            if (gameState !== GAME_STATES.PLAYING) return;
+            if (input.isMobile) return; // Handled by touch
+            const rect = canvas.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const laneChange = e.clientX < centerX ? -1 : 1;
+            
+            const newLane = Math3D.clamp(player.targetLane + laneChange, 0, CONFIG.LANE_COUNT - 1);
+            if (newLane !== player.targetLane) {
+                player.targetLane = newLane;
+                player.laneSwitchProgress = 0;
+                const proj = player.getScreenPos(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+                particles.addLaneTrail(proj.x, proj.y, player.glowColor);
+            }
+        }
+        
+        // ============================================
+        // GAME STATE MANAGEMENT
+        // ============================================
+        function startGame() {
+            gameState = GAME_STATES.PLAYING;
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            levelUpScreen.classList.add('hidden');
+            hudTop.classList.remove('hidden');
+            laneIndicator.classList.remove('hidden');
+            
+            // Reset game variables
+            score = 0;
+            distance = 0;
+            phase = 1;
+            speed = CONFIG.INITIAL_SPEED;
+            spawnTimer = 0;
+            spawnInterval = CONFIG.BASE_SPAWN_INTERVAL;
+            multiplier = 1;
+            multiplierTimer = 0;
+            coins = 0;
+            phaseTransition = false;
+            phaseTransitionTimer = 0;
+            
+            // Reset powerups
+            activePowerups = { magnet: 0, jetpack: 0, sneakers: 0, multiplier: 0, shield: 0 };
+            
+            // Reset objects
+            player = new Player3D();
+            player.setPhase(phase);
+            obstacles = [];
+            collectibles = [];
+            particles = new ParticleSystem();
+            background = new Background3D();
+            
+            updateHUD();
+            updateLaneIndicator();
+        }
+        
+        function showStartScreen() {
+            gameState = GAME_STATES.START;
+            startScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            levelUpScreen.classList.add('hidden');
+            hudTop.classList.add('hidden');
+            laneIndicator.classList.add('hidden');
+        }
+        
+        function gameOver() {
+            gameState = GAME_STATES.GAME_OVER;
+            hudTop.classList.add('hidden');
+            laneIndicator.classList.add('hidden');
+            
+            // Update best distance
+            if (distance > bestDistance) {
+                bestDistance = Math.floor(distance);
+                localStorage.setItem('nv_best_distance', bestDistance.toString());
+            }
+            if (coins > bestCoins) {
+                bestCoins = coins;
+                localStorage.setItem('nv_best_coins', bestCoins.toString());
+            }
+            
+            finalDistance.textContent = Math.floor(distance) + 'm';
+            bestDistanceEl.textContent = bestDistance + 'm';
+            finalLevel.textContent = phase;
+            finalCoins.textContent = coins;
+            
+            gameOverScreen.classList.remove('hidden');
+            
+            // Crash particles
+            const proj = player.getScreenPos(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+            particles.addCrash(proj.x, proj.y, player.glowColor);
+            
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        }
+        
+        function triggerPhaseUp(newPhase) {
+            phase = newPhase;
+            phaseTransition = true;
+            phaseTransitionTimer = 1.5; // seconds
+            
+            // Visual feedback
+            levelUpScreen.style.setProperty('--flash-color', CONFIG.PHASE_COLORS[(phase - 1) % CONFIG.PHASE_COLORS.length].primary);
+            levelUpNumber.textContent = phase.toString().padStart(2, '0');
+            levelUpScreen.classList.remove('hidden');
+            
+            // Background transition
+            background.setPhase(phase);
+            player.setPhase(phase);
+            
+            // Particles
+            const proj = player.getScreenPos(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+            const colors = CONFIG.PHASE_COLORS[(phase - 1) % CONFIG.PHASE_COLORS.length];
+            particles.addPhaseShift(proj.x, proj.y, [colors.primary, colors.secondary, colors.accent]);
+            
+            // Speed increase
+            speed = CONFIG.INITIAL_SPEED * (1 + (phase - 1) * CONFIG.SPEED_INCREMENT);
+            speed = Math.min(speed, CONFIG.INITIAL_SPEED * CONFIG.MAX_SPEED_MULTIPLIER);
+            
+            // Spawn rate increase
+            spawnInterval = Math.max(CONFIG.MIN_SPAWN_INTERVAL, CONFIG.BASE_SPAWN_INTERVAL - (phase - 1) * 150);
+            
+            if (navigator.vibrate) navigator.vibrate([50, 30, 50, 30, 100]);
+        }
+        
+        // ============================================
+        // SPAWNING SYSTEM
+        // ============================================
+        function updateSpawning(dt) {
+            spawnTimer += dt * 1000;
+            
+            if (spawnTimer >= spawnInterval) {
+                spawnTimer = 0;
+                spawnPattern();
+            }
+        }
+        
+        function spawnPattern() {
+            const pattern = CONFIG.PHASE_PATTERNS[Math.min(phase, 5)] || CONFIG.PHASE_PATTERNS[5];
+            
+            // Determine how many lanes to fill (1-3)
+            const lanesToFill = Math3D.randomInt(1, Math.min(3, phase));
+            const availableLanes = [0, 1, 2];
+            Math3D.shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+            const shuffledLanes = Math3D.shuffle([...availableLanes]);
+            const selectedLanes = shuffledLanes.slice(0, lanesToFill);
+            
+            // Ensure at least one lane is free
+            if (selectedLanes.length === 3) {
+                selectedLanes.pop(); // Remove one to leave a path
+            }
+            
+            for (const lane of selectedLanes) {
+                // Spawn obstacle
+                if (Math.random() < 0.75) { // 75% chance obstacle
+                    const obsType = Math3D.weightedChoice(pattern.obstacles, pattern.weights);
+                    obstacles.push(new Obstacle3D(lane, CONFIG.HORIZON_Z + Math3D.random(0, 20), obsType));
+                }
+                
+                // Spawn collectible (sometimes in same lane, sometimes different)
+                if (Math.random() < 0.4) { // 40% chance collectible
+                    const collType = Math3D.weightedChoice(pattern.collectibles, [pattern.coinWeight, ...pattern.collectibles.slice(1).map(() => 0.3)]);
+                    collectibles.push(new Collectible3D(lane, CONFIG.HORIZON_Z + Math3D.random(0, 30), collType));
+                }
+            }
+            
+            // Sometimes spawn collectibles in empty lanes
+            const emptyLanes = [0, 1, 2].filter(l => !selectedLanes.includes(l));
+            for (const lane of emptyLanes) {
+                if (Math.random() < 0.3) {
+                    const collType = Math3D.randomChoice(pattern.collectibles);
+                    collectibles.push(new Collectible3D(lane, CONFIG.HORIZON_Z + Math3D.random(0, 30), collType));
+                }
+            }
+        }
+        
+        // ============================================
+        // COLLISION DETECTION
+        // ============================================
+        function checkCollisions() {
+            const playerBox = player.getHitbox(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+            if (!playerBox) return;
+            
+            // Check obstacles
+            for (const obs of obstacles) {
+                const obsBox = obs.getHitbox(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+                if (!obsBox) continue;
+                
+                if (boxesOverlap(playerBox, obsBox)) {
+                    if (obs.lethal) {
+                        if (activePowerups.shield > 0) {
+                            // Shield blocks hit
+                            activePowerups.shield = 0;
+                            particles.addCrash(obsBox.proj.x, obsBox.proj.y, CONFIG.COLORS.CYAN);
+                            if (navigator.vibrate) navigator.vibrate(50);
+                        } else if (!player.invincible) {
+                            gameOver();
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // Check collectibles
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                const col = collectibles[i];
+                if (col.collected) continue;
+                
+                const colBox = col.getHitbox(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+                if (!colBox) continue;
+                
+                // Magnet powerup extends range
+                let collectRange = 1.2;
+                if (activePowerups.magnet > 0) collectRange = 2.5;
+                
+                // Check if player is in same lane (lane-based collection)
+                const playerLaneCenter = CONFIG.LANE_POSITIONS[player.lane];
+                const colLaneCenter = CONFIG.LANE_POSITIONS[col.lane];
+                const laneDist = Math.abs(playerLaneCenter - colLaneCenter);
+                
+                if (laneDist < 0.1 || activePowerups.magnet > 0) {
+                    // Same lane or magnet active - check screen overlap
+                    if (boxesOverlap(playerBox, colBox)) {
+                        collectItem(col, i);
+                    }
+                }
+            }
+        }
+        
+        function boxesOverlap(box1, box2) {
+            return box1.x < box2.x + box2.w &&
+                   box1.x + box1.w > box2.x &&
+                   box1.y < box2.y + box2.h &&
+                   box1.y + box1.h > box2.y;
+        }
+        
+        function collectItem(col, index) {
+            col.collected = true;
+            collectibles.splice(index, 1);
+            
+            const proj = col.getHitbox(canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+            if (proj) {
+                particles.addCollect(proj.proj.x, proj.proj.y, col.config.glow);
+            }
+            
+            if (col.powerup) {
+                activatePowerup(col.powerup, col.duration);
+                particles.addPowerup(proj.proj.x, proj.proj.y, col.config.glow);
+            } else {
+                // Coin
+                const coinValue = col.value * multiplier;
+                coins += col.value;
+                score += coinValue;
+                multiplier = Math.min(CONFIG.MULTIPLIER_MAX, multiplier + CONFIG.MULTIPLIER_INCREMENT);
+                multiplierTimer = 3; // Reset multiplier decay timer
+            }
+            
+            updateHUD();
+        }
+        
+        function activatePowerup(type, duration) {
+            activePowerups[type] = duration;
+            
+            // Visual feedback
+            switch (type) {
+                case 'magnet':
+                    // Magnet attracts coins from adjacent lanes
+                    break;
+                case 'jetpack':
+                    // Jetpack - could make player fly over obstacles (simplified: invincibility)
+                    player.makeInvincible();
+                    break;
+                case 'sneakers':
+                    // Super sneakers - higher jump (not applicable in lane runner, maybe speed boost)
+                    speed *= 1.3;
+                    break;
+                case 'multiplier':
+                    multiplier = Math.min(CONFIG.MULTIPLIER_MAX, multiplier * 2);
+                    break;
+                case 'shield':
+                    // Shield blocks one hit
+                    break;
+            }
+        }
+        
+        function updatePowerups(dt) {
+            for (const key in activePowerups) {
+                if (activePowerups[key] > 0) {
+                    activePowerups[key] -= dt * 1000;
+                    if (activePowerups[key] <= 0) {
+                        activePowerups[key] = 0;
+                        // Revert effects
+                        if (key === 'sneakers') speed = CONFIG.INITIAL_SPEED * (1 + (phase - 1) * CONFIG.SPEED_INCREMENT);
+                    }
+                }
+            }
+            
+            // Multiplier decay
+            if (multiplier > 1) {
+                multiplierTimer -= dt;
+                if (multiplierTimer <= 0) {
+                    multiplier = Math.max(1, multiplier - CONFIG.MULTIPLIER_DECAY * dt);
+                }
+            }
+        }
+        
+        // ============================================
+        // UPDATE LOOP
+        // ============================================
+        function update(dt) {
+            if (gameState !== GAME_STATES.PLAYING) return;
+            
+            // Update distance & score
+            distance += speed * dt;
+            score += Math.floor(speed * dt * CONFIG.DISTANCE_SCORE_RATE * multiplier);
+            
+            // Check phase up
+            const newPhase = getPhaseFromDistance(distance);
+            if (newPhase > phase) {
+                triggerPhaseUp(newPhase);
+            }
+            
+            // Phase transition timer
+            if (phaseTransition) {
+                phaseTransitionTimer -= dt;
+                if (phaseTransitionTimer <= 0) {
+                    phaseTransition = false;
+                    levelUpScreen.classList.add('hidden');
+                }
+            }
+            
+            // Update game objects
+            player.update(dt, input, speed);
+            background.update(dt, speed, distance);
+            particles.update(dt);
+            updatePowerups(dt);
+            
+            // Update obstacles
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].update(dt, speed);
+                if (obstacles[i].isBehindCamera()) obstacles.splice(i, 1);
+            }
+            
+            // Update collectibles
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                collectibles[i].update(dt, speed);
+                if (collectibles[i].isBehindCamera()) collectibles.splice(i, 1);
+            }
+            
+            // Spawn new entities
+            updateSpawning(dt);
+            
+            // Check collisions
+            checkCollisions();
+            
+            // Update HUD
+            updateHUD();
+            updateLaneIndicator();
+        }
+        
+        // ============================================
+        // RENDER LOOP
+        // ============================================
+        function render() {
+            // Clear
+            ctx.fillStyle = CONFIG.COLORS.BG_DARK;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Render background (3D)
+            background.render(ctx, canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+            
+            // Render entities (far to near for proper occlusion)
+            // Collect all entities with their Z
+            const allEntities = [];
+            for (const obs of obstacles) allEntities.push({ z: obs.z, obj: obs, type: 'obstacle' });
+            for (const col of collectibles) allEntities.push({ z: col.z, obj: col, type: 'collectible' });
+            // Sort by Z descending (far to near)
+            allEntities.sort((a, b) => b.z - a.z);
+            
+            const colors = background.getColors();
+            
+            for (const ent of allEntities) {
+                ent.obj.render(ctx, canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH, colors);
+            }
+            
+            // Render player (always at front)
+            player.render(ctx, canvasWidth, canvasHeight, CONFIG.FOCAL_LENGTH);
+            
+            // Render particles
+            particles.render(ctx, 1);
+        }
+        
+        // ============================================
+        // HUD & UI
+        // ============================================
+        function updateHUD() {
+            distanceValue.textContent = Math.floor(distance) + 'm';
+            levelValue.textContent = phase;
+            multiplierValue.textContent = 'x' + multiplier.toFixed(1);
+        }
+        
+        function updateLaneIndicator() {
+            const dots = laneIndicator.querySelectorAll('.lane-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === player.lane);
+            });
+        }
+        
+        function updateBestDistanceDisplay() {
+            bestDistanceEl.textContent = bestDistance + 'm';
+        }
+        
+        // ============================================
+        // MAIN GAME LOOP
+        // ============================================
+        function gameLoop(timestamp) {
+            const dt = Math.min((timestamp - lastTime) / 1000, 0.1); // Cap at 100ms
+            lastTime = timestamp;
+            
+            update(dt);
+            render();
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

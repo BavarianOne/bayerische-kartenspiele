@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Igelspiel - Der hungrige Igel</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: linear-gradient(135deg, #1a3a1a 0%, #2d5a2d 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 10px;
+        color: #e8f5e9;
+    }
+    h1 {
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        text-align: center;
+    }
+    .subtitle {
+        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        color: #a5d6a7;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    #gameContainer {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        aspect-ratio: 25/18;
+        background: #1a3a1a;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+    }
+    #canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #1a3a1a;
+    }
+    #ui {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 10px;
+        pointer-events: none;
+        z-index: 10;
+    }
+    .ui-group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    .ui-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: clamp(0.75rem, 2vw, 0.9rem);
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.3);
+        padding: 4px 10px;
+        border-radius: 20px;
+        backdrop-filter: blur(4px);
+    }
+    .ui-item .icon { font-size: 1.2em; }
+    #dayNight {
+        min-width: 80px;
+        text-align: center;
+        background: linear-gradient(135deg, #ffd54f, #ffb300);
+        color: #1a1a1a;
+        font-weight: 700;
+    }
+    #dayNight.night {
+        background: linear-gradient(135deg, #78909c, #546e7a);
+        color: #eceff1;
+    }
+    #fastForwardBtn {
+        padding: 4px 10px;
+        font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+        font-weight: 600;
+        border: none;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(255,152,0,0.4);
+        transition: transform 0.1s, box-shadow 0.2s, opacity 0.3s;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    #fastForwardBtn.daytime {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    #fastForwardBtn.active {
+        opacity: 1;
+        pointer-events: auto;
+        background: linear-gradient(135deg, #f57c00, #e65100);
+        box-shadow: 0 2px 12px rgba(255,152,0,0.6);
+    }
+    #fastForwardBtn:active { transform: scale(0.95); }
+    #fastForwardBtn:focus { outline: 3px solid #ffb74d; outline-offset: 2px; }
+    #fastForwardBtn:active { transform: scale(0.95); }
+    #fastForwardBtn:focus { outline: 3px solid #ffb74d; outline-offset: 2px; }
+    #overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        backdrop-filter: blur(4px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        padding: 20px;
+        text-align: center;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
+    #overlay h2 {
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    #overlay p {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        max-width: 90%;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        color: #c8e6c9;
+    }
+    #overlay button {
+        padding: 12px 30px;
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        font-weight: 600;
+        border: none;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #4caf50, #2e7d32);
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+        transition: transform 0.1s, box-shadow 0.2s;
+        min-width: 180px;
+    }
+    #overlay button:active { transform: scale(0.95); }
+    #overlay button:focus { outline: 3px solid #81c784; outline-offset: 3px; }
+    #overlay button.secondary {
+        background: linear-gradient(135deg, #78909c, #546e7a);
+        box-shadow: 0 4px 15px rgba(118,144,156,0.4);
+    }
+    #controls {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        z-index: 10;
+        pointer-events: none;
+    }
+    #dpad {
+        display: grid;
+        grid-template-areas: ". up ." "left down right";
+        gap: 4px;
+        pointer-events: auto;
+    }
+    .dpad-btn {
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+        border: 2px solid rgba(255,255,255,0.2);
+        transition: background 0.1s, transform 0.05s;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .dpad-btn:active { background: rgba(76,175,80,0.6); transform: scale(0.9); }
+    .dpad-btn[aria-label="Hoch"] { grid-area: up; }
+    .dpad-btn[aria-label="Links"] { grid-area: left; }
+    .dpad-btn[aria-label="Runter"] { grid-area: down; }
+    .dpad-btn[aria-label="Rechts"] { grid-area: right; }
+    #joystick {
+        width: 100px;
+        height: 100px;
+        position: relative;
+        pointer-events: auto;
+        display: none;
+    }
+    #joystickBase {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.3);
+        border: 2px solid rgba(255,255,255,0.2);
+        position: absolute;
+    }
+    #joystickStick {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4caf50, #2e7d32);
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        transition: transform 0.05s linear;
+    }
+    @media (pointer: coarse) {
+        #controls { display: flex; }
+        #joystick { display: block; }
+    }
+    @media (max-width: 480px) {
+        .dpad-btn { width: 44px; height: 44px; font-size: 1.2rem; }
+        #joystick { width: 90px; height: 90px; }
+        #joystickStick { width: 36px; height: 36px; top: 27px; left: 27px; }
+    }
+</style>
+</head>
+<body>
+<h1>🦔 Igelspiel</h1>
+<p class="subtitle">Sammle 5 Futter, bevor die Nacht kommt. Dann ab in den Laubhaufen!</p>
+
+<div id="gameContainer">
+    <canvas id="canvas"></canvas>
+    
+    <div id="ui">
+        <div class="ui-group">
+            <div class="ui-item"><span class="icon">❤️</span><span id="lives">3</span></div>
+            <div class="ui-item"><span class="icon">🍎</span><span id="food">0</span>/5</div>
+        </div>
+        <div class="ui-item" id="dayNight">☀️ Tag 1</div>
+        <button id="fastForwardBtn" title="Tag überspringen">⏩</button>
+        <div class="ui-group">
+            <div class="ui-item"><span class="icon">🦊</span><span id="foxes">3</span></div>
+            <div class="ui-item"><span class="icon">🦡</span><span id="badgers">2</span></div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <h2 id="overlayTitle">🦔 Igelspiel</h2>
+        <p id="overlayText">Sammle 5 Futterstücke (Äpfel, Würmer, Beeren), bevor die Nacht hereinbricht. Dann bringe den Igel sicher in den Laubhaufen (Nest), um den Tag zu überleben. Pass auf Füchse und Dachse auf!</p>
+        <button id="startBtn" onclick="startGame()">Los geht's!</button>
+    </div>
+
+    <div id="controls">
+        <div id="dpad">
+            <button class="dpad-btn" aria-label="Hoch" ontouchstart="touchDir(0,-1)" ontouchend="touchDir(0,0)" onmousedown="touchDir(0,-1)" onmouseup="touchDir(0,0)" onmouseleave="touchDir(0,0)">↑</button>
+            <button class="dpad-btn" aria-label="Links" ontouchstart="touchDir(-1,0)" ontouchend="touchDir(0,0)" onmousedown="touchDir(-1,0)" onmouseup="touchDir(0,0)" onmouseleave="touchDir(0,0)">←</button>
+            <button class="dpad-btn" aria-label="Runter" ontouchstart="touchDir(0,1)" ontouchend="touchDir(0,0)" onmousedown="touchDir(0,1)" onmouseup="touchDir(0,0)" onmouseleave="touchDir(0,0)">↓</button>
+            <button class="dpad-btn" aria-label="Rechts" ontouchstart="touchDir(1,0)" ontouchend="touchDir(0,0)" onmousedown="touchDir(1,0)" onmouseup="touchDir(0,0)" onmouseleave="touchDir(0,0)">→</button>
+        </div>
+        <div id="joystick">
+            <div id="joystickBase"></div>
+            <div id="joystickStick"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ========== KONFIGURATION ========== */
+const CFG = {
+    cols: 25, rows: 18,
+    cellSize: 32,
+    startLives: 3,
+    foodTarget: 5,
+    dayDuration: 20000,
+    nightDuration: 15000,
+    hedgehogSpeed: 4.5,
+    foxSpeed: 3.2,
+    badgerSpeed: 2.5,
+    invulnTime: 1000,
+    foxWaypoints: 4
+};
+
+/* ========== STATE ========== */
+let canvas, ctx, width, height, cellsize;
+let grid = [];
+let hedgehog = null;
+let enemies = [];
+let foods = [];
+let nest = null;
+let lives = CFG.startLives;
+let foodCollected = 0;
+let isNight = false;
+let timeLeft = CFG.dayDuration;
+let dayCount = 1;
+let gameRunning = false;
+let lastTime = 0;
+let inputDir = {x:0, y:0};
+let joystickActive = false;
+let joystickCenter = {x:0, y:0};
+let lastDir = {x:1, y:0};
+let frameCount = 0;
+// Track which keys are currently pressed
+let keysPressed = {
+    ArrowUp: false, KeyW: false,
+    ArrowDown: false, KeyS: false,
+    ArrowLeft: false, KeyA: false,
+    ArrowRight: false, KeyD: false
+};
+
+// Expose state on window for testing
+window.gameRunning = false;
+window.inputDir = {x:0, y:0};
+window.hedgehog = null;
+window.grid = [];
+window.enemies = [];
+window.foods = [];
+window.nest = null;
+window.lives = CFG.startLives;
+window.foodCollected = 0;
+window.isNight = false;
+window.dayCount = 1;
+
+// Fast forward state
+let fastForwardActive = false;
+let fastForwardSpeed = 5; // 5x speed
+
+/* ========== INIT ========== */
+function init() {
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Canvas context not available!');
+        return;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    setupJoystick();
+    showOverlay('🦔 Igelspiel', 'Sammle 5 Futterstücke (Äpfel, Würmer, Beeren), bevor die Nacht hereinbricht. Dann bringe den Igel sicher in den Laubhaufen (Nest), um den Tag zu überleben. Pass auf Füchse und Dachse auf!', false);
+}
+
+function resize() {
+    const container = document.getElementById('gameContainer');
+    const rect = container.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas.width = width;
+    canvas.height = height;
+    cellsize = Math.min(width / CFG.cols, height / CFG.rows);
+    if (gameRunning) draw();
+}
+
+/* ========== INPUT ========== */
+function onKeyDown(e) {
+    if (!gameRunning) return;
+    if (e.key in keysPressed) {
+        keysPressed[e.key] = true;
+    }
+    let newX = 0, newY = 0;
+    if (keysPressed.ArrowLeft || keysPressed.KeyA) newX = -1;
+    if (keysPressed.ArrowRight || keysPressed.KeyD) newX = 1;
+    if (keysPressed.ArrowUp || keysPressed.KeyW) newY = -1;
+    if (keysPressed.ArrowDown || keysPressed.KeyS) newY = 1;
+    inputDir = {x: newX, y: newY};
+    window.inputDir = inputDir;
+    if (newX !== 0 || newY !== 0) lastDir = {x: newX, y: newY};
+}
+function onKeyUp(e) {
+    if (!gameRunning) return;
+    if (e.key in keysPressed) {
+        keysPressed[e.key] = false;
+    }
+    let newX = 0, newY = 0;
+    if (keysPressed.ArrowLeft || keysPressed.KeyA) newX = -1;
+    if (keysPressed.ArrowRight || keysPressed.KeyD) newX = 1;
+    if (keysPressed.ArrowUp || keysPressed.KeyW) newY = -1;
+    if (keysPressed.ArrowDown || keysPressed.KeyS) newY = 1;
+    inputDir = {x: newX, y: newY};
+    window.inputDir = inputDir;
+    if (newX !== 0 || newY !== 0) lastDir = {x: newX, y: newY};
+}
+
+function touchDir(x, y) {
+    if (!gameRunning) return;
+    inputDir = {x, y};
+    if (x !== 0 || y !== 0) lastDir = {x, y};
+}
+
+function setupJoystick() {
+    const joy = document.getElementById('joystick');
+    const stick = document.getElementById('joystickStick');
+    const base = document.getElementById('joystickBase');
+    const rect = joy.getBoundingClientRect();
+    joystickCenter = {x: rect.left + rect.width/2, y: rect.top + rect.height/2};
+    window.addEventListener('resize', () => {
+        const r = joy.getBoundingClientRect();
+        joystickCenter = {x: r.left + r.width/2, y: r.top + r.height/2};
+    });
+    function moveStick(clientX, clientY) {
+        const dx = clientX - joystickCenter.x;
+        const dy = clientY - joystickCenter.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const maxR = 30;
+        if (dist > maxR) {
+            stick.style.transform = `translate(-50%, -50%) translate(${dx/dist*maxR}px, ${dy/dist*maxR}px)`;
+        } else {
+            stick.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+        }
+        const deadzone = 10;
+        if (dist > deadzone) {
+            inputDir = {x: dx/dist, y: dy/dist};
+            lastDir = {...inputDir};
+        } else {
+            inputDir = {x:0, y:0};
+        }
+    }
+    joy.addEventListener('touchstart', e => { e.preventDefault(); joystickActive = true; moveStick(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+    joy.addEventListener('touchmove', e => { e.preventDefault(); if(joystickActive) moveStick(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+    joy.addEventListener('touchend', () => { joystickActive = false; inputDir = {x:0, y:0}; stick.style.transform = 'translate(-50%, -50%)'; });
+    joy.addEventListener('mousedown', e => { joystickActive = true; moveStick(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', e => { if(joystickActive) moveStick(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', () => { if(joystickActive) { joystickActive = false; inputDir = {x:0, y:0}; stick.style.transform = 'translate(-50%, -50%)'; } });
+}
+
+// Fast forward button
+const fastForwardBtn = document.getElementById('fastForwardBtn');
+fastForwardBtn.addEventListener('click', () => {
+    fastForwardActive = !fastForwardActive;
+    fastForwardBtn.classList.toggle('active', fastForwardActive);
+    fastForwardBtn.textContent = fastForwardActive ? '⏭️' : '⏩';
+});
+
+// Update fast-forward button visibility based on day/night
+function updateFastForwardButton() {
+    fastForwardBtn.classList.toggle('daytime', !isNight);
+    if (isNight) {
+        fastForwardActive = false;
+        fastForwardBtn.classList.remove('active');
+        fastForwardBtn.textContent = '⏩';
+    }
+}
+
+/* ========== GAME LOGIC ========== */
+function startGame() {
+    lives = CFG.startLives;
+    foodCollected = 0;
+    isNight = false;
+    timeLeft = CFG.dayDuration;
+    dayCount = 1;
+    gameRunning = true;
+    window.gameRunning = true;
+    inputDir = {x:0, y:0};
+    window.inputDir = {x:0, y:0};
+    lastDir = {x:1, y:0};
+    frameCount = 0;
+    document.getElementById('overlay').classList.add('hidden');
+    spawnEntities();
+    updateUI();
+    lastTime = performance.now();
+    requestAnimationFrame(gameLoop);
+}
+
+function spawnEntities() {
+    // Grid generieren
+    grid = [];
+    for(let y=0; y<CFG.rows; y++) {
+        grid[y] = [];
+        for(let x=0; x<CFG.cols; x++) {
+            if (x===0 || x===CFG.cols-1 || y===0 || y===CFG.rows-1) grid[y][x] = 2;
+            else if (Math.random() < 0.08) grid[y][x] = 2;
+            else grid[y][x] = 1;
+        }
+    }
+    // Igel Startposition
+    const startX = Math.floor(CFG.cols/2);
+    const startY = Math.floor(CFG.rows/2);
+    hedgehog = {
+        x: startX, y: startY,
+        px: startX, py: startY,
+        targetX: startX, targetY: startY,
+        moving: false,
+        invuln: 0,
+        animFrame: 0,
+        animTime: 0,
+        facing: 1
+    };
+    // Nest (create BEFORE enemies so they can avoid it)
+    let nx, ny;
+    do { nx = Math.floor(Math.random()*(CFG.cols-2))+1; ny = Math.floor(Math.random()*(CFG.rows-2))+1; }
+    while(grid[ny][nx]===2 || (nx===startX && ny===startY));
+    nest = {x:nx, y:ny, active:false};
+    // Feinde
+    enemies = [];
+    for(let i=0;i<3;i++) enemies.push(spawnFox());
+    for(let i=0;i<2;i++) enemies.push(spawnBadger());
+    // Futter
+    foods = [];
+    for(let i=0;i<CFG.foodTarget;i++) spawnFood();
+}
+
+function spawnFox() {
+    let x, y;
+    do { x = Math.floor(Math.random()*(CFG.cols-2))+1; y = Math.floor(Math.random()*(CFG.rows-2))+1; }
+    while(grid[y][x]===2 || (x===hedgehog.x && y===hedgehog.y) || (nest && x===nest.x && y===nest.y));
+    const wp = [];
+    for(let i=0;i<CFG.foxWaypoints;i++) {
+        let wx, wy;
+        do { wx = Math.floor(Math.random()*(CFG.cols-2))+1; wy = Math.floor(Math.random()*(CFG.rows-2))+1; }
+        while(grid[wy][wx]===2);
+        wp.push({x:wx, y:wy});
+    }
+    return {type:'fox', x, y, px:x, py:y, targetX:x, targetY:y, moving:false, waypoints:wp, wpIndex:0, speed:CFG.foxSpeed, animTime:0, pathRecalcTimer: 0};
+}
+
+function spawnBadger() {
+    let x, y;
+    do { x = Math.floor(Math.random()*(CFG.cols-2))+1; y = Math.floor(Math.random()*(CFG.rows-2))+1; }
+    while(grid[y][x]===2 || (x===hedgehog.x && y===hedgehog.y) || (nest && x===nest.x && y===nest.y));
+    return {type:'badger', x, y, px:x, py:y, targetX:x, targetY:y, moving:false, speed:CFG.badgerSpeed, animTime:0, pause:0, pathRecalcTimer: 0};
+}
+
+function spawnFood() {
+    const types = ['apple','worm','berry'];
+    let x, y;
+    do { x = Math.floor(Math.random()*(CFG.cols-2))+1; y = Math.floor(Math.random()*(CFG.rows-2))+1; }
+    while(grid[y][x]===2 || foods.some(f=>f.x===x&&f.y===y) || (nest&&nest.x===x&&nest.y===y) || (hedgehog.x===x&&hedgehog.y===y));
+    foods.push({x, y, type: types[Math.floor(Math.random()*types.length)], bob: Math.random()*Math.PI*2});
+}
+
+function gameLoop(time) {
+    if (!gameRunning) return;
+    frameCount++;
+    const dt = time - lastTime;
+    lastTime = time;
+    update(dt);
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+    if (!hedgehog) {
+        console.error('[ERROR] hedgehog is null in update!');
+        return;
+    }
+    // Fast forward multiplier
+    const effectiveDt = fastForwardActive && !isNight ? dt * fastForwardSpeed : dt;
+    
+    // Unverwundbarkeit
+    if (hedgehog.invuln > 0) hedgehog.invuln -= effectiveDt;
+    // Tag/Nacht
+    timeLeft -= effectiveDt;
+    if (timeLeft <= 0) {
+        isNight = !isNight;
+        timeLeft = isNight ? CFG.nightDuration : CFG.dayDuration;
+        if (!isNight) dayCount++;
+        nest.active = isNight && foodCollected >= CFG.foodTarget;
+        updateUI();
+        updateFastForwardButton();
+    }
+    // Nest aktiv?
+    nest.active = isNight && foodCollected >= CFG.foodTarget;
+    // Igel Bewegung
+    updateHedgehog(effectiveDt);
+    // Feinde
+    enemies.forEach(e => updateEnemy(e, dt));
+    // Kollisionen
+    checkCollisions();
+    // Futter-Bob
+    foods.forEach(f => f.bob += dt * 0.003);
+    // Animationen
+    hedgehog.animTime += dt;
+    if (hedgehog.moving) hedgehog.animFrame = Math.floor(hedgehog.animTime / 120) % 2;
+    else hedgehog.animFrame = 0;
+}
+
+function updateHedgehog(dt) {
+    if (!hedgehog) return;
+    
+    // DAY: Hedgehog moves to nest and sleeps there
+    if (!isNight) {
+        hedgehog.invuln = CFG.invulnTime; // Always invulnerable during day
+        inputDir = {x: 0, y: 0};
+        window.inputDir = {x: 0, y: 0};
+        
+        // Move to nest if not already there
+        const hx = Math.round(hedgehog.x);
+        const hy = Math.round(hedgehog.y);
+        if (nest && (hx !== nest.x || hy !== nest.y)) {
+            if (!hedgehog.moving || hedgehog.targetX !== nest.x || hedgehog.targetY !== nest.y) {
+                // Find path to nest
+                const path = findPath(hx, hy, nest.x, nest.y);
+                if (path.length > 0) {
+                    hedgehog.targetX = path[0].x;
+                    hedgehog.targetY = path[0].y;
+                    hedgehog.moving = true;
+                    hedgehog.px = hedgehog.x;
+                    hedgehog.py = hedgehog.y;
+                    hedgehog.pathToNest = path;
+                    hedgehog.pathIndex = 0;
+                }
+            }
+            // Follow path to nest
+            if (hedgehog.moving && hedgehog.pathToNest && hedgehog.pathIndex < hedgehog.pathToNest.length) {
+                const speed = CFG.hedgehogSpeed * dt / 1000;
+                const dx = hedgehog.targetX - hedgehog.x;
+                const dy = hedgehog.targetY - hedgehog.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < speed) {
+                    hedgehog.x = hedgehog.targetX;
+                    hedgehog.y = hedgehog.targetY;
+                    hedgehog.px = hedgehog.x;
+                    hedgehog.py = hedgehog.y;
+                    hedgehog.pathIndex++;
+                    if (hedgehog.pathIndex < hedgehog.pathToNest.length) {
+                        hedgehog.targetX = hedgehog.pathToNest[hedgehog.pathIndex].x;
+                        hedgehog.targetY = hedgehog.pathToNest[hedgehog.pathIndex].y;
+                    } else {
+                        hedgehog.moving = false;
+                        hedgehog.pathToNest = null;
+                    }
+                } else {
+                    hedgehog.x += dx/dist * speed;
+                    hedgehog.y += dy/dist * speed;
+                }
+            }
+        } else {
+            hedgehog.moving = false;
+        }
+        return;
+    }
+    
+    // NIGHT: Normal movement
+    const hx = Math.round(hedgehog.x);
+    const hy = Math.round(hedgehog.y);
+    // Ziel setzen
+    if (!hedgehog.moving) {
+        const nx = hx + (inputDir.x || 0);
+        const ny = hy + (inputDir.y || 0);
+        if ((inputDir.x !== 0 || inputDir.y !== 0) && nx >= 0 && nx < CFG.cols && ny >= 0 && ny < CFG.rows && grid[ny][nx] !== 2) {
+            hedgehog.targetX = nx;
+            hedgehog.targetY = ny;
+            hedgehog.moving = true;
+            hedgehog.px = hedgehog.x;
+            hedgehog.py = hedgehog.y;
+            if (inputDir.x !== 0) hedgehog.facing = inputDir.x;
+        }
+    }
+    // Interpolation
+    if (hedgehog.moving) {
+        const speed = CFG.hedgehogSpeed * dt / 1000;
+        const dx = hedgehog.targetX - hedgehog.x;
+        const dy = hedgehog.targetY - hedgehog.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < speed) {
+            hedgehog.x = hedgehog.targetX;
+            hedgehog.y = hedgehog.targetY;
+            hedgehog.px = hedgehog.x;
+            hedgehog.py = hedgehog.y;
+            hedgehog.moving = false;
+        } else {
+            hedgehog.x += dx/dist * speed;
+            hedgehog.y += dy/dist * speed;
+        }
+    }
+}
+
+// A* Pathfinding
+function findPath(startX, startY, targetX, targetY) {
+    const openSet = [];
+    const closedSet = new Set();
+    const cameFrom = new Map();
+    const gScore = new Map();
+    const fScore = new Map();
+    
+    const key = (x, y) => `${x},${y}`;
+    const startKey = key(startX, startY);
+    const targetKey = key(targetX, targetY);
+    
+    openSet.push({x: startX, y: startY, f: 0});
+    gScore.set(startKey, 0);
+    fScore.set(startKey, heuristic(startX, startY, targetX, targetY));
+    
+    while (openSet.length > 0) {
+        openSet.sort((a, b) => a.f - b.f);
+        const current = openSet.shift();
+        const currentKey = key(current.x, current.y);
+        
+        if (currentKey === targetKey) {
+            // Reconstruct path
+            const path = [];
+            let curr = currentKey;
+            while (cameFrom.has(curr)) {
+                const [x, y] = curr.split(',').map(Number);
+                path.unshift({x, y});
+                curr = cameFrom.get(curr);
+            }
+            return path;
+        }
+        
+        closedSet.add(currentKey);
+        
+        const neighbors = [
+            {x: current.x + 1, y: current.y},
+            {x: current.x - 1, y: current.y},
+            {x: current.x, y: current.y + 1},
+            {x: current.x, y: current.y - 1}
+        ];
+        
+        for (const n of neighbors) {
+            const nKey = key(n.x, n.y);
+            if (closedSet.has(nKey)) continue;
+            if (n.x < 0 || n.x >= CFG.cols || n.y < 0 || n.y >= CFG.rows) continue;
+            if (grid[n.y][n.x] === 2) continue; // Wall
+            
+            const tentativeG = gScore.get(currentKey) + 1;
+            if (!gScore.has(nKey) || tentativeG < gScore.get(nKey)) {
+                cameFrom.set(nKey, currentKey);
+                gScore.set(nKey, tentativeG);
+                fScore.set(nKey, tentativeG + heuristic(n.x, n.y, targetX, targetY));
+                
+                if (!openSet.some(o => o.x === n.x && o.y === n.y)) {
+                    openSet.push({x: n.x, y: n.y, f: fScore.get(nKey)});
+                }
+            }
+        }
+    }
+    return []; // No path found
+}
+
+function heuristic(x1, y1, x2, y2) {
+    return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+function updateEnemy(e, dt) {
+    e.animTime += dt;
+    
+    // Day/night behavior
+    if (isNight) {
+        // NIGHT: Chase hedgehog using pathfinding
+        if (!e.path || e.path.length === 0 || e.pathRecalcTimer <= 0) {
+            const hx = Math.round(hedgehog.x);
+            const hy = Math.round(hedgehog.y);
+            const ex = Math.round(e.x);
+            const ey = Math.round(e.y);
+            
+            if (ex !== hx || ey !== hy) {
+                e.path = findPath(ex, ey, hx, hy);
+                e.pathIndex = 0;
+            }
+            e.pathRecalcTimer = 2000; // Recalculate every 2 seconds
+        } else {
+            e.pathRecalcTimer -= dt;
+        }
+        
+        if (e.path && e.path.length > 0 && e.pathIndex < e.path.length) {
+            const next = e.path[e.pathIndex];
+            e.targetX = next.x;
+            e.targetY = next.y;
+            if (!e.moving) {
+                e.moving = true;
+                e.px = e.x;
+                e.py = e.y;
+            }
+            const speed = e.type === 'fox' ? e.speed : e.speed * 0.8; // Badgers slightly slower at night
+            moveEnemyTowards(e, dt, speed);
+            
+            // Check if reached next waypoint
+            if (!e.moving) e.pathIndex++;
+        } else {
+            // No path or reached target - wait a bit
+            if (!e.moving) e.pause = 500;
+        }
+    } else {
+        // DAY: Less dangerous - slow patrol / random walk
+        e.path = null;
+        e.pathIndex = 0;
+        
+        if (e.type === 'fox') {
+            // Slow patrol between waypoints
+            if (!e.moving) {
+                const wp = e.waypoints[e.wpIndex];
+                e.targetX = wp.x; e.targetY = wp.y;
+                e.moving = true; e.px = e.x; e.py = e.y;
+                e.wpIndex = (e.wpIndex + 1) % e.waypoints.length;
+                e.dayPause = 1000 + Math.random() * 2000; // Pause at waypoint
+            }
+            if (e.moving) moveEnemyTowards(e, dt, e.speed * 0.4); // Much slower
+            else if (e.dayPause > 0) { e.dayPause -= dt; }
+        } else {
+            // Badger: random walk with long pauses
+            if (e.pause > 0) { e.pause -= dt; return; }
+            if (!e.moving) {
+                const dirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+                const d = dirs[Math.floor(Math.random()*dirs.length)];
+                const nx = e.x + d.x, ny = e.y + d.y;
+                if (nx>0 && nx<CFG.cols-1 && ny>0 && ny<CFG.rows-1 && grid[ny][nx]!==2) {
+                    e.targetX = nx; e.targetY = ny;
+                    e.moving = true; e.px = e.x; e.py = e.y;
+                } else e.pause = 1000;
+            }
+            if (e.moving) moveEnemyTowards(e, dt, e.speed * 0.3); // Very slow
+        }
+    }
+}
+
+function moveEnemyTowards(e, dt, speed) {
+    const spd = speed * dt / 1000;
+    const dx = e.targetX - e.px;
+    const dy = e.targetY - e.py;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < spd) {
+        e.x = e.targetX; e.y = e.targetY;
+        e.px = e.x; e.py = e.y;
+        e.moving = false;
+        if (e.type === 'badger') e.pause = 300 + Math.random()*700;
+    } else {
+        e.x = e.px + dx/dist * spd;
+        e.y = e.py + dy/dist * spd;
+    }
+}
+
+function checkCollisions() {
+    if (!hedgehog) return;
+    const hx = Math.round(hedgehog.x);
+    const hy = Math.round(hedgehog.y);
+    // Futter
+    for(let i=foods.length-1;i>=0;i--) {
+        if (foods[i].x === hx && foods[i].y === hy) {
+            foods.splice(i,1);
+            foodCollected++;
+            updateUI();
+            if (foods.length === 0) {
+                for(let j=0;j<CFG.foodTarget;j++) spawnFood();
+            }
+            break;
+        }
+    }
+    // Nest
+    if (nest.active && nest.x === hx && nest.y === hy) {
+        winGame();
+        return;
+    }
+    // Feinde
+    if (hedgehog.invuln <= 0) {
+        enemies.forEach(e => {
+            const ex = Math.round(e.x), ey = Math.round(e.y);
+            if (ex === hx && ey === hy) {
+                loseLife();
+            }
+        });
+    }
+}
+
+function loseLife() {
+    lives--;
+    hedgehog.invuln = CFG.invulnTime;
+    updateUI();
+    if (lives <= 0) {
+        gameOver();
+    } else {
+        // Respawn
+        hedgehog.x = Math.floor(CFG.cols/2);
+        hedgehog.y = Math.floor(CFG.rows/2);
+        hedgehog.px = hedgehog.x;
+        hedgehog.py = hedgehog.y;
+        hedgehog.targetX = hedgehog.x;
+        hedgehog.targetY = hedgehog.y;
+        hedgehog.moving = false;
+    }
+}
+
+function winGame() {
+    gameRunning = false;
+    showOverlay(`🌙 Gute Nacht, Igel! (Tag ${dayCount})`, `Du hast ${foodCollected} Futter gesammelt und sicher im Laubhaufen geschlafen.<br>Ein neuer Tag beginnt!`, false, () => {
+        dayCount++;
+        foodCollected = 0;
+        isNight = false;
+        timeLeft = CFG.dayDuration;
+        nest.active = false;
+        foods.forEach(f => { f.x = -1; f.y = -1; });
+        for(let i=0;i<CFG.foodTarget;i++) spawnFood();
+        gameRunning = true;
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+        updateUI();
+    });
+}
+
+function gameOver() {
+    gameRunning = false;
+    showOverlay("💀 Game Over", `Der Igel hat alle Leben verloren.<br>Er hat ${dayCount} Tag${dayCount>1?'e':''} überlebt.`, true);
+}
+
+function updateUI() {
+    document.getElementById('lives').textContent = lives;
+    document.getElementById('food').textContent = foodCollected;
+    const dn = document.getElementById('dayNight');
+    dn.textContent = (isNight ? '🌙' : '☀️') + (isNight ? ' Nacht' : ` Tag ${dayCount}`);
+    dn.classList.toggle('night', isNight);
+    document.getElementById('foxes').textContent = enemies.filter(e=>e.type==='fox').length;
+    document.getElementById('badgers').textContent = enemies.filter(e=>e.type==='badger').length;
+}
+
+function showOverlay(title, text, isGameOver, callback) {
+    document.getElementById('overlayTitle').textContent = title;
+    document.getElementById('overlayText').innerHTML = text;
+    const btn = document.getElementById('startBtn');
+    if (isGameOver) {
+        btn.textContent = 'Neu starten';
+        btn.onclick = () => { init(); startGame(); };
+        btn.classList.remove('secondary');
+    } else if (callback) {
+        btn.textContent = 'Weiter';
+        btn.onclick = () => { document.getElementById('overlay').classList.add('hidden'); callback(); };
+        btn.classList.add('secondary');
+    } else {
+        btn.textContent = 'Los geht\'s!';
+        btn.onclick = startGame;
+        btn.classList.remove('secondary');
+    }
+    document.getElementById('overlay').classList.remove('hidden');
+}
+
+/* ========== RENDERING ========== */
+function draw() {
+    if (!ctx) return;
+    // Hintergrund
+    ctx.fillStyle = isNight ? '#1a2a1a' : '#3a5a3a';
+    ctx.fillRect(0, 0, width, height);
+    // Grid
+    for(let y=0;y<CFG.rows;y++) {
+        for(let x=0;x<CFG.cols;x++) {
+            const px = x * cellsize;
+            const py = y * cellsize;
+            if(grid[y][x] === 1) {
+                ctx.fillStyle = isNight ? '#2d4a2d' : '#4a7a4a';
+                ctx.fillRect(px, py, cellsize, cellsize);
+                ctx.fillStyle = isNight ? '#3a5a3a' : '#5a8a5a';
+                for(let i=0;i<3;i++) {
+                    const gx = px + (x*7 + i*13 + y*11) % cellsize;
+                    const gy = py + (y*5 + i*17) % cellsize;
+                    ctx.fillRect(gx, gy, 2, 4);
+                }
+            } else if(grid[y][x] === 2) {
+                ctx.fillStyle = isNight ? '#2d201a' : '#4e342e';
+                ctx.fillRect(px, py, cellsize, cellsize);
+                ctx.fillStyle = isNight ? '#3d2a22' : '#5d4037';
+                for(let i=0;i<5;i++) {
+                    const tx = px + (x*11 + i*19) % cellsize;
+                    const ty = py + (y*7 + i*23) % cellsize;
+                    ctx.fillRect(tx, ty, 3, 3);
+                }
+            }
+        }
+    }
+    // Nest
+    if (nest) drawNest();
+    // Futter
+    foods.forEach(f => {
+        const fx = f.x * cellsize + cellsize/2;
+        const fy = f.y * cellsize + cellsize/2 + Math.sin(f.bob) * 3;
+        drawFood(fx, fy, f.type);
+    });
+    // Feinde
+    enemies.forEach(e => drawEnemy(e));
+    // Igel
+    drawHedgehog();
+    // Nacht-Overlay
+    if (isNight) {
+        ctx.fillStyle = 'rgba(0,0,50,0.4)';
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = 'white';
+        for(let i=0;i<30;i++) {
+            const sx = (i*127 + dayCount*37) % width;
+            const sy = (i*89 + dayCount*113) % height;
+            const twinkle = Math.sin(Date.now()*0.001 + i) * 0.5 + 0.5;
+            ctx.globalAlpha = twinkle * 0.8;
+            ctx.fillRect(sx, sy, 1, 1);
+        }
+        ctx.globalAlpha = 1;
+    }
+}
+
+function drawNest() {
+    const nx = nest.x * cellsize + cellsize/2;
+    const ny = nest.y * cellsize + cellsize/2;
+    const pulse = Math.sin(Date.now() * 0.005) * 0.2 + 0.8;
+    ctx.fillStyle = isNight ? '#3d2a1a' : '#5d4037';
+    ctx.beginPath();
+    ctx.ellipse(nx, ny + cellsize*0.15, cellsize*0.7, cellsize*0.4, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = isNight ? '#4a3520' : '#6d4c41';
+    for(let i=0;i<8;i++) {
+        const angle = (i/8) * Math.PI*2;
+        const lx = nx + Math.cos(angle) * cellsize * 0.5;
+        const ly = ny + Math.sin(angle) * cellsize * 0.3 + cellsize*0.15;
+        ctx.beginPath();
+        ctx.ellipse(lx, ly, cellsize*0.25, cellsize*0.15, angle, 0, Math.PI*2);
+        ctx.fill();
+    }
+    if (nest.active) {
+        const glow = ctx.createRadialGradient(nx, ny, 0, nx, ny, cellsize);
+        glow.addColorStop(0, 'rgba(255,235,59,0.4)');
+        glow.addColorStop(1, 'rgba(255,235,59,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(nx, ny, cellsize, 0, Math.PI*2);
+        ctx.fill();
+        for(let i=0;i<5;i++) {
+            const t = Date.now() * 0.001 + i;
+            const px = nx + Math.sin(t + i) * cellsize * 0.6;
+            const py = ny + Math.cos(t * 0.7 + i) * cellsize * 0.3;
+            ctx.fillStyle = `rgba(255,235,59,${0.5 + 0.3*Math.sin(t*2)})`;
+            ctx.beginPath();
+            ctx.arc(px, py, 3, 0, Math.PI*2);
+            ctx.fill();
+        }
+        ctx.fillStyle = '#ffeb3b';
+        ctx.font = `${cellsize*0.3}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText('💤', nx, ny - cellsize*0.5);
+    }
+}
+
+function drawFood(x, y, type) {
+    const s = cellsize * 0.35;
+    ctx.save();
+    ctx.translate(x, y);
+    if (type === 'apple') {
+        ctx.fillStyle = '#c62828';
+        ctx.beginPath(); ctx.arc(0, 0, s, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#2e7d32';
+        ctx.beginPath(); ctx.moveTo(0, -s); ctx.lineTo(-s*0.3, -s*0.5); ctx.lineTo(s*0.3, -s*0.5); ctx.fill();
+    } else if (type === 'worm') {
+        ctx.fillStyle = '#8d6e63';
+        for(let i=0;i<3;i++) {
+            ctx.beginPath(); ctx.ellipse((i-1)*s*0.7, Math.sin(Date.now()*0.005+i)*2, s*0.6, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+        }
+    } else {
+        ctx.fillStyle = '#6a1b9a';
+        for(let i=0;i<5;i++) {
+            const a = (i/5)*Math.PI*2;
+            ctx.beginPath(); ctx.ellipse(Math.cos(a)*s*0.5, Math.sin(a)*s*0.5, s*0.3, s*0.3, 0, 0, Math.PI*2); ctx.fill();
+        }
+    }
+    ctx.restore();
+}
+
+function drawEnemy(e) {
+    const ex = e.x * cellsize + cellsize/2;
+    const ey = e.y * cellsize + cellsize/2;
+    const bob = Math.sin(e.animTime * 0.005) * 2;
+    ctx.save();
+    ctx.translate(ex, ey + bob);
+    if (e.type === 'fox') drawFox();
+    else drawBadger();
+    ctx.restore();
+}
+
+function drawFox() {
+    const s = cellsize * 0.4;
+    const facing = Math.sign(hedgehog.x - (enemies.find(e=>e.type==='fox')?.x||0)) || 1;
+    ctx.scale(facing, 1);
+    // Körper
+    ctx.fillStyle = '#e65100';
+    ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.7, 0, 0, Math.PI*2); ctx.fill();
+    // Kopf
+    ctx.beginPath(); ctx.ellipse(s*0.9, -s*0.2, s*0.55, s*0.5, 0, 0, Math.PI*2); ctx.fill();
+    // Ohren
+    ctx.fillStyle = '#bf360c';
+    ctx.beginPath(); ctx.moveTo(s*0.6, -s*0.6); ctx.lineTo(s*0.9, -s*1.1); ctx.lineTo(s*1.2, -s*0.6); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(s*1.0, -s*0.6); ctx.lineTo(s*1.3, -s*1.1); ctx.lineTo(s*1.6, -s*0.6); ctx.fill();
+    // Schwanz
+    ctx.fillStyle = '#e65100';
+    ctx.beginPath(); ctx.moveTo(-s*0.9, 0); ctx.quadraticCurveTo(-s*1.6, -s*0.3, -s*1.3, s*0.4); ctx.quadraticCurveTo(-s*1.0, s*0.1, -s*0.9, 0); ctx.fill();
+    ctx.fillStyle = '#fff8e1';
+    ctx.beginPath(); ctx.moveTo(-s*1.0, s*0.1); ctx.quadraticCurveTo(-s*1.4, -s*0.1, -s*1.2, s*0.3); ctx.quadraticCurveTo(-s*0.9, s*0.05, -s*1.0, s*0.1); ctx.fill();
+    // Augen
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(s*1.1, -s*0.3, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*1.25, -s*0.35, 1.5, 0, Math.PI*2); ctx.fill();
+    // Schnauze
+    ctx.fillStyle = '#fff8e1';
+    ctx.beginPath(); ctx.ellipse(s*1.3, -s*0.1, s*0.25, s*0.15, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(s*1.4, -s*0.1, 1.5, 0, Math.PI*2); ctx.fill();
+}
+
+function drawBadger() {
+    const s = cellsize * 0.38;
+    // Körper
+    ctx.fillStyle = '#3e2723';
+    ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.75, 0, 0, Math.PI*2); ctx.fill();
+    // Kopf
+    ctx.fillStyle = '#fff8e1';
+    ctx.beginPath(); ctx.ellipse(s*0.85, -s*0.1, s*0.5, s*0.45, 0, 0, Math.PI*2); ctx.fill();
+    // Streifen
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.moveTo(s*0.5, -s*0.4); ctx.lineTo(s*1.1, -s*0.4); ctx.lineTo(s*1.0, s*0.1); ctx.lineTo(s*0.4, s*0.1); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(s*0.5, s*0.1); ctx.lineTo(s*1.1, s*0.1); ctx.lineTo(s*1.0, s*0.5); ctx.lineTo(s*0.4, s*0.5); ctx.fill();
+    // Ohren
+    ctx.fillStyle = '#3e2723';
+    ctx.beginPath(); ctx.arc(s*0.7, -s*0.5, s*0.18, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*1.0, -s*0.5, s*0.18, 0, Math.PI*2); ctx.fill();
+    // Augen
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(s*0.8, -s*0.2, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*1.05, -s*0.2, 1.5, 0, Math.PI*2); ctx.fill();
+    // Nase
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(s*1.2, -s*0.05, 2, 0, Math.PI*2); ctx.fill();
+}
+
+function drawHedgehog() {
+    if (!hedgehog) return;
+    const hx = hedgehog.x * cellsize + cellsize/2;
+    const hy = hedgehog.y * cellsize + cellsize/2;
+    const s = cellsize * 0.4;
+    const bob = hedgehog.moving ? Math.sin(hedgehog.animTime * 0.01) * 1.5 : 0;
+    const facing = hedgehog.facing || 1;
+    const invuln = hedgehog.invuln > 0;
+    const sleeping = !isNight; // Sleeping during day
+    ctx.save();
+    ctx.translate(hx, hy + bob);
+    ctx.scale(facing, 1);
+    if (invuln) ctx.globalAlpha = 0.5 + 0.3 * Math.sin(Date.now() * 0.02);
+    // Körper
+    ctx.fillStyle = '#4e342e';
+    ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.75, 0, 0, Math.PI*2); ctx.fill();
+    // Stacheln
+    ctx.fillStyle = '#3e2723';
+    const spikeCount = 12;
+    for(let i=0;i<spikeCount;i++) {
+        const angle = (i/spikeCount) * Math.PI - Math.PI/2;
+        const baseX = Math.cos(angle) * s * 0.85;
+        const baseY = Math.sin(angle) * s * 0.65;
+        const len = s * (0.45 + 0.15 * Math.sin(hedgehog.animTime * 0.003 + i));
+        const tipX = baseX + Math.cos(angle) * len;
+        const tipY = baseY + Math.sin(angle) * len;
+        ctx.beginPath(); ctx.moveTo(baseX, baseY); ctx.lineTo(tipX, tipY); ctx.strokeStyle = '#3e2723'; ctx.lineWidth = 2; ctx.stroke();
+    }
+    // Kopf
+    ctx.fillStyle = '#d7ccc8';
+    ctx.beginPath(); ctx.ellipse(s*0.9, -s*0.1, s*0.5, s*0.45, 0, 0, Math.PI*2); ctx.fill();
+    // Schnauze
+    ctx.fillStyle = '#bcaaa4';
+    ctx.beginPath(); ctx.ellipse(s*1.25, -s*0.05, s*0.25, s*0.18, 0, 0, Math.PI*2); ctx.fill();
+    // Nase
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(s*1.4, -s*0.05, s*0.08, 0, Math.PI*2); ctx.fill();
+    // Augen - closed when sleeping
+    ctx.fillStyle = '#1a1a1a';
+    const eyeY = -s*0.25;
+    if (sleeping) {
+        // Closed eyes - curved lines
+        ctx.beginPath();
+        ctx.moveTo(s*0.9, eyeY);
+        ctx.quadraticCurveTo(s*1.0, eyeY - 3, s*1.1, eyeY);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(s*1.1, eyeY);
+        ctx.quadraticCurveTo(s*1.2, eyeY - 3, s*1.3, eyeY);
+        ctx.stroke();
+    } else {
+        const blink = Math.sin(hedgehog.animTime * 0.002) > 0.95 ? 0.2 : 1;
+        ctx.beginPath(); ctx.ellipse(s*1.0, eyeY, 2, 2*blink, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(s*1.15, eyeY, 2, 2*blink, 0, 0, Math.PI*2); ctx.fill();
+    }
+    // Ohren
+    ctx.fillStyle = '#4e342e';
+    ctx.beginPath(); ctx.arc(s*0.8, -s*0.45, s*0.15, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*1.05, -s*0.45, s*0.15, 0, Math.PI*2); ctx.fill();
+    // Beine (wenn bewegt)
+    if (hedgehog.moving && !sleeping) {
+        ctx.fillStyle = '#4e342e';
+        const legPhase = hedgehog.animTime * 0.01;
+        for(let i=0;i<4;i++) {
+            const legX = (i<2?-1:1) * s*0.4 + Math.sin(legPhase + i) * 3;
+            const legY = s*0.6 + Math.abs(Math.sin(legPhase + i)) * 4;
+            ctx.beginPath(); ctx.ellipse(legX, legY, 3, 6, 0, 0, Math.PI*2); ctx.fill();
+        }
+    }
+    ctx.restore();
+    
+    // Sleep Zzz particles during day
+    if (sleeping) {
+        drawSleepParticles(hx, hy - s * 0.8);
+    }
+}
+
+function drawSleepParticles(x, y) {
+    const time = Date.now() * 0.001;
+    for (let i = 0; i < 3; i++) {
+        const phase = time * 0.5 + i * 1.5;
+        const px = x + Math.sin(phase) * 8;
+        const py = y - (time * 30 + i * 15) % 40;
+        const alpha = 0.5 + 0.5 * Math.sin(phase * 2);
+        const size = 10 + Math.sin(phase) * 3;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#fff';
+        ctx.font = `${size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText('Z', px, py);
+        ctx.restore();
+    }
+}
+
+/* ========== START ========== */
+init();
+</script>
+</body>
+</html>

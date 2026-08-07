@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Domino Simulator 3D</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #canvas-container { width: 100%; height: 100%; position: relative; }
+  canvas { display: block; }
+  
+  #ui-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #top-bar {
+    pointer-events: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(26,26,46,0.95) 0%, transparent 100%);
+    backdrop-filter: blur(10px);
+  }
+  
+  #title { color: #e8e8f0; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.5px; }
+  
+  #mode-toggle {
+    pointer-events: auto;
+    display: flex;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 4px;
+    backdrop-filter: blur(10px);
+  }
+  
+  .mode-btn {
+    pointer-events: auto;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: #a0a0b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-btn.active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+  .mode-btn:active { transform: scale(0.96); }
+  
+  #bottom-bar {
+    pointer-events: auto;
+    margin-top: auto;
+    padding: 16px;
+    background: linear-gradient(0deg, rgba(26,26,46,0.95) 0%, transparent 100%);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  #tool-palette {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  #rotation-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  
+  #rotation-control label {
+    color: #a0a0b8;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+  
+  #rotation-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    outline: none;
+  }
+  
+  #rotation-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(99,102,241,0.5);
+  }
+  
+  #rotation-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(99,102,241,0.5);
+  }
+  
+  #rotation-value {
+    color: #e8e8f0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: right;
+    font-family: monospace;
+  }
+  
+  .rotation-presets {
+    display: flex;
+    gap: 6px;
+  }
+  
+  .rotation-preset {
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: #e8e8f0;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .rotation-preset:hover {
+    background: rgba(99,102,241,0.3);
+    border-color: #6366f1;
+  }
+  
+  .tool-btn {
+    pointer-events: auto;
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #e8e8f0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(10px);
+  }
+  .tool-btn.active {
+    background: linear-gradient(145deg, #6366f1, #8b5cf6);
+    border-color: #8b5cf6;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+    transform: scale(1.05);
+  }
+  .tool-btn:active { transform: scale(0.95); }
+  .tool-btn.active:active { transform: scale(1); }
+  .tool-icon { font-size: 1.5rem; line-height: 1; }
+  .tool-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
+  
+  #action-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .action-btn {
+    pointer-events: auto;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-btn.primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+  }
+  .action-btn.secondary {
+    background: rgba(255,255,255,0.1);
+    color: #e8e8f0;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .action-btn.danger {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: white;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn:disabled { opacity: 0.4; pointer-events: none; }
+  
+  #info-panel {
+    pointer-events: auto;
+    position: absolute;
+    top: 80px;
+    right: 16px;
+    width: 220px;
+    background: rgba(26,26,46,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 16px;
+    backdrop-filter: blur(20px);
+    color: #e8e8f0;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    pointer-events: auto;
+    display: none;
+  }
+  #info-panel.visible { display: block; }
+  #info-panel h4 { font-size: 0.85rem; margin-bottom: 12px; color: #a5b4fc; }
+  .info-row { display: flex; justify-content: space-between; margin: 8px 0; }
+  .info-label { color: #a0a0b8; }
+  .info-value { color: #e8e8f0; font-weight: 500; font-family: monospace; font-size: 0.75rem; }
+  
+  #touch-hint {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26,26,46,0.95);
+    border: 1px solid rgba(99,102,241,0.5);
+    border-radius: 12px;
+    padding: 12px 20px;
+    color: #a5b4fc;
+    font-size: 0.8rem;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    animation: fadeInOut 4s ease-in-out;
+    pointer-events: none;
+    max-width: 90vw;
+  }
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    15%, 85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  
+  #simulate-btn.loading { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 4px 20px rgba(99,102,241,0.4)} 50%{box-shadow:0 4px 30px rgba(99,102,241,0.8)} }
+  
+  @media (max-width: 600px) {
+    #tool-btn-label { display: none; }
+    .tool-btn { width: 56px; height: 56px; }
+    .action-btn { padding: 10px 18px; font-size: 0.8rem; }
+    #info-panel { right: 8px; left: 8px; width: auto; top: auto; bottom: 180px; }
+  }
+  
+  @media (pointer: coarse) {
+    .tool-btn { width: 72px; height: 72px; }
+    .action-btn { padding: 14px 28px; font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div id="ui-overlay">
+  <div id="top-bar">
+    <span id="title">🎲 Domino Simulator 3D</span>
+    <div id="mode-toggle">
+      <button class="mode-btn active" data-mode="build" id="btn-build"><span class="tool-icon">🏗️</span><span class="tool-label">Bauen</span></button>
+      <button class="mode-btn" data-mode="simulate" id="btn-simulate"><span class="tool-icon">▶️</span><span class="tool-label">Simulieren</span></button>
+      <button class="mode-btn" data-mode="camera" id="btn-camera"><span class="tool-icon">📷</span><span class="tool-label">Kamera</span></button>
+    </div>
+  </div>
+  
+  <div id="info-panel">
+    <h4>📊 Statistiken</h4>
+    <div class="info-row"><span class="info-label">Dominosteine:</span><span class="info-value" id="stat-count">0</span></div>
+    <div class="info-row"><span class="info-label">Gefallen:</span><span class="info-value" id="stat-fallen">0</span></div>
+    <div class="info-row"><span class="info-label">Zeit:</span><span class="info-value" id="stat-time">0.00s</span></div>
+    <div class="info-row"><span class="info-label">FPS:</span><span class="info-value" id="stat-fps">60</span></div>
+  </div>
+  
+  <div id="touch-hint">👆 Tippen zum Platzieren • 👆👆 Zweifinger zum Rotieren • 🤏 Pinch zum Zoomen</div>
+  
+  <div id="bottom-bar">
+    <div id="tool-palette"></div>
+    <div id="rotation-control">
+      <label>🔄 Drehung:</label>
+      <input type="range" id="rotation-slider" min="0" max="360" value="0" step="5">
+      <span id="rotation-value">0°</span>
+      <div class="rotation-presets">
+        <button class="rotation-preset" data-angle="0">0°</button>
+        <button class="rotation-preset" data-angle="45">45°</button>
+        <button class="rotation-preset" data-angle="90">90°</button>
+        <button class="rotation-preset" data-angle="135">135°</button>
+        <button class="rotation-preset" data-angle="180">180°</button>
+      </div>
+    </div>
+    <div id="action-bar">
+      <button class="action-btn primary" id="simulate-btn">▶️ Simulation starten</button>
+      <button class="action-btn secondary" id="reset-btn">🔄 Zurücksetzen</button>
+      <button class="action-btn secondary" id="bridge-btn">🌉 Brücke</button>
+      <button class="action-btn danger" id="clear-btn">🗑️ Alles löschen</button>
+      <button class="action-btn secondary" id="info-btn">ℹ️ Info</button>
+    </div>
+    
+    <div id="bridge-control" style="display: none; padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <label style="color: #a0a0b8; font-size: 0.8rem;">🌉 Brückenhöhe:</label>
+        <input type="range" id="bridge-height-slider" min="0.5" max="3" value="1.5" step="0.1" style="flex: 1;">
+        <span id="bridge-height-value" style="color: #e8e8f0; font-size: 0.85rem; font-weight: 600; min-width: 40px;">1.5m</span>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="action-btn secondary" id="place-bridge-start">📍 Start setzen</button>
+        <button class="action-btn secondary" id="place-bridge-end">📍 Ende setzen</button>
+        <button class="action-btn danger" id="cancel-bridge">✖ Abbrechen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/",
+    "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as CANNON from 'cannon-es';
+
+// ════════════════════════════════════════════════════════════════
+// DOMINO SIMULATOR 3D - Three.js + Cannon-es Physics
+// ════════════════════════════════════════════════════════════════
+
+// CONFIG & CONSTANTS
+const DOMINO_WIDTH = 0.4;
+const DOMINO_HEIGHT = 1.8;
+const DOMINO_DEPTH = 0.8;
+const DOMINO_MASS = 0.12; // Slightly lighter for better chain reactions
+const GROUND_SIZE = 50;
+const GRAVITY = -9.82;
+
+const DOMINO_TYPES = {
+  standard: { color: 0x1e1e2e, name: 'Standard', emissive: 0x000000 },
+  red: { color: 0x8b1538, name: 'Rot', emissive: 0x440010 },
+  blue: { color: 0x1e3a5f, name: 'Blau', emissive: 0x001033 },
+  green: { color: 0x166534, name: 'Grün', emissive: 0x003311 },
+  yellow: { color: 0x854d0e, name: 'Gelb', emissive: 0x442200 },
+  purple: { color: 0x4c1d95, name: 'Lila', emissive: 0x220044 },
+  white: { color: 0xf8fafc, name: 'Weiß', emissive: 0x333344 },
+  black: { color: 0x0f172a, name: 'Schwarz', emissive: 0x000000 },
+};
+
+const TYPE_KEYS = Object.keys(DOMINO_TYPES);
+
+// Bridge state
+let bridgeMeshes = [];
+let bridgeBodies = [];
+let currentBridgeHeight = 1.5; // Default bridge height
+let isBuildingBridge = false;
+let bridgeStartPoint = null;
+let bridgePreviewMesh = null;
+const BRIDGE_WIDTH = 2.0;
+const BRIDGE_THICKNESS = 0.2;
+const BRIDGE_LENGTH = 4.0;
+
+// STATE
+let mode = 'build';
+let currentDominoType = 'standard';
+let dominoMeshes = [];
+let dominoBodies = [];
+let dominoTypes = [];
+let isSimulating = false;
+let simulationTime = 0;
+let fallenCount = 0;
+let lastFrameTime = performance.now();
+let fps = 60;
+let touchHintShown = false;
+let simulationTarget = null;
+
+let touchStartPos = { x: 0, y: 0 };
+let touchStartTime = 0;
+let isMultiTouch = false;
+let lastTouchDistance = 0;
+
+// THREE.JS SETUP
+const container = document.getElementById('canvas-container');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0f0f1a);
+scene.fog = new THREE.FogExp2(0x0f0f1a, 0.015);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(0, 12, 18);
+camera.lookAt(0, 0, 0);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.enablePan = true;
+controls.minDistance = 3;
+controls.maxDistance = 80;
+controls.maxPolarAngle = Math.PI / 2 - 0.05;
+controls.target.set(0, 1, 0);
+controls.touches = {
+  ONE: THREE.TOUCH.ROTATE,
+  TWO: THREE.TOUCH.DOLLY_PAN
+};
+
+// CANNON-ES PHYSICS WORLD - Optimized for domino chain reactions
+const world = new CANNON.World({
+  gravity: new CANNON.Vec3(0, GRAVITY, 0)
+});
+world.broadphase = new CANNON.NaiveBroadphase();
+world.solver.iterations = 40; // More iterations for stability
+world.solver.tolerance = 0.0001;
+world.allowSleep = false;
+world.sleepSpeedLimit = 0.01;
+world.sleepTimeLimit = 0.5;
+
+const groundBody = new CANNON.Body({
+  mass: 0,
+  shape: new CANNON.Box(new CANNON.Vec3(GROUND_SIZE/2, 0.5, GROUND_SIZE/2)),
+  position: new CANNON.Vec3(0, -0.5, 0),
+  material: new CANNON.Material('ground')
+});
+world.addBody(groundBody);
+
+const dominoMaterial = new CANNON.Material('domino');
+const groundDominoContact = new CANNON.ContactMaterial(groundBody.material, dominoMaterial, {
+  friction: 0.9, // Strong grip so dominoes pivot cleanly on the ground
+  restitution: 0.0, // No bounce on ground
+  contactEquationStiffness: 1e9,
+  contactEquationRelaxation: 1
+});
+world.addContactMaterial(groundDominoContact);
+
+const dominoContact = new CANNON.ContactMaterial(dominoMaterial, dominoMaterial, {
+  friction: 0.15, // Lower friction between dominoes for smoother transfer
+  restitution: 0.0, // No bounce - dominoes should stick together when falling
+  contactEquationStiffness: 1e9,
+  contactEquationRelaxation: 1
+});
+world.addContactMaterial(dominoContact);
+
+// LIGHTING - Much brighter for visibility
+const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
+scene.add(ambientLight);
+
+// Main sun light - very bright
+const sunLight = new THREE.DirectionalLight(0xffffff, 3.0);
+sunLight.position.set(20, 50, 30);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(2048, 2048);
+sunLight.shadow.camera.near = 1;
+sunLight.shadow.camera.far = 200;
+sunLight.shadow.camera.left = -50;
+sunLight.shadow.camera.right = 50;
+sunLight.shadow.camera.top = 50;
+sunLight.shadow.camera.bottom = -50;
+sunLight.shadow.bias = -0.0005;
+sunLight.shadow.normalBias = 0.02;
+scene.add(sunLight);
+
+// Fill light - bright blue
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.5);
+fillLight.position.set(-25, 30, -20);
+scene.add(fillLight);
+
+// Rim light for better visibility
+const rimLight = new THREE.DirectionalLight(0xffffff, 1.0);
+rimLight.position.set(0, 20, -40);
+scene.add(rimLight);
+
+// Additional point lights for better illumination
+const pointLight1 = new THREE.PointLight(0xffffff, 1.0, 80);
+pointLight1.position.set(0, 20, 0);
+scene.add(pointLight1);
+
+const pointLight2 = new THREE.PointLight(0xffffff, 0.8, 60);
+pointLight2.position.set(-15, 15, 15);
+scene.add(pointLight2);
+
+const pointLight3 = new THREE.PointLight(0xffffff, 0.8, 60);
+pointLight3.position.set(15, 15, -15);
+scene.add(pointLight3);
+
+// GROUND MESH
+const groundGeometry = new THREE.PlaneGeometry(GROUND_SIZE, GROUND_SIZE, 50, 50);
+const posAttr = groundGeometry.attributes.position;
+for (let i = 0; i < posAttr.count; i++) {
+  const x = posAttr.getX(i);
+  const z = posAttr.getY(i);
+  const dist = Math.sqrt(x*x + z*z);
+  const noise = Math.sin(x * 0.5) * Math.cos(z * 0.5) * 0.02 * (1 - dist/GROUND_SIZE*2);
+  posAttr.setZ(i, noise);
+}
+groundGeometry.computeVertexNormals();
+
+const groundMaterial = new THREE.MeshStandardMaterial({
+  color: 0x1a1a2e,
+  roughness: 0.9,
+  metalness: 0.1,
+  side: THREE.DoubleSide
+});
+const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+groundMesh.rotation.x = -Math.PI / 2;
+groundMesh.position.y = -0.5;
+groundMesh.receiveShadow = true;
+scene.add(groundMesh);
+
+const gridHelper = new THREE.GridHelper(GROUND_SIZE, GROUND_SIZE, 0x334155, 0x1e293b);
+gridHelper.position.y = -0.49;
+scene.add(gridHelper);
+
+const centerGeo = new THREE.RingGeometry(0.3, 0.6, 32);
+const centerMat = new THREE.MeshBasicMaterial({ 
+  color: 0x6366f1, 
+  transparent: true, 
+  opacity: 0.3, 
+  side: THREE.DoubleSide 
+});
+const centerMarker = new THREE.Mesh(centerGeo, centerMat);
+centerMarker.rotation.x = -Math.PI / 2;
+centerMarker.position.y = -0.48;
+scene.add(centerMarker);
+
+// DOMINO CREATION - using let instead of function to allow reassignment
+let createDominoMesh = function(type) {
+  const t = DOMINO_TYPES[type];
+  const geometry = new THREE.BoxGeometry(DOMINO_WIDTH, DOMINO_HEIGHT, DOMINO_DEPTH, 2, 4, 1);
+  
+  const pos = geometry.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = Math.abs(pos.getX(i));
+    const z = Math.abs(pos.getZ(i));
+    const y = pos.getY(i);
+    if ((x > DOMINO_WIDTH/2 * 0.95 || z > DOMINO_DEPTH/2 * 0.95) && Math.abs(y) < DOMINO_HEIGHT/2 * 0.9) {
+      const scale = 0.92;
+      if (x > z) pos.setX(i, pos.getX(i) * scale);
+      else pos.setZ(i, pos.getZ(i) * scale);
+    }
+  }
+  geometry.computeVertexNormals();
+  
+  const material = new THREE.MeshStandardMaterial({
+    color: t.color,
+    roughness: 0.7,
+    metalness: 0.1,
+    emissive: t.emissive,
+    emissiveIntensity: 0.1
+  });
+  
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.userData.type = type;
+  return mesh;
+};
+
+let createDominoBody = function(position, rotation, type) {
+  const shape = new CANNON.Box(new CANNON.Vec3(DOMINO_WIDTH/2, DOMINO_HEIGHT/2, DOMINO_DEPTH/2));
+  const body = new CANNON.Body({
+    mass: 0.1,
+    shape,
+    position: new CANNON.Vec3(position.x, position.y, position.z),
+    material: dominoMaterial,
+    sleepSpeedLimit: 0.01,
+    sleepTimeLimit: 0.5,
+    allowSleep: false
+  });
+  body.quaternion.setFromEuler(0, rotation, 0);
+  body.angularDamping = 0.01; // Preserve rotational momentum for more realistic tipping
+  body.linearDamping = 0.0; // Minimal damping so impulses carry through the chain
+  return body;
+};
+
+// Core addDomino function
+let addDominoCore = function(x, z, rotation, type) {
+  const y = DOMINO_HEIGHT / 2; // Center of domino is at half height
+  const mesh = createDominoMesh(type);
+  mesh.position.set(x, y, z);
+  mesh.rotation.y = rotation;
+  scene.add(mesh);
+  
+  // Body position should match mesh - bottom of domino at y=0
+  const bodyPos = new CANNON.Vec3(x, y, z);
+  const body = createDominoBody(bodyPos, rotation, type);
+  world.addBody(body);
+  
+  dominoMeshes.push(mesh);
+  dominoBodies.push(body);
+  dominoTypes.push(type);
+  updateStats();
+  return { mesh, body };
+};
+
+// Wrapped addDomino with auto-save
+let addDomino = function(x, z, rotation, type) {
+  const result = addDominoCore(x, z, rotation, type);
+  saveLayout();
+  return result;
+};
+
+// TOOL PALETTE
+const paletteContainer = document.getElementById('tool-palette');
+TYPE_KEYS.forEach((type, i) => {
+  const t = DOMINO_TYPES[type];
+  const btn = document.createElement('button');
+  btn.className = 'tool-btn' + (i === 0 ? ' active' : '');
+  btn.dataset.type = type;
+  btn.innerHTML = `
+    <span class="tool-icon" style="color: #${t.color.toString(16).padStart(6,'0')}">■</span>
+    <span class="tool-label">${t.name}</span>
+  `;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDominoType = type;
+  });
+  paletteContainer.appendChild(btn);
+});
+
+// ROTATION CONTROL
+const rotationSlider = document.getElementById('rotation-slider');
+const rotationValue = document.getElementById('rotation-value');
+
+rotationSlider.addEventListener('input', (e) => {
+  const degrees = parseInt(e.target.value);
+  placeRotation = degrees * Math.PI / 180;
+  rotationValue.textContent = degrees + '°';
+  if (previewMesh) {
+    previewMesh.rotation.y = placeRotation;
+  }
+});
+
+// Rotation presets
+document.querySelectorAll('.rotation-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const angle = parseInt(btn.dataset.angle);
+    placeRotation = angle * Math.PI / 180;
+    rotationSlider.value = angle;
+    rotationValue.textContent = angle + '°';
+    if (previewMesh) {
+      previewMesh.rotation.y = placeRotation;
+    }
+  });
+});
+
+// MODE SWITCHING
+function setMode(newMode) {
+  mode = newMode;
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === newMode);
+  });
+  controls.enabled = (newMode !== 'build');
+  
+  const simBtn = document.getElementById('simulate-btn');
+  if (newMode === 'simulate') {
+    simBtn.textContent = '⏸️ Pause';
+    simBtn.classList.add('loading');
+    startSimulation();
+  } else {
+    simBtn.textContent = '▶️ Simulation starten';
+    simBtn.classList.remove('loading');
+    if (isSimulating) pauseSimulation();
+  }
+  
+  paletteContainer.style.display = (newMode === 'build') ? 'flex' : 'none';
+  document.getElementById('simulate-btn').style.display = (newMode === 'build') ? 'inline-flex' : 'none';
+  document.getElementById('reset-btn').style.display = isSimulating ? 'inline-flex' : 'none';
+  document.getElementById('clear-btn').style.display = (newMode === 'build' && dominoMeshes.length > 0) ? 'inline-flex' : 'none';
+  document.getElementById('info-btn').style.display = 'inline-flex';
+}
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => setMode(btn.dataset.mode));
+});
+
+// SIMULATION CONTROL
+function startSimulation() {
+  if (isSimulating || dominoBodies.length === 0) return;
+  isSimulating = true;
+  simulationTime = 0;
+  fallenCount = 0;
+  simulationTarget = null;
+  
+  dominoBodies.forEach(body => {
+    body.sleepState = 0;
+    body.wakeUp();
+  });
+  
+  setMode('simulate');
+  
+  // Start the chain reaction automatically by pushing the first domino
+  if (dominoBodies.length > 0) {
+    pushDomino(0);
+    const firstBody = dominoBodies[0];
+    simulationTarget = new THREE.Vector3(firstBody.position.x, 1, firstBody.position.z);
+  }
+}
+
+// Push a specific domino to start chain reaction
+function pushDomino(index) {
+  if (!isSimulating || index < 0 || index >= dominoBodies.length) return;
+  
+  const body = dominoBodies[index];
+  body.sleepState = 0;
+  body.wakeUp();
+  body.velocity.set(0, 0, 0);
+  body.angularVelocity.set(0, 0, 0);
+  
+  // Push along the broad bottom side so the stone tips forward over the long edge.
+  const localImpulse = new CANNON.Vec3(1.4, 0, 0);
+  const localPoint = new CANNON.Vec3(0, DOMINO_HEIGHT * 0.45, 0);
+  
+  if (typeof body.applyLocalImpulse === 'function') {
+    body.applyLocalImpulse(localImpulse, localPoint);
+  } else {
+    const worldImpulse = body.quaternion.vmult(localImpulse);
+    const worldPoint = body.pointToWorldFrame
+      ? body.pointToWorldFrame(localPoint)
+      : body.position.vadd(new CANNON.Vec3(0, DOMINO_HEIGHT * 0.45, 0));
+    body.applyImpulse(worldImpulse, worldPoint);
+  }
+  
+  // Add tipping rotation around the long bottom edge (local Z axis).
+  const localRotationAxis = new CANNON.Vec3(0, 0, 1);
+  const worldRotationAxis = body.quaternion.vmult(localRotationAxis);
+  body.angularVelocity.copy(worldRotationAxis.scale(2.4));
+  
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function pauseSimulation() {
+  isSimulating = false;
+  document.getElementById('simulate-btn').textContent = '▶️ Fortsetzen';
+  document.getElementById('simulate-btn').classList.remove('loading');
+}
+
+function resetSimulation() {
+  pauseSimulation();
+  simulationTime = 0;
+  fallenCount = 0;
+  dominoBodies.forEach((body, i) => {
+    const mesh = dominoMeshes[i];
+    body.position.copy(mesh.userData.originalPos || new CANNON.Vec3(mesh.position.x, mesh.position.y, mesh.position.z));
+    body.quaternion.copy(mesh.userData.originalQuat || new CANNON.Quaternion(mesh.quaternion.x, mesh.quaternion.y, mesh.quaternion.z, mesh.quaternion.w));
+    body.velocity.set(0,0,0);
+    body.angularVelocity.set(0,0,0);
+    body.sleepState = 0;
+    body.sleep();
+  });
+  updateStats();
+}
+
+function clearAll() {
+  pauseSimulation();
+  dominoMeshes.forEach(m => { scene.remove(m); m.geometry.dispose(); m.material.dispose(); });
+  dominoBodies.forEach(b => world.removeBody(b));
+  dominoMeshes = [];
+  dominoBodies = [];
+  dominoTypes = [];
+  updateStats();
+  document.getElementById('clear-btn').style.display = 'none';
+  document.getElementById('reset-btn').style.display = 'none';
+}
+
+document.getElementById('simulate-btn').addEventListener('click', () => {
+  if (isSimulating) pauseSimulation();
+  else startSimulation();
+});
+document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+document.getElementById('clear-btn').addEventListener('click', clearAll);
+
+document.getElementById('info-btn').addEventListener('click', () => {
+  document.getElementById('info-panel').classList.toggle('visible');
+});
+
+// BRIDGE BUILDING
+const bridgeBtn = document.getElementById('bridge-btn');
+const bridgeControl = document.getElementById('bridge-control');
+const bridgeHeightSlider = document.getElementById('bridge-height-slider');
+const bridgeHeightValue = document.getElementById('bridge-height-value');
+const placeBridgeStartBtn = document.getElementById('place-bridge-start');
+const placeBridgeEndBtn = document.getElementById('place-bridge-end');
+const cancelBridgeBtn = document.getElementById('cancel-bridge');
+
+bridgeBtn.addEventListener('click', () => {
+  isBuildingBridge = !isBuildingBridge;
+  bridgeControl.style.display = isBuildingBridge ? 'block' : 'none';
+  bridgeBtn.classList.toggle('active', isBuildingBridge);
+  if (!isBuildingBridge) {
+    bridgeStartPoint = null;
+    if (bridgePreviewMesh) {
+      scene.remove(bridgePreviewMesh);
+      bridgePreviewMesh = null;
+    }
+  }
+});
+
+bridgeHeightSlider.addEventListener('input', (e) => {
+  currentBridgeHeight = parseFloat(e.target.value);
+  bridgeHeightValue.textContent = currentBridgeHeight.toFixed(1) + 'm';
+});
+
+placeBridgeStartBtn.addEventListener('click', () => {
+  // Set bridge start point on click
+  const rect = renderer.domElement.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const point = getGroundIntersection(centerX, centerY);
+  if (point) {
+    bridgeStartPoint = point.clone();
+    bridgeStartPoint.y = currentBridgeHeight;
+    placeBridgeStartBtn.textContent = '📍 Start: ✓';
+    placeBridgeStartBtn.classList.add('active');
+  }
+});
+
+placeBridgeEndBtn.addEventListener('click', () => {
+  if (!bridgeStartPoint) {
+    alert('Bitte zuerst Startpunkt setzen!');
+    return;
+  }
+  // Set bridge end point on click
+  const rect = renderer.domElement.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const point = getGroundIntersection(centerX, centerY);
+  if (point) {
+    const endPoint = point.clone();
+    endPoint.y = currentBridgeHeight;
+    createBridge(bridgeStartPoint, endPoint);
+    bridgeStartPoint = null;
+    placeBridgeStartBtn.textContent = '📍 Start setzen';
+    placeBridgeStartBtn.classList.remove('active');
+  }
+});
+
+cancelBridgeBtn.addEventListener('click', () => {
+  isBuildingBridge = false;
+  bridgeControl.style.display = 'none';
+  bridgeBtn.classList.remove('active');
+  bridgeStartPoint = null;
+  if (bridgePreviewMesh) {
+    scene.remove(bridgePreviewMesh);
+    bridgePreviewMesh = null;
+  }
+  placeBridgeStartBtn.textContent = '📍 Start setzen';
+  placeBridgeStartBtn.classList.remove('active');
+});
+
+function createBridge(start, end) {
+  const bridgeMaterial = new THREE.MeshStandardMaterial({
+    color: 0x4a5568,
+    roughness: 0.8,
+    metalness: 0.2
+  });
+  
+  // Calculate bridge length and angle
+  const dx = end.x - start.x;
+  const dz = end.z - start.z;
+  const length = Math.sqrt(dx * dx + dz * dz);
+  const angle = Math.atan2(dx, dz);
+  
+  // Create bridge platform
+  const bridgeGeometry = new THREE.BoxGeometry(length, BRIDGE_THICKNESS, BRIDGE_WIDTH);
+  const bridgeMesh = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
+  bridgeMesh.position.set(
+    (start.x + end.x) / 2,
+    start.y,
+    (start.z + end.z) / 2
+  );
+  bridgeMesh.rotation.y = angle;
+  bridgeMesh.castShadow = true;
+  bridgeMesh.receiveShadow = true;
+  scene.add(bridgeMesh);
+  bridgeMeshes.push(bridgeMesh);
+  
+  // Create physics body for bridge
+  const bridgeShape = new CANNON.Box(new CANNON.Vec3(length/2, BRIDGE_THICKNESS/2, BRIDGE_WIDTH/2));
+  const bridgeBody = new CANNON.Body({
+    mass: 0, // Static body
+    shape: bridgeShape,
+    position: new CANNON.Vec3(bridgeMesh.position.x, bridgeMesh.position.y, bridgeMesh.position.z),
+    material: new CANNON.Material('bridge')
+  });
+  bridgeBody.quaternion.setFromEuler(0, angle, 0);
+  world.addBody(bridgeBody);
+  bridgeBodies.push(bridgeBody);
+  
+  // Create supports (pillars)
+  const supportGeometry = new THREE.BoxGeometry(0.3, start.y, 0.3);
+  const supportMaterial = new THREE.MeshStandardMaterial({
+    color: 0x718096,
+    roughness: 0.9,
+    metalness: 0.1
+  });
+  
+  // Support at start
+  const support1 = new THREE.Mesh(supportGeometry, supportMaterial);
+  support1.position.set(start.x, start.y / 2, start.z);
+  support1.castShadow = true;
+  support1.receiveShadow = true;
+  scene.add(support1);
+  bridgeMeshes.push(support1);
+  
+  // Support at end
+  const support2 = new THREE.Mesh(supportGeometry, supportMaterial);
+  support2.position.set(end.x, end.y / 2, end.z);
+  support2.castShadow = true;
+  support2.receiveShadow = true;
+  scene.add(support2);
+  bridgeMeshes.push(support2);
+  
+  // Physics for supports
+  const supportShape = new CANNON.Box(new CANNON.Vec3(0.15, start.y / 2, 0.15));
+  const supportBody1 = new CANNON.Body({ mass: 0, shape: supportShape, position: new CANNON.Vec3(start.x, start.y / 2, start.z) });
+  const supportBody2 = new CANNON.Body({ mass: 0, shape: supportShape, position: new CANNON.Vec3(end.x, end.y / 2, end.z) });
+  world.addBody(supportBody1);
+  world.addBody(supportBody2);
+  bridgeBodies.push(supportBody1);
+  bridgeBodies.push(supportBody2);
+  
+  if (navigator.vibrate) navigator.vibrate(50);
+}
+
+// TOUCH / MOUSE INTERACTION
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let placeRotation = 0;
+let previewMesh = null;
+
+function createPreviewMesh() {
+  const mesh = createDominoMesh(currentDominoType);
+  mesh.material = mesh.material.clone();
+  mesh.material.transparent = true;
+  mesh.material.opacity = 0.5;
+  mesh.material.depthWrite = false;
+  return mesh;
+}
+
+function getGroundIntersection(clientX, clientY) {
+  pointer.x = (clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  
+  // Check bridges first
+  if (bridgeMeshes.length > 0) {
+    const bridgeIntersects = raycaster.intersectObjects(bridgeMeshes);
+    if (bridgeIntersects.length > 0) {
+      return bridgeIntersects[0].point;
+    }
+  }
+  
+  // Then check ground
+  const groundIntersects = raycaster.intersectObject(groundMesh);
+  return groundIntersects.length > 0 ? groundIntersects[0].point : null;
+}
+
+function updatePreview(clientX, clientY) {
+  if (mode !== 'build') return;
+  const point = getGroundIntersection(clientX, clientY);
+  if (!point) { if (previewMesh) previewMesh.visible = false; return; }
+  
+  if (!previewMesh) {
+    previewMesh = createPreviewMesh();
+    scene.add(previewMesh);
+  }
+  
+  const snap = 0.5;
+  point.x = Math.round(point.x / snap) * snap;
+  point.z = Math.round(point.z / snap) * snap;
+  point.y = DOMINO_HEIGHT / 2;
+  
+  previewMesh.position.copy(point);
+  previewMesh.rotation.y = placeRotation;
+  previewMesh.visible = true;
+  
+  let collision = false;
+  const previewBox = new THREE.Box3().setFromObject(previewMesh);
+  for (const mesh of dominoMeshes) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    if (box.intersectsBox(previewBox)) { collision = true; break; }
+  }
+  previewMesh.material.color.setHex(collision ? 0xef4444 : 0x6366f1);
+}
+
+function placeDominoAt(clientX, clientY) {
+  if (mode !== 'build') return;
+  const point = getGroundIntersection(clientX, clientY);
+  if (!point) return;
+  
+  const snap = 0.5;
+  point.x = Math.round(point.x / snap) * snap;
+  point.z = Math.round(point.z / snap) * snap;
+  
+  const tempMesh = createDominoMesh(currentDominoType);
+  tempMesh.position.set(point.x, DOMINO_HEIGHT/2, point.z);
+  tempMesh.rotation.y = placeRotation;
+  const newBox = new THREE.Box3().setFromObject(tempMesh);
+  tempMesh.geometry.dispose();
+  tempMesh.material.dispose();
+  
+  for (const mesh of dominoMeshes) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    if (box.intersectsBox(newBox)) return;
+  }
+  
+  const placed = addDomino(point.x, point.z, placeRotation, currentDominoType);
+  placed.mesh.userData.originalPos = new CANNON.Vec3(placed.body.position.x, placed.body.position.y, placed.body.position.z);
+  placed.mesh.userData.originalQuat = new CANNON.Quaternion(placed.body.quaternion.x, placed.body.quaternion.y, placed.body.quaternion.z, placed.body.quaternion.w);
+  
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function handleTouchStart(e) {
+  if (e.touches.length === 1) {
+    touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    touchStartTime = Date.now();
+    isMultiTouch = false;
+  } else if (e.touches.length === 2) {
+    isMultiTouch = true;
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    lastTouchDistance = Math.hypot(dx, dy);
+  }
+}
+
+function handleTouchMove(e) {
+  if (e.touches.length === 1 && !isMultiTouch) {
+    if (mode === 'build') {
+      updatePreview(e.touches[0].clientX, e.touches[0].clientY);
+    }
+    // Allow camera orbit on single-touch drag outside build preview
+    if (mode === 'simulate' || mode === 'camera') {
+      e.preventDefault();
+    }
+  }
+}
+
+function handleTouchEnd(e) {
+  if (!isMultiTouch && e.changedTouches.length === 1) {
+    const touch = e.changedTouches[0];
+    const dt = Date.now() - touchStartTime;
+    const dx = touch.clientX - touchStartPos.x;
+    const dy = touch.clientY - touchStartPos.y;
+    const dist = Math.hypot(dx, dy);
+    
+    if (dt < 300 && dist < 20) {
+      if (mode === 'build') {
+        placeDominoAt(touch.clientX, touch.clientY);
+        if (!touchHintShown) {
+          document.getElementById('touch-hint').style.animation = 'none';
+          document.getElementById('touch-hint').offsetHeight;
+          document.getElementById('touch-hint').style.animation = 'fadeInOut 4s ease-in-out';
+          touchHintShown = true;
+        }
+      } else if (isSimulating) {
+        // Tap on domino to push it during simulation
+        const index = getDominoIntersection(touch.clientX, touch.clientY);
+        if (index >= 0) {
+          pushDomino(index);
+        }
+      }
+    }
+    else if (dist > 20 && mode === 'build') {
+      placeRotation = Math.atan2(dx, -dy);
+      updatePreview(touch.clientX, touch.clientY);
+    }
+  }
+  isMultiTouch = false;
+  lastTouchDistance = 0;
+}
+
+renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+renderer.domElement.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+// Get domino intersection for clicking
+function getDominoIntersection(clientX, clientY) {
+  pointer.x = (clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(dominoMeshes);
+  if (intersects.length > 0) {
+    const mesh = intersects[0].object;
+    const index = dominoMeshes.indexOf(mesh);
+    return index;
+  }
+  return -1;
+}
+
+renderer.domElement.addEventListener('mousemove', e => {
+  if (mode === 'build') updatePreview(e.clientX, e.clientY);
+});
+renderer.domElement.addEventListener('click', e => {
+  if (mode === 'build') {
+    placeDominoAt(e.clientX, e.clientY);
+  } else if (isSimulating) {
+    // Click on domino to push it
+    const index = getDominoIntersection(e.clientX, e.clientY);
+    if (index >= 0) {
+      pushDomino(index);
+    }
+  }
+});
+renderer.domElement.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (mode === 'build') placeRotation += Math.PI / 8;
+  updatePreview(e.clientX, e.clientY);
+});
+
+window.addEventListener('keydown', e => {
+  if (mode !== 'build') return;
+  if (e.key === 'r' || e.key === 'R') placeRotation += Math.PI / 8;
+  else if (e.key === 'Shift') placeRotation += Math.PI / 2;
+  else if (e.key === 'Delete' || e.key === 'Backspace') clearAll();
+  else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); startSimulation(); }
+  else if (e.key === 'Escape') { pauseSimulation(); setMode('build'); }
+  if (previewMesh) updatePreview(pointer.x * 0.5 * window.innerWidth + window.innerWidth/2, -pointer.y * 0.5 * window.innerHeight + window.innerHeight/2);
+});
+
+// ANIMATION LOOP
+let lastFpsUpdate = 0;
+let frameCount = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  
+  const now = performance.now();
+  const dt = Math.min((now - lastFrameTime) / 1000, 1/30);
+  lastFrameTime = now;
+  
+  frameCount++;
+  if (now - lastFpsUpdate > 500) {
+    fps = Math.round(frameCount * 1000 / (now - lastFpsUpdate));
+    lastFpsUpdate = now;
+    frameCount = 0;
+  }
+  
+  if (isSimulating) {
+    world.step(1/60, dt, 3);
+    simulationTime += dt;
+    
+    fallenCount = 0;
+    dominoBodies.forEach((body, i) => {
+      const mesh = dominoMeshes[i];
+      mesh.position.copy(body.position);
+      mesh.quaternion.copy(body.quaternion);
+      const up = new THREE.Vector3(0,1,0).applyQuaternion(body.quaternion);
+      if (up.y < 0.7) fallenCount++;
+    });
+    updateStats();
+  }
+  
+  centerMarker.rotation.z += 0.002;
+  centerMarker.material.opacity = 0.2 + Math.sin(now * 0.003) * 0.1;
+  
+  if (isSimulating && dominoBodies.length > 0) {
+    let targetPos;
+    if (simulationTarget) {
+      targetPos = simulationTarget;
+    } else {
+      const avgPos = new THREE.Vector3();
+      dominoMeshes.forEach(m => avgPos.add(m.position));
+      avgPos.divideScalar(dominoMeshes.length);
+      targetPos = new THREE.Vector3(avgPos.x, 1, avgPos.z);
+    }
+    controls.target.lerp(targetPos, 0.02);
+    if (controls.target.distanceTo(targetPos) < 0.05) {
+      simulationTarget = null;
+    }
+  }
+  
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// STATS & UI UPDATES
+function updateStats() {
+  document.getElementById('stat-count').textContent = dominoMeshes.length;
+  document.getElementById('stat-fallen').textContent = fallenCount;
+  document.getElementById('stat-time').textContent = simulationTime.toFixed(2) + 's';
+  document.getElementById('stat-fps').textContent = fps;
+  
+  const clearBtn = document.getElementById('clear-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  clearBtn.style.display = (mode === 'build' && dominoMeshes.length > 0) ? 'inline-flex' : 'none';
+  resetBtn.style.display = (isSimulating || fallenCount > 0) ? 'inline-flex' : 'none';
+}
+
+// RESIZE HANDLER
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// SAVE/LOAD
+function saveLayout() {
+  const data = dominoMeshes.map((m, i) => ({
+    x: m.position.x, z: m.position.z, r: m.rotation.y, t: dominoTypes[i]
+  }));
+  localStorage.setItem('dominoLayout', JSON.stringify(data));
+}
+
+function loadLayout() {
+  try {
+    const data = JSON.parse(localStorage.getItem('dominoLayout') || '[]');
+    clearAll();
+    data.forEach(d => {
+      const placed = addDomino(d.x, d.z, d.r, d.t);
+      placed.mesh.userData.originalPos = new CANNON.Vec3(placed.body.position.x, placed.body.position.y, placed.body.position.z);
+      placed.mesh.userData.originalQuat = new CANNON.Quaternion(placed.body.quaternion.x, placed.body.quaternion.y, placed.body.quaternion.z, placed.body.quaternion.w);
+    });
+  } catch (e) {
+    console.warn('Could not load layout:', e);
+  }
+}
+
+// Load on start
+loadLayout();
+if (dominoMeshes.length > 0) {
+  document.getElementById('clear-btn').style.display = 'inline-flex';
+}
+
+// PREVENT CONTEXT MENU / ZOOM ON DOUBLE TAP
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('gestureend', e => e.preventDefault());
+
+renderer.domElement.style.touchAction = 'none';
+
+console.log('🎲 Domino Simulator 3D geladen!');
+console.log('👆 Tippen: Stein platzieren | 👆👆 Zweifinger: Kamera | 🤏 Pinch: Zoom');
+console.log('Tasten: R = drehen, Leertaste = simulieren, Entf = löschen');
+</script>
+</body>
+</html>

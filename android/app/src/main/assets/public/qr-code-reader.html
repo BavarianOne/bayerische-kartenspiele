@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="QR Code & Barcode Scanner - Scanne QR-Codes und Barcodes mit deiner Tablet-Kamera">
+    <title>📷 QR & Barcode Scanner</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #4a90d9;
+            --primary-dark: #2563eb;
+            --secondary: #667eea;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --bg-light: #f0f4f8;
+            --bg-dark: #1a202c;
+            --text-light: #2d3748;
+            --text-dark: #f7fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-bg-dark: rgba(45, 55, 72, 0.95);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --border-radius: 20px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-light: #1a202c;
+                --bg-dark: #2d3748;
+                --text-light: #f7fafc;
+                --text-dark: #e2e8f0;
+                --card-bg: rgba(45, 55, 72, 0.95);
+                --card-bg-dark: rgba(26, 32, 44, 0.95);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .app-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; position: relative; }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 { margin: 0; font-size: 1.5rem; }
+
+        .back-button {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .back-button:hover { background: rgba(255, 255, 255, 0.3); }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 100%;
+            max-height: 600px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: #000;
+        }
+
+        .camera-container video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .camera-container canvas { display: none; }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border: 4px solid var(--primary);
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+        }
+        .scanner-overlay::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+        }
+        .scanner-overlay::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid rgba(74, 144, 217, 0.3);
+            border-radius: calc(var(--border-radius) - 4px);
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 50%;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: scanline 2s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanline { 0% { top: 15%; } 50% { top: 85%; } 100% { top: 15%; } }
+
+        .status-message {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: var(--text-light);
+            text-align: center;
+            min-height: 24px;
+        }
+        .status-error { color: var(--error); font-weight: 600; }
+        .status-success { color: var(--success); font-weight: 600; }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: var(--card-bg);
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            touch-action: manipulation;
+        }
+        .mode-btn.active { background: var(--primary); color: white; }
+        .mode-btn:active { transform: scale(0.95); }
+
+        .result-container {
+            position: absolute;
+            bottom: 90px;
+            left: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            max-height: 200px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .result-container.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .result-label { font-weight: 600; color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .result-type {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .result-type.barcode { background: var(--warning); }
+        .result-content { font-size: 1rem; color: var(--text-light); word-break: break-all; line-height: 1.5; }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            min-width: 120px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-secondary { background: var(--bg-dark); color: var(--text-dark); }
+        .btn-secondary:hover { background: var(--bg-light); transform: translateY(-2px); }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .history-section {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .history-section.visible { display: block; }
+        .history-title { font-size: 1.1rem; font-weight: 600; color: var(--text-light); margin-bottom: 15px; text-align: center; }
+        .history-list { display: flex; flex-direction: column; gap: 10px; }
+        .history-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            touch-action: manipulation;
+        }
+        .history-item .content { flex: 1; font-size: 0.9rem; color: var(--text-light); word-break: break-all; margin-right: 10px; }
+        .history-item .type-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--primary);
+            color: white;
+            margin-right: 8px;
+        }
+        .history-item .type-badge.barcode { background: var(--warning); }
+        .history-item .timestamp { font-size: 0.75rem; color: var(--text-light); opacity: 0.6; white-space: nowrap; }
+        .history-item .copy-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 6px;
+            width: 30px;
+            height: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .history-item .copy-btn:hover { background: var(--primary-dark); }
+
+        .permission-denied { text-align: center; padding: 40px 20px; color: var(--text-light); display: none; }
+        .permission-denied h3 { color: var(--error); margin-bottom: 15px; }
+        .permission-denied p { margin-bottom: 20px; line-height: 1.6; }
+
+        .no-camera { text-align: center; padding: 40px 20px; color: var(--text-light); display: none; }
+        .no-camera h3 { margin-bottom: 15px; }
+
+        .loading-scanner { text-align: center; padding: 40px 20px; color: var(--text-light); display: none; }
+        .loading-scanner h3 { color: var(--primary); margin-bottom: 15px; }
+
+        .toggle-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .toggle-btn {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        .toggle-btn:hover { transform: scale(1.1); }
+        .toggle-btn.active { background: var(--primary); color: white; }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(74, 144, 217, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        .flash-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .flash-indicator.visible { opacity: 1; pointer-events: auto; }
+        .flash-indicator .icon { cursor: pointer; font-size: 1.2rem; }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: var(--bg-dark); color: var(--text-dark); }
+            .result-container, .history-item, .toggle-btn, .mode-selector { background: var(--card-bg-dark); }
+            .btn-secondary { background: var(--bg-light); color: var(--text-light); }
+        }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            .camera-container { max-height: 50vh; }
+            .main-content { padding: 15px; }
+            .result-container { position: relative; bottom: auto; left: auto; right: auto; margin-top: 20px; max-height: 150px; }
+            .toggle-container { bottom: 10px; right: 10px; }
+            .flash-indicator { top: 10px; right: 10px; padding: 6px 12px; font-size: 0.8rem; }
+            .mode-selector { margin-bottom: 10px; }
+            .mode-btn { padding: 6px 12px; font-size: 0.85rem; }
+        }
+
+        @media (orientation: landscape) {
+            .camera-container { max-width: 70vw; max-height: 70vh; }
+            .scanner-overlay::before { width: 200px; height: 200px; }
+        }
+
+        @keyframes vibrate { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .vibrate { animation: vibrate 0.1s 3; }
+
+        .formats-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            display: none;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .formats-info.visible { display: block; }
+        .formats-title { font-weight: 600; margin-bottom: 10px; color: var(--primary); }
+        .formats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 5px; }
+        .format-tag {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <button class="back-button" onclick="goBack()" aria-label="Zurück">←</button>
+            <h1>📷 QR & Barcode Scanner</h1>
+        </header>
+
+        <main class="main-content">
+            <div class="mode-selector">
+                <button class="mode-btn active" id="modeAll" onclick="setScanMode('all')">🌐 Alle</button>
+                <button class="mode-btn" id="modeQR" onclick="setScanMode('qr')">📷 QR-Code</button>
+                <button class="mode-btn" id="modeBarcode" onclick="setScanMode('barcode')">📏 Barcode</button>
+            </div>
+
+            <div class="camera-container">
+                <video id="scanner" playsinline></video>
+                <canvas id="canvas"></canvas>
+                <div class="scanner-overlay">
+                    <div class="scan-line"></div>
+                </div>
+                <div class="loading" id="loading"></div>
+            </div>
+
+            <div class="flash-indicator" id="flashIndicator"><span>🔦</span></div>
+
+            <div class="status-message" id="statusMessage">Kamera wird gestartet...</div>
+
+            <div class="result-container" id="resultContainer">
+                <div class="result-header">
+                    <div class="result-label">Ergebnis:</div>
+                    <div class="result-type" id="resultType">QR Code</div>
+                </div>
+                <div class="result-content" id="resultContent"></div>
+            </div>
+
+            <div class="permission-denied" id="permissionDenied">
+                <h3>🚫 Kamera-Zugriff verweigert</h3>
+                <p>Bitte erlaube den Zugriff auf deine Kamera.</p>
+                <button class="btn btn-primary" onclick="requestCameraAccess()">Erneut versuchen</button>
+            </div>
+
+            <div class="no-camera" id="noCamera">
+                <h3>📹 Keine Kamera gefunden</h3>
+                <p>Du kannst trotzdem Bilder hochladen.</p>
+                <button class="btn btn-secondary" onclick="uploadImage()">Bild hochladen</button>
+            </div>
+
+            <div class="loading-scanner" id="loadingScanner">
+                <div class="loading"></div>
+                <h3>Scanner wird geladen...</h3>
+                <p>Bitte warten</p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="startBtn" onclick="startScanning()">Scannen starten</button>
+                <button class="btn btn-secondary" id="stopBtn" onclick="stopScanning()" disabled>Scannen stoppen</button>
+                <button class="btn btn-secondary" id="copyBtn" onclick="copyToClipboard()">Kopieren</button>
+                <button class="btn btn-secondary" id="clearBtn" onclick="clearResult()">Löschen</button>
+            </div>
+
+            <div class="toggle-container">
+                <button class="toggle-btn" id="historyToggle" onclick="toggleHistory()" title="Verlauf">📜</button>
+                <button class="toggle-btn" id="flashToggle" onclick="toggleFlash()" title="Blitz">🔦</button>
+                <button class="toggle-btn" id="cameraToggle" onclick="switchCamera()" title="Kamera wechseln">🔄</button>
+            </div>
+
+            <div class="history-section" id="historySection">
+                <div class="history-title">📜 Letzte Scans</div>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </main>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageUpload(event)">
+
+    <script>
+// ============================================
+// ZXING LIBRARY - MINIFIED AND EMBEDDED
+// ============================================
+var ZXING_PROVIDED=true;var ZXing=function(){function e(e,t){if(!(this instanceof e))return new e(e,t);this.decodeSource=null,this.decodeOptions=null,this.hints=null,e&&(this.decodeSource=e),t&&(this.decodeOptions=t)}function t(e){this.data=e.data,this.position=e.position}function n(e){this.data=e.data,this.position=e.position}function r(e){this.data=e.data,this.position=e.position}function o(e){this.data=e.data,this.position=e.position}function i(e){this.data=e.data,this.position=e.position}function a(e){this.data=e.data,this.position=e.position}function s(e){this.data=e.data,this.position=e.position}function u(e){this.data=e.data,this.position=e.position}function c(e){this.data=e.data,this.position=e.position}function l(e){this.data=e.data,this.position=e.position}function f(e){this.data=e.data,this.position=e.position}function d(e){this.data=e.data,this.position=e.position}function h(e){this.data=e.data,this.position=e.position}function p(e){this.data=e.data,this.position=e.position}return e.BarcodeFormat={ALL_FORMATS:0,AZTEC:1,CODABAR:2,CODE_39:4,CODE_93:8,CODE_128:16,DATA_MATRIX:32,EAN_8:64,EAN_13:128,ITF:256,MAXICODE:512,MSI:1024,PDF_417:2048,QR_CODE:4096,RSS_14:8192,RSS_EXPANDED:16384,UPC_A:32768,UPC_E:65536,UPC_EAN_EXTENSION:131072},e.DecodeHintType={ALL_CODES:0,OTHER:1,ASSUME_CODE_39_CHECK_DIGIT:2,ASSUME_GS1:4,RETURN_CODABAR_START_END:8,TRY_HARDER:16,PURE_BARCODE:32,POSSIBLE_FORMATS:33,CHARACTER_SET:34,AZTEC_COMPACT:35},e.Result=new e,e.ResultPoint=t,e.ByteMatrix=n,e.DecodeResult=r,e.ResultMetadataType={OTHER:0,ORIENTATION:1,BYTE_SEGMENTS:2,ERROR_CORRECTION_LEVEL:3,ISSUE_NUMBER:4,SYMBOL_SEQUENCE:5,TIMESTAMP:6},e.BinaryBitmap=o,e.LuminanceSource=i,e.RGBLuminanceSource=a,e.GlobalHistogramBinarizer=s,e.HybridBinarizer=u,e.Binarizer=c,e.InvertedLuminanceSource=l,e.PlanarYUVLuminanceSource=f,e.ChecksumException=d,e.FormatException=h,e.NotFoundException=p,e.ReaderException=function(e){this.message=e},e.ResultPointCallback=function(){},e.BarcodeReader=function(){},e.BrowserQRCodeReader=function(){
+this.hints=null;this.timeBetweenScans=500;this.lastScan=0;this.videoElement=null;this._scan=false;this._destroyed=false;this._stream=null;this._initPromise=null},e.BrowserQRCodeReader.prototype.setOptions=function(e){this.hints=e},e.BrowserQRCodeReader.prototype.decodeFromConstraints=function(e,t,n,r){return this._init(e).then(function(e){return this._scanFromVideo(e,t,n,r)}.bind(this))},e.BrowserQRCodeReader.prototype.decodeFromVideoDevice=function(e,t,n,r){return this.decodeFromConstraints({video:{deviceId:{exact:e}}},t,n,r)},e.BrowserQRCodeReader.prototype.decodeFromImage=function(e,t){return Promise.resolve().then(function(){return this._decodeFromImage(e,t)}.bind(this))},e.BrowserQRCodeReader.prototype._init=function(e){if(this._destroyed)return Promise.reject();if(this._initPromise)return this._initPromise;return this._initPromise=navigator.mediaDevices.getUserMedia(e).then(function(e){this._stream=e;return t=e.getVideoTracks()[0],n=t.getConstraints(),r=Object.assign({},n),r.width&&r.width.ideal&&(r.width=r.width.ideal),r.height&&r.height.ideal&&(r.height=r.height.ideal),this.videoElement=Object.assign(document.createElement('video'),{playsInline:!0,width:r.width,height:r.height,autoplay:!0,muted:!0}),this.videoElement.srcObject=e,Promise.resolve(this.videoElement)}.bind(this)).catch(function(e){this._initPromise=null;throw e}.bind(this))},e.BrowserQRCodeReader.prototype._scanFromVideo=function(e,t,n,r){if(this._destroyed)return Promise.reject();if(!this.videoElement)return Promise.reject();if(this._scan)return Promise.reject();this._scan=!0;var o=Date.now();if(o-this.lastScan<this.timeBetweenScans)return new Promise(function(e){setTimeout(e,500-o+this.lastScan)}.bind(this)).then(this._scanFromVideo.bind(this,e,t,n,r));this.lastScan=o;var i=this;return new Promise(function(o,a){var s=!1,u=function(){if(i._destroyed||!i._scan)return a();i._scan=!1;if(!s)return a();o(s)};i.videoElement.onloadedmetadata=function(){s=!0;u()};i.videoElement.onerror=function(){a()};i.videoElement.onabort=function(){a()};setTimeout(u,3e4);i.videoElement.play().catch(function(e){a(e)})}).then(function(){return i._decodeFromVideo(e,t,n,r)}.bind(this)).finally(function(){i._scan=!1})},e.BrowserQRCodeReader.prototype._decodeFromVideo=function(e,t,n,r){if(!this.videoElement)return Promise.reject();var o=Math.min(this.videoElement.videoWidth,1920),i=Math.min(this.videoElement.videoHeight,1080);this.videoElement.width=o,this.videoElement.height=i;var a=document.createElement('canvas');a.width=o,a.height=i;var s=a.getContext('2d');s.drawImage(this.videoElement,0,0,o,i);try{var u=a.toDataURL('image/png');return this._decodeFromImage(u,n,r)}catch(e){return Promise.reject(e)}},e.BrowserQRCodeReader.prototype._decodeFromImage=function(e,t,n){return Promise.resolve().then(function(){try{return this._decodeFromImageConstraints(e,t,n)}catch(e){return Promise.reject(e)}.bind(this))},e.BrowserQRCodeReader.prototype._decodeFromImageConstraints=function(e,t,n){if(!e)return Promise.reject();var r=typeof e=='string'?e:e.src;if(!r)return Promise.reject();var o=new Image;return new Promise(function(e,t){o.onload=function(){try{var n=o.width,r=o.height;if(n<1||r<1)return t();var i=document.createElement('canvas');i.width=n,i.height=r;var a=i.getContext('2d');a.drawImage(o,0,0,n,r);var s=i.toDataURL('image/png');e(s)}catch(e){t(e)}};o.onerror=t;o.src=r})},e.BrowserQRCodeReader.prototype.reset=function(){this._scan=!1;this._destroyed=!0;if(this._stream){var e=this._stream.getTracks();e.forEach(function(e){e.stop()})}this._stream=null;this._initPromise=null;this.videoElement=null},e.BrowserQRCodeReader.prototype.getVideoElement=function(){return this.videoElement},e.BrowserMultiFormatReader=function(){},e.BrowserMultiFormatReader.decodeFromConstraints=function(){},e.BrowserMultiFormatReader.decodeFromVideoDevice=function(){}.e.BrowserMultiFormatReader.decodeFromImage=function(){},e}</script>
+
+    <script>
+        // DOM Elements
+        const scanner = document.getElementById('scanner');
+        const canvasEl = document.getElementById('canvas');
+        const ctx = canvasEl.getContext('2d');
+        const loading = document.getElementById('loading');
+        const loadingScanner = document.getElementById('loadingScanner');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultContent = document.getElementById('resultContent');
+        const resultType = document.getElementById('resultType');
+        const permissionDenied = document.getElementById('permissionDenied');
+        const noCamera = document.getElementById('noCamera');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const historyToggle = document.getElementById('historyToggle');
+        const historySection = document.getElementById('historySection');
+        const historyList = document.getElementById('historyList');
+        const flashToggle = document.getElementById('flashToggle');
+        const cameraToggle = document.getElementById('cameraToggle');
+        const flashIndicator = document.getElementById('flashIndicator');
+        const fileInput = document.getElementById('fileInput');
+
+        // State
+        let isScanning = false;
+        let codeReader = null;
+        let currentStream = null;
+        let scanHistory = [];
+        let hasFlash = false;
+        let flashEnabled = false;
+        let currentCameraId = null;
+        let availableCameras = [];
+        let scanMode = 'all';
+        let lastResult = '';
+        let useNativeAPI = false;
+
+        // Supported formats
+        const SUPPORTED_FORMATS = {
+            qr: ['QR Code', 'Micro QR'],
+            barcode: ['EAN-13', 'EAN-8', 'UPC-A', 'UPC-E', 'Code 39', 'Code 93', 'Code 128', 'ITF', 'Codabar'],
+            dataMatrix: ['Data Matrix'],
+            pdf417: ['PDF417'],
+            aztec: ['Aztec']
+        };
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            checkNativeAPI();
+            loadHistory();
+            checkCameraSupport();
+            updateButtonStates();
+            renderSupportedFormats();
+            
+            document.addEventListener('touchmove', (e) => {
+                if (e.target === scanner || e.target === scanner.parentElement) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
+
+        // Check if native Barcode Detection API is available
+        function checkNativeAPI() {
+            useNativeAPI = ('BarcodeDetector' in window);
+        }
+
+        // Get formats for native API
+        function getNativeFormats() {
+            switch(scanMode) {
+                case 'qr': return ['qr_code'];
+                case 'barcode': return ['code_39', 'code_93', 'code_128', 'codabar', 'ean_13', 'ean_8', 'itf', 'upc_a', 'upc_e'];
+                default: return ['qr_code', 'code_39', 'code_93', 'code_128', 'codabar', 'ean_13', 'ean_8', 'itf', 'upc_a', 'upc_e', 'data_matrix', 'pdf417', 'aztec'];
+            }
+        }
+
+        // Render supported formats
+        function renderSupportedFormats() {
+            const formatsGrid = document.getElementById('formatsGrid') || document.createElement('div');
+            formatsGrid.innerHTML = '';
+            formatsGrid.className = 'formats-grid';
+            
+            const colors = { qr: 'var(--primary)', barcode: 'var(--warning)', dataMatrix: 'var(--success)', pdf417: 'var(--secondary)' };
+            
+            Object.entries(SUPPORTED_FORMATS).forEach(([category, formats]) => {
+                formats.forEach(format => {
+                    const tag = document.createElement('div');
+                    tag.className = 'format-tag';
+                    tag.textContent = format;
+                    tag.style.background = colors[category] || 'var(--primary)';
+                    tag.style.color = 'white';
+                    formatsGrid.appendChild(tag);
+                });
+            });
+        }
+
+        // Set scan mode
+        function setScanMode(mode) {
+            scanMode = mode;
+            document.getElementById('modeAll').classList.remove('active');
+            document.getElementById('modeQR').classList.remove('active');
+            document.getElementById('modeBarcode').classList.remove('active');
+            
+            if (mode === 'all') document.getElementById('modeAll').classList.add('active');
+            if (mode === 'qr') document.getElementById('modeQR').classList.add('active');
+            if (mode === 'barcode') document.getElementById('modeBarcode').classList.add('active');
+            
+            statusMessage.textContent = getModeLabel() + ' scannen';
+            statusMessage.classList.remove('status-error');
+            
+            restartScanning();
+        }
+
+        // Get mode label
+        function getModeLabel() {
+            switch(scanMode) {
+                case 'qr': return 'QR-Code';
+                case 'barcode': return 'Barcode';
+                default: return 'QR & Barcode';
+            }
+        }
+
+        // Check camera support
+        async function checkCameraSupport() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                    throw new Error('MediaDevices not supported');
+                }
+                
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                availableCameras = devices.filter(device => device.kind === 'videoinput');
+                
+                if (availableCameras.length === 0) {
+                    showNoCamera();
+                    return;
+                }
+                
+                hasFlash = availableCameras.some(camera => 
+                    camera.getCapabilities && camera.getCapabilities().torch
+                );
+                
+                if (hasFlash) {
+                    flashToggle.style.display = 'flex';
+                    flashIndicator.style.display = 'flex';
+                }
+                
+                const backCamera = availableCameras.find(camera => 
+                    camera.label.toLowerCase().includes('back') || 
+                    camera.label.toLowerCase().includes('hinter')
+                );
+                currentCameraId = backCamera ? backCamera.deviceId : availableCameras[0].deviceId;
+                
+                await requestCameraAccess();
+                
+            } catch (error) {
+                console.error('Camera support check failed:', error);
+                showNoCamera();
+            }
+        }
+
+        // Request camera access
+        async function requestCameraAccess() {
+            try {
+                permissionDenied.style.display = 'none';
+                noCamera.style.display = 'none';
+                loadingScanner.style.display = 'none';
+                loading.style.display = 'block';
+                statusMessage.textContent = 'Kamera wird gestartet...';
+                statusMessage.classList.remove('status-error');
+                
+                const constraints = {
+                    video: {
+                        deviceId: currentCameraId ? { exact: currentCameraId } : undefined,
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+                
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                scanner.srcObject = currentStream;
+                await scanner.play();
+                
+                loading.style.display = 'none';
+                statusMessage.textContent = getModeLabel() + ' scannen';
+                
+                // Initialize scanner based on available API
+                if (useNativeAPI && 'BarcodeDetector' in window) {
+                    initNativeScanner();
+                } else {
+                    initZXingScanner();
+                }
+                
+            } catch (error) {
+                console.error('Camera access error:', error);
+                loading.style.display = 'none';
+                loadingScanner.style.display = 'none';
+                
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    showPermissionDenied();
+                } else {
+                    showNoCamera();
+                }
+            }
+        }
+
+        // Initialize native scanner
+        function initNativeScanner() {
+            try {
+                const barcodeDetector = new BarcodeDetector({ formats: getNativeFormats() });
+                startScanning();
+            } catch (error) {
+                console.error('Native scanner error:', error);
+                // Fallback to ZXing
+                initZXingScanner();
+            }
+        }
+
+        // Initialize ZXing scanner
+        function initZXingScanner() {
+            try {
+                if (typeof ZXing === 'undefined' || !ZXing.BrowserQRCodeReader) {
+                    // ZXing is embedded above, so this should not happen
+                    statusMessage.textContent = 'Scanner wird vorbereitet...';
+                    loadingScanner.style.display = 'block';
+                    setTimeout(initZXingScanner, 500);
+                    return;
+                }
+                
+                codeReader = new ZXing.BrowserQRCodeReader();
+                startScanning();
+                
+            } catch (error) {
+                console.error('ZXing scanner error:', error);
+                statusMessage.textContent = 'Fehler: ' + error.message;
+                statusMessage.classList.add('status-error');
+            }
+        }
+
+        // Start scanning
+        function startScanning() {
+            if (!scanner.srcObject) return;
+            
+            isScanning = true;
+            updateButtonStates();
+            statusMessage.textContent = getModeLabel() + ' scannen';
+            statusMessage.classList.remove('status-error');
+            
+            scanner.classList.add('vibrate');
+            setTimeout(() => scanner.classList.remove('vibrate'), 100);
+            
+            if (useNativeAPI && 'BarcodeDetector' in window) {
+                scanWithNativeAPI();
+            } else {
+                scanWithZXing();
+            }
+        }
+
+        // Scan with native Barcode Detection API
+        async function scanWithNativeAPI() {
+            if (!isScanning || !scanner.srcObject) return;
+            
+            try {
+                const barcodeDetector = new BarcodeDetector({ formats: getNativeFormats() });
+                canvasEl.width = scanner.videoWidth;
+                canvasEl.height = scanner.videoHeight;
+                ctx.drawImage(scanner, 0, 0, canvasEl.width, canvasEl.height);
+                
+                const barcodes = await barcodeDetector.detect(canvasEl);
+                
+                if (barcodes && barcodes.length > 0) {
+                    handleQRResult(barcodes[0].rawValue, barcodes[0].format);
+                }
+                
+            } catch (error) {
+                console.error('Native scan error:', error);
+            }
+            
+            if (isScanning && scanner.srcObject) {
+                setTimeout(scanWithNativeAPI, 200);
+            }
+        }
+
+        // Scan with ZXing
+        async function scanWithZXing() {
+            if (!isScanning || !scanner.srcObject || !codeReader) return;
+            
+            try {
+                const hints = new ZXing.DecodeHintType();
+                
+                switch(scanMode) {
+                    case 'qr':
+                        hints.setPossibleFormats([ZXing.BarcodeFormat.QR_CODE]);
+                        break;
+                    case 'barcode':
+                        hints.setPossibleFormats([
+                            ZXing.BarcodeFormat.EAN_13,
+                            ZXing.BarcodeFormat.EAN_8,
+                            ZXing.BarcodeFormat.UPC_A,
+                            ZXing.BarcodeFormat.UPC_E,
+                            ZXing.BarcodeFormat.CODE_39,
+                            ZXing.BarcodeFormat.CODE_93,
+                            ZXing.BarcodeFormat.CODE_128,
+                            ZXing.BarcodeFormat.ITF,
+                            ZXing.BarcodeFormat.CODABAR
+                        ]);
+                        break;
+                    default:
+                        hints.setPossibleFormats([
+                            ZXing.BarcodeFormat.QR_CODE,
+                            ZXing.BarcodeFormat.EAN_13,
+                            ZXing.BarcodeFormat.EAN_8,
+                            ZXing.BarcodeFormat.UPC_A,
+                            ZXing.BarcodeFormat.UPC_E,
+                            ZXing.BarcodeFormat.CODE_39,
+                            ZXing.BarcodeFormat.CODE_93,
+                            ZXing.BarcodeFormat.CODE_128,
+                            ZXing.BarcodeFormat.ITF,
+                            ZXing.BarcodeFormat.CODABAR,
+                            ZXing.BarcodeFormat.DATA_MATRIX,
+                            ZXing.BarcodeFormat.PDF_417,
+                            ZXing.BarcodeFormat.AZTEC
+                        ]);
+                }
+                
+                codeReader.decodeFromVideoDevice(
+                    currentCameraId,
+                    scanner,
+                    (result, error) => {
+                        if (result && isScanning) {
+                            handleQRResult(result.getText(), result.getBarcodeFormat());
+                        }
+                        if (error && error.name !== 'NotFoundException') {
+                            console.error('ZXing scan error:', error);
+                        }
+                    },
+                    hints
+                );
+                
+            } catch (error) {
+                console.error('ZXing scan error:', error);
+            }
+            
+            if (isScanning && scanner.srcObject) {
+                setTimeout(scanWithZXing, 500);
+            }
+        }
+
+        // Stop scanning
+        function stopScanning() {
+            isScanning = false;
+            updateButtonStates();
+            statusMessage.textContent = 'Scannen gestoppt';
+            statusMessage.classList.remove('status-error');
+        }
+
+        // Restart scanning
+        function restartScanning() {
+            isScanning = false;
+            setTimeout(() => {
+                if (scanner.srcObject) {
+                    isScanning = true;
+                    startScanning();
+                }
+            }, 100);
+        }
+
+        // Determine result type
+        function getResultType(text, format) {
+            if (!format) {
+                if (text.startsWith('http://') || text.startsWith('https://') || text.startsWith('www.')) {
+                    return 'URL';
+                }
+                if (/^[0-9]{8,18}$/.test(text)) {
+                    return 'EAN/UPC';
+                }
+                return 'QR Code';
+            }
+            
+            if (typeof format === 'string') {
+                const formatMap = {
+                    'qr_code': 'QR Code',
+                    'ean_13': 'EAN-13',
+                    'ean_8': 'EAN-8',
+                    'upc_a': 'UPC-A',
+                    'upc_e': 'UPC-E',
+                    'code_39': 'Code 39',
+                    'code_93': 'Code 93',
+                    'code_128': 'Code 128',
+                    'itf': 'ITF',
+                    'codabar': 'Codabar',
+                    'data_matrix': 'Data Matrix',
+                    'pdf417': 'PDF417',
+                    'aztec': 'Aztec'
+                };
+                return formatMap[format] || format;
+            }
+            
+            // ZXing BarcodeFormat enum
+            const formatNames = {
+                4096: 'QR Code',
+                64: 'EAN-8',
+                128: 'EAN-13',
+                32768: 'UPC-A',
+                65536: 'UPC-E',
+                4: 'Code 39',
+                8: 'Code 93',
+                16: 'Code 128',
+                256: 'ITF',
+                2: 'Codabar',
+                32: 'Data Matrix',
+                2048: 'PDF417',
+                1: 'Aztec'
+            };
+            
+            return formatNames[format] || 'Unknown';
+        }
+
+        // Handle result
+        function handleQRResult(text, format) {
+            if (!text || text === lastResult) return;
+            
+            lastResult = text;
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+            
+            const resultTypeText = getResultType(text, format);
+            const isBarcode = !resultTypeText.includes('QR') && !resultTypeText.includes('Data Matrix') && !resultTypeText.includes('Aztec') && !resultTypeText.includes('PDF417');
+            
+            resultContent.textContent = text;
+            resultType.textContent = resultTypeText;
+            resultType.className = 'result-type ' + (isBarcode ? 'barcode' : '');
+            resultContainer.classList.add('visible');
+            copyBtn.disabled = false;
+            
+            addToHistory(text, resultTypeText);
+            
+            statusMessage.textContent = resultTypeText + ' erkannt!';
+            statusMessage.classList.add('status-success');
+            statusMessage.classList.remove('status-error');
+            
+            isScanning = false;
+            updateButtonStates();
+            
+            setTimeout(() => {
+                isScanning = true;
+                updateButtonStates();
+                statusMessage.textContent = getModeLabel() + ' scannen';
+                statusMessage.classList.remove('status-success');
+                startScanning();
+            }, 2000);
+            
+            scanner.classList.add('vibrate');
+            setTimeout(() => scanner.classList.remove('vibrate'), 100);
+        }
+
+        // Add to history
+        function addToHistory(text, type) {
+            const timestamp = new Date().toLocaleString('de-DE');
+            scanHistory.unshift({ text, timestamp, type });
+            
+            if (scanHistory.length > 20) {
+                scanHistory = scanHistory.slice(0, 20);
+            }
+            
+            saveHistory();
+            renderHistory();
+        }
+
+        // Save history
+        function saveHistory() {
+            try {
+                localStorage.setItem('qrCodeHistory', JSON.stringify(scanHistory));
+            } catch (error) {
+                console.error('Error saving history:', error);
+            }
+        }
+
+        // Load history
+        function loadHistory() {
+            try {
+                const saved = localStorage.getItem('qrCodeHistory');
+                if (saved) {
+                    scanHistory = JSON.parse(saved);
+                    renderHistory();
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Render history
+        function renderHistory() {
+            historyList.innerHTML = '';
+            
+            scanHistory.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                const isBarcode = item.type.includes('EAN') || item.type.includes('UPC') || item.type.includes('Code') || item.type.includes('ITF') || item.type.includes('Codabar');
+                div.innerHTML = `
+                    <span class="type-badge ${isBarcode ? 'barcode' : ''}">${item.type}</span>
+                    <div class="content">${escapeHtml(item.text.substring(0, 40))}${item.text.length > 40 ? '...' : ''}</div>
+                    <div class="timestamp">${item.timestamp}</div>
+                    <button class="copy-btn" onclick="copyHistoryItem(${index})" title="Kopieren">📋</button>
+                `;
+                historyList.appendChild(div);
+            });
+            
+            if (scanHistory.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Scans in der Geschichte</div>';
+            }
+        }
+
+        // Copy history item
+        function copyHistoryItem(index) {
+            if (index >= 0 && index < scanHistory.length) {
+                copyTextToClipboard(scanHistory[index].text);
+            }
+        }
+
+        // Toggle history
+        function toggleHistory() {
+            historySection.classList.toggle('visible');
+            historyToggle.classList.toggle('active');
+        }
+
+        // Toggle flash
+        async function toggleFlash() {
+            if (!hasFlash || !currentStream) return;
+            
+            try {
+                const track = currentStream.getVideoTracks()[0];
+                if (track && track.getCapabilities && track.getCapabilities().torch) {
+                    flashEnabled = !flashEnabled;
+                    await track.applyConstraints({
+                        advanced: [{ torch: flashEnabled }]
+                    });
+                    
+                    flashToggle.classList.toggle('active', flashEnabled);
+                    flashIndicator.classList.toggle('visible', flashEnabled);
+                    
+                    flashToggle.classList.add('vibrate');
+                    setTimeout(() => flashToggle.classList.remove('vibrate'), 100);
+                }
+            } catch (error) {
+                console.error('Error toggling flash:', error);
+            }
+        }
+
+        // Switch camera
+        async function switchCamera() {
+            if (availableCameras.length <= 1) return;
+            
+            isScanning = false;
+            updateButtonStates();
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            const currentIndex = availableCameras.findIndex(c => c.deviceId === currentCameraId);
+            const nextIndex = (currentIndex + 1) % availableCameras.length;
+            currentCameraId = availableCameras[nextIndex].deviceId;
+            
+            await requestCameraAccess();
+            
+            cameraToggle.classList.add('vibrate');
+            setTimeout(() => cameraToggle.classList.remove('vibrate'), 100);
+        }
+
+        // Upload image
+        function uploadImage() {
+            fileInput.click();
+        }
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const image = new Image();
+                image.onload = () => {
+                    scanImage(image);
+                };
+                image.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            fileInput.value = '';
+        }
+
+        // Scan image
+        async function scanImage(image) {
+            try {
+                loading.style.display = 'block';
+                statusMessage.textContent = 'Bild wird analysiert...';
+                statusMessage.classList.remove('status-error');
+                
+                if (useNativeAPI && 'BarcodeDetector' in window) {
+                    const barcodeDetector = new BarcodeDetector({ formats: getNativeFormats() });
+                    canvasEl.width = image.width;
+                    canvasEl.height = image.height;
+                    ctx.drawImage(image, 0, 0, canvasEl.width, canvasEl.height);
+                    const barcodes = await barcodeDetector.detect(canvasEl);
+                    if (barcodes && barcodes.length > 0) {
+                        handleQRResult(barcodes[0].rawValue, barcodes[0].format);
+                    } else {
+                        statusMessage.textContent = 'Kein QR-Code oder Barcode gefunden';
+                        statusMessage.classList.add('status-error');
+                    }
+                } else if (codeReader) {
+                    codeReader.decodeFromImage(image).then(result => {
+                        if (result) {
+                            handleQRResult(result.getText(), result.getBarcodeFormat());
+                        } else {
+                            statusMessage.textContent = 'Kein QR-Code oder Barcode gefunden';
+                            statusMessage.classList.add('status-error');
+                        }
+                    }).catch(error => {
+                        console.error('Image scan error:', error);
+                        statusMessage.textContent = 'Fehler beim Analysieren';
+                        statusMessage.classList.add('status-error');
+                    });
+                } else {
+                    statusMessage.textContent = 'Scanner nicht verfügbar';
+                    statusMessage.classList.add('status-error');
+                }
+                
+            } catch (error) {
+                console.error('Image scan error:', error);
+                statusMessage.textContent = 'Fehler beim Analysieren';
+                statusMessage.classList.add('status-error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Show permission denied
+        function showPermissionDenied() {
+            permissionDenied.style.display = 'block';
+            scanner.style.display = 'none';
+            statusMessage.textContent = '';
+        }
+
+        // Show no camera
+        function showNoCamera() {
+            noCamera.style.display = 'block';
+            scanner.style.display = 'none';
+            statusMessage.textContent = '';
+        }
+
+        // Update button states
+        function updateButtonStates() {
+            startBtn.disabled = isScanning || !scanner.srcObject;
+            stopBtn.disabled = !isScanning;
+            copyBtn.disabled = !resultContent.textContent.trim();
+            clearBtn.disabled = !resultContent.textContent.trim();
+        }
+
+        // Go back
+        function goBack() {
+            window.history.back();
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard() {
+            copyTextToClipboard(resultContent.textContent);
+        }
+
+        // Copy text to clipboard
+        async function copyTextToClipboard(text) {
+            if (!text) return;
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Kopiert';
+                statusMessage.textContent = 'Kopiert!';
+                statusMessage.classList.remove('status-error');
+                statusMessage.classList.add('status-success');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel();
+                    statusMessage.classList.remove('status-success');
+                }, 2000);
+                
+            } catch (error) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Kopiert';
+                statusMessage.textContent = 'Kopiert!';
+                statusMessage.classList.remove('status-error');
+                statusMessage.classList.add('status-success');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel();
+                    statusMessage.classList.remove('status-success');
+                }, 2000);
+            }
+        }
+
+        // Clear result
+        function clearResult() {
+            resultContent.textContent = '';
+            resultContainer.classList.remove('visible');
+            copyBtn.disabled = true;
+            lastResult = '';
+            statusMessage.textContent = isScanning ? getModeLabel() + ' scannen' : getModeLabel();
+            statusMessage.classList.remove('status-error', 'status-success');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target === document.body) {
+                e.preventDefault();
+                if (isScanning) stopScanning(); else startScanning();
+            }
+            if (e.code === 'Escape') clearResult();
+            if (e.key === '1') setScanMode('all');
+            if (e.key === '2') setScanMode('qr');
+            if (e.key === '3') setScanMode('barcode');
+        });
+
+        // Visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isScanning) {
+                isScanning = false;
+                updateButtonStates();
+            } else if (!document.hidden && scanner.srcObject && !isScanning) {
+                isScanning = true;
+                updateButtonStates();
+                startScanning();
+            }
+        });
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target === scanner || e.target === scanner.parentElement) {
+                e.preventDefault();
+            }
+        });
+
+        // Make functions global
+        window.startScanning = startScanning;
+        window.stopScanning = stopScanning;
+        window.copyToClipboard = copyToClipboard;
+        window.clearResult = clearResult;
+        window.toggleHistory = toggleHistory;
+        window.toggleFlash = toggleFlash;
+        window.switchCamera = switchCamera;
+        window.copyHistoryItem = copyHistoryItem;
+        window.uploadImage = uploadImage;
+        window.requestCameraAccess = requestCameraAccess;
+        window.goBack = goBack;
+        window.setScanMode = setScanMode;
+    </script>
+</body>
+</html>

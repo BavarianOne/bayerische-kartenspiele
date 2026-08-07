@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Rhythm Quest: Beat Kingdom - Rhythmustraining für Kinder">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Rhythm Quest">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+    <title>🎵 Rhythm Quest: Beat Kingdom</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #fafafa;
+            --bg-card: #ffffff;
+            --bg-elevated: #f5f5f5;
+            --text: #1a1a2e;
+            --text-muted: #6b7280;
+            --text-light: #9ca3af;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --success: #22c55e;
+            --success-light: #4ade80;
+            --warning: #f97316;
+            --danger: #ef4444;
+            --purple: #a855f7;
+            --cyan: #06b6d4;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --shadow-xl: 0 16px 48px rgba(0,0,0,0.16);
+            --radius: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.15s ease;
+            --safe-top: env(safe-area-inset-top, 0);
+            --safe-bottom: env(safe-area-inset-bottom, 0);
+            --safe-left: env(safe-area-inset-left, 0);
+            --safe-right: env(safe-area-inset-right, 0);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f1a;
+                --bg-card: #1a1a2e;
+                --bg-elevated: #252542;
+                --text: #f1f5f9;
+                --text-muted: #94a3b8;
+                --text-light: #64748b;
+                --shadow: 0 4px 12px rgba(0,0,0,0.3);
+                --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+                --shadow-xl: 0 16px 48px rgba(0,0,0,0.5);
+            }
+        }
+        
+        @media (prefers-contrast: high) {
+            :root {
+                --primary: #4f46e5;
+                --success: #16a34a;
+                --warning: #ea580c;
+                --danger: #dc2626;
+            }
+        }
+        
+        html { -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        
+        /* Background Decoration */
+        .bg-decor {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(245,158,11,0.05) 0%, transparent 70%);
+        }
+        
+        .floating-notes {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        }
+        .float-note {
+            position: absolute; font-size: 1.5rem; opacity: 0.06;
+            animation: floatNote 25s linear infinite;
+        }
+        @keyframes floatNote {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.06; }
+            90% { opacity: 0.06; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Screens */
+        .screen { 
+            display: none; 
+            position: relative; 
+            z-index: 10; 
+            min-height: 100vh; 
+            padding: calc(1rem + var(--safe-top)) 1rem calc(2rem + var(--safe-bottom));
+        }
+        .screen.active { 
+            display: block; 
+            animation: fadeIn 0.4s ease; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        /* Header */
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        .logo { display: inline-flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .logo-icon { 
+            width: 64px; height: 64px; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            border-radius: var(--radius); 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 2rem; 
+            box-shadow: var(--shadow-lg); 
+            animation: pulse 3s ease-in-out infinite; 
+        }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .logo-text { 
+            font-size: 2rem; font-weight: 700; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; 
+        }
+        .tagline { color: var(--text-muted); font-weight: 500; }
+        
+        /* Back Button */
+        .back-btn { 
+            position: absolute; left: 0; top: 0; 
+            padding: 0.5rem 1rem; font-size: 0.9rem; 
+        }
+        
+        /* Cards */
+        .card { 
+            background: var(--bg-card); 
+            border-radius: var(--radius-lg); 
+            padding: 1.5rem; 
+            box-shadow: var(--shadow); 
+            border: 2px solid transparent; 
+            transition: var(--transition); 
+        }
+        .card:hover { box-shadow: var(--shadow-lg); border-color: rgba(99,102,241,0.2); }
+        
+        /* Buttons */
+        .btn { 
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; 
+            padding: 0.875rem 1.75rem; border: none; border-radius: var(--radius); 
+            font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1rem; 
+            cursor: pointer; transition: var(--transition); 
+            touch-action: manipulation;
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: white; box-shadow: var(--shadow); 
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .btn-secondary { 
+            background: var(--bg-elevated); color: var(--text); 
+            border: 2px solid rgba(0,0,0,0.1); 
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-large { padding: 1rem 2.5rem; font-size: 1.1rem; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+        .btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+        .btn-icon { width: 48px; height: 48px; padding: 0; border-radius: 50%; }
+        
+        .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        
+        /* Menu Grid */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .menu-card { text-align: center; cursor: pointer; position: relative; overflow: hidden; }
+        .menu-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--primary), var(--secondary)); opacity: 0; transition: var(--transition); }
+        .menu-card:hover::before { opacity: 0.05; }
+        .menu-card-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+        .menu-card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .menu-card-desc { color: var(--text-muted); font-size: 0.9rem; }
+        .menu-card-badge { position: absolute; top: 1rem; right: 1rem; font-size: 0.65rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 20px; text-transform: uppercase; }
+        .badge-new { background: linear-gradient(135deg, var(--success), #16a34a); color: white; }
+        .badge-popular { background: linear-gradient(135deg, var(--accent), #ea580c); color: white; }
+        
+        /* Stats Bar */
+        .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1.5rem; text-align: center; }
+        .stat-item { background: var(--bg-card); padding: 1rem; border-radius: var(--radius); box-shadow: var(--shadow); }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        /* World Tabs */
+        .world-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .world-tab { 
+            flex: 0 0 auto; padding: 0.75rem 1.25rem; 
+            background: var(--bg-card); border: 2px solid transparent; 
+            border-radius: 50px; font-weight: 600; cursor: pointer; 
+            transition: var(--transition); white-space: nowrap; 
+        }
+        .world-tab.active { border-color: var(--primary); background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1)); color: var(--primary); }
+        .world-tab.locked { opacity: 0.4; cursor: not-allowed; }
+        
+        /* Levels Grid */
+        .levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.75rem; }
+        .level-btn { 
+            aspect-ratio: 1; background: var(--bg-card); border: 2px solid transparent; 
+            border-radius: var(--radius); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; cursor: pointer; 
+            transition: var(--transition); position: relative; font-family: 'Fredoka', sans-serif; 
+        }
+        .level-btn:hover:not(.locked):not(.completed) { transform: scale(1.05); border-color: var(--primary); box-shadow: var(--shadow-lg); }
+        .level-btn.completed { border-color: var(--success); background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(22,163,74,0.1)); }
+        .level-btn.locked { opacity: 0.4; cursor: not-allowed; }
+        .level-num { font-size: 1.5rem; font-weight: 700; }
+        .level-stars { display: flex; gap: 2px; margin-top: 0.25rem; }
+        .star { color: #e2e8f0; font-size: 0.85rem; }
+        .star.filled { color: var(--accent); }
+        .level-type { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; }
+        .level-lock { position: absolute; inset: 0; background: rgba(0,0,0,0.3); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        
+        /* Game Header */
+        .game-header { 
+            display: flex; align-items: center; justify-content: space-between; 
+            margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; 
+        }
+        .game-title { font-size: 1.25rem; font-weight: 700; }
+        .game-stats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .stat-pill { 
+            background: var(--bg-card); padding: 0.5rem 1rem; border-radius: 50px; 
+            display: flex; align-items: center; gap: 0.5rem; box-shadow: var(--shadow); 
+            font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.9rem; 
+        }
+        .stat-pill.accent { color: var(--primary); }
+        .stat-pill.success { color: var(--success); }
+        .stat-pill.warning { color: var(--warning); }
+        .stat-pill.danger { color: var(--danger); }
+        .stat-pill.purple { color: var(--purple); }
+        
+        /* Game Area */
+        .game-area { position: relative; }
+        
+        /* Rhythm Game Canvas Area */
+        .rhythm-container { 
+            background: var(--bg-card); border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow); overflow: hidden; position: relative; 
+            aspect-ratio: 16/10; max-height: 60vh;
+        }
+        
+        #rhythmCanvas { 
+            width: 100%; height: 100%; display: block; 
+            touch-action: none; 
+        }
+        
+        /* Hit Zone Indicator */
+        .hit-zone { 
+            position: absolute; bottom: 15%; left: 0; right: 0; height: 4px; 
+            background: linear-gradient(90deg, transparent, var(--primary), transparent); 
+            border-radius: 2px; z-index: 10;
+            box-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary);
+            animation: hitZonePulse 1s ease-in-out infinite;
+        }
+        @keyframes hitZonePulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+        
+        /* Tap Feedback */
+        .tap-feedback { 
+            position: absolute; pointer-events: none; z-index: 20; 
+            font-size: 1.5rem; font-weight: 700; 
+            animation: tapFloat 0.8s ease-out forwards; 
+        }
+        @keyframes tapFloat { 
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 
+            100% { transform: translate(-50%, -150%) scale(1.2); opacity: 0; } 
+        }
+        .tap-feedback.perfect { color: var(--success); text-shadow: 0 0 20px var(--success); }
+        .tap-feedback.good { color: var(--warning); text-shadow: 0 0 20px var(--warning); }
+        .tap-feedback.miss { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
+        
+        /* Combo Display */
+        .combo-display { 
+            position: absolute; top: 1rem; right: 1rem; z-index: 15; 
+            background: var(--bg-card); padding: 0.5rem 1rem; border-radius: 50px; 
+            box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 0.5rem;
+            font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.25rem;
+            color: var(--accent); transform: scale(1); transition: var(--transition-fast);
+        }
+        .combo-display.pop { animation: comboPop 0.2s ease; }
+        @keyframes comboPop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .combo-label { font-size: 0.7rem; font-family: 'Fredoka', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+        
+        /* Progress Bar */
+        .progress-container { margin-top: 1rem; }
+        .progress-bar { height: 8px; background: var(--bg-elevated); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 4px; transition: width 0.3s ease; width: 0%; }
+        .progress-labels { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted); }
+        
+        /* Dragon Mascot */
+        .mascot { position: fixed; bottom: calc(2rem + var(--safe-bottom)); right: calc(1rem + var(--safe-right)); z-index: 20; pointer-events: none; }
+        .mascot-inner { 
+            background: var(--bg-card); padding: 1rem 1.5rem; border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-xl); display: flex; align-items: center; gap: 1rem; 
+            max-width: 280px; animation: slideIn 0.5s ease; 
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .mascot-char { font-size: 2.5rem; animation: bounce 2s ease-in-out infinite; }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .mascot-text { font-weight: 600; line-height: 1.4; }
+        .mascot-text strong { display: block; color: var(--primary); }
+        
+        /* Results Screen */
+        .results-card { text-align: center; }
+        .result-icon { font-size: 4rem; margin-bottom: 1rem; animation: resultPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes resultPop { 0% { transform: scale(0) rotate(-180deg); } 100% { transform: scale(1) rotate(0); } }
+        .result-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .result-subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+        .stars-display { display: flex; justify-content: center; gap: 0.5rem; margin: 1.5rem 0; }
+        .star-big { font-size: 2.5rem; color: #e2e8f0; transition: var(--transition); }
+        .star-big.earned { color: var(--accent); animation: starPop 0.5s ease backwards; }
+        @keyframes starPop { 0% { transform: scale(0) rotate(-180deg); } 50% { transform: scale(1.3) rotate(0); } 100% { transform: scale(1) rotate(0); } }
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .result-item { background: var(--bg-elevated); padding: 1.25rem; border-radius: var(--radius); }
+        .result-value { font-size: 2.25rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--primary); }
+        .result-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .result-item.big { max-width: 300px; margin: 0 auto 2rem; }
+        
+        /* Settings Modal */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); 
+            z-index: 100; display: none; align-items: center; justify-content: center; padding: 1rem; 
+            animation: fadeIn 0.2s ease; 
+        }
+        .modal-overlay.show { display: flex; }
+        .modal { 
+            background: var(--bg-card); border-radius: var(--radius-lg); padding: 2rem; 
+            max-width: 420px; width: 100%; box-shadow: var(--shadow-xl); 
+            animation: slideUp 0.3s ease; 
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; }
+        .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-info { display: flex; flex-direction: column; gap: 0.25rem; }
+        .setting-label { font-weight: 600; }
+        .setting-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .toggle { width: 52px; height: 28px; background: #e2e8f0; border-radius: 14px; position: relative; cursor: pointer; transition: var(--transition); border: none; appearance: none; }
+        .toggle:checked { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: white; border-radius: 50%; transition: var(--transition); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle:checked::after { left: 27px; }
+        @media (prefers-color-scheme: dark) { .toggle { background: #374151; } }
+        .select { padding: 0.5rem 1rem; border: 2px solid rgba(0,0,0,0.1); border-radius: var(--radius); background: var(--bg-elevated); font-family: 'Fredoka', sans-serif; font-weight: 500; cursor: pointer; }
+        @media (prefers-color-scheme: dark) { .select { border-color: #374151; background: #1f2937; color: var(--text); } }
+        
+        /* Pause Overlay */
+        .pause-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); 
+            z-index: 50; display: none; align-items: center; justify-content: center; padding: 1rem; 
+        }
+        .pause-overlay.show { display: flex; }
+        .pause-card { background: var(--bg-card); padding: 2.5rem; border-radius: var(--radius-lg); text-align: center; max-width: 350px; box-shadow: var(--shadow-xl); animation: slideUp 0.3s ease; }
+        .pause-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .pause-text { color: var(--text-muted); margin-bottom: 2rem; }
+        
+        /* Toast */
+        .toast-container { position: fixed; bottom: calc(2rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; align-items: center; pointer-events: none; }
+        .toast { background: var(--bg-card); padding: 1rem 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 0.75rem; animation: slideUp 0.3s ease; pointer-events: auto; border-left: 4px solid var(--primary); }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
+        .toast.warning { border-color: var(--accent); }
+        
+        /* Difficulty Select */
+        .difficulty-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .diff-btn { 
+            background: var(--bg-card); border: 2px solid transparent; border-radius: var(--radius); 
+            padding: 1.5rem; text-align: center; cursor: pointer; transition: var(--transition); 
+        }
+        .diff-btn:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .diff-btn.selected { border-color: var(--primary); background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1)); }
+        .diff-icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+        .diff-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .diff-desc { font-size: 0.8rem; color: var(--text-muted); }
+        
+        /* Practice Options */
+        .practice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+        .practice-card { padding: 1.5rem; }
+        .practice-card .menu-card-icon { font-size: 2rem; }
+        .practice-card .menu-card-title { font-size: 1.1rem; }
+        .practice-card .menu-card-desc { font-size: 0.85rem; }
+        
+        /* World Progress in Stats */
+        .world-progress { display: flex; flex-direction: column; gap: 0.75rem; }
+        .world-progress-item { display: flex; align-items: center; gap: 1rem; }
+        .world-progress-info { flex: 1; min-width: 0; }
+        .world-progress-name { font-weight: 600; font-size: 0.9rem; }
+        .world-progress-bar { height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; margin-top: 0.25rem; }
+        .world-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .world-progress-stars { display: flex; gap: 2px; font-size: 1rem; }
+        
+        /* Recent Games */
+        .recent-game { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-elevated); border-radius: var(--radius); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .recent-game-info { display: flex; flex-direction: column; gap: 0.25rem; }
+        .recent-game-name { font-weight: 600; }
+        .recent-game-meta { font-size: 0.75rem; color: var(--text-muted); }
+        .recent-game-score { text-align: right; }
+        .recent-game-stars { color: var(--accent); font-size: 1.1rem; }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .levels-grid { grid-template-columns: repeat(5, 1fr); }
+            .level-btn { font-size: 0.8rem; }
+            .level-num { font-size: 1.25rem; }
+            .level-type { display: none; }
+            .game-stats { gap: 0.25rem; }
+            .stat-pill { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+            .stat-pill span:first-child { display: none; }
+            .mascot { display: none; }
+            .result-value { font-size: 1.75rem; }
+            .world-tabs { gap: 0.25rem; }
+            .world-tab { padding: 0.5rem 1rem; font-size: 0.85rem; }
+        }
+        
+        @media (max-width: 400px) {
+            .levels-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+        
+        /* Focus Visible */
+        :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+        .btn:focus-visible, .level-btn:focus-visible, .world-tab:focus-visible, .menu-card:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+        
+        /* Loading Screen */
+        .loading-screen { 
+            position: fixed; inset: 0; background: var(--bg); z-index: 1000; 
+            display: flex; align-items: center; justify-content: center; 
+            flex-direction: column; gap: 1rem; 
+        }
+        .loading-logo { font-size: 4rem; animation: bounce 1.5s ease-in-out infinite; }
+        .loading-title { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .loading-bar { width: 200px; height: 8px; background: var(--bg-elevated); border-radius: 4px; overflow: hidden; }
+        .loading-progress { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 4px; width: 0%; transition: width 0.3s ease; }
+        .loading-text { color: var(--text-muted); font-size: 0.9rem; }
+        
+        /* Hidden utility */
+        .hidden { display: none !important; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen" role="status" aria-label="Lade Spiel">
+        <div class="loading-logo">🐉</div>
+        <h1 class="loading-title">Rhythm Quest</h1>
+        <p style="color:var(--text-muted);">Beat Kingdom</p>
+        <div class="loading-bar"><div class="loading-progress" id="loadingProgress"></div></div>
+        <p class="loading-text" id="loadingText">Lade Abenteuer...</p>
+    </div>
+
+    <div class="bg-decor"></div>
+    <div class="floating-notes" id="floatingNotes"></div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Pause Overlay -->
+    <div class="pause-overlay" id="pauseOverlay">
+        <div class="pause-card">
+            <h2 class="pause-title">⏸️ Pausiert</h2>
+            <p class="pause-text">Mach eine Pause! Tippe auf Fortsetzen oder drücke Escape.</p>
+            <div class="btn-group">
+                <button class="btn btn-primary btn-large" onclick="resumeGame()">▶️ Fortsetzen</button>
+                <button class="btn btn-secondary" onclick="quitToMenu()">🏠 Zum Menü</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <h2 class="modal-title">⚙️ Einstellungen</h2>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Soundeffekte</span>
+                    <span class="setting-desc">Töne für Treffer und Fehlschläge</span>
+                </div>
+                <input type="checkbox" class="toggle" id="settingSfx" checked onchange="saveSettings()">
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Hintergrundmusik</span>
+                    <span class="setting-desc">Ambiente-Musik während des Spiels</span>
+                </div>
+                <input type="checkbox" class="toggle" id="settingMusic" onchange="saveSettings()">
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Haptisches Feedback</span>
+                    <span class="setting-desc">Vibration bei Treffern (falls unterstützt)</span>
+                </div>
+                <input type="checkbox" class="toggle" id="settingHaptics" checked onchange="saveSettings()">
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Noten-Geschwindigkeit</span>
+                    <span class="setting-desc">Wie schnell die Noten fallen</span>
+                </div>
+                <select class="select" id="settingScrollSpeed" onchange="saveSettings()">
+                    <option value="0.7">🐢 Langsam</option>
+                    <option value="1" selected>🚶 Normal</option>
+                    <option value="1.3">🏃 Schnell</option>
+                    <option value="1.6">⚡ Sehr schnell</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Visuelle Hilfen</span>
+                    <span class="setting-desc">Trefferzone und Noten-Vorschau anzeigen</span>
+                </div>
+                <input type="checkbox" class="toggle" id="settingVisualAids" checked onchange="saveSettings()">
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Hoher Kontrast</span>
+                    <span class="setting-desc">Bessere Sichtbarkeit für Barrierefreiheit</span>
+                </div>
+                <input type="checkbox" class="toggle" id="settingHighContrast" onchange="saveSettings(); applyHighContrast()">
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Reduzierte Animation</span>
+                    <span class="setting-desc">Bewegungen minimieren</span>
+                </div>
+                <input type="checkbox" class="toggle" id="settingReducedMotion" onchange="saveSettings(); applyReducedMotion()">
+            </div>
+            <button class="btn btn-primary btn-large" style="width:100%;margin-top:1rem;" onclick="closeSettings()">Speichern & Schließen</button>
+        </div>
+    </div>
+
+    <!-- MENU SCREEN -->
+    <div class="screen active" id="screenMenu" role="region" aria-label="Hauptmenü">
+        <div class="container">
+            <header class="header">
+                <div class="logo">
+                    <span class="logo-icon">🐉</span>
+                    <span class="logo-text">Rhythm Quest</span>
+                </div>
+                <p class="tagline">Hilf Melody dem Musikdrachen, den Rhythmus zurückzubringen!</p>
+            </header>
+            
+            <div class="menu-grid">
+                <button class="card menu-card" onclick="showScreen('screenWorlds')" aria-label="Abenteuer-Modus starten">
+                    <span class="menu-card-icon">🗺️</span>
+                    <span class="menu-card-badge badge-new">Neu</span>
+                    <h3 class="menu-card-title">Abenteuer-Modus</h3>
+                    <p class="menu-card-desc">5 Welten, 50 Level – werde Rhythmus-Meister!</p>
+                </button>
+                <button class="card menu-card" onclick="showDifficultySelect('quick')" aria-label="Schnellstart">
+                    <span class="menu-card-icon">⚡</span>
+                    <span class="menu-card-badge badge-popular">Beliebt</span>
+                    <h3 class="menu-card-title">Schnellstart</h3>
+                    <p class="menu-card-desc">Zufälliges Level, sofort loslegen</p>
+                </button>
+                <button class="card menu-card" onclick="showScreen('screenPractice')" aria-label="Übungs-Modus">
+                    <span class="menu-card-icon">🎯</span>
+                    <h3 class="menu-card-title">Übungs-Modus</h3>
+                    <p class="menu-card-desc">Bestimmte Rhythmen in deinem Tempo üben</p>
+                </button>
+                <button class="card menu-card" onclick="showScreen('screenStats')" aria-label="Statistiken anzeigen">
+                    <span class="menu-card-icon">📊</span>
+                    <h3 class="menu-card-title">Meine Stats</h3>
+                    <p class="menu-card-desc">Fortschritt, Bestzeiten, Lieblingswelten</p>
+                </button>
+            </div>
+            
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="statTotalLevels">0/50</div>
+                    <div class="stat-label">Level geschafft</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statBestAccuracy">0%</div>
+                    <div class="stat-label">Beste Genauigkeit</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statBestCombo">0</div>
+                    <div class="stat-label">Bester Combo</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTotalStars">0/150</div>
+                    <div class="stat-label">Sterne gesammelt</div>
+                </div>
+            </div>
+            
+            <div style="text-align:center;margin-top:2rem;">
+                <button class="btn btn-secondary" onclick="openSettings()" style="gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Einstellungen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WORLDS / LEVEL SELECT SCREEN -->
+    <div class="screen" id="screenWorlds" role="region" aria-label="Welten-Auswahl">
+        <div class="container">
+            <header class="header">
+                <button class="btn btn-secondary back-btn" onclick="showScreen('screenMenu')">← Zurück</button>
+                <div class="logo">
+                    <span class="logo-icon">🗺️</span>
+                    <span class="logo-text">Welten</span>
+                </div>
+                <p class="tagline">Wähle eine Welt und starte dein rhythmisches Abenteuer!</p>
+            </header>
+            
+            <div class="world-tabs" id="worldTabs" role="tablist"></div>
+            
+            <div class="card">
+                <div id="levelsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRACTICE SCREEN -->
+    <div class="screen" id="screenPractice" role="region" aria-label="Übungs-Modus">
+        <div class="container">
+            <header class="header">
+                <button class="btn btn-secondary back-btn" onclick="showScreen('screenMenu')">← Zurück</button>
+                <div class="logo">
+                    <span class="logo-icon">🎯</span>
+                    <span class="logo-text">Übungs-Modus</span>
+                </div>
+                <p class="tagline">Trainiere gezielt bestimmte Rhythmen in deinem eigenen Tempo</p>
+            </header>
+            
+            <div class="card" style="margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;font-size:1.2rem;">🎮 Was möchtest du üben?</h3>
+                <div class="practice-grid" id="practiceGrid"></div>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-bottom:1rem;font-size:1.2rem;">⚙️ Übungs-Einstellungen</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:0.5rem;">BPM (Tempo)</label>
+                        <input type="range" id="practiceBpm" min="40" max="140" value="80" style="width:100%;" oninput="updatePracticeBpm(this.value)">
+                        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">
+                            <span>40</span><span id="practiceBpmValue">80</span><span>140</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:0.5rem;">Notenwert</label>
+                        <select class="select" id="practiceNoteValue" onchange="updatePracticeNoteValue()">
+                            <option value="quarter">♩ Viertelnoten</option>
+                            <option value="eighth">♪ Achtelnoten</option>
+                            <option value="mixed">🎵 Gemischt</option>
+                            <option value="syncopated">🎶 Synkopiert</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS SCREEN -->
+    <div class="screen" id="screenStats" role="region" aria-label="Statistiken">
+        <div class="container">
+            <header class="header">
+                <button class="btn btn-secondary back-btn" onclick="showScreen('screenMenu')">← Zurück</button>
+                <div class="logo">
+                    <span class="logo-icon">📊</span>
+                    <span class="logo-text">Meine Stats</span>
+                </div>
+                <p class="tagline">Verfolge deinen Fortschritt und werde besser!</p>
+            </header>
+            
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="stats-bar" style="margin:0;">
+                    <div class="stat-item">
+                        <div class="stat-value" id="sTotalLevels">0</div>
+                        <div class="stat-label">Level gespielt</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sTotalNotes">0</div>
+                        <div class="stat-label">Noten getippt</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sAvgAccuracy">0%</div>
+                        <div class="stat-label">Ø Genauigkeit</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sBestCombo">0</div>
+                        <div class="stat-label">Bester Combo</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;font-size:1.2rem;">🎯 Genauigkeit & Streaks</h3>
+                <div class="stats-bar" style="margin:0;">
+                    <div class="stat-item">
+                        <div class="stat-value success" id="sPerfectHits">0</div>
+                        <div class="stat-label">Perfekte Treffer</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value warning" id="sGoodHits">0</div>
+                        <div class="stat-label">Gute Treffer</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value danger" id="sMisses">0</div>
+                        <div class="stat-label">Verfehlt</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sCurrentStreak">0</div>
+                        <div class="stat-label">Aktueller Streak</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;font-size:1.2rem;">🏆 Abenteuer-Fortschritt</h3>
+                <div id="worldProgress"></div>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-bottom:1rem;font-size:1.2rem;">📈 Letzte Spiele</h3>
+                <div id="recentGames" style="text-align:center;color:var(--text-muted);">Noch keine Spiele gespielt.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div class="screen" id="screenGame" role="region" aria-label="Spielbildschirm">
+        <div class="container">
+            <header class="game-header">
+                <h2 class="game-title" id="gameTitle">Level 1-1</h2>
+                <div class="game-stats">
+                    <div class="stat-pill accent">⭐ <span id="gameScore">0</span></div>
+                    <div class="stat-pill success">✓ <span id="gameAccuracy">100%</span></div>
+                    <div class="stat-pill warning">🔥 <span id="gameCombo">0</span></div>
+                    <div class="stat-pill danger">❤️ <span id="gameLives">3</span></div>
+                </div>
+                <button class="btn btn-icon btn-secondary" onclick="togglePause()" aria-label="Pause" id="pauseBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </button>
+            </header>
+            
+            <div class="game-area">
+                <div class="rhythm-container" id="rhythmContainer">
+                    <canvas id="rhythmCanvas" aria-hidden="true"></canvas>
+                    <div class="hit-zone" id="hitZone" aria-hidden="true"></div>
+                    <div class="combo-display" id="comboDisplay" style="display:none;">
+                        <span class="combo-label">Combo</span>
+                        <span id="comboCount">0</span>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="progress-labels">
+                        <span>Level Fortschritt</span>
+                        <span id="progressText">0 / 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mascot" id="mascot" style="display:none;">
+            <div class="mascot-inner">
+                <span class="mascot-char" id="mascotChar">🐉</span>
+                <div class="mascot-text"><strong id="mascotTitle">Super!</strong><span id="mascotMsg">Weiter so!</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div class="screen" id="screenResults" role="region" aria-label="Ergebnis">
+        <div class="container">
+            <div class="card results-card">
+                <div class="result-icon" id="resultIcon">🎉</div>
+                <h2 class="result-title" id="resultTitle">Level geschafft!</h2>
+                <p class="result-subtitle" id="resultSubtitle">Du hast den Rhythmus gemeistert!</p>
+                
+                <div class="stars-display" id="starsDisplay"></div>
+                
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="result-value" id="rScore">0</div>
+                        <div class="result-label">Punkte</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-value success" id="rAccuracy">100%</div>
+                        <div class="result-label">Genauigkeit</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-value" id="rCombo">0</div>
+                        <div class="result-label">Max Combo</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-value accent" id="rStars">0</div>
+                        <div class="result-label">Sterne</div>
+                    </div>
+                </div>
+                
+                <div class="result-item big">
+                    <div class="result-value" id="rBreakdown">Perfekt: 0 • Gut: 0 • Verfehlt: 0</div>
+                    <div class="result-label">Details</div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-large" onclick="nextLevel()" id="nextLevelBtn">➡️ Nächstes Level</button>
+                    <button class="btn btn-secondary" onclick="replayLevel()">🔁 Wiederholen</button>
+                    <button class="btn btn-secondary" onclick="showScreen('screenWorlds')">🗺️ Zur Karte</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIFFICULTY SELECT MODAL (for quick play) -->
+    <div class="modal-overlay" id="difficultyModal">
+        <div class="modal" style="max-width:500px;">
+            <h2 class="modal-title">⚡ Schwierigkeit wählen</h2>
+            <p style="text-align:center;color:var(--text-muted);margin-bottom:1.5rem;">Wähle dein Tempo für den Schnellstart</p>
+            <div class="difficulty-grid" id="difficultyGrid"></div>
+            <button class="btn btn-secondary" style="width:100%;margin-top:1rem;" onclick="closeDifficultyModal()">Abbrechen</button>
+        </div>
+    </div>
+
+    <script>
+        // ============ GAME DATA ============
+        const WORLDS = [
+            { id: 1, name: '🌈 Regenbogen-Wiese', theme: 'meadow', color: '#6366f1', levels: 10, focus: 'quarter', desc: 'Viertelnoten & Pausen – der Einstieg', bpm: [70, 80], noteTypes: ['quarter', 'quarterRest'] },
+            { id: 2, name: '🏝️ Insel-Groove', theme: 'island', color: '#06b6d4', levels: 10, focus: 'eighth', desc: 'Achtelnoten dazwischen', bpm: [80, 90], noteTypes: ['quarter', 'eighth', 'quarterRest'] },
+            { id: 3, name: '🌋 Vulkan-Beat', theme: 'volcano', color: '#f97316', levels: 10, focus: 'mixed', desc: 'Gemischte Notenwerte & Synkopen', bpm: [90, 100], noteTypes: ['quarter', 'eighth', 'half', 'quarterRest', 'eighthRest'] },
+            { id: 4, name: '❄️ Kristall-Höhlen', theme: 'crystal', color: '#a855f7', levels: 10, focus: 'syncopated', desc: 'Synkopen & komplexe Rhythmen', bpm: [100, 110], noteTypes: ['quarter', 'eighth', 'half', 'sixteenth', 'quarterRest', 'eighthRest', 'syncopated'] },
+            { id: 5, name: '🌟 Sternen-Sinfonie', theme: 'stars', color: '#ec4899', levels: 10, focus: 'mastery', desc: 'Meister-Modus: Alles kombiniert', bpm: [110, 120], noteTypes: ['quarter', 'eighth', 'half', 'sixteenth', 'quarterRest', 'eighthRest', 'syncopated', 'triplet'] }
+        ];
+
+        const PRACTICE_MODES = [
+            { id: 'quarter', icon: '🎵', name: 'Viertelnoten', desc: 'Grundschlag üben', bpm: 80, noteValue: 'quarter' },
+            { id: 'eighth', icon: '🎶', name: 'Achtelnoten', desc: 'Doppelt so schnell', bpm: 90, noteValue: 'eighth' },
+            { id: 'mixed', icon: '🎼', name: 'Gemischt', desc: 'Viertel & Achtel', bpm: 85, noteValue: 'mixed' },
+            { id: 'syncopated', icon: '💫', name: 'Synkopen', desc: 'Off-Beat Rhythmen', bpm: 95, noteValue: 'syncopated' },
+            { id: 'triplet', icon: '🎭', name: 'Triolen', desc: 'Drei auf einen Schlag', bpm: 90, noteValue: 'triplet' },
+            { id: 'custom', icon: '✏️', name: 'Eigener Rhythmus', desc: 'Tippe deinen Rhythmus', bpm: 80, noteValue: 'custom' }
+        ];
+
+        const DIFFICULTIES = [
+            { id: 'easy', name: '🐢 Entspannt', desc: '60-70 BPM, nur Viertelnoten', bpm: 65, noteTypes: ['quarter'], lives: 5, scoreMult: 0.8 },
+            { id: 'normal', name: '🚶 Normal', desc: '80-90 BPM, Viertel & Achtel', bpm: 85, noteTypes: ['quarter', 'eighth'], lives: 3, scoreMult: 1 },
+            { id: 'hard', name: '🏃 Schnell', desc: '100-110 BPM, alle Noten', bpm: 105, noteTypes: ['quarter', 'eighth', 'half', 'sixteenth'], lives: 2, scoreMult: 1.3 },
+            { id: 'expert', name: '⚡ Meister', desc: '120+ BPM, Synkopen & Triolen', bpm: 125, noteTypes: ['quarter', 'eighth', 'half', 'sixteenth', 'syncopated', 'triplet'], lives: 1, scoreMult: 1.6 }
+        ];
+
+        const NOTE_CONFIG = {
+            quarter: { duration: 1, symbol: '♩', name: 'Viertel', color: '#6366f1', hold: false },
+            half: { duration: 2, symbol: '𝅗𝅥', name: 'Halbe', color: '#06b6d4', hold: true },
+            eighth: { duration: 0.5, symbol: '♪', name: 'Achtel', color: '#f59e0b', hold: false },
+            sixteenth: { duration: 0.25, symbol: '𝅘𝅥𝅮', name: 'Sechzehntel', color: '#ec4899', hold: false },
+            quarterRest: { duration: 1, symbol: '𝄽', name: 'Viertelpause', color: '#94a3b8', hold: false, isRest: true },
+            eighthRest: { duration: 0.5, symbol: '𝄾', name: 'Achtelpause', color: '#94a3b8', hold: false, isRest: true },
+            syncopated: { duration: 0.5, symbol: '♪', name: 'Synkopen-Achtel', color: '#a855f7', hold: false, syncopated: true },
+            triplet: { duration: 1/3, symbol: '𝅘𝅥𝅯', name: 'Triole', color: '#22c55e', hold: false, triplet: true }
+        };
+
+        const MASCOTS = ['🐉', '🐲', '🦎', '🦕', '🦖', '🐊', '🦎'];
+        const ENCOURAGEMENTS = [
+            { title: 'Fantastisch!', msg: 'Du fühlst den Beat!' },
+            { title: 'Großartig!', msg: 'Der Rhythmus fließt durch dich!' },
+            { title: 'Perfekt!', msg: 'Melody tanzt vor Freude!' },
+            { title: 'Super!', msg: 'Immer im Takt bleiben!' },
+            { title: 'Wahnsinn!', msg: 'Ein echter Rhythmus-Meister!' },
+            { title: 'Klasse!', msg: 'Der Groove sitzt!' },
+            { title: 'Bravo!', msg: 'Nicht aufhören, weiter so!' }
+        ];
+
+        // ============ GAME STATE ============
+        let state = {
+            screen: 'menu',
+            mode: 'adventure', // adventure, quick, practice
+            currentWorld: 1,
+            currentLevel: 1,
+            difficulty: 'normal',
+            practiceType: 'quarter',
+            practiceBpm: 80,
+            practiceNoteValue: 'quarter',
+            customPattern: [],
+            
+            // Gameplay
+            gameActive: false,
+            paused: false,
+            levelNotes: [],
+            currentNoteIndex: 0,
+            score: 0,
+            accuracy: 100,
+            combo: 0,
+            maxCombo: 0,
+            lives: 3,
+            maxLives: 3,
+            perfectHits: 0,
+            goodHits: 0,
+            misses: 0,
+            totalNotes: 0,
+            levelStartTime: 0,
+            
+            // Timing
+            audioCtx: null,
+            scheduleAheadTime: 0.1,
+            nextNoteTime: 0,
+            noteInterval: 0,
+            scrollSpeed: 1,
+            visualOffset: 0,
+            
+            // Settings
+            settings: {
+                sfx: true,
+                music: false,
+                haptics: true,
+                scrollSpeed: 1,
+                visualAids: true,
+                highContrast: false,
+                reducedMotion: false
+            },
+            
+            // Stats
+            stats: {
+                totalLevels: 0,
+                totalNotes: 0,
+                totalPerfect: 0,
+                totalGood: 0,
+                totalMisses: 0,
+                bestAccuracy: 0,
+                bestCombo: 0,
+                currentStreak: 0,
+                totalStars: 0,
+                levelsCompleted: {},
+                recentGames: []
+            }
+        };
+
+        // ============ AUDIO ENGINE ============
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            if (!state.audioCtx) {
+                state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (state.audioCtx.state === 'suspended') {
+                state.audioCtx.resume().then(() => {
+                    audioInitialized = true;
+                    // Play a silent tone to "unlock" audio on iOS
+                    const osc = state.audioCtx.createOscillator();
+                    const gain = state.audioCtx.createGain();
+                    gain.gain.value = 0;
+                    osc.connect(gain).connect(state.audioCtx.destination);
+                    osc.start();
+                    osc.stop(state.audioCtx.currentTime + 0.01);
+                });
+            } else {
+                audioInitialized = true;
+            }
+        }
+
+        function getAudioCtx() {
+            if (!state.audioCtx) {
+                state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (state.audioCtx.state === 'suspended') {
+                state.audioCtx.resume();
+            }
+            return state.audioCtx;
+        }
+
+        function playTone(freq, dur, type = 'sine', vol = 0.1, when = 0) {
+            if (!state.settings.sfx) return;
+            try {
+                const ctx = getAudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.value = vol;
+                osc.connect(gain).connect(ctx.destination);
+                const startTime = ctx.currentTime + when;
+                osc.start(startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+                osc.stop(startTime + dur);
+            } catch(e) {}
+        }
+
+        function playHitSound(type) {
+            switch(type) {
+                case 'perfect': playTone(880, 0.15, 'sine', 0.12); playTone(1320, 0.1, 'sine', 0.06, 0.05); break;
+                case 'good': playTone(660, 0.12, 'triangle', 0.1); break;
+                case 'miss': playTone(220, 0.2, 'square', 0.1); break;
+                case 'combo': playTone(523, 0.08, 'sine', 0.08); playTone(659, 0.08, 'sine', 0.08, 0.08); playTone(784, 0.08, 'sine', 0.08, 0.16); break;
+                case 'levelComplete': playTone(523, 0.1, 'sine', 0.15); setTimeout(()=>playTone(659,0.1,'sine',0.15),100); setTimeout(()=>playTone(784,0.1,'sine',0.15),200); setTimeout(()=>playTone(1047,0.2,'sine',0.15),300); break;
+                case 'click': playTone(440, 0.05, 'sine', 0.04); break;
+            }
+        }
+
+        function playBackgroundMusic() {
+            if (!state.settings.music || state.paused) return;
+            // Simple procedural ambient loop
+            const ctx = getAudioCtx();
+            // This would be expanded with a proper music loop
+        }
+
+        function vibrate(pattern) {
+            if (state.settings.haptics && navigator.vibrate) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        // ============ STORAGE ============
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('rhythmQuest');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.stats = { ...state.stats, ...data.stats };
+                    state.settings = { ...state.settings, ...data.settings };
+                    state.currentWorld = data.currentWorld || 1;
+                    state.currentLevel = data.currentLevel || 1;
+                    applySettingsToUI();
+                }
+            } catch(e) { console.warn('Load failed:', e); }
+        }
+
+        function saveData() {
+            try {
+                const data = {
+                    stats: state.stats,
+                    settings: state.settings,
+                    currentWorld: state.currentWorld,
+                    currentLevel: state.currentLevel
+                };
+                localStorage.setItem('rhythmQuest', JSON.stringify(data));
+            } catch(e) { console.warn('Save failed:', e); }
+        }
+
+        function saveSettings() {
+            state.settings.sfx = document.getElementById('settingSfx').checked;
+            state.settings.music = document.getElementById('settingMusic').checked;
+            state.settings.haptics = document.getElementById('settingHaptics').checked;
+            state.settings.scrollSpeed = parseFloat(document.getElementById('settingScrollSpeed').value);
+            state.settings.visualAids = document.getElementById('settingVisualAids').checked;
+            state.settings.highContrast = document.getElementById('settingHighContrast').checked;
+            state.settings.reducedMotion = document.getElementById('settingReducedMotion').checked;
+            saveData();
+            applySettings();
+            showToast('Einstellungen gespeichert!', 'success');
+        }
+
+        function applySettingsToUI() {
+            document.getElementById('settingSfx').checked = state.settings.sfx;
+            document.getElementById('settingMusic').checked = state.settings.music;
+            document.getElementById('settingHaptics').checked = state.settings.haptics;
+            document.getElementById('settingScrollSpeed').value = state.settings.scrollSpeed;
+            document.getElementById('settingVisualAids').checked = state.settings.visualAids;
+            document.getElementById('settingHighContrast').checked = state.settings.highContrast;
+            document.getElementById('settingReducedMotion').checked = state.settings.reducedMotion;
+        }
+
+        function applySettings() {
+            state.scrollSpeed = state.settings.scrollSpeed;
+            applyHighContrast();
+            applyReducedMotion();
+        }
+
+        function applyHighContrast() {
+            document.body.classList.toggle('high-contrast', state.settings.highContrast);
+        }
+
+        function applyReducedMotion() {
+            document.body.classList.toggle('reduced-motion', state.settings.reducedMotion);
+        }
+
+        // ============ SCREEN MANAGEMENT ============
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            state.screen = screenId;
+            
+            if (screenId === 'screenMenu') updateMenuStats();
+            if (screenId === 'screenWorlds') renderWorlds();
+            if (screenId === 'screenStats') renderStats();
+            if (screenId === 'screenPractice') renderPracticeGrid();
+            if (screenId === 'screenGame' && !state.gameActive) initGame();
+        }
+
+        function openSettings() { playHitSound('click'); document.getElementById('settingsModal').classList.add('show'); }
+        function closeSettings() { playHitSound('click'); document.getElementById('settingsModal').classList.remove('show'); }
+
+        // ============ MENU ============
+        function updateMenuStats() {
+            document.getElementById('statTotalLevels').textContent = `${Object.keys(state.stats.levelsCompleted).length}/50`;
+            document.getElementById('statBestAccuracy').textContent = state.stats.bestAccuracy + '%';
+            document.getElementById('statBestCombo').textContent = state.stats.bestCombo;
+            document.getElementById('statTotalStars').textContent = `${state.stats.totalStars}/150`;
+        }
+
+        // ============ WORLDS / LEVELS ============
+        function renderWorlds() {
+            const tabs = document.getElementById('worldTabs');
+            tabs.innerHTML = '';
+            
+            WORLDS.forEach((world, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'world-tab' + (i === state.currentWorld - 1 ? ' active' : '');
+                btn.textContent = world.name;
+                btn.setAttribute('role', 'tab');
+                btn.setAttribute('aria-selected', i === state.currentWorld - 1);
+                btn.onclick = () => selectWorld(i + 1);
+                tabs.appendChild(btn);
+            });
+            
+            renderLevels(state.currentWorld);
+        }
+
+        function selectWorld(worldId) {
+            state.currentWorld = worldId;
+            renderWorlds();
+        }
+
+        function renderLevels(worldId) {
+            const world = WORLDS[worldId - 1];
+            const container = document.getElementById('levelsContainer');
+            const completed = state.stats.levelsCompleted[worldId] || {};
+            
+            container.innerHTML = '<div class="levels-grid" id="levelsGrid"></div>';
+            const grid = document.getElementById('levelsGrid');
+            
+            for (let i = 1; i <= world.levels; i++) {
+                const levelData = completed[i] || { stars: 0, bestAccuracy: 0, bestCombo: 0 };
+                
+                const btn = document.createElement('button');
+                btn.className = 'level-btn' + (levelData.stars === 3 ? ' completed' : '');
+                btn.innerHTML = `
+                    <span class="level-num">${i}</span>
+                    <div class="level-stars">
+                        ${[1,2,3].map(s => `<span class="star${s <= levelData.stars ? ' filled' : ''}">★</span>`).join('')}
+                    </div>
+                    <span class="level-type">${getLevelTypeLabel(world, i)}</span>
+                `;
+                btn.onclick = () => startLevel(worldId, i);
+                btn.setAttribute('aria-label', `Level ${i}, ${levelData.stars} Sterne`);
+                grid.appendChild(btn);
+            }
+        }
+
+        function getLevelTypeLabel(world, level) {
+            const progress = (level - 1) / (world.levels - 1);
+            if (world.focus === 'quarter') return progress < 0.5 ? '♩' : '𝄽';
+            if (world.focus === 'eighth') return progress < 0.5 ? '♪' : '𝄾';
+            if (world.focus === 'mixed') return progress < 0.33 ? '♩' : progress < 0.66 ? '♪' : '𝅗𝅥';
+            if (world.focus === 'syncopated') return '🎶';
+            return '⭐';
+        }
+
+        // ============ PRACTICE ============
+        function renderPracticeGrid() {
+            const grid = document.getElementById('practiceGrid');
+            grid.innerHTML = '';
+            
+            PRACTICE_MODES.forEach(mode => {
+                const btn = document.createElement('button');
+                btn.className = 'card menu-card practice-card' + (mode.id === state.practiceType ? ' selected' : '');
+                btn.style.border = mode.id === state.practiceType ? '2px solid var(--primary)' : '2px solid transparent';
+                btn.innerHTML = `
+                    <span class="menu-card-icon">${mode.icon}</span>
+                    <h3 class="menu-card-title">${mode.name}</h3>
+                    <p class="menu-card-desc">${mode.desc}</p>
+                `;
+                btn.onclick = () => startPractice(mode.id);
+                grid.appendChild(btn);
+            });
+        }
+
+        function startPractice(type) {
+            state.mode = 'practice';
+            state.practiceType = type;
+            const mode = PRACTICE_MODES.find(m => m.id === type);
+            if (mode) {
+                state.practiceBpm = mode.bpm;
+                state.practiceNoteValue = mode.noteValue;
+                document.getElementById('practiceBpm').value = mode.bpm;
+                document.getElementById('practiceBpmValue').textContent = mode.bpm;
+                document.getElementById('practiceNoteValue').value = mode.noteValue;
+            }
+            if (type === 'custom') {
+                const input = prompt('Tippe deinen Rhythmus ein (z.B. "1 2 3 4" für Viertel, "1&2&3&4&" für Achtel):');
+                if (!input) return;
+                state.customPattern = parseCustomPattern(input);
+            }
+            state.currentWorld = 1;
+            state.currentLevel = 1;
+            showScreen('screenGame');
+        }
+
+        function parseCustomPattern(input) {
+            // Simple parser: numbers = beats, & = off-beat
+            const tokens = input.trim().split(/\s+/);
+            return tokens.map(t => {
+                if (t === '&') return { type: 'eighth', syncopated: true };
+                if (t.includes('&')) return { type: 'eighth' };
+                return { type: 'quarter' };
+            });
+        }
+
+        function updatePracticeBpm(val) {
+            state.practiceBpm = parseInt(val);
+            document.getElementById('practiceBpmValue').textContent = val;
+        }
+
+        function updatePracticeNoteValue() {
+            state.practiceNoteValue = document.getElementById('practiceNoteValue').value;
+        }
+
+        // ============ QUICK PLAY DIFFICULTY ============
+        function showDifficultySelect(mode) {
+            state.mode = mode;
+            const grid = document.getElementById('difficultyGrid');
+            grid.innerHTML = '';
+            
+            DIFFICULTIES.forEach(diff => {
+                const btn = document.createElement('button');
+                btn.className = 'diff-btn';
+                btn.innerHTML = `
+                    <span class="diff-icon">${diff.name.split(' ')[0]}</span>
+                    <div class="diff-name">${diff.name}</div>
+                    <div class="diff-desc">${diff.desc}</div>
+                `;
+                btn.onclick = () => startQuickPlay(diff.id);
+                grid.appendChild(btn);
+            });
+            
+            document.getElementById('difficultyModal').classList.add('show');
+        }
+
+        function closeDifficultyModal() {
+            playHitSound('click');
+            document.getElementById('difficultyModal').classList.remove('show');
+        }
+
+        function startQuickPlay(diffId) {
+            const diff = DIFFICULTIES.find(d => d.id === diffId);
+            state.difficulty = diffId;
+            state.currentWorld = 1;
+            state.currentLevel = Math.floor(Math.random() * 10) + 1;
+            closeDifficultyModal();
+            showScreen('screenGame');
+        }
+
+        // ============ GAME INIT ============
+        function startLevel(worldId, levelId) {
+            state.mode = 'adventure';
+            state.currentWorld = worldId;
+            state.currentLevel = levelId;
+            showScreen('screenGame');
+        }
+
+        function initGame() {
+            // Generate level notes
+            state.levelNotes = generateLevelNotes();
+            state.currentNoteIndex = 0;
+            state.score = 0;
+            state.accuracy = 100;
+            state.combo = 0;
+            state.maxCombo = 0;
+            state.lives = state.mode === 'adventure' ? 3 : (DIFFICULTIES.find(d => d.id === state.difficulty)?.lives || 3);
+            state.maxLives = state.lives;
+            state.perfectHits = 0;
+            state.goodHits = 0;
+            state.misses = 0;
+            state.totalNotes = state.levelNotes.filter(n => !n.isRest).length;
+            state.levelStartTime = performance.now();
+            state.gameActive = true;
+            state.paused = false;
+            state.nextNoteTime = 0;
+            
+            // Calculate note interval based on BPM
+            let bpm = 80;
+            if (state.mode === 'adventure') {
+                const world = WORLDS[state.currentWorld - 1];
+                bpm = world.bpm[0] + (world.bpm[1] - world.bpm[0]) * ((state.currentLevel - 1) / 9);
+            } else if (state.mode === 'practice') {
+                bpm = state.practiceBpm;
+            } else {
+                bpm = DIFFICULTIES.find(d => d.id === state.difficulty)?.bpm || 85;
+            }
+            
+            state.noteInterval = 60 / bpm; // seconds per beat
+            state.scrollSpeed = state.settings.scrollSpeed;
+            
+            // Update UI
+            updateGameHeader();
+            document.getElementById('gameLives').textContent = state.lives;
+            document.getElementById('comboDisplay').style.display = 'none';
+            
+            // Start game loop
+            requestAnimationFrame(gameLoop);
+            
+            // Schedule first notes
+            scheduleNotes();
+            
+            // Show mascot
+            showMascot('start');
+        }
+
+        function generateLevelNotes() {
+            const notes = [];
+            const notesPerLevel = 32; // 32 beats per level
+            
+            let availableTypes = [];
+            let bpm = 80;
+            
+            if (state.mode === 'adventure') {
+                const world = WORLDS[state.currentWorld - 1];
+                availableTypes = world.noteTypes;
+                bpm = world.bpm[0] + (world.bpm[1] - world.bpm[0]) * ((state.currentLevel - 1) / 9);
+            } else if (state.mode === 'practice') {
+                if (state.practiceType === 'custom' && state.customPattern.length > 0) {
+                    // Use custom pattern, repeat it
+                    let pattern = [...state.customPattern];
+                    while (pattern.length < notesPerLevel) pattern = [...pattern, ...state.customPattern];
+                    return pattern.slice(0, notesPerLevel).map((p, i) => ({
+                        type: p.type,
+                        time: i * (60 / state.practiceBpm),
+                        isRest: false,
+                        syncopated: p.syncopated || false,
+                        triplet: p.triplet || false
+                    }));
+                }
+                availableTypes = [state.practiceNoteValue];
+                bpm = state.practiceBpm;
+            } else {
+                const diff = DIFFICULTIES.find(d => d.id === state.difficulty);
+                availableTypes = diff.noteTypes;
+                bpm = diff.bpm;
+            }
+            
+            const beatDuration = 60 / bpm;
+            
+            for (let i = 0; i < notesPerLevel; i++) {
+                // Determine note type for this beat
+                let noteType;
+                const beatInMeasure = i % 4;
+                
+                if (state.mode === 'adventure') {
+                    const world = WORLDS[state.currentWorld - 1];
+                    const progress = (state.currentLevel - 1) / 9;
+                    
+                    if (world.focus === 'quarter') {
+                        noteType = Math.random() < 0.8 ? 'quarter' : 'quarterRest';
+                    } else if (world.focus === 'eighth') {
+                        if (beatInMeasure % 2 === 0) {
+                            noteType = Math.random() < 0.7 ? 'quarter' : 'eighth';
+                        } else {
+                            noteType = Math.random() < 0.5 ? 'eighth' : 'quarterRest';
+                        }
+                    } else if (world.focus === 'mixed') {
+                        if (progress < 0.33) noteType = Math.random() < 0.6 ? 'quarter' : 'eighth';
+                        else if (progress < 0.66) noteType = Math.random() < 0.5 ? 'eighth' : 'half';
+                        else noteType = ['quarter', 'eighth', 'half', 'quarterRest'][Math.floor(Math.random() * 4)];
+                    } else if (world.focus === 'syncopated') {
+                        if (beatInMeasure === 0 || beatInMeasure === 2) {
+                            noteType = Math.random() < 0.6 ? 'quarter' : 'syncopated';
+                        } else {
+                            noteType = Math.random() < 0.4 ? 'eighth' : 'syncopated';
+                        }
+                    } else { // mastery
+                        const types = ['quarter', 'eighth', 'half', 'sixteenth', 'syncopated', 'triplet'];
+                        noteType = types[Math.floor(Math.random() * types.length)];
+                    }
+                } else {
+                    noteType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+                }
+                
+                const config = NOTE_CONFIG[noteType];
+                const duration = config.duration * beatDuration;
+                
+                notes.push({
+                    type: noteType,
+                    time: i * beatDuration,
+                    duration: duration,
+                    isRest: config.isRest || false,
+                    syncopated: config.syncopated || false,
+                    triplet: config.triplet || false,
+                    hold: config.hold || false,
+                    hit: false,
+                    judged: false
+                });
+            }
+            
+            return notes;
+        }
+
+        // ============ GAME LOOP ============
+        let lastFrameTime = 0;
+        let animationId = null;
+
+        function gameLoop(timestamp) {
+            if (!state.gameActive || state.paused) {
+                if (state.gameActive) animationId = requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            const deltaTime = (timestamp - lastFrameTime) / 1000;
+            lastFrameTime = timestamp;
+            
+            // Update visual positions
+            updateVisuals(deltaTime);
+            
+            // Check for missed notes
+            checkMissedNotes();
+            
+            // Update progress
+            updateProgress();
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function scheduleNotes() {
+            // This would use AudioContext timing for precise scheduling
+            // For visual-only, we use requestAnimationFrame
+            state.nextNoteTime = performance.now() / 1000 + 1; // Start after 1 second
+        }
+
+        function updateVisuals(deltaTime) {
+            const canvas = document.getElementById('rhythmCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('rhythmContainer');
+            const rect = container.getBoundingClientRect();
+            
+            // Set canvas size
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            ctx.scale(dpr, dpr);
+            
+            // Clear
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            
+            // Draw hit zone line (middle of screen)
+            const hitZoneY = rect.height * 0.5;
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(0, hitZoneY);
+            ctx.lineTo(rect.width, hitZoneY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw hit zone glow
+            const gradient = ctx.createLinearGradient(0, hitZoneY - 20, 0, hitZoneY + 20);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0)');
+            gradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.3)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, hitZoneY - 20, rect.width, 40);
+            
+            // Current time in level
+            const currentTime = (performance.now() / 1000) - (state.levelStartTime / 1000) - 1; // -1 for start delay
+            
+            // Draw notes
+            const noteSpeed = rect.height * 0.6 / 2; // pixels per second (2 seconds to travel)
+            const visualTime = currentTime * state.scrollSpeed;
+            
+            state.levelNotes.forEach((note, index) => {
+                if (note.judged) return;
+                
+                const noteVisualTime = note.time * state.scrollSpeed;
+                const timeDiff = visualTime - noteVisualTime;
+                const y = hitZoneY - timeDiff * noteSpeed;
+                
+                // Only draw if visible
+                if (y > -50 && y < rect.height + 50) {
+                    drawNote(ctx, note, rect.width / 2, y, rect.width);
+                }
+            });
+            
+            // Draw upcoming notes indicator (top)
+            if (state.settings.visualAids) {
+                drawUpcomingNotes(ctx, rect.width, rect.height, hitZoneY, noteSpeed, visualTime);
+            }
+        }
+
+        function drawNote(ctx, note, x, y, width) {
+            const config = NOTE_CONFIG[note.type];
+            const isHold = note.hold && note.duration > 0.1;
+            
+            // Note body
+            const radius = 28;
+            
+            if (isHold) {
+                // Draw hold note (rectangle with rounded caps)
+                const holdHeight = Math.max(40, note.duration * 100 * state.scrollSpeed);
+                ctx.fillStyle = config.color;
+                ctx.beginPath();
+                ctx.roundRect(x - radius, y - holdHeight/2, radius * 2, holdHeight, 16);
+                ctx.fill();
+                
+                // Inner glow
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.roundRect(x - radius + 4, y - holdHeight/2 + 4, radius * 2 - 8, holdHeight - 8, 12);
+                ctx.fill();
+            } else {
+                // Regular note circle
+                ctx.fillStyle = config.color;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.beginPath();
+                ctx.arc(x - 6, y - 6, radius * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Note symbol
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(config.symbol, x, y + (isHold ? 0 : 1));
+            
+            // Syncopated indicator
+            if (note.syncopated) {
+                ctx.fillStyle = '#a855f7';
+                ctx.font = '14px Arial';
+                ctx.fillText('⚡', x, y - radius - 8);
+            }
+            
+            // Triplet indicator
+            if (note.triplet) {
+                ctx.fillStyle = '#22c55e';
+                ctx.font = '12px Arial';
+                ctx.fillText('3', x + radius - 4, y - radius + 10);
+            }
+        }
+
+        function drawUpcomingNotes(ctx, width, height, hitZoneY, noteSpeed, visualTime) {
+            // Show next 4 notes at top
+            const upcoming = state.levelNotes
+                .filter(n => !n.judged && n.time * state.scrollSpeed > visualTime)
+                .slice(0, 4);
+            
+            upcoming.forEach((note, i) => {
+                const noteVisualTime = note.time * state.scrollSpeed;
+                const timeDiff = noteVisualTime - visualTime;
+                const y = hitZoneY - timeDiff * noteSpeed;
+                
+                if (y < 80) {
+                    const config = NOTE_CONFIG[note.type];
+                    const x = width * 0.15 + i * (width * 0.2);
+                    const radius = 16;
+                    
+                    ctx.fillStyle = config.color;
+                    ctx.globalAlpha = 0.5;
+                    ctx.beginPath();
+                    ctx.arc(x, 40, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(config.symbol, x, 42);
+                }
+            });
+        }
+
+        function checkMissedNotes() {
+            const currentTime = (performance.now() / 1000) - (state.levelStartTime / 1000) - 1;
+            const visualTime = currentTime * state.scrollSpeed;
+            const hitWindow = 0.15 * state.scrollSpeed; // 150ms window
+            
+            state.levelNotes.forEach((note, index) => {
+                if (note.judged) return;
+                
+                const noteVisualTime = note.time * state.scrollSpeed;
+                const timeDiff = visualTime - noteVisualTime;
+                
+                if (timeDiff > hitWindow) {
+                    // Missed!
+                    judgeNote(index, 'miss');
+                }
+            });
+        }
+
+        function updateProgress() {
+            const currentTime = (performance.now() / 1000) - (state.levelStartTime / 1000) - 1;
+            const totalTime = state.levelNotes[state.levelNotes.length - 1]?.time || 32;
+            const progress = Math.min(100, Math.max(0, (currentTime / totalTime) * 100));
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${Math.floor(currentTime)}s / ${Math.floor(totalTime)}s`;
+            
+            // Check level complete
+            if (currentTime > totalTime + 1 && state.currentNoteIndex >= state.levelNotes.length) {
+                completeLevel();
+            }
+        }
+
+        // ============ INPUT HANDLING ============
+        function handleTap(event) {
+            if (!state.gameActive || state.paused) return;
+            
+            event.preventDefault();
+            
+            const currentTime = (performance.now() / 1000) - (state.levelStartTime / 1000) - 1;
+            const visualTime = currentTime * state.scrollSpeed;
+            const hitWindowPerfect = 0.08 * state.scrollSpeed; // 80ms
+            const hitWindowGood = 0.15 * state.scrollSpeed;   // 150ms
+            
+            // Find closest unjudged note
+            let bestNote = null;
+            let bestDiff = Infinity;
+            let bestIndex = -1;
+            
+            state.levelNotes.forEach((note, index) => {
+                if (note.judged || note.isRest) return;
+                
+                const noteVisualTime = note.time * state.scrollSpeed;
+                const diff = Math.abs(visualTime - noteVisualTime);
+                
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    bestNote = note;
+                    bestIndex = index;
+                }
+            });
+            
+            if (bestNote && bestDiff <= hitWindowGood) {
+                if (bestDiff <= hitWindowPerfect) {
+                    judgeNote(bestIndex, 'perfect', bestDiff);
+                } else {
+                    judgeNote(bestIndex, 'good', bestDiff);
+                }
+                showTapFeedback(event, bestDiff <= hitWindowPerfect ? 'perfect' : 'good');
+                vibrate(bestDiff <= hitWindowPerfect ? [10] : [20]);
+            } else {
+                // Early/late tap - count as miss if no note nearby
+                showTapFeedback(event, 'miss');
+                vibrate([30, 20, 30]);
+            }
+        }
+
+        function judgeNote(index, judgement, timingDiff = 0) {
+            const note = state.levelNotes[index];
+            if (!note || note.judged) return;
+            
+            note.judged = true;
+            note.judgement = judgement;
+            state.currentNoteIndex = Math.max(state.currentNoteIndex, index + 1);
+            
+            const baseScore = 100;
+            let scoreGain = 0;
+            
+            switch(judgement) {
+                case 'perfect':
+                    state.perfectHits++;
+                    state.combo++;
+                    scoreGain = baseScore + state.combo * 5;
+                    playHitSound('perfect');
+                    if (state.combo > 1 && state.combo % 10 === 0) playHitSound('combo');
+                    break;
+                case 'good':
+                    state.goodHits++;
+                    state.combo++;
+                    scoreGain = Math.floor(baseScore * 0.5);
+                    playHitSound('good');
+                    break;
+                case 'miss':
+                    state.misses++;
+                    state.combo = 0;
+                    state.lives = Math.max(0, state.lives - 1);
+                    playHitSound('miss');
+                    break;
+            }
+            
+            state.maxCombo = Math.max(state.maxCombo, state.combo);
+            state.score += scoreGain;
+            
+            // Update accuracy
+            const totalJudged = state.perfectHits + state.goodHits + state.misses;
+            state.accuracy = totalJudged > 0 ? Math.round(((state.perfectHits + state.goodHits * 0.5) / totalJudged) * 100) : 100;
+            
+            updateGameHeader();
+            updateComboDisplay();
+            
+            // Check game over
+            if (state.lives <= 0) {
+                gameOver();
+            }
+        }
+
+        function showTapFeedback(event, type) {
+            const container = document.getElementById('rhythmContainer');
+            const rect = container.getBoundingClientRect();
+            
+            const x = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left;
+            const y = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top;
+            
+            const feedback = document.createElement('div');
+            feedback.className = `tap-feedback ${type}`;
+            
+            const texts = {
+                perfect: ['PERFECT!', 'EXCELLENT!', 'AMAZING!', 'SPOT ON!'],
+                good: ['GOOD!', 'NICE!', 'WELL DONE!'],
+                miss: ['MISS', 'TOO EARLY', 'TOO LATE']
+            };
+            
+            feedback.textContent = texts[type][Math.floor(Math.random() * texts[type].length)];
+            feedback.style.left = x + 'px';
+            feedback.style.top = y + 'px';
+            
+            container.appendChild(feedback);
+            
+            setTimeout(() => feedback.remove(), 800);
+        }
+
+        function updateGameHeader() {
+            document.getElementById('gameScore').textContent = state.score.toLocaleString();
+            document.getElementById('gameAccuracy').textContent = state.accuracy + '%';
+            document.getElementById('gameLives').textContent = state.lives;
+        }
+
+        function updateComboDisplay() {
+            const comboDisplay = document.getElementById('comboDisplay');
+            const comboCount = document.getElementById('comboCount');
+            
+            if (state.combo >= 3) {
+                comboDisplay.style.display = 'flex';
+                comboCount.textContent = state.combo;
+                comboDisplay.classList.add('pop');
+                setTimeout(() => comboDisplay.classList.remove('pop'), 200);
+            } else {
+                comboDisplay.style.display = 'none';
+            }
+        }
+
+        // ============ LEVEL COMPLETE / GAME OVER ============
+        function completeLevel() {
+            state.gameActive = false;
+            cancelAnimationFrame(animationId);
+            
+            // Calculate stars
+            let stars = 0;
+            if (state.accuracy >= 95) stars = 3;
+            else if (state.accuracy >= 80) stars = 2;
+            else if (state.accuracy >= 50) stars = 1;
+            
+            // Save progress
+            if (state.mode === 'adventure') {
+                const worldId = state.currentWorld;
+                const levelId = state.currentLevel;
+                
+                if (!state.stats.levelsCompleted[worldId]) {
+                    state.stats.levelsCompleted[worldId] = {};
+                }
+                
+                const existing = state.stats.levelsCompleted[worldId][levelId] || { stars: 0 };
+                if (stars > existing.stars) {
+                    state.stats.levelsCompleted[worldId][levelId] = { 
+                        stars, 
+                        accuracy: state.accuracy, 
+                        combo: state.maxCombo,
+                        score: state.score 
+                    };
+                    
+                    // Update total stars
+                    let totalStars = 0;
+                    Object.values(state.stats.levelsCompleted).forEach(world => {
+                        Object.values(world).forEach(level => totalStars += level.stars);
+                    });
+                    state.stats.totalStars = totalStars;
+                    
+                    // Unlock next level/world
+                    if (levelId === 10 && worldId < 5) {
+                        state.currentWorld = worldId + 1;
+                        state.currentLevel = 1;
+                    } else if (levelId < 10) {
+                        state.currentLevel = levelId + 1;
+                    }
+                }
+                
+                state.stats.totalLevels++;
+            }
+            
+            state.stats.totalNotes += state.perfectHits + state.goodHits + state.misses;
+            state.stats.totalPerfect += state.perfectHits;
+            state.stats.totalGood += state.goodHits;
+            state.stats.totalMisses += state.misses;
+            state.stats.bestAccuracy = Math.max(state.stats.bestAccuracy, state.accuracy);
+            state.stats.bestCombo = Math.max(state.stats.bestCombo, state.maxCombo);
+            state.stats.currentStreak = stars === 3 ? state.stats.currentStreak + 1 : 0;
+            
+            // Add to recent games
+            state.stats.recentGames.unshift({
+                mode: state.mode,
+                world: state.currentWorld,
+                level: state.currentLevel,
+                accuracy: state.accuracy,
+                combo: state.maxCombo,
+                stars,
+                score: state.score,
+                timestamp: Date.now()
+            });
+            state.stats.recentGames = state.stats.recentGames.slice(0, 10);
+            
+            saveData();
+            playHitSound('levelComplete');
+            showResults(stars);
+        }
+
+        function gameOver() {
+            state.gameActive = false;
+            cancelAnimationFrame(animationId);
+            playHitSound('miss');
+            showResults(0, true);
+        }
+
+        function showResults(stars, failed = false) {
+            document.getElementById('resultIcon').textContent = failed ? '💔' : stars === 3 ? '⭐' : stars > 0 ? '✨' : '😊';
+            document.getElementById('resultTitle').textContent = failed ? 'Game Over!' : stars === 3 ? 'Perfekt!' : stars > 0 ? 'Level geschafft!' : 'Fast geschafft!';
+            document.getElementById('resultSubtitle').textContent = failed ? 'Versuch es noch einmal!' : `Genauigkeit: ${state.accuracy}% • Combo: ${state.maxCombo}`;
+            
+            // Stars
+            const starsDisplay = document.getElementById('starsDisplay');
+            starsDisplay.innerHTML = '';
+            for (let i = 1; i <= 3; i++) {
+                const star = document.createElement('span');
+                star.className = 'star-big' + (i <= stars ? ' earned' : '');
+                star.style.animationDelay = (i * 0.15) + 's';
+                star.textContent = '★';
+                starsDisplay.appendChild(star);
+            }
+            
+            // Stats
+            document.getElementById('rScore').textContent = state.score.toLocaleString();
+            document.getElementById('rAccuracy').textContent = state.accuracy + '%';
+            document.getElementById('rCombo').textContent = state.maxCombo;
+            document.getElementById('rStars').textContent = stars;
+            document.getElementById('rBreakdown').textContent = `Perfekt: ${state.perfectHits} • Gut: ${state.goodHits} • Verfehlt: ${state.misses}`;
+            
+            // Next level button
+            const nextBtn = document.getElementById('nextLevelBtn');
+            if (state.mode === 'adventure' && !failed && stars > 0 && state.currentLevel < 10) {
+                nextBtn.style.display = 'inline-flex';
+            } else if (state.mode === 'adventure' && !failed && stars > 0 && state.currentLevel === 10 && state.currentWorld < 5) {
+                nextBtn.textContent = '➡️ Nächste Welt';
+                nextBtn.style.display = 'inline-flex';
+            } else {
+                nextBtn.style.display = 'none';
+            }
+            
+            showMascot(stars === 3 ? 'perfect' : stars > 0 ? 'good' : 'encourage');
+            showScreen('screenResults');
+        }
+
+        function nextLevel() {
+            if (state.mode === 'adventure') {
+                if (state.currentLevel < 10) {
+                    state.currentLevel++;
+                } else if (state.currentWorld < 5) {
+                    state.currentWorld++;
+                    state.currentLevel = 1;
+                }
+            }
+            showScreen('screenGame');
+        }
+
+        function replayLevel() {
+            showScreen('screenGame');
+        }
+
+        function quitToMenu() {
+            state.gameActive = false;
+            state.paused = false;
+            cancelAnimationFrame(animationId);
+            showScreen('screenMenu');
+        }
+
+        function togglePause() {
+            if (!state.gameActive) return;
+            state.paused = !state.paused;
+            document.getElementById('pauseOverlay').classList.toggle('show', state.paused);
+            document.getElementById('pauseBtn').innerHTML = state.paused 
+                ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+                : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        }
+
+        function resumeGame() {
+            state.paused = false;
+            document.getElementById('pauseOverlay').classList.remove('show');
+            document.getElementById('pauseBtn').innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+            lastFrameTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ============ STATS ============
+        function renderStats() {
+            document.getElementById('sTotalLevels').textContent = state.stats.totalLevels;
+            document.getElementById('sTotalNotes').textContent = state.stats.totalNotes.toLocaleString();
+            document.getElementById('sAvgAccuracy').textContent = state.stats.totalNotes > 0 
+                ? Math.round(((state.stats.totalPerfect + state.stats.totalGood * 0.5) / state.stats.totalNotes) * 100) + '%' 
+                : '0%';
+            document.getElementById('sBestCombo').textContent = state.stats.bestCombo;
+            document.getElementById('sPerfectHits').textContent = state.stats.totalPerfect;
+            document.getElementById('sGoodHits').textContent = state.stats.totalGood;
+            document.getElementById('sMisses').textContent = state.stats.totalMisses;
+            document.getElementById('sCurrentStreak').textContent = state.stats.currentStreak;
+            
+            // World progress
+            const wp = document.getElementById('worldProgress');
+            wp.innerHTML = '';
+            
+            WORLDS.forEach(world => {
+                const completed = state.stats.levelsCompleted[world.id] || {};
+                const totalStars = Object.values(completed).reduce((sum, l) => sum + l.stars, 0);
+                const maxStars = world.levels * 3;
+                const percent = maxStars > 0 ? (totalStars / maxStars) * 100 : 0;
+                const completedCount = Object.keys(completed).length;
+                
+                const item = document.createElement('div');
+                item.className = 'world-progress-item';
+                item.innerHTML = `
+                    <div style="width:50px;height:50px;border-radius:12px;background:${world.color}20;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">${world.name.split(' ')[0]}</div>
+                    <div class="world-progress-info">
+                        <div class="world-progress-name">${world.name}</div>
+                        <div class="world-progress-bar"><div class="world-progress-fill" style="width:${percent}%;background:${world.color}"></div></div>
+                    </div>
+                    <div class="world-progress-stars">${'★'.repeat(Math.floor(totalStars/3))}${'☆'.repeat(5 - Math.floor(totalStars/3))}</div>
+                `;
+                wp.appendChild(item);
+            });
+            
+            // Recent games
+            const rg = document.getElementById('recentGames');
+            if (state.stats.recentGames.length === 0) {
+                rg.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Noch keine Spiele gespielt.</p>';
+            } else {
+                rg.innerHTML = state.stats.recentGames.map(g => `
+                    <div class="recent-game">
+                        <div class="recent-game-info">
+                            <span class="recent-game-name">${g.mode === 'adventure' ? `Welt ${g.world}-${g.level}` : g.mode === 'practice' ? 'Übung: ' + g.level : 'Schnellstart'}</span>
+                            <span class="recent-game-meta">${new Date(g.timestamp).toLocaleDateString('de-DE')} • ${g.accuracy}% • ${g.combo} Combo</span>
+                        </div>
+                        <div class="recent-game-score">
+                            <div class="recent-game-stars">${'★'.repeat(g.stars)}${'☆'.repeat(3-g.stars)}</div>
+                            <div style="font-family:'JetBrains Mono',monospace;font-weight:600;">${g.score.toLocaleString()}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ============ MASCOT ============
+        function showMascot(type) {
+            const mascot = document.getElementById('mascot');
+            const char = document.getElementById('mascotChar');
+            const title = document.getElementById('mascotTitle');
+            const msg = document.getElementById('mascotMsg');
+            
+            char.textContent = MASCOTS[Math.floor(Math.random() * MASCOTS.length)];
+            
+            let encouragement;
+            switch(type) {
+                case 'start':
+                    encouragement = { title: 'Los geht\'s!', msg: 'Fühle den Rhythmus!' };
+                    break;
+                case 'perfect':
+                    encouragement = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+                    break;
+                case 'good':
+                    encouragement = { title: 'Gut gemacht!', msg: 'Nächstes Mal noch besser!' };
+                    break;
+                case 'encourage':
+                    encouragement = { title: 'Nicht aufgeben!', msg: 'Übung macht den Meister!' };
+                    break;
+                default:
+                    encouragement = { title: 'Super!', msg: 'Weiter so!' };
+            }
+            
+            title.textContent = encouragement.title;
+            msg.textContent = encouragement.msg;
+            mascot.style.display = 'block';
+            
+            setTimeout(() => { mascot.style.display = 'none'; }, 4000);
+        }
+
+        // ============ TOAST ============
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ============ EVENT LISTENERS ============
+        function setupEventListeners() {
+            // Initialize audio on first user interaction (anywhere on page)
+            function initAudioOnInteraction() {
+                initAudio();
+                document.removeEventListener('pointerdown', initAudioOnInteraction);
+                document.removeEventListener('keydown', initAudioOnInteraction);
+                document.removeEventListener('click', initAudioOnInteraction);
+            }
+            document.addEventListener('pointerdown', initAudioOnInteraction, { once: true, passive: true });
+            document.addEventListener('keydown', initAudioOnInteraction, { once: true, passive: true });
+            document.addEventListener('click', initAudioOnInteraction, { once: true, passive: true });
+            
+            // Touch/click on rhythm container
+            const rhythmContainer = document.getElementById('rhythmContainer');
+            rhythmContainer.addEventListener('pointerdown', handleTap, { passive: false });
+            rhythmContainer.addEventListener('click', handleTap, { passive: false });
+            
+            // Keyboard support (spacebar)
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && state.gameActive && !state.paused && state.screen === 'screenGame') {
+                    e.preventDefault();
+                    handleTap({ 
+                        preventDefault: () => {}, 
+                        clientX: window.innerWidth / 2, 
+                        clientY: window.innerHeight * 0.85,
+                        touches: [{ clientX: window.innerWidth / 2, clientY: window.innerHeight * 0.85 }]
+                    });
+                }
+                if (e.code === 'Escape' && state.gameActive) {
+                    togglePause();
+                }
+            });
+            
+            // Prevent context menu on game area
+            rhythmContainer.addEventListener('contextmenu', e => e.preventDefault());
+            
+            // Resize handler
+            window.addEventListener('resize', () => {
+                // Canvas will resize on next frame
+            });
+            
+            // Visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && state.gameActive && !state.paused) {
+                    togglePause();
+                }
+            });
+        }
+
+        // ============ INITIALIZATION ============
+        function init() {
+            loadData();
+            applySettings();
+            setupEventListeners();
+            createFloatingNotes();
+            
+            // Simulate loading
+            let progress = 0;
+            const loadingProgress = document.getElementById('loadingProgress');
+            const loadingText = document.getElementById('loadingText');
+            const texts = ['Lade Welten...', 'Stimme Instrumente...', 'Wecke Melody...', 'Bereit!'];
+            let textIndex = 0;
+            
+            const loadInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(loadInterval);
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                    }, 500);
+                }
+                loadingProgress.style.width = progress + '%';
+                
+                if (progress > 25 * (textIndex + 1) && textIndex < texts.length - 1) {
+                    textIndex++;
+                    loadingText.textContent = texts[textIndex];
+                }
+            }, 200);
+        }
+
+        function createFloatingNotes() {
+            const container = document.getElementById('floatingNotes');
+            const notes = ['♪', '♩', '♫', '𝅘𝅥𝅮', '𝄽', '𝄾', '𝅗𝅥'];
+            
+            for (let i = 0; i < 20; i++) {
+                const note = document.createElement('div');
+                note.className = 'float-note';
+                note.textContent = notes[Math.floor(Math.random() * notes.length)];
+                note.style.left = Math.random() * 100 + '%';
+                note.style.animationDelay = Math.random() * 25 + 's';
+                note.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+                container.appendChild(note);
+            }
+        }
+
+        // Start when DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>

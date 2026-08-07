@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historische Zeitreise - Europeana Archiv</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --primary: #2c3e50;
+            --accent: #d35400;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        input { width: 50%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        #map { width: 100%; height: 350px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        .timeline-box { background: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .slider { width: 85%; margin: 15px 0; cursor: pointer; }
+        .year-label { font-size: 26px; font-weight: bold; color: var(--accent); }
+        
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .card img { width: 100%; height: 220px; object-fit: contain; background: #eaeded; }
+        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .year-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; align-self: flex-start; }
+        .status { text-align: center; color: #7f8c8d; grid-column: 1 / -1; padding: 40px; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="text-align:center; color:var(--primary); margin-bottom:5px;">Echtes Kulturarchiv-Zeitreise</h2>
+    <p style="text-align:center; margin-top:0; color:#7f8c8d;">Gefüttert durch verifizierte Bestände europäischer Museen & Archive</p>
+    
+    <div class="search-box">
+        <input type="text" id="target-loc" placeholder="Ort eingeben (z.B. München, Berlin, Landshut)..." onkeypress="if(event.key === 'Enter') doSearch()">
+        <button onclick="doSearch()">Ort suchen & laden</button>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="timeline-box">
+        <div>Zeige Archivdokumente bis zum Jahr: <span id="year-display" class="year-label">1930</span></div>
+        <input type="range" min="1800" max="2000" value="1930" class="slider" id="year-slider" oninput="filterGallery(this.value)">
+        <div style="display:flex; justify-content:space-between; width:85%; margin:0 auto; color:#95a5a6; font-size:12px;">
+            <span>1800</span><span>1850</span><span>1900</span><span>1930</span><span>1950</span><span>1980</span><span>2000</span>
+        </div>
+    </div>
+
+    <div id="gallery" class="gallery">
+        <div class="status">Gib oben einen Ort ein, um historische Originalaufnahmen zu laden.</div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map;
+    let currentCityName = "";
+    let itemsCache = [];
+    
+    // Freier Public-API-Key für Demonstrationszwecke von Europeana
+    const EUROPEANA_API_KEY = "api2demo"; 
+
+    window.onload = function() {
+        // Startet standardmäßig in München
+        map = L.map('map').setView([48.1351, 11.5820], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+        
+        // Initial-Suche für München triggern
+        currentCityName = "München";
+        fetchEuropeanaData();
+    };
+
+    async function doSearch() {
+        const q = document.getElementById('target-loc').value.trim();
+        if (!q) return;
+        currentCityName = q;
+        
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
+            const d = await res.json();
+            if(d.length > 0) {
+                map.setView([parseFloat(d[0].lat), parseFloat(d[0].lon)], 13);
+                fetchEuropeanaData();
+            }
+        } catch(e) { alert("Ort konnte nicht kartiert werden."); }
+    }
+
+    async function fetchEuropeanaData() {
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = '<div class="status">Frage europäische Museumsdatenbanken ab...</div>';
+        itemsCache = [];
+
+        try {
+            // Wir fragen Europeana nach Bildern (IMAGE) ab, die den Ortsnamen im Titel/Metadaten haben
+            // Verfeinert mit "TYPE:IMAGE" und sortiert nach Relevanz.
+            const url = `https://api.europeana.eu/record/v2/search.json?wskey=${EUROPEANA_API_KEY}&query=where%3A"${encodeURIComponent(currentCityName)}"+AND+TYPE%3AIMAGE&rows=100&profile=standard`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!data.items || data.items.length === 0) {
+                gallery.innerHTML = `<div class="status">Keine verifizierten Archivbilder für "${currentCityName}" gefunden.</div>`;
+                return;
+            }
+
+            data.items.forEach(item => {
+                // Versuche das Jahr präzise aus dem "year" Array oder "dcDate" zu lesen
+                let year = null;
+                if (item.year && item.year.length > 0) {
+                    year = parseInt(item.year[0], 10);
+                } else if (item.dcDate && item.dcDate.length > 0) {
+                    const match = item.dcDate[0].match(/\b(17|18|19|20)\d{2}\b/);
+                    if (match) year = parseInt(match[0], 10);
+                }
+
+                // Nur aufnehmen, wenn wir ein klares Jahr ermitteln konnten
+                if (year && year >= 1800 && year <= 2025) {
+                    // Prüfen ob ein gültiges Thumbnail existiert
+                    const imgSrc = item.edmPreview && item.edmPreview.length > 0 ? item.edmPreview[0] : null;
+                    const title = item.title && item.title.length > 0 ? item.title[0] : "Historisches Dokument";
+                    const archive = item.dataProvider ? item.dataProvider[0] : "Unbekanntes Archiv";
+
+                    if (imgSrc) {
+                        itemsCache.push({
+                            title: title,
+                            year: year,
+                            src: imgSrc,
+                            archive: archive,
+                            url: item.guid
+                        });
+                    }
+                }
+            });
+
+            // Sortierung: Älteste Archivschätze zuerst
+            itemsCache.sort((a, b) => a.year - b.year);
+
+            // Filter anwenden
+            filterGallery(document.getElementById('year-slider').value);
+
+        } catch (error) {
+            console.error(error);
+            gallery.innerHTML = '<div class="status">Fehler beim Verbinden mit der Europeana-Datenbank.</div>';
+        }
+    }
+
+    function filterGallery(selectedYear) {
+        document.getElementById('year-display').innerText = selectedYear;
+        const gallery = document.getElementById('gallery');
+
+        // Filter: Alle Schätze, die älter oder gleich dem gewählten Slider-Jahr sind
+        const filtered = itemsCache.filter(item => item.year <= parseInt(selectedYear, 10));
+
+        if (filtered.length === 0) {
+            gallery.innerHTML = `<div class="status">Keine verifizierten Archivbilder für "${currentCityName}" bis zum Jahr ${selectedYear} gelistet. Schiebe den Regler nach rechts.</div>`;
+            return;
+        }
+
+        let html = '';
+        filtered.forEach(item => {
+            html += `
+                <div class="card">
+                    <img src="${item.src}" onerror="this.src='https://placehold.co/300x200?text=Bild+im+Archiv'">
+                    <div class="card-body">
+                        <div>
+                            <span class="year-badge">Jahr: ${item.year}</span>
+                            <h4 style="margin: 10px 0 5px 0; font-size:15px; line-height:1.4;">${item.title}</h4>
+                            <p style="font-size:12px; color:#7f8c8d; margin: 5px 0;">🏛️ ${item.archive}</p>
+                        </div>
+                        <a href="${item.url}" target="_blank" style="font-size:13px; color:var(--accent); text-decoration:none; font-weight:bold; margin-top:10px; display:inline-block;">Im Digitalarchiv öffnen ↗</a>
+                    </div>
+                </div>
+            `;
+        });
+        gallery.innerHTML = html;
+    }
+</script>
+</body>
+</html>
