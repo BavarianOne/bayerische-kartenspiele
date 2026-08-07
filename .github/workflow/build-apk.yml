@@ -1,0 +1,25 @@
+ yaml                                                 name: Build Android APK
+
+ on:                                                    push:
+     branches: [master]                                 workflow_dispatch:
+
+ jobs:
+   build:                                                 runs-on: ubuntu-latest
+     steps:
+       - uses: actions/checkout@v4                          - uses: actions/setup-node@v4
+         with: { node-version: '20', cache: 'npm' }         - uses: actions/setup-java@v4
+         with: { distribution: 'temurin',             java-version: '17' }
+       - uses: android-actions/setup-android@v3               with: { api-level: 34, build-tools-version:
+ '34.0.0' }                                                 - name: Install & Sync                                 run: |
+           npm ci
+           mkdir -p www
+           cp *.html *.js *.css www/ 2>/dev/null ||
+ true
+           cp -r data www/ 2>/dev/null || true
+           npx cap sync android
+       - name: Build APK
+         run: cd android && ./gradlew assembleDebug
+ --no-daemon
+       - uses: actions/upload-artifact@v4
+         with:                                                  name: app-debug.apk                                  path:
+ android/app/build/outputs/apk/debug/app-debug.apk
