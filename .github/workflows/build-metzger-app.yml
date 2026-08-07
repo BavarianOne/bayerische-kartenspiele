@@ -33,7 +33,6 @@ jobs:
       - name: Setup Metzger App
         run: |
           cd /home/runner/work/bayerische-kartenspiele/bayerische-kartenspiele
-          # Create dedicated metzger app structure
           mkdir -p metzger-app/www
           cp metzger-angebote.html metzger-app/www/index.html
           cp data/metzger/wasner.json metzger-app/www/data.json
@@ -62,12 +61,10 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Delete old releases
-        uses: dev-drpr/delete-old-releases@v1.0.1
+        uses: mkasatkin/delete-old-releases@v1.0.0
         with:
           keep_latest: 3
-          delete_tags: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v2
@@ -76,4 +73,4 @@ jobs:
           name: Metzger App Build v1.0.${{ github.run_number }}
           files: metzger-app/android/app/build/outputs/apk/debug/app-debug.apk
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}roflows# l
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
