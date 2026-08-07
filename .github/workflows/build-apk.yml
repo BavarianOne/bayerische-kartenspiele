@@ -66,16 +66,16 @@ jobs:
       - name: Build Android (debug)
         run: cd android && ./gradlew assembleDebug --no-daemon
 
-      - name: Delete old releases
+      - name: Lösche alte Releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release list --limit 100 | tail -n +4 | awk '{print $1}' | while read -r tag; do
+          gh release list --limit 100 --json tagName --jq '.[3:] | .[].tagName' | while read -r tag; do
             if [ -n "$tag" ]; then
               echo "Lösche altes Release: $tag"
               gh release delete "$tag" --cleanup-tag --yes
             fi
           done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v2
