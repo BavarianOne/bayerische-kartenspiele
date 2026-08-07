@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [master, main]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install
 
       - name: Prepare www folder
         run: |
@@ -48,13 +48,8 @@ jobs:
       - name: Capacitor sync (Android)
         run: npx cap sync android
 
-      - name: Ensure gradlew is executable
-        run: chmod +x ./gradlew
-        working-directory: android
-
       - name: Build Android (debug)
-        run: ./gradlew assembleDebug --no-daemon
-        working-directory: android
+        run: cd android && ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
