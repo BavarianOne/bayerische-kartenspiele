@@ -184,6 +184,11 @@
             font-weight: 600;
         }
         
+        .layer-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
         /* Opacity Slider in Layer Bar */
         .opacity-control {
             display: flex;
@@ -440,11 +445,11 @@
         </div>
         <div class="layer-bar-group">
             <span class="layer-bar-label">Overlay</span>
-            <button class="layer-btn" data-overlay="clouds" title="Wolken">☁️ Wolken</button>
+            <button class="layer-btn" data-overlay="clouds" title="Wolken (API key benötigt)" disabled>☁️ Wolken</button>
             <button class="layer-btn" data-overlay="rain" title="Regen/Radar">🌧️ Regen</button>
-            <button class="layer-btn" data-overlay="wind" title="Wind">💨 Wind</button>
-            <button class="layer-btn" data-overlay="storm" title="Gewitter/Sturm">⛈️ Sturm</button>
-            <button class="layer-btn" data-overlay="temp" title="Temperatur">🌡️ Temp</button>
+            <button class="layer-btn" data-overlay="wind" title="Wind (API key benötigt)" disabled>💨 Wind</button>
+            <button class="layer-btn" data-overlay="storm" title="Sturm/Druck (API key benötigt)" disabled>⛈️ Sturm</button>
+            <button class="layer-btn" data-overlay="temp" title="Temperatur (API key benötigt)" disabled>🌡️ Temp</button>
         </div>
         <div class="opacity-control">
             <span class="opacity-label">Opacity</span>
@@ -561,42 +566,49 @@
                     maxZoom: 17
                 }
             },
-            // DWD WMS layers - using OpenWeatherMap (reliable XYZ tiles) instead of DWD WMS
+            // Overlay layers - ONLY WORKING free providers (no API key needed)
+            // RainViewer for radar/precipitation (global, free, works perfectly)
+            // Other OpenWeatherMap layers require API key - disabled for now
             overlayLayers: {
-                clouds: {
-                    url: 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
-                    maxZoom: 18,
-                    name: 'Wolken',
-                    type: 'xyz'
-                },
                 rain: {
-                    url: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
+                    url: 'https://tilecache.rainviewer.com/v2/radar/{z}/{x}/{y}/2/1_1.png',
+                    attribution: '© RainViewer',
                     maxZoom: 18,
-                    name: 'Regen',
-                    type: 'xyz'
+                    name: 'Regen/Radar',
+                    type: 'xyz',
+                    available: true
                 },
-                wind: {
-                    url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
+                clouds: {
+                    url: '',
+                    attribution: '© OpenWeatherMap (API key required)',
                     maxZoom: 18,
-                    name: 'Wind',
-                    type: 'xyz'
-                },
-                storm: {
-                    url: 'https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
-                    maxZoom: 18,
-                    name: 'Sturm/Druck',
-                    type: 'xyz'
+                    name: 'Wolken (API key benötigt)',
+                    type: 'xyz',
+                    available: false
                 },
                 temp: {
-                    url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
-                    attribution: '© OpenWeatherMap',
+                    url: '',
+                    attribution: '© OpenWeatherMap (API key required)',
                     maxZoom: 18,
-                    name: 'Temperatur',
-                    type: 'xyz'
+                    name: 'Temperatur (API key benötigt)',
+                    type: 'xyz',
+                    available: false
+                },
+                wind: {
+                    url: '',
+                    attribution: '© OpenWeatherMap (API key required)',
+                    maxZoom: 18,
+                    name: 'Wind (API key benötigt)',
+                    type: 'xyz',
+                    available: false
+                },
+                storm: {
+                    url: '',
+                    attribution: '© OpenWeatherMap (API key required)',
+                    maxZoom: 18,
+                    name: 'Sturm/Druck (API key benötigt)',
+                    type: 'xyz',
+                    available: false
                 }
             },
             weatherIcons: {
@@ -679,12 +691,16 @@
 
             // Overlay layers
             Object.entries(CONFIG.overlayLayers).forEach(([key, cfg]) => {
-                overlayLayers[key] = L.tileLayer(cfg.url, {
-                    attribution: cfg.attribution,
-                    maxZoom: cfg.maxZoom,
-                    opacity: 0.7
-                });
-                console.log('Created overlay layer:', key, cfg.url);
+                if (cfg.available && cfg.url) {
+                    overlayLayers[key] = L.tileLayer(cfg.url, {
+                        attribution: cfg.attribution,
+                        maxZoom: cfg.maxZoom,
+                        opacity: 0.7
+                    });
+                    console.log('Created overlay layer:', key, cfg.url);
+                } else {
+                    console.log('Overlay layer NOT available:', key, cfg.name);
+                }
             });
 
             // Location marker
@@ -890,7 +906,14 @@
 
         function toggleOverlay(type) {
             console.log('toggleOverlay called:', type);
+            const cfg = CONFIG.overlayLayers[type];
             const layer = overlayLayers[type];
+            
+            if (!cfg?.available) {
+                alert(`Diese Ebene (${cfg?.name || type}) ist aktuell nicht verfügbar. OpenWeatherMap Layer benötigen einen API-Key.`);
+                return;
+            }
+            
             if (!layer) {
                 console.error('Layer not found:', type, overlayLayers);
                 return;
