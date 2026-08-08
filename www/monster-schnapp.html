@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 Schnapp das Monster!</title>
+<style>
+:root {
+--bg: #f0f4f8;
+--hole-bg: #2d3a4a;
+--hole-border: #1a2530;
+--grass: #4ade80;
+--grass-dark: #22c55e;
+--btn-start: #3b82f6;
+--btn-start-hover: #2563eb;
+--btn-diff: #6366f1;
+--btn-diff-active: #4f46e5;
+--text: #1e293b;
+--text-light: #64748b;
+--score-color: #f59e0b;
+--hit-color: #22c55e;
+--miss-color: #ef4444;
+--panel-bg: rgba(255,255,255,0.95);
+--shadow: 0 4px 12px rgba(0,0,0,0.15);
+--shadow-lg: 0 8px 24px rgba(0,0,0,0.2);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #faf5ff 100%);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 1rem;
+user-select: none;
+-webkit-user-select: none;
+-webkit-tap-highlight-color: transparent;
+}
+h1 {
+font-size: clamp(1.8rem, 6vw, 2.8rem);
+color: var(--text);
+margin-bottom: 0.5rem;
+text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+text-align: center;
+}
+.subtitle {
+color: var(--text-light);
+font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+margin-bottom: 1.5rem;
+text-align: center;
+}
+.game-container {
+background: var(--panel-bg);
+border-radius: 20px;
+padding: 1.5rem;
+box-shadow: var(--shadow-lg);
+max-width: 100%;
+width: 100%;
+max-width: 500px;
+}
+.header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 1rem;
+flex-wrap: wrap;
+gap: 0.5rem;
+}
+.score-timer {
+display: flex;
+gap: 1.5rem;
+font-size: clamp(1rem, 3vw, 1.3rem);
+font-weight: 700;
+color: var(--text);
+}
+.score { color: var(--score-color); }
+.timer { color: var(--btn-start); }
+.mute-btn {
+background: var(--hole-bg);
+color: white;
+border: none;
+border-radius: 12px;
+padding: 0.6rem 1rem;
+font-size: 1.2rem;
+cursor: pointer;
+transition: transform 0.15s, background 0.2s;
+}
+.mute-btn:active { transform: scale(0.95); }
+.mute-btn.muted { background: var(--miss-color); }
+.difficulty-selector {
+display: flex;
+gap: 0.5rem;
+justify-content: center;
+margin-bottom: 1rem;
+flex-wrap: wrap;
+}
+.diff-btn {
+background: var(--btn-diff);
+color: white;
+border: none;
+border-radius: 10px;
+padding: 0.6rem 1.2rem;
+font-size: 0.95rem;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+.diff-btn:hover, .diff-btn.active {
+background: var(--btn-diff-active);
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+}
+.diff-btn:active { transform: scale(0.98); }
+.grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 0.75rem;
+margin-bottom: 1rem;
+}
+.hole {
+position: relative;
+background: var(--hole-bg);
+border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+border: 4px solid var(--hole-border);
+box-shadow: inset 0 -8px 20px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2);
+aspect-ratio: 1;
+cursor: pointer;
+overflow: hidden;
+transition: transform 0.1s;
+}
+.hole:active { transform: scale(0.98); }
+.hole::before {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 35%;
+background: linear-gradient(180deg, var(--grass-dark) 0%, var(--grass) 100%);
+border-radius: 0 0 40% 40% / 0 0 40% 40%;
+z-index: 1;
+}
+.hole::after {
+content: '';
+position: absolute;
+bottom: 2%;
+left: 10%;
+right: 10%;
+height: 20%;
+background: rgba(0,0,0,0.15);
+border-radius: 50%;
+filter: blur(2px);
+z-index: 0;
+}
+.monster {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, 120%) scale(0);
+font-size: clamp(2.5rem, 8vw, 4rem);
+z-index: 10;
+transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+pointer-events: none;
+filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+.monster.visible {
+transform: translate(-50%, -50%) scale(1);
+pointer-events: auto;
+}
+.monster.hit {
+transform: translate(-50%, -50%) scale(1.3) rotate(15deg);
+opacity: 0;
+transition: transform 0.2s, opacity 0.2s;
+}
+.hit-popup {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%) scale(0);
+font-size: clamp(1.5rem, 5vw, 2.5rem);
+font-weight: 800;
+color: var(--hit-color);
+z-index: 15;
+pointer-events: none;
+text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+animation: popup 0.5s ease-out forwards;
+}
+@keyframes popup {
+0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+50% { transform: translate(-50%, -80%) scale(1.2); opacity: 1; }
+100% { transform: translate(-50%, -120%) scale(1); opacity: 0; }
+}
+.btn-start {
+width: 100%;
+background: linear-gradient(135deg, var(--btn-start) 0%, #06b6d4 100%);
+color: white;
+border: none;
+border-radius: 14px;
+padding: 1rem;
+font-size: clamp(1.1rem, 3vw, 1.4rem);
+font-weight: 700;
+cursor: pointer;
+transition: transform 0.15s, box-shadow 0.2s;
+box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+}
+.btn-start:hover { box-shadow: 0 6px 20px rgba(59,130,246,0.5); }
+.btn-start:active { transform: scale(0.98); }
+.btn-start:disabled {
+background: #94a3b8;
+cursor: not-allowed;
+box-shadow: none;
+transform: none;
+}
+.overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+z-index: 100;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s;
+backdrop-filter: blur(4px);
+}
+.overlay.visible { opacity: 1; pointer-events: auto; }
+.overlay-content {
+background: var(--panel-bg);
+border-radius: 24px;
+padding: 2.5rem;
+text-align: center;
+max-width: 90%;
+width: 100%;
+max-width: 400px;
+box-shadow: var(--shadow-lg);
+transform: scale(0.8);
+transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.overlay.visible .overlay-content { transform: scale(1); }
+.overlay h2 { font-size: clamp(1.5rem, 5vw, 2.2rem); margin-bottom: 1rem; color: var(--text); }
+.overlay .final-score { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 800; color: var(--score-color); margin: 1rem 0; text-shadow: 0 2px 8px rgba(245,158,11,0.3); }
+.overlay .message { font-size: clamp(1.1rem, 3vw, 1.4rem); color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.5; }
+.btn-replay {
+background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+color: white;
+border: none;
+border-radius: 14px;
+padding: 1rem 2rem;
+font-size: clamp(1.1rem, 3vw, 1.3rem);
+font-weight: 700;
+cursor: pointer;
+transition: transform 0.15s, box-shadow 0.2s;
+box-shadow: 0 4px 16px rgba(34,197,94,0.4);
+}
+.btn-replay:hover { box-shadow: 0 6px 20px rgba(34,197,94,0.5); }
+.btn-replay:active { transform: scale(0.98); }
+@media (max-width: 480px) {
+.grid { gap: 0.5rem; }
+.hole { border-width: 3px; }
+.score-timer { gap: 1rem; font-size: 1rem; }
+.overlay-content { padding: 1.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<h1>🎯 Schnapp das Monster!</h1>
+<p class="subtitle">Tippe schnell auf die Monster, bevor sie verschwinden!</p>
+
+<div class="game-container">
+<div class="header">
+<div class="score-timer">
+<span class="score">Punkte: <span id="score">0</span></span>
+<span class="timer">Zeit: <span id="timer">30</span>s</span>
+</div>
+<button class="mute-btn" id="muteBtn" aria-label="Sound an/aus">🔊</button>
+</div>
+
+<div class="difficulty-selector" id="diffSelector">
+<button class="diff-btn" data-diff="easy">🟢 Einfach</button>
+<button class="diff-btn active" data-diff="medium">🟡 Mittel</button>
+<button class="diff-btn" data-diff="hard">🔴 Schwer</button>
+</div>
+
+<div class="grid" id="grid" role="grid" aria-label="Spielfeld mit 9 Löchern"></div>
+
+<button class="btn-start" id="startBtn">🚀 Spiel starten</button>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+<div class="overlay-content">
+<h2 id="resultTitle">🎉 Zeit um! 🎉</h2>
+<div class="final-score" id="finalScore">0</div>
+<p class="message" id="resultMessage">Super gemacht!</p>
+<button class="btn-replay" id="replayBtn">🔁 Nochmal spielen</button>
+</div>
+</div>
+
+<script>
+const MONSTERS = ['👾','👹','🐸','🐙','🤖','🦄','🐙','👻','🦖'];
+const DIFFICULTY = {
+easy: { minShow: 1200, maxShow: 2000, spawnDelay: 800 },
+medium: { minShow: 800, maxShow: 1400, spawnDelay: 600 },
+hard: { minShow: 500, maxShow: 1000, spawnDelay: 400 }
+};
+const MESSAGES = [
+{ threshold: 30, text: '🏆 Unglaublich! Du bist ein Monster-Meister!' },
+{ threshold: 20, text: '⭐ Fantastisch! So schnell wie der Blitz!' },
+{ threshold: 15, text: '🌟 Super gemacht! Du hast echt Talent!' },
+{ threshold: 10, text: '👏 Gut gemacht! Weiter so!' },
+{ threshold: 5, text: '😊 Nicht schlecht! Beim nächsten Mal klappt es noch besser!' },
+{ threshold: 0, text: '💪 Gut versucht! Übung macht den Meister!' }
+];
+
+let audioCtx = null;
+let muted = false;
+let score = 0;
+let timeLeft = 30;
+let gameTimer = null;
+let spawnTimer = null;
+let currentDiff = 'medium';
+let holes = [];
+let gameRunning = false;
+
+const grid = document.getElementById('grid');
+const scoreEl = document.getElementById('score');
+const timerEl = document.getElementById('timer');
+const startBtn = document.getElementById('startBtn');
+const muteBtn = document.getElementById('muteBtn');
+const overlay = document.getElementById('overlay');
+const finalScoreEl = document.getElementById('finalScore');
+const resultMsgEl = document.getElementById('resultMessage');
+const replayBtn = document.getElementById('replayBtn');
+const diffBtns = document.querySelectorAll('.diff-btn');
+
+function initAudio() {
+if (audioCtx) return;
+audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+function playTone(freq, duration, type='sine', volume=0.15, startTime=0) {
+if (muted || !audioCtx) return;
+initAudio();
+const osc = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+osc.type = type;
+osc.frequency.value = freq;
+gain.gain.value = volume;
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+const now = audioCtx.currentTime + startTime;
+osc.start(now);
+osc.stop(now + duration);
+}
+function playHit() {
+playTone(523, 0.1, 'square', 0.2);
+playTone(659, 0.1, 'square', 0.15, 0.05);
+playTone(784, 0.15, 'sine', 0.1, 0.1);
+}
+function playStart() {
+playTone(262, 0.15, 'triangle', 0.15);
+playTone(330, 0.15, 'triangle', 0.15, 0.1);
+playTone(392, 0.2, 'triangle', 0.15, 0.2);
+}
+function playEnd() {
+const notes = [523, 659, 784, 1047];
+notes.forEach((f, i) => playTone(f, 0.25, 'sine', 0.15, i * 0.15));
+setTimeout(() => playTone(1047, 0.5, 'sine', 0.1, notes.length * 0.15), 0);
+}
+function playCountdown() {
+playTone(440, 0.1, 'sine', 0.1);
+}
+
+function createHoles() {
+grid.innerHTML = '';
+holes = [];
+for (let i = 0; i < 9; i++) {
+const hole = document.createElement('div');
+hole.className = 'hole';
+hole.dataset.index = i;
+hole.setAttribute('role', 'button');
+hole.setAttribute('tabindex', '0');
+hole.setAttribute('aria-label', `Loch ${i+1}`);
+const monster = document.createElement('div');
+monster.className = 'monster';
+monster.textContent = MONSTERS[Math.floor(Math.random() * MONSTERS.length)];
+hole.appendChild(monster);
+hole.addEventListener('click', () => onHoleClick(i));
+hole.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onHoleClick(i); } });
+grid.appendChild(hole);
+holes.push(hole);
+}
+}
+
+function onHoleClick(index) {
+if (!gameRunning) return;
+const hole = holes[index];
+const monster = hole.querySelector('.monster');
+if (monster.classList.contains('visible') && !monster.classList.contains('hit')) {
+monster.classList.add('hit');
+monster.classList.remove('visible');
+showHitPopup(hole, '+1 ⭐');
+score++;
+scoreEl.textContent = score;
+playHit();
+setTimeout(() => {
+monster.classList.remove('hit');
+monster.textContent = MONSTERS[Math.floor(Math.random() * MONSTERS.length)];
+}, 200);
+}
+}
+function showHitPopup(hole, text) {
+const popup = document.createElement('div');
+popup.className = 'hit-popup';
+popup.textContent = text;
+hole.appendChild(popup);
+setTimeout(() => popup.remove(), 500);
+}
+
+function spawnMonster() {
+if (!gameRunning) return;
+const cfg = DIFFICULTY[currentDiff];
+const available = holes.filter(h => !h.querySelector('.monster').classList.contains('visible') && !h.querySelector('.monster').classList.contains('hit'));
+if (available.length === 0) { scheduleNextSpawn(); return; }
+const hole = available[Math.floor(Math.random() * available.length)];
+const monster = hole.querySelector('.monster');
+monster.textContent = MONSTERS[Math.floor(Math.random() * MONSTERS.length)];
+monster.classList.add('visible');
+const showTime = cfg.minShow + Math.random() * (cfg.maxShow - cfg.minShow);
+setTimeout(() => {
+if (gameRunning && monster.classList.contains('visible')) {
+monster.classList.remove('visible');
+}
+scheduleNextSpawn();
+}, showTime);
+}
+function scheduleNextSpawn() {
+if (!gameRunning) return;
+const cfg = DIFFICULTY[currentDiff];
+const delay = cfg.spawnDelay + Math.random() * 300;
+spawnTimer = setTimeout(spawnMonster, delay);
+}
+
+function startGame() {
+if (gameRunning) return;
+gameRunning = true;
+score = 0;
+timeLeft = 30;
+scoreEl.textContent = '0';
+timerEl.textContent = '30';
+startBtn.disabled = true;
+startBtn.textContent = '⏳ Läuft...';
+diffBtns.forEach(b => b.disabled = true);
+playStart();
+spawnMonster();
+gameTimer = setInterval(() => {
+timeLeft--;
+timerEl.textContent = timeLeft;
+if (timeLeft <= 5 && timeLeft > 0) playCountdown();
+if (timeLeft <= 0) endGame();
+}, 1000);
+}
+function endGame() {
+gameRunning = false;
+clearInterval(gameTimer);
+clearTimeout(spawnTimer);
+holes.forEach(h => h.querySelector('.monster').classList.remove('visible', 'hit'));
+startBtn.disabled = false;
+startBtn.textContent = '🚀 Spiel starten';
+diffBtns.forEach(b => b.disabled = false);
+playEnd();
+finalScoreEl.textContent = score;
+const msg = MESSAGES.find(m => score >= m.threshold) || MESSAGES[MESSAGES.length-1];
+resultMsgEl.textContent = msg.text;
+overlay.classList.add('visible');
+}
+
+function resetGame() {
+overlay.classList.remove('visible');
+startGame();
+}
+
+muteBtn.addEventListener('click', () => {
+muted = !muted;
+muteBtn.textContent = muted ? '🔇' : '🔊';
+muteBtn.classList.toggle('muted', muted);
+if (!muted) initAudio();
+});
+diffBtns.forEach(btn => {
+btn.addEventListener('click', () => {
+if (gameRunning) return;
+diffBtns.forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+currentDiff = btn.dataset.diff;
+});
+});
+startBtn.addEventListener('click', startGame);
+replayBtn.addEventListener('click', resetGame);
+
+createHoles();
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
