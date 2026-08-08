@@ -561,35 +561,21 @@
                     maxZoom: 17
                 }
             },
-            // DWD WMS layers - using correct layer names
+            // DWD WMS layers - using OpenWeatherMap (reliable XYZ tiles) instead of DWD WMS
             overlayLayers: {
                 clouds: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
-                    params: {
-                        layers: 'dwd:WMS_CloudCover',
-                        format: 'image/png',
-                        transparent: true,
-                        version: '1.1.1',
-                        srs: 'EPSG:3857'
-                    },
-                    attribution: '© DWD',
+                    url: 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
+                    attribution: '© OpenWeatherMap',
                     maxZoom: 18,
                     name: 'Wolken',
-                    type: 'wms'
+                    type: 'xyz'
                 },
                 rain: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
-                    params: {
-                        layers: 'dwd:WMS_Precipitation',
-                        format: 'image/png',
-                        transparent: true,
-                        version: '1.1.1',
-                        srs: 'EPSG:3857'
-                    },
-                    attribution: '© DWD',
+                    url: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
+                    attribution: '© OpenWeatherMap',
                     maxZoom: 18,
                     name: 'Regen',
-                    type: 'wms'
+                    type: 'xyz'
                 },
                 wind: {
                     url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
@@ -599,32 +585,18 @@
                     type: 'xyz'
                 },
                 storm: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
-                    params: {
-                        layers: 'dwd:WMS_WindWarning',
-                        format: 'image/png',
-                        transparent: true,
-                        version: '1.1.1',
-                        srs: 'EPSG:3857'
-                    },
-                    attribution: '© DWD',
+                    url: 'https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
+                    attribution: '© OpenWeatherMap',
                     maxZoom: 18,
-                    name: 'Sturmwarnung',
-                    type: 'wms'
+                    name: 'Sturm/Druck',
+                    type: 'xyz'
                 },
                 temp: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
-                    params: {
-                        layers: 'dwd:WMS_Temperature',
-                        format: 'image/png',
-                        transparent: true,
-                        version: '1.1.1',
-                        srs: 'EPSG:3857'
-                    },
-                    attribution: '© DWD',
+                    url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=d3ad5f57f299a83fadfb1da11427bb17',
+                    attribution: '© OpenWeatherMap',
                     maxZoom: 18,
                     name: 'Temperatur',
-                    type: 'wms'
+                    type: 'xyz'
                 }
             },
             weatherIcons: {
@@ -707,20 +679,11 @@
 
             // Overlay layers
             Object.entries(CONFIG.overlayLayers).forEach(([key, cfg]) => {
-                if (cfg.type === 'wms') {
-                    overlayLayers[key] = L.tileLayer.wms(cfg.url, {
-                        ...cfg.params,
-                        attribution: cfg.attribution,
-                        maxZoom: cfg.maxZoom,
-                        opacity: 0.7
-                    });
-                } else {
-                    overlayLayers[key] = L.tileLayer(cfg.url, {
-                        attribution: cfg.attribution,
-                        maxZoom: cfg.maxZoom,
-                        opacity: 0.7
-                    });
-                }
+                overlayLayers[key] = L.tileLayer(cfg.url, {
+                    attribution: cfg.attribution,
+                    maxZoom: cfg.maxZoom,
+                    opacity: 0.7
+                });
             });
 
             // Location marker
@@ -925,7 +888,6 @@
 
         function toggleOverlay(type) {
             const layer = overlayLayers[type];
-            const cfg = CONFIG.overlayLayers[type];
             if (!layer) return;
 
             const isActive = document.querySelector(`[data-overlay="${type}"]`).classList.contains('active');
@@ -937,11 +899,7 @@
                 Object.values(overlayLayers).forEach(l => map.removeLayer(l));
                 document.querySelectorAll('[data-overlay]').forEach(btn => btn.classList.remove('active'));
                 
-                if (cfg?.type === 'wms') {
-                    layer.setParams({ opacity: els.opacitySlider.value / 100 });
-                } else {
-                    layer.setOpacity(els.opacitySlider.value / 100);
-                }
+                layer.setOpacity(els.opacitySlider.value / 100);
                 layer.addTo(map);
                 currentOverlay = type;
             }
@@ -952,14 +910,7 @@
 
         function setOpacity(val) {
             els.opacityValue.textContent = `${val}%`;
-            Object.entries(overlayLayers).forEach(([key, layer]) => {
-                const cfg = CONFIG.overlayLayers[key];
-                if (cfg?.type === 'wms') {
-                    layer.setParams({ opacity: val / 100 });
-                } else {
-                    layer.setOpacity(val / 100);
-                }
-            });
+            Object.values(overlayLayers).forEach(l => l.setOpacity(val / 100));
         }
 
         // ============ LOCATION SEARCH ============
