@@ -53,7 +53,9 @@
         .player-1 { right: 12px; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: center center; }
         .player-2 { top: 12px; left: 50%; transform: translateX(-50%) rotate(180deg); transform-origin: center center; }
         .player-3 { left: 12px; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: center center; }
-        .hand-container { display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 2px solid transparent; }
+        .hand-container { display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 2px solid transparent; min-width: max-content; }
+        .player-1 .hand-container, .player-3 .hand-container { flex-direction: column; align-items: center; }
+        .player-2 .hand-container { flex-direction: row-reverse; }
         .hand-container.active { border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.5); }
         .hand-container.partner { border-color: #90ee90; }
         .player-label { position: absolute; font-size: 0.7rem; font-weight: bold; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
@@ -89,7 +91,7 @@
         @keyframes cardPlayed { from { opacity: 0; transform: scale(0.5) translateY(-80px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .trick-card.winner { border-color: #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.8); }
         .trick-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: #c9a84c; font-weight: bold; white-space: nowrap; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-start; z-index: 100; padding-top: 80px; padding-bottom: 200px; }
         .modal-overlay.active { display: flex; }
         .modal { background: linear-gradient(135deg, #2d4a2e 0%, #1a3a1e 100%); border: 3px solid #c9a84c; border-radius: 12px; padding: 24px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 0 25px rgba(201,168,76,0.3); }
         .modal h2 { color: #ffd700; margin-bottom: 12px; font-size: 1.5rem; }
@@ -298,6 +300,7 @@ let gameState = {
 class Card {
     constructor(suit, rank) { this.suit = suit; this.rank = rank; this.value = RANK_VALUES[rank]; this.id = `${suit}-${rank}`; }
     isTrump(gameType, trumpSuit) {
+        if (!gameType) return false;
         if (gameType === 'ramsch' || gameType === 'normal') return this.rank === 'ober' || this.rank === 'unter' || this.suit === 'herz';
         if (gameType === 'wenz') return this.rank === 'unter';
         if (gameType === 'geier') return this.rank === 'ober';
@@ -305,7 +308,7 @@ class Card {
         return false;
     }
     getTrumpRank(gameType, trumpSuit) {
-        if (!this.isTrump(gameType, trumpSuit)) return -1;
+        if (!gameType || !this.isTrump(gameType, trumpSuit)) return -1;
         if (gameType === 'ramsch' || gameType === 'normal') {
             if (this.rank === 'ober') return 14 - SUITS.indexOf(this.suit);
             if (this.rank === 'unter') return 10 - SUITS.indexOf(this.suit);
