@@ -15,6 +15,7 @@ const GAMES = [
   { file: '2048.html', name: '2048', checks: ['grid', 'score', 'best'] },
   { file: 'schafkopf.html', name: 'Schafkopf', checks: ['canvas', 'gamePhase', 'hand'] },
   { file: 'schafkopf2.html', name: 'Schafkopf 2', checks: ['gamePhase', 'hand'] },
+  { file: 'monster-schnapp.html', name: 'Schnapp das Monster!', checks: ['grid', 'score', 'timer'] },
 ];
 
 const HUB_PAGES = [
@@ -88,6 +89,14 @@ async function testGame(browser, game, baseUrl) {
       } else if (game.file === 'schafkopf.html' || game.file === 'schafkopf2.html') {
         // Schafkopf uses DOM-based rendering (no canvas)
         console.log('  ✓ DOM-based rendering (no canvas expected)');
+      } else if (game.file === 'monster-schnapp.html') {
+        // Monster Schnapp uses DOM-based grid (no canvas)
+        const gridDiv = await page.$('#grid');
+        if (gridDiv) {
+          console.log('  ✓ DOM-based grid found (no canvas expected)');
+        } else {
+          errors.push('No grid div found for monster-schnapp');
+        }
       } else {
         errors.push('No <canvas> element found');
       }
@@ -122,15 +131,32 @@ async function testGame(browser, game, baseUrl) {
     }
     
     if (game.file === '2048.html') {
-      const score = await page.$('#score');
-      const best = await page.$('#best');
-      const grid = await page.$('#grid');
-      if (score) console.log('  ✓ Score element found');
-      if (best) console.log('  ✓ Best element found');
-      if (grid) console.log('  ✓ Grid element found');
-    }
-    
-    if (game.file === 'sternhimmel.html') {
+          const score = await page.$('#score');
+          const best = await page.$('#best');
+          const grid = await page.$('#grid');
+          if (score) console.log('  ✓ Score element found');
+          if (best) console.log('  ✓ Best element found');
+          if (grid) console.log('  ✓ Grid element found');
+        }
+
+        if (game.file === 'monster-schnapp.html') {
+          const grid = await page.$('#grid');
+          const score = await page.$('#score');
+          const timer = await page.$('#timer');
+          const startBtn = await page.$('#startBtn');
+          if (grid) console.log('  ✓ Grid element found');
+          if (score) console.log('  ✓ Score element found');
+          if (timer) console.log('  ✓ Timer element found');
+          if (startBtn) console.log('  ✓ Start button found');
+          // Check holes rendered
+          const holes = await page.$$('.hole');
+          console.log(`  ✓ Found ${holes.length} holes`);
+          if (holes.length !== 9) {
+            errors.push(`Expected 9 holes, found ${holes.length}`);
+          }
+        }
+
+        if (game.file === 'sternhimmel.html') {
           // Check that canvas exists and render functions exist
           const renderDebug = await page.evaluate(() => {
             const canvas = document.querySelector('canvas');
