@@ -125,6 +125,78 @@
         .btn-icon:hover { background: rgba(0,180,216,0.3); transform: scale(1.05); }
         .btn-icon.active { background: var(--accent); color: var(--bg); }
         
+        /* Layer Controls Bar - FIXED POSITION IN HEADER AREA */
+        .layer-bar {
+            background: rgba(27,42,74,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,180,216,0.2);
+            padding: 8px 16px;
+            position: sticky;
+            top: 60px; /* below header */
+            z-index: 290;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .layer-bar-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            padding: 0 8px;
+            border-right: 1px solid rgba(0,180,216,0.15);
+        }
+        .layer-bar-group:last-child { border: none; }
+        .layer-bar-label { 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            color: var(--muted); 
+            margin-right: 8px; 
+            letter-spacing: 0.5px; 
+            white-space: nowrap;
+        }
+        .layer-btn {
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--muted);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .layer-btn:hover { 
+            background: rgba(0,180,216,0.15); 
+            color: var(--accent); 
+            border-color: rgba(0,180,216,0.3);
+        }
+        .layer-btn.active { 
+            background: var(--accent); 
+            color: var(--bg); 
+            border-color: var(--accent); 
+            font-weight: 600;
+        }
+        
+        /* Opacity Slider in Layer Bar */
+        .opacity-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 8px;
+        }
+        .opacity-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .opacity-slider {
+            width: 100px;
+            accent-color: var(--accent);
+        }
+        
         /* Main Layout */
         main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
         
@@ -141,70 +213,29 @@
             min-height: 400px;
         }
         
-        /* Layer Controls */
-        .layer-panel {
+        /* Loading Overlay */
+        .loading-overlay {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            z-index: 1000;
-            background: rgba(27,42,74,0.98);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0,180,216,0.3);
-            border-radius: 12px;
-            padding: 8px;
+            inset: 0;
+            background: rgba(13,27,42,0.95);
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            pointer-events: auto;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 350;
+            transition: opacity 0.3s, visibility 0.3s;
         }
-        
-        .layer-group { 
-            border-bottom: 1px solid rgba(0,180,216,0.15); 
-            padding-bottom: 8px; 
-            margin-bottom: 8px; 
+        .loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0,180,216,0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        .layer-group:last-child { border: none; margin: 0; padding: 0; }
-        .layer-label { 
-            font-size: 0.7rem; 
-            text-transform: uppercase; 
-            color: var(--muted); 
-            margin-bottom: 6px; 
-            letter-spacing: 0.5px; 
-        }
-        .layer-btns { display: flex; gap: 4px; flex-wrap: wrap; }
-        .layer-btn {
-            padding: 6px 10px;
-            border-radius: 8px;
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--muted);
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.15s;
-            white-space: nowrap;
-        }
-        .layer-btn:hover { 
-            background: rgba(0,180,216,0.15); 
-            color: var(--accent); 
-            border-color: rgba(0,180,216,0.3);
-        }
-        .layer-btn.active { 
-            background: var(--accent); 
-            color: var(--bg); 
-            border-color: var(--accent); 
-            font-weight: 600;
-        }
-        
-        /* Opacity Slider */
-        .opacity-control {
-            padding: 8px 4px;
-        }
-        .opacity-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
-        .opacity-slider {
-            width: 100%;
-            accent-color: var(--accent);
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
         /* Bottom Panel */
         .bottom-panel {
@@ -367,30 +398,6 @@
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .legend-color { width: 16px; height: 16px; border-radius: 3px; }
         
-        /* Loading / Error */
-        .loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(13,27,42,0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            z-index: 350;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        .loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0,180,216,0.2);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
         /* Responsive */
         @media (max-width: 600px) {
             .header-content { flex-direction: column; align-items: stretch; }
@@ -398,9 +405,11 @@
             h1 { order: 1; }
             .current-weather { grid-template-columns: 1fr; text-align: center; }
             .weather-details-grid { grid-template-columns: repeat(2, 1fr); }
-            .layer-panel { top: auto; bottom: 16px; right: 8px; left: 8px; flex-direction: row; flex-wrap: wrap; justify-content: center; }
-            .layer-group { border: none; padding: 4px 8px; margin: 0; }
-            .layer-label { display: none; }
+            .layer-bar { flex-direction: column; align-items: stretch; top: auto; bottom: 0; padding: 8px; gap: 6px; }
+            .layer-bar-group { border: none; padding: 4px 0; justify-content: center; }
+            .layer-bar-label { display: none; }
+            .opacity-control { justify-content: center; }
+            .opacity-slider { width: 100%; }
         }
         
         @media (min-width: 1000px) {
@@ -417,40 +426,36 @@
                 <div class="suggestions" id="suggestions" role="listbox"></div>
             </div>
             <button class="btn-icon" id="locateBtn" title="Aktueller Standort" aria-label="Aktueller Standort">📍</button>
-            <button class="btn-icon" id="layersBtn" title="Ebenen & Legende" aria-label="Ebenen & Legende">🗂️</button>
         </div>
     </header>
+    
+    <!-- Layer Controls Bar - NOW IN DOCUMENT FLOW, BELOW HEADER -->
+    <div class="layer-bar" id="layerBar">
+        <div class="layer-bar-group">
+            <span class="layer-bar-label">Basiskarte</span>
+            <button class="layer-btn active" data-layer="satellite" title="Satellit">🛰️ Satellit</button>
+            <button class="layer-btn" data-layer="osmde" title="OpenStreetMap DE">🗺️ Karte</button>
+            <button class="layer-btn" data-layer="osm" title="OpenStreetMap">🌍 Weltkarte</button>
+            <button class="layer-btn" data-layer="terrain" title="Gelände">🏔️ Gelände</button>
+        </div>
+        <div class="layer-bar-group">
+            <span class="layer-bar-label">Overlay</span>
+            <button class="layer-btn" data-overlay="clouds" title="Wolken">☁️ Wolken</button>
+            <button class="layer-btn" data-overlay="rain" title="Regen/Radar">🌧️ Regen</button>
+            <button class="layer-btn" data-overlay="wind" title="Wind">💨 Wind</button>
+            <button class="layer-btn" data-overlay="storm" title="Gewitter/Sturm">⛈️ Sturm</button>
+            <button class="layer-btn" data-overlay="temp" title="Temperatur">🌡️ Temp</button>
+        </div>
+        <div class="opacity-control">
+            <span class="opacity-label">Opacity</span>
+            <input type="range" class="opacity-slider" id="opacitySlider" min="0" max="100" value="70" aria-label="Overlay Transparenz">
+            <span id="opacityValue" style="font-size:0.7rem;color:var(--muted);min-width:35px;">70%</span>
+        </div>
+    </div>
     
     <main>
         <div class="map-container">
             <div id="map"></div>
-            
-            <!-- Layer Controls Panel -->
-            <div class="layer-panel" id="layerPanel">
-                <div class="layer-group">
-                    <div class="layer-label">Basiskarte</div>
-                    <div class="layer-btns">
-                        <button class="layer-btn active" data-layer="satellite" title="Satellit">🛰️ Satellit</button>
-                        <button class="layer-btn" data-layer="osmde" title="OpenStreetMap DE">🗺️ Karte</button>
-                        <button class="layer-btn" data-layer="osm" title="OpenStreetMap">🌍 Weltkarte</button>
-                        <button class="layer-btn" data-layer="terrain" title="Gelände">🏔️ Gelände</button>
-                    </div>
-                </div>
-                <div class="layer-group">
-                    <div class="layer-label">Overlay-Ebenen</div>
-                    <div class="layer-btns">
-                        <button class="layer-btn" data-overlay="clouds" title="Wolken">☁️ Wolken</button>
-                        <button class="layer-btn" data-overlay="rain" title="Regen/Radar">🌧️ Regen</button>
-                        <button class="layer-btn" data-overlay="wind" title="Wind">💨 Wind</button>
-                        <button class="layer-btn" data-overlay="storm" title="Gewitter/Sturm">⛈️ Sturm</button>
-                        <button class="layer-btn" data-overlay="temp" title="Temperatur">🌡️ Temp</button>
-                    </div>
-                </div>
-                <div class="opacity-control">
-                    <div class="opacity-label"><span>Transparenz</span><span id="opacityValue">70%</span></div>
-                    <input type="range" class="opacity-slider" id="opacitySlider" min="0" max="100" value="70" aria-label="Overlay Transparenz">
-                </div>
-            </div>
             
             <div class="loading-overlay" id="loadingOverlay">
                 <div class="spinner"></div>
@@ -540,15 +545,15 @@
                     attribution: '© Esri',
                     maxZoom: 18
                 },
-                osm: {
-                    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                },
                 osmde: {
                     url: 'https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png',
                     attribution: '© OpenStreetMap Deutschland',
                     maxZoom: 18
+                },
+                osm: {
+                    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
                 },
                 terrain: {
                     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
@@ -556,16 +561,31 @@
                     maxZoom: 17
                 }
             },
+            // DWD WMS layers - using correct layer names
             overlayLayers: {
                 clouds: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_CloudCover&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
+                    params: {
+                        layers: 'dwd:WMS_CloudCover',
+                        format: 'image/png',
+                        transparent: true,
+                        version: '1.1.1',
+                        srs: 'EPSG:3857'
+                    },
                     attribution: '© DWD',
                     maxZoom: 18,
                     name: 'Wolken',
                     type: 'wms'
                 },
                 rain: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_Precipitation&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
+                    params: {
+                        layers: 'dwd:WMS_Precipitation',
+                        format: 'image/png',
+                        transparent: true,
+                        version: '1.1.1',
+                        srs: 'EPSG:3857'
+                    },
                     attribution: '© DWD',
                     maxZoom: 18,
                     name: 'Regen',
@@ -579,14 +599,28 @@
                     type: 'xyz'
                 },
                 storm: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_WindWarning&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
+                    params: {
+                        layers: 'dwd:WMS_WindWarning',
+                        format: 'image/png',
+                        transparent: true,
+                        version: '1.1.1',
+                        srs: 'EPSG:3857'
+                    },
                     attribution: '© DWD',
                     maxZoom: 18,
                     name: 'Sturmwarnung',
                     type: 'wms'
                 },
                 temp: {
-                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms?LAYERS=dwd%3AWMS_Temperature&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+                    url: 'https://maps.dwd.de/geoserver/gwc/service/wms',
+                    params: {
+                        layers: 'dwd:WMS_Temperature',
+                        format: 'image/png',
+                        transparent: true,
+                        version: '1.1.1',
+                        srs: 'EPSG:3857'
+                    },
                     attribution: '© DWD',
                     maxZoom: 18,
                     name: 'Temperatur',
@@ -633,8 +667,7 @@
             locationInput: document.getElementById('locationInput'),
             suggestions: document.getElementById('suggestions'),
             locateBtn: document.getElementById('locateBtn'),
-            layersBtn: document.getElementById('layersBtn'),
-            layerPanel: document.getElementById('layerPanel'),
+            layerBar: document.getElementById('layerBar'),
             loadingOverlay: document.getElementById('loadingOverlay'),
             currentWeather: document.getElementById('currentWeather'),
             weatherIcon: document.getElementById('weatherIcon'),
@@ -672,22 +705,20 @@
             baseLayer = L.tileLayer(CONFIG.tileLayers.satellite.url, CONFIG.tileLayers.satellite);
             baseLayer.addTo(map);
 
-            // Overlay layers (initially hidden)
+            // Overlay layers
             Object.entries(CONFIG.overlayLayers).forEach(([key, cfg]) => {
                 if (cfg.type === 'wms') {
                     overlayLayers[key] = L.tileLayer.wms(cfg.url, {
-                        layers: cfg.url.includes('LAYERS=') ? cfg.url.split('LAYERS=')[1].split('&')[0] : '',
-                        format: 'image/png',
-                        transparent: true,
+                        ...cfg.params,
                         attribution: cfg.attribution,
                         maxZoom: cfg.maxZoom,
                         opacity: 0.7
                     });
                 } else {
                     overlayLayers[key] = L.tileLayer(cfg.url, {
-                        ...cfg,
-                        opacity: 0.7,
-                        visible: false
+                        attribution: cfg.attribution,
+                        maxZoom: cfg.maxZoom,
+                        opacity: 0.7
                     });
                 }
             });
@@ -715,17 +746,15 @@
         async function loadWeather(lat, lon, name) {
             showLoading(true);
             try {
-                const [currentRes, hourlyRes, dailyRes, alertsRes] = await Promise.all([
+                const [currentRes, hourlyRes, dailyRes] = await Promise.all([
                     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl,visibility,uv_index,precipitation&temperature_unit=celsius&wind_speed_unit=kmh&precipitation_unit=mm&timezone=auto`),
                     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,precipitation_probability,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m,visibility,uv_index&temperature_unit=celsius&wind_speed_unit=kmh&precipitation_unit=mm&timezone=auto&forecast_hours=48`),
-                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max&temperature_unit=celsius&wind_speed_unit=kmh&precipitation_unit=mm&timezone=auto&forecast_days=7`),
-                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=weather_code&timezone=auto`) // placeholder for alerts
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max&temperature_unit=celsius&wind_speed_unit=kmh&precipitation_unit=mm&timezone=auto&forecast_days=7`)
                 ]);
 
                 const current = await currentRes.json();
                 const hourly = await hourlyRes.json();
                 const daily = await dailyRes.json();
-                // const alerts = await alertsRes.json(); // DWD alerts need separate API
 
                 renderCurrent(current.current, name);
                 renderHourly(hourly.hourly);
@@ -772,7 +801,7 @@
 
             hours.slice(0, 48).forEach((timeStr, i) => {
                 const dt = new Date(timeStr.replace('T', ' '));
-                if (dt < now - 3600000) return; // skip past hours
+                if (dt < now - 3600000) return;
 
                 const card = document.createElement('div');
                 card.className = 'hourly-card';
@@ -820,7 +849,6 @@
         }
 
         function checkWarnings(current, daily) {
-            // Simple warning logic based on weather codes
             const stormCodes = [95, 96, 99];
             const heavyRainCodes = [65, 67, 82];
             const heavySnowCodes = [75, 77, 86];
@@ -906,7 +934,6 @@
                 map.removeLayer(layer);
                 currentOverlay = null;
             } else {
-                // Remove other overlays
                 Object.values(overlayLayers).forEach(l => map.removeLayer(l));
                 document.querySelectorAll('[data-overlay]').forEach(btn => btn.classList.remove('active'));
                 
@@ -1037,14 +1064,6 @@
 
         // Init
         initMap();
-
-        // Install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Could show install button here
-        });
     </script>
 </body>
 </html>
