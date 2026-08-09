@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Familienurlaub Strasswalchen – 5 Tage mit Kindern (6 & 10 Jahre)</title>
+    <meta name="description" content="Komplettplan für 5 Tage Familienurlaub in Strasswalchen (Salzburger Flachgau) mit Kindern 6 & 10 Jahre: Aktivitäten, Preise, Spartipps, Buchungslinks.">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #1a1a2e;
+            background: #f5f5f0;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        header {
+            background: linear-gradient(135deg, #2c5f8a 0%, #1a3d5c 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(44, 95, 138, 0.3);
+        }
+        header h1 { font-size: 2rem; margin-bottom: 8px; font-weight: 700; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            background: #ffd700;
+            color: #1a1a2e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        section { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        h2 { font-size: 1.4rem; color: #2c5f8a; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e8f0f8; display: flex; align-items: center; gap: 10px; }
+        h2::before { content: ''; width: 4px; height: 24px; background: #2c5f8a; border-radius: 2px; }
+        h3 { font-size: 1.1rem; color: #3a7ab5; margin: 20px 0 12px; }
+        .day-card {
+            border-left: 4px solid #2c5f8a;
+            padding: 16px;
+            margin: 12px 0;
+            background: #fafbfc;
+            border-radius: 0 8px 8px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .day-card:hover { transform: translateX(4px); box-shadow: 0 4px 16px rgba(44, 95, 138, 0.1); }
+        .day-card h4 { font-size: 1rem; color: #2c5f8a; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .day-card .time { color: #666; font-size: 0.9rem; margin-bottom: 4px; }
+        .day-card .activity { color: #333; }
+        .day-card .tip { color: #b8860b; font-size: 0.85rem; font-style: italic; margin-top: 6px; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.95rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e8eef5; }
+        th { background: #f0f5fa; color: #2c5f8a; font-weight: 600; }
+        tr:hover td { background: #f8fbff; }
+        .price-highlight { color: #c0392b; font-weight: 700; }
+        .price-save { color: #27ae60; font-weight: 600; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary { background: #2c5f8a; color: white; }
+        .btn-primary:hover { background: #1a3d5c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(44, 95, 138, 0.4); }
+        .btn-secondary { background: #e8f0f8; color: #2c5f8a; border: 1px solid #b8d0e8; }
+        .btn-secondary:hover { background: #d0e4f0; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #1e8a49; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .icon { width: 20px; height: 20px; display: inline-block; vertical-align: middle; }
+        .alert-box {
+            background: #fff8e1;
+            border-left: 4px solid #f39c12;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .alert-box.success { background: #e8f8f0; border-left-color: #27ae60; }
+        .alert-box.info { background: #e8f0f8; border-left-color: #2c5f8a; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .card { background: #fafbfc; padding: 16px; border-radius: 8px; border: 1px solid #e8eef5; }
+        .card h4 { color: #2c5f8a; margin-bottom: 10px; font-size: 1rem; }
+        .card ul { margin-left: 20px; font-size: 0.9rem; color: #444; }
+        .card li { margin: 6px 0; }
+        footer { text-align: center; padding: 24px; color: #666; font-size: 0.85rem; }
+        .highlight { background: #fff3cd; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.5rem; }
+            section { padding: 16px; }
+            th, td { padding: 8px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏔️ Familienurlaub Strasswalchen</h1>
+            <p>5 Tage · Salzburg Flachgau · Kinder 6 & 10 Jahre</p>
+            <span class="badge">Stand 2025 · Mit Buchungslinks & Spartipps</span>
+        </header>
+
+        <!-- ÜBERSICHT -->
+        <section>
+            <h2>📋 Kurzübersicht</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>📍 Lage & Anreise</h4>
+                    <ul>
+                        <li>Strasswalchen = idealer Basispunkt (Flachgau)</li>
+                        <li>30 Min nach Salzburg (Auto/Postbus 140/150)</li>
+                        <li>15 Min an Wolfgangsee, Fuschlsee, Mondsee</li>
+                        <li>45 Min in Berge (Schafberg, Postalm, Dachstein)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>💰 Budget-Orientierung (2E+2K)</h4>
+                    <ul>
+                        <li><strong>Ohne Rabatte:</strong> ca. € 320–380 Eintritte</li>
+                        <li><strong>Mit Salzburg Card 48h + Familientage:</strong> ca. € 220–260</li>
+                        <li><strong>Ersparnis:</strong> ~€ 80–120</li>
+                        <li>Übernachtung & Verpflegung nicht含まれ</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAGEPLAN -->
+        <section>
+            <h2>📅 5-Tage-Plan mit Spartipps</h2>
+
+            <div class="day-card">
+                <h4>🗓️ Tag 1 – Ankommen & Seenluft schnuppern</h4>
+                <div class="time">Nachmittag</div>
+                <div class="activity">Check-in → Spielplatz Strasswalchen (Gemeindeamt) oder Waldspielplatz</div>
+                <div class="time">Abend</div>
+                <div class="activity">Spaziergang Irrsee-Ufer (flach, kinderwagentauglich) → Eis in Mondsee (10 Min Fahrt)</div>
+                <div class="tip">💡 Tipp: Mondsee-Schifffahrt (kurze 30-Min-Runde) wenn noch Energie da – online buchbar</div>
+            </div>
+
+            <div class="day-card">
+                <h4>🗓️ Tag 2 – Salzburg Stadt (Mo/Di/Do/Fr optimal)</h4>
+                <div class="time">Vormittag</div>
+                <div class="activity"><strong>Haus der Natur</strong> – Aquarium, Science Center, Dinosaurier (2–3 Std)</div>
+                <div class="time">Mittag</div>
+                <div class="activity">Picknick im Mirabellgarten / Zwergelgarten</div>
+                <div class="time">Nachmittag</div>
+                <div class="activity"><strong>Salzburg Zoo Hellbrunn</strong> – Gehege, Streichelzoo, großer Spielplatz</div>
+                <div class="tip">💡 Spartipp: <strong>Salzburg Card 48h</strong> deckt Haus der Natur + Zoo + Öffis + Festungsbahn ab (€ 156 für 2E+2K)</div>
+                <div class="btn-group">
+                    <a href="https://www.hausdernatur.at/tickets/" target="_blank" class="btn btn-primary">🎫 Haus der Natur Tickets</a>
+                    <a href="https://www.salzburg-zoo.at/tickets-preise/" target="_blank" class="btn btn-primary">🦁 Zoo Hellbrunn Tickets</a>
+                    <a href="https://www.salzburgcard.at/" target="_blank" class="btn btn-success">⭐ Salzburg Card kaufen</a>
+                </div>
+            </div>
+
+            <div class="day-card">
+                <h4>🗓️ Tag 3 – Wolfgangsee & Schafberg <span class="highlight">BESTER TAG FÜR RABATTE</span></h4>
+                <div class="time">Vormittag</div>
+                <div class="activity"><strong>Schafbergbahn</strong> (St. Wolfgang) – Zahnradbahn auf 1.783 m, oben Rundweg (1 Std)</div>
+                <div class="time">Mittag</div>
+                <div class="activity">Hütten-Essen auf der Schafbergalm (Kindergerichte)</div>
+                <div class="time">Nachmittag</div>
+                <div class="activity"><strong>Wolfgangsee-Schifffahrt</strong> Rundfahrt St. Wolfgang → St. Gilgen → Strobl (1,5 Std)</div>
+                <div class="tip">💡 <strong>Mittwoch = Familientag!</strong> Schafbergbahn 2E+2K Berg+Tal <span class="price-highlight">€ 79</span> (statt € 99) + Schiff Familientag <span class="price-highlight">€ 44</span> (statt € 55) = <span class="price-save">Gesamt € 123 statt € 154</span></div>
+                <div class="btn-group">
+                    <a href="https://ticketing.5schaetze.at/de/Products/Tickets/Category?cID=2001" target="_blank" class="btn btn-primary">🚂 Schafbergbahn Online-Tickets</a>
+                    <a href="https://ticketing.5schaetze.at/de/Products/Tickets/Category?cID=2006" target="_blank" class="btn btn-primary">🚢 Wolfgangsee-Schifffahrt Tickets</a>
+                    <a href="https://www.5schaetze.at/de/schafbergbahn/preise-und-fahrplan/angebote/Familientag.html" target="_blank" class="btn btn-secondary">📋 Familientag-Details</a>
+                </div>
+            </div>
+
+            <div class="day-card">
+                <h4>🗓️ Tag 4 – Wahlweise Abenteuer (Mi/Do/Fr)</h4>
+                <div class="card" style="margin-top: 12px;">
+                    <h4>Option A: Wildpark & Sommerrodelbahn (Schönwetter)</h4>
+                    <ul>
+                        <li><strong>Wildpark Ferleiten</strong> (bei Kaprun, ~45 Min) – Wildtiere füttern, großer Spielplatz</li>
+                        <li><strong>Sommerrodelbahn "Lucky Flitzer"</strong> (Fuschlsee, 15 Min) – 2 Bahnen, Kinder ab 3 mitfahren</li>
+                        <li>Nachmittags-Rabatt: Wildpark ab 15 Uhr <span class="price-save">–15%</span>, Rodelbahn 10er-Block <span class="price-save">€ 35</span> (statt € 45)</li>
+                    </ul>
+                </div>
+                <div class="card" style="margin-top: 12px;">
+                    <h4>Option B: Salzwelten & Eisriesenwelt (Schlechtwetter)</h4>
+                    <ul>
+                        <li><strong>Salzwelten Bad Dürrnberg</strong> (25 Min) – Grubenbahn, Rutschen, Salzkammer – <strong>Montag = Familientag € 65</span> (2E+2K)</li>
+                        <li><strong>Eisriesenwelt Werfen</strong> (35 Min) – größte Eishöhle, Führung ~70 Min (warm anziehen!)</li>
+                        <li>Kombi-Ticket Burg Werfen + Eisriesenwelt verfügbar</li>
+                    </ul>
+                </div>
+                <div class="btn-group" style="margin-top: 12px;">
+                    <a href="https://www.wildpark-ferleiten.at/tickets/" target="_blank" class="btn btn-primary">🦌 Wildpark Ferleiten</a>
+                    <a href="https://www.luckyflitzer.at/" target="_blank" class="btn btn-primary">🛷 Lucky Flitzer Fuschlsee</a>
+                    <a href="https://www.salzwelten.at/salzburg/tickets/" target="_blank" class="btn btn-primary">⛏️ Salzwelten Tickets</a>
+                    <a href="https://www.eisriesenwelt.at/tickets/" target="_blank" class="btn btn-primary">🧊 Eisriesenwelt Tickets</a>
+                </div>
+            </div>
+
+            <div class="day-card">
+                <h4>🗓️ Tag 5 – Aktiv & Abschied</h4>
+                <div class="time">Vormittag</div>
+                <div class="activity"><strong>Radweg Wallersee–Mattsee</strong> (flach, asphaltiert, ~15 km hin/zurück) – Leihräder in Seekirchen</div>
+                <div class="time">Alternativ</div>
+                <div class="activity"><strong>Waldseilpark Höllwirth</strong> (Elixhausen, 10 Min) – Parcours ab 4 Jahre</div>
+                <div class="time">Mittag</div>
+                <div class="activity">Letztes Eis am Fuschlsee (Strandbad mit Sprungturm, flaches Ufer)</div>
+                <div class="time">Nachmittag</div>
+                <div class="activity">Heimreise</div>
+                <div class="btn-group">
+                    <a href="https://www.waldseilpark.at/" target="_blank" class="btn btn-primary">🌲 Waldseilpark Höllwirth</a>
+                    <a href="https://www.salzkammergut.at/radfahren" target="_blank" class="btn btn-secondary">🚴 Radwege-Infos</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- PREISE & RABATTE -->
+        <section>
+            <h2>💰 Preisübersicht & Fix-Rabatte 2025</h2>
+
+            <h3>Einzelpreise (Erwachsene / Kind 6–14 / Familie 2E+2K)</h3>
+            <table>
+                <thead>
+                    <tr><th>Aktivität</th><th>Erwachsener</th><th>Kind</th><th>Familie</th><th>Rabatt-Tag</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Schafbergbahn Berg+Tal</td><td>€ 39,50</td><td>€ 19,80</td><td>€ 99,–</td><td><strong>Mi/Do:</strong> € 79,–</td></tr>
+                    <tr><td>Schafbergbahn nur Bergfahrt</td><td>€ 26,50</td><td>€ 13,30</td><td>–</td><td>Online –5%</td></tr>
+                    <tr><td>Wolfgangsee-Schiff Rundfahrt</td><td>€ 22,–</td><td>€ 11,–</td><td>€ 55,–</td><td><strong>Di:</strong> € 44,–</td></tr>
+                    <tr><td>Kombikarte Bahn + Schiff</td><td>€ 52,–</td><td>€ 26,–</td><td>–</td><td>nur Vorort/Webshop</td></tr>
+                    <tr><td>Haus der Natur Salzburg</td><td>€ 12,–</td><td>€ 6,–</td><td>€ 30,–</td><td>Salzburg Card</td></tr>
+                    <tr><td>Salzburg Zoo Hellbrunn</td><td>€ 16,–</td><td>€ 7,–</td><td>€ 40,–</td><td>ab 15 Uhr –10%</td></tr>
+                    <tr><td>Salzwelten Bad Dürrnberg</td><td>€ 28,–</td><td>€ 14,–</td><td>€ 70,–</td><td><strong>Mo:</strong> € 65,–</td></tr>
+                    <tr><td>Eisriesenwelt Werfen</td><td>€ 31,–</td><td>€ 15,50</td><td>–</td><td>Kombi mit Burg</td></tr>
+                    <tr><td>Wildpark Ferleiten</td><td>€ 14,–</td><td>€ 7,–</td><td>€ 35,–</td><td>ab 15 Uhr –15%</td></tr>
+                    <tr><td>Sommerrodelbahn Fuschlsee</td><td>€ 4,50/Fahrt</td><td>€ 3,50/Fahrt</td><td>10er € 35</td><td>10er-Block –22%</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Salzburg Card – Lohnt sich ab Tag 2</h3>
+            <table>
+                <thead>
+                    <tr><th>Dauer</th><th>Erwachsener</th><th>Kind (6–15)</th><th>Enthält (Auszug)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>24 h</td><td>€ 37,–</td><td>€ 18,50</td><td>Haus der Natur, Zoo, Festungsbahn, Schifffahrt Amadé, Öffis Stadt+Land</td></tr>
+                    <tr><td><strong>48 h</strong></td><td><strong>€ 52,–</strong></td><td><strong>€ 26,–</strong></td><td><strong>+ Schafbergbahn, Wolfgangsee-Schiff, Salzwelten, Eisriesenwelt, Therme</strong></td></tr>
+                    <tr><td>72 h</td><td>€ 63,–</td><td>€ 31,50</td><td>Alles oben + weitere Museen, Bergbahnen, Bäder</td></tr>
+                </tbody>
+            </table>
+            <div class="alert-box success">
+                <strong>Rechnung für euch (2E+2K):</strong> 48h Salzburg Card = 2×52 + 2×26 = <strong>€ 156</strong><br>
+                Deckt ab: Haus der Natur, Zoo, <strong>Schafbergbahn</strong>, Wolfgangsee-Schiff, Salzwelten, Eisriesenwelt, Öffis Salzburg↔Strasswalchen<br>
+                Ohne Card (Einzelkarten Tag 2+3): ca. € 220+ → <span class="price-save">Ersparnis ~€ 65</span>
+            </div>
+            <div class="btn-group">
+                <a href="https://www.salzburgcard.at/" target="_blank" class="btn btn-success">⭐ Salzburg Card direkt kaufen</a>
+                <a href="https://www.salzburgcard.at/leistungen/" target="_blank" class="btn btn-secondary">📋 Alle Leistungen anzeigen</a>
+            </div>
+        </section>
+
+        <!-- HOTELS -->
+        <section>
+            <h2>🏨 Familienfreundliche Hotels in Strasswalchen</h2>
+            <table>
+                <thead>
+                    <tr><th>Hotel</th><th>Besonderheit</th><th>Preis-Niveau</th><th>Buchung</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Hotel Gasthof Post</td><td>Zentral, Familienzimmer, gutes Frühstück</td><td>€€</td><td><a href="https://www.gasthof-post-strasswalchen.at/" target="_blank" class="btn btn-secondary">Website</a></td></tr>
+                    <tr><td>Hotel Kohlwirt</td><td>Pool, Sauna, Spielzimmer, nahe Autobahn</td><td>€€</td><td><a href="https://www.kohlwirt.at/" target="_blank" class="btn btn-secondary">Website</a></td></tr>
+                    <tr><td>Landhotel Kainz</td><td>Ruhig, Garten, Kinderspielplatz, Bauernhof-Nähe</td><td>€€</td><td><a href="https://www.landhotel-kainz.at/" target="_blank" class="btn btn-secondary">Website</a></td></tr>
+                    <tr><td>JUFA Hotel Strasswalchen</td><td>Speziell für Familien, Indoor-Spielbereich, Waschmaschine</td><td>€€</td><td><a href="https://www.jufa.eu/de/hotels/salzburg/strasswalchen" target="_blank" class="btn btn-secondary">Website</a></td></tr>
+                </tbody>
+            </table>
+            <div class="alert-box info">
+                <strong>💡 Buchungstipp:</strong> Viele Hotels bieten <strong>Kinderermäßigungen im Elternzimmer</strong> (oft –50% bis –100% bis 10/12 J.). Direkt anfragen lohnt sich mehr als Buchungsportale!
+            </div>
+        </section>
+
+        <!-- PRACHTIPPS -->
+        <section>
+            <h2>💡 Praxistipps für stressfreie Tage</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>🚌 Mobilität</h4>
+                    <ul>
+                        <li>Postbus 140/150: Strasswalchen ↔ Salzburg Hbf (30 Min, mit Salzburg Card gratis)</li>
+                        <li>Auto: Parken in Salzburg z.B. Garage Mirabell / Altstadtgaragen (€ 3–4/h)</li>
+                        <li>Wolfgangsee: Parkplätze in St. Wolfgang (P1/P2, früh da sein im Sommer)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🌧️ Schlechtwetter-Alternativen</h4>
+                    <ul>
+                        <li>Therme Bad Vigaun (25 Min) – Familientherme mit Rutschen</li>
+                        <li>Museum der Moderne Salzburg (Mönchsberg, mit Card)</li>
+                        <li>Indoorspielplatz "Kids & Fun" Thalgau (10 Min)</li>
+                        <li>Haus der Natur / Salzwelten – beide Indoor</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🎒 Packliste Kids</h4>
+                    <ul>
+                        <li>Badesachen <strong>immer dabei</strong> (viele kostenlose Seezugänge)</li>
+                        <li>Regenjacke + warme Schicht (Schafberg oben oft 10° kälter)</li>
+                        <li>Feste Schuhe für Wildpark/Eisriesenwelt</li>
+                        <li>Trinkflasche & Snacks für Wartezeiten</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>📱 Digital vorbereiten</h4>
+                    <ul>
+                        <li>Salzburg Card als QR-Code auf Handy speichern</li>
+                        <li>Schafbergbahn/Schiff-Tickets online kaufen → Warteschlange umgehen</li>
+                        <li>Öffis-App "Salzburg Verkehr" für Buszeiten</li>
+                        <li>Wetter-App (Bergwetter checken vor Schafberg)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- BUCHUNGSLINKS SAMMELÜBERSICHT -->
+        <section>
+            <h2>🔗 Alle Buchungslinks auf einen Blick</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>🎫 Haupt-Aktivitäten</h4>
+                    <ul>
+                        <li><a href="https://ticketing.5schaetze.at/de/Products/Tickets/Category?cID=2001" target="_blank">Schafbergbahn Tickets</a></li>
+                        <li><a href="https://ticketing.5schaetze.at/de/Products/Tickets/Category?cID=2006" target="_blank">Wolfgangsee-Schifffahrt</a></li>
+                        <li><a href="https://www.hausdernatur.at/tickets/" target="_blank">Haus der Natur</a></li>
+                        <li><a href="https://www.salzburg-zoo.at/tickets-preise/" target="_blank">Zoo Hellbrunn</a></li>
+                        <li><a href="https://www.salzwelten.at/salzburg/tickets/" target="_blank">Salzwelten Bad Dürrnberg</a></li>
+                        <li><a href="https://www.eisriesenwelt.at/tickets/" target="_blank">Eisriesenwelt Werfen</a></li>
+                        <li><a href="https://www.wildpark-ferleiten.at/tickets/" target="_blank">Wildpark Ferleiten</a></li>
+                        <li><a href="https://www.luckyflitzer.at/" target="_blank">Lucky Flitzer Fuschlsee</a></li>
+                        <li><a href="https://www.waldseilpark.at/" target="_blank">Waldseilpark Höllwirth</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>⭐ Pässe & Kombis</h4>
+                    <ul>
+                        <li><a href="https://www.salzburgcard.at/" target="_blank">Salzburg Card kaufen</a></li>
+                        <li><a href="https://www.salzburgcard.at/leistungen/" target="_blank">Salzburg Card Leistungen</a></li>
+                        <li><a href="https://www.5schaetze.at/de/schafbergbahn/preise-und-fahrplan/angebote/Familientag.html" target="_blank">Schafbergbahn Familientag (Mi/Do)</a></li>
+                        <li><a href="https://www.5schaetze.at/de/wolfgangseeschifffahrt/preise-und-fahrplan/angebote-und-ermaessigungen/familientagamschiff.html" target="_blank">Schiff Familientag (Di)</a></li>
+                        <li><a href="https://www.salzwelten.at/salzburg/angebote/familientag/" target="_blank">Salzwelten Familientag (Mo)</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🏨 Hotels & Infos</h4>
+                    <ul>
+                        <li><a href="https://www.gasthof-post-strasswalchen.at/" target="_blank">Gasthof Post</a></li>
+                        <li><a href="https://www.kohlwirt.at/" target="_blank">Hotel Kohlwirt</a></li>
+                        <li><a href="https://www.landhotel-kainz.at/" target="_blank">Landhotel Kainz</a></li>
+                        <li><a href="https://www.jufa.eu/de/hotels/salzburg/strasswalchen" target="_blank">JUFA Hotel Strasswalchen</a></li>
+                        <li><a href="https://www.salzkammergut.at/" target="_blank">Tourismusinfo Salzkammergut</a></li>
+                        <li><a href="https://www.salzburg.info/" target="_blank">Salzburg Tourismus</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🚌 Mobilität & Wetter</h4>
+                    <ul>
+                        <li><a href="https://www.salzburg-verkehr.at/" target="_blank">Salzburg Verkehr (Bus/Zug)</a></li>
+                        <li><a href="https://www.bergfex.at/sommer/salzburg/wetter/" target="_blank">Bergwetter Salzburg</a></li>
+                        <li><a href="https://www.wolfgangsee.at/" target="_blank">Wolfgangsee Infos</a></li>
+                        <li><a href="https://www.fuschlsee.at/" target="_blank">Fuschlsee Infos</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Erstellt für das <a href="https://github.com/BavarianOne/bayerische-kartenspiele" target="_blank">bayerische-kartenspiele</a> Repo · Stand 2025 · Preise & Rabatte können sich ändern – bitte vor Buchung prüfen</p>
+            <p>Viel Spaß beim Familienurlaub in Strasswalchen! 🏔️❤️</p>
+        </footer>
+    </div>
+</body>
+</html>
