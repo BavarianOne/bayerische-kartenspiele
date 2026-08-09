@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metzger-Angebote Bayern | Live</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px;
+            background-color: #f5f5f5;
+            font-size: 14px;
+        }
+        h1 {
+            color: #8b4513;
+            text-align: center;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 8px;
+            font-size: 1.5em;
+            margin: 10px 0 15px;
+        }
+        .week-card {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .week-header {
+            color: white;
+            font-weight: bold;
+            font-size: 1em;
+            padding: 10px 14px;
+            margin: -12px -12px 10px -12px;
+            border-radius: 6px 6px 0 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .metzger-section {
+            margin: 12px 0;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 4px;
+            border-left: 3px solid #d4af37;
+        }
+        .metzger-name {
+            color: #8b4513;
+            font-size: 1.05em;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .metzger-name a { color: inherit; text-decoration: none; }
+        .metzger-name a:hover { text-decoration: underline; }
+        .city {
+            color: #666;
+            font-style: italic;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+        }
+        .angebot {
+            background: #fff8dc;
+            border-left: 3px solid #d4af37;
+            padding: 6px 8px;
+            margin: 4px 0;
+            border-radius: 0 4px 4px 0;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .angebot:hover {
+            transform: translateX(2px);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.06);
+        }
+        .angebot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 2px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .angebot-name {
+            font-weight: bold;
+            color: #8b4513;
+            font-size: 0.9em;
+            line-height: 1.3;
+        }
+        .angebot-preis {
+            font-weight: bold;
+            font-size: 0.85em;
+            background: #8b4513;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .angebot-desc {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .angebot-link {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 2px 8px;
+            background: #8b4513;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.75em;
+            transition: background 0.2s;
+        }
+        .angebot-link:hover {
+            background: #a0522d;
+        }
+        .last-update {
+            text-align: center;
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .empty-week {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            font-size: 0.85em;
+            padding: 15px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #8b4513;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #c62828;
+            background: #ffebee;
+            border-radius: 8px;
+            margin: 20px;
+        }
+        .retry-btn {
+            background: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .retry-btn:hover {
+            background: #a0522d;
+        }
+
+        /* Mobile-First Responsive: ab 480px etwas größer */
+        @media (min-width: 480px) {
+            body { font-size: 15px; padding: 16px; }
+            h1 { font-size: 1.7em; }
+            .week-card { padding: 16px; margin: 12px 0; }
+            .week-header { padding: 12px 16px; font-size: 1.1em; margin: -16px -16px 12px -16px; }
+            .metzger-section { padding: 12px; margin: 14px 0; }
+            .metzger-name { font-size: 1.15em; }
+            .city { font-size: 0.85em; margin-bottom: 10px; }
+            .angebot { padding: 8px 10px; margin: 6px 0; }
+            .angebot-name { font-size: 0.95em; }
+            .angebot-preis { font-size: 0.9em; padding: 2px 8px; }
+            .angebot-desc { font-size: 0.78em; }
+            .angebot-link { font-size: 0.78em; padding: 3px 10px; }
+            .last-update { font-size: 0.85em; }
+        }
+
+        /* Tablet/Desktop: ab 768px */
+        @media (min-width: 768px) {
+            body { font-size: 16px; padding: 20px; }
+            h1 { font-size: 2em; }
+            .week-card { padding: 20px; margin: 15px 0; }
+            .week-header { padding: 15px 20px; font-size: 1.2em; margin: -20px -20px 15px -20px; }
+            .metzger-section { padding: 15px; margin: 18px 0; }
+            .metzger-name { font-size: 1.25em; }
+            .city { font-size: 0.9em; margin-bottom: 12px; }
+            .angebot { padding: 10px 12px; margin: 8px 0; }
+            .angebot-name { font-size: 1em; }
+            .angebot-preis { font-size: 1em; padding: 2px 8px; }
+            .angebot-desc { font-size: 0.82em; }
+            .angebot-link { font-size: 0.82em; }
+            .last-update { font-size: 0.9em; }
+        }
+
+        /* WhatsApp Share Banner responsive */
+        .top-share-banner {
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #f0f2f5;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+        }
+        .top-share-banner button {
+            width: 100%;
+            justify-content: center;
+            font-size: 13px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .top-share-banner button:first-child {
+            background-color: #25D366;
+            color: white;
+        }
+        .top-share-banner button:last-child {
+            background-color: #128C7E;
+            color: white;
+        }
+        .top-share-banner button:hover {
+            opacity: 0.9;
+        }
+        @media (min-width: 480px) {
+            .top-share-banner {
+                flex-direction: row;
+                padding: 12px;
+            }
+            .top-share-banner button {
+                width: auto;
+                font-size: 13px;
+            }
+        }
+
+        /* Print: fürs Ausdrucken alle Wochen anzeigen */
+        @media print {
+            body { background: white; padding: 0; font-size: 12px; }
+            .top-share-banner { display: none; }
+            .week-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+            .metzger-section { break-inside: avoid; }
+            .angebot { break-inside: avoid; }
+        }
+
+        /* Week colors */
+        .week-orange .week-header { background: #ff9800; }
+        .week-green .week-header { background: #4caf50; }
+        .week-blue .week-header { background: #2196f3; }
+        .week-purple .week-header { background: #9c27b0; }
+        .week-teal .week-header { background: #00bcd4; }
+        .week-pink .week-header { background: #e91e63; }
+        .week-red .week-header { background: #f44336; }
+        .week-amber .week-header { background: #ffc107; color: #333; }
+        .week-indigo .week-header { background: #3f51b5; }
+        .week-deep-orange .week-header { background: #ff5722; }
+        .week-cyan .week-header { background: #00bcd4; }
+        .week-lime .week-header { background: #cddc39; color: #333; }
+        .week-light-blue .week-header { background: #03a9f4; }
+    </style>
+</head>
+<body>
+    <!-- WhatsApp Teilen Buttons - ganz oben -->
+    <div class="top-share-banner">
+        <button onclick="shareLinkOnly()">🔗 Nur Link teilen</button>
+        <button onclick="shareFullContent()">📱 Inhalt & Angebote teilen</button>
+    </div>
+
+    <script>
+// Funktion 1: Nur Link teilen
+async function shareLinkOnly() {
+  const shareData = {
+    title: document.title,
+    text: 'Schau dir diese Seite an:',
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (err) {
+      console.log('Teilen abgebrochen:', err);
+    }
+  } else {
+    const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(shareData.text + ' ' + shareData.url)}`;
+    window.open(fallbackUrl, '_blank');
+  }
+}
+
+// Funktion 2: Inhalt + Link teilen
+async function shareFullContent() {
+  const contentElement = document.getElementById('angebote-inhalt');
+  let bodyText = "";
+
+  if (contentElement) {
+    bodyText = contentElement.innerText.trim();
+  } else {
+    bodyText = "Schau dir diese aktuellen Angebote an!";
+  }
+
+  const fullMessage = `${bodyText}\n\n👉 Hier online ansehen:\n${window.location.href}`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: document.title,
+        text: fullMessage
+      });
+    } catch (err) {
+      console.log('Teilen abgebrochen:', err);
+    }
+  } else {
+    const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
+    window.open(fallbackUrl, '_blank');
+  }
+}
+
+// Live-Daten laden
+const DATA_URL = 'data/metzger/all.json'; // Relativ zur GitHub Pages URL
+const FALLBACK_URL = 'https://raw.githubusercontent.com/BavarianOne/bayerische-kartenspiele/master/data/metzger/all.json';
+
+async function loadData() {
+  const container = document.getElementById('angebote-inhalt');
+  const lastUpdateEl = document.getElementById('last-update');
+  
+  // Loading anzeigen
+  container.innerHTML = `
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Lade aktuelle Angebote...</p>
+    </div>
+  `;
+
+  try {
+    // Erst versuchen: relativer Pfad (funktioniert auf GitHub Pages)
+    let response = await fetch(DATA_URL, { cache: 'no-cache' });
+    
+    // Fallback: Raw GitHub URL
+    if (!response.ok) {
+      response = await fetch(FALLBACK_URL, { cache: 'no-cache' });
+    }
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+    renderData(data);
+    
+    // Last Update aktualisieren
+    if (lastUpdateEl && data.scraped_at) {
+      const date = new Date(data.scraped_at);
+      lastUpdateEl.textContent = `Letzte Aktualisierung: ${date.toLocaleString('de-DE')} (Live-Daten)`;
+    } else if (lastUpdateEl) {
+      lastUpdateEl.textContent = `Letzte Aktualisierung: ${new Date().toLocaleString('de-DE')} (Live-Daten)`;
+    }
+    
+  } catch (error) {
+    console.error('Fehler beim Laden:', error);
+    container.innerHTML = `
+      <div class="error">
+        <h3>⚠️ Angebote konnten nicht geladen werden</h3>
+        <p>${error.message}</p>
+        <button class="retry-btn" onclick="loadData()">🔄 Erneut versuchen</button>
+        <p style="margin-top:10px;font-size:0.85em;color:#666;">
+          Prüfe Internetverbindung oder lade Seite neu.
+        </p>
+      </div>
+    `;
+    if (lastUpdateEl) {
+      lastUpdateEl.textContent = `Fehler beim Laden - ${new Date().toLocaleString('de-DE')}`;
+    }
+  }
+}
+
+function renderData(data) {
+  const container = document.getElementById('angebote-inhalt');
+  
+  if (!data.metzgereien || data.metzgereien.length === 0) {
+    container.innerHTML = '<p class="empty-week">Keine aktuellen Angebote verfügbar.</p>';
+    return;
+  }
+
+  // Wochencard-Farben
+  const weekColors = [
+    'week-orange', 'week-green', 'week-blue', 'week-purple',
+    'week-teal', 'week-pink', 'week-red', 'week-amber',
+    'week-indigo', 'week-deep-orange', 'week-cyan', 'week-lime', 'week-light-blue'
+  ];
+  
+  let html = '';
+  
+  // Für jede Metzgerei eine Week-Card
+  data.metzgereien.forEach((metzger, metzgerIndex) => {
+    const colorClass = weekColors[metzgerIndex % 13];
+    
+    html += `<div class="week-card ${colorClass}">`;
+    html += `<div class="week-header">${escapeHtml(metzger.name)}</div>`;
+    
+    if (metzger.standort) {
+      html += `<div class="metzger-section"><div class="city">📍 ${escapeHtml(metzger.standort)}</div>`;
+    } else {
+      html += `<div class="metzger-section">`;
+    }
+    
+    if (metzger.website) {
+      html += `<div class="metzger-name"><a href="${escapeHtml(metzger.website)}" target="_blank" rel="noopener">${escapeHtml(metzger.name)}</a></div>`;
+    } else {
+      html += `<div class="metzger-name">${escapeHtml(metzger.name)}</div>`;
+    }
+    
+    if (!metzger.angebote || metzger.angebote.length === 0) {
+      html += `<p class="empty-week">Keine aktuellen Angebote verfügbar.</p>`;
+    } else {
+      metzger.angebote.forEach(angebot => {
+        html += `<div class="metzger-section">`;
+        
+        if (angebot.typ) {
+          html += `<div class="angebot-header" style="margin-bottom:8px;">`;
+          html += `<span class="angebot-name" style="font-size:0.85em;background:#e8e8e8;padding:2px 6px;border-radius:3px;">${escapeHtml(angebot.typ)}</span>`;
+          if (angebot.gueltig) {
+            html += `<span class="angebot-preis" style="background:#666;font-size:0.75em;">${escapeHtml(angebot.gueltig)}</span>`;
+          }
+          html += `</div>`;
+        }
+        
+        if (angebot.produkte && angebot.produkte.length > 0) {
+          angebot.produkte.forEach(p => {
+            html += `<div class="angebot">`;
+            html += `<div class="angebot-header">`;
+            html += `<span class="angebot-name">${escapeHtml(p.name)}</span>`;
+            if (p.preis) html += `<span class="angebot-preis">${escapeHtml(p.preis)}</span>`;
+            html += `</div>`;
+            if (p.beschreibung) {
+              html += `<div class="angebot-desc">${escapeHtml(p.beschreibung)}</div>`;
+            }
+            if (p.tag) {
+              html += `<div class="angebot-desc"><strong>${escapeHtml(p.tag)}:</strong> ${escapeHtml(p.gericht)}</div>`;
+            } else if (p.gericht) {
+              html += `<div class="angebot-desc">${escapeHtml(p.gericht)}</div>`;
+            }
+            if (p.preis && !p.preis.includes('k.A.') && !p.preis.includes('€/')) {
+              // Preis schon oben
+            }
+            if (p.preis_pro_kg || p.preis_pro_stueck) {
+              html += `<div class="angebot-desc">${escapeHtml(p.preis_pro_kg || p.preis_pro_stueck)}</div>`;
+            }
+            if (p.beschreibung) {
+              html += `<div class="angebot-desc">${escapeHtml(p.beschreibung)}</div>`;
+            }
+            if (p.link) {
+              html += `<a href="${escapeHtml(p.link)}" class="angebot-link" target="_blank" rel="noopener">Zum Angebot</a>`;
+            }
+            html += `</div>`;
+          });
+        }
+        
+        if (angebot.hinweis) {
+          html += `<div class="angebot-desc" style="font-style:italic;margin-top:8px;">${escapeHtml(angebot.hinweis)}</div>`;
+        }
+        
+        html += `</div>`;
+      });
+    }
+    
+    html += `</div></div>`;
+  });
+  
+  document.getElementById('angebote-inhalt').innerHTML = html;
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Initial laden
+document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+    
+    <h1>🥩 Metzger-Angebote aus Bayern</h1>
+    <p style="text-align: center; color: #666;">Live-Daten von regionalen Metzgerien</p>
+    
+    <div class="last-update" id="last-update">
+        Lade Daten...
+    </div>
+
+    <!-- Container für alle Angebote (für WhatsApp Teilen) -->
+    <div id="angebote-inhalt">
+    </div>
+</body>
+</html>

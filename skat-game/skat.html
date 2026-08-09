@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat – Das deutsche Kartenspiel</title>
+    <link rel="stylesheet" href="skat.css">
+</head>
+<body>
+    <header>
+        <h1>🃏 Skat</h1>
+        <nav id="mode-switch">
+            <button id="btn-tutorial" class="active" data-mode="tutorial">📖 Tutorial</button>
+            <button id="btn-game" data-mode="game">🎮 Spielen</button>
+            <button id="btn-scoring" data-mode="scoring">📊 Punkte</button>
+        </nav>
+    </header>
+    <main>
+        <!-- Tutorial Panel -->
+        <section id="tutorial" class="panel" data-mode="tutorial">
+            <div id="tutorial-content"></div>
+        </section>
+
+        <!-- Game Panel -->
+        <section id="game" class="panel" data-mode="game" hidden>
+            <div id="game-header">
+                <div id="game-info">
+                    <span id="phase-display">Phase: —</span>
+                    <span id="declarer-display"></span>
+                    <span id="game-value-display"></span>
+                </div>
+                <div id="player-scores">
+                    <span id="score-0" class="player-score">Du: 0</span>
+                    <span id="score-1" class="player-score">Opp 1: 0</span>
+                    <span id="score-2" class="player-score">Opp 2: 0</span>
+                </div>
+            </div>
+            <div id="table">
+                <!-- Player Areas -->
+                <div id="player-area-2" class="player-area opponent" data-player="2">
+                    <div class="player-name">Gegner 2</div>
+                    <div class="hand" id="hand-2"></div>
+                    <div class="tricks-won" id="tricks-2">0 Stiche</div>
+                </div>
+                <div id="player-area-0" class="player-area human" data-player="0">
+                    <div class="player-name">Du</div>
+                    <div class="hand" id="hand-0"></div>
+                    <div class="tricks-won" id="tricks-0">0 Stiche</div>
+                </div>
+                <div id="player-area-1" class="player-area opponent" data-player="1">
+                    <div class="player-name">Gegner 1</div>
+                    <div class="hand" id="hand-1"></div>
+                    <div class="tricks-won" id="tricks-1">0 Stiche</div>
+                </div>
+
+                <!-- Skat Area (center) -->
+                <div id="skat-area" class="center-area">
+                    <div id="skat-cards" class="skat-cards"></div>
+                    <div id="skat-label">Skat</div>
+                    <div id="skat-actions" class="actions" hidden></div>
+                </div>
+
+                <!-- Trick Area (center) -->
+                <div id="trick-area" class="center-area">
+                    <div id="current-trick" class="trick-display"></div>
+                    <div id="trick-info"></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls" class="controls-panel">
+                <div id="bidding-controls" class="control-group" hidden>
+                    <h3>Reizen</h3>
+                    <div id="game-value-preview">Wert: <span id="preview-value">—</span></div>
+                    <div id="matador-display"></div>
+                    <button id="btn-bid" class="btn primary">Reizen</button>
+                    <button id="btn-pass" class="btn secondary">Passen</button>
+                </div>
+                <div id="discard-controls" class="control-group" hidden>
+                    <h3>Drücken (2 Karten wählen)</h3>
+                    <p id="discard-hint">Wähle 2 Karten zum Drücken</p>
+                    <button id="btn-confirm-discard" class="btn primary" disabled>Bestätigen</button>
+                </div>
+                <div id="game-declaration-controls" class="control-group" hidden>
+                    <h3>Spiel ansagen</h3>
+                    <div id="game-type-options"></div>
+                    <button id="btn-confirm-game" class="btn primary" disabled>Ansagen</button>
+                </div>
+                <div id="play-controls" class="control-group" hidden>
+                    <div id="play-hint"></div>
+                    <button id="btn-sort-hand" class="btn secondary">Sortieren</button>
+                </div>
+                <div id="game-over-controls" class="control-group" hidden>
+                    <h3 id="game-result">Spiel beendet</h3>
+                    <div id="final-scores"></div>
+                    <button id="btn-new-game" class="btn primary">Neues Spiel</button>
+                    <button id="btn-back-menu" class="btn secondary">Zum Menü</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scoring Panel -->
+        <section id="scoring" class="panel" data-mode="scoring" hidden>
+            <h2>Punkteberechnung</h2>
+            <div id="scoring-calculator"></div>
+        </section>
+    </main>
+
+    <!-- Modal for bidding -->
+    <div id="bidding-modal" class="modal" hidden>
+        <div class="modal-content">
+            <h2>Reizen</h2>
+            <div id="modal-bidding-info"></div>
+            <button id="modal-bid" class="btn primary">Reizen</button>
+            <button id="modal-pass" class="btn secondary">Passen</button>
+        </div>
+    </div>
+
+    <script type="module" src="skat.js"></script>
+</body>
+</html>

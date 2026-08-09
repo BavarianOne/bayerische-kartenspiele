@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medieval Defense 3D</title>
+  <link rel="stylesheet" href="td.css">
+  <script src="three.min.js"></script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- Start Overlay -->
+  <div id="startOverlay" class="overlay show">
+    <div class="card">
+      <h1>🏰 Medieval Defense</h1>
+      <p>Defend your castle against waves of enemies!<br>Place towers strategically along the path to stop them.</p>
+      <select id="difficultySelect">
+        <option value="easy">Easy (🟢)</option>
+        <option value="medium" selected>Medium (🟡)</option>
+        <option value="hard">Hard (🔴)</option>
+      </select>
+      <button id="startBtn" class="btn">▶ Start Game</button>
+    </div>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div id="gameOver" class="overlay">
+    <div class="card">
+      <h1>💀 Game Over</h1>
+      <p>You survived <span id="goWaves">0</span> waves<br>Score: <span id="goScore">0</span></p>
+      <button id="restartBtn" class="btn">🔄 Play Again</button>
+    </div>
+  </div>
+
+  <!-- Build Panel -->
+  <div id="buildPanel"></div>
+
+  <!-- Castle Health Bar (top left) -->
+  <div id="castleHealthContainer">
+    <div id="castleHealthBarOuter">
+      <div id="castleHealthBarInner"></div>
+      <span id="castleHealthText">500 / 500</span>
+    </div>
+  </div>
+
+  <!-- Boss Health Bar (top center, hidden by default) -->
+  <div id="bossHealthContainer" class="hidden">
+    <div id="bossHealthBarOuter">
+      <div id="bossName">👹 Boss</div>
+      <div id="bossHealthBg">
+        <div id="bossHealthInner"></div>
+        <span id="bossHealthText">1000 / 1000</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="topBar">
+    <div class="stat"><span class="icon">🪙</span><span id="gold">300</span></div>
+    <div class="stat"><span class="icon">🏰</span><span id="castleHp">500</span></div>
+    <div class="stat"><span class="icon">🌊</span><span id="wave">1</span></div>
+    <div class="stat"><span class="icon">📊</span><span id="score">0</span></div>
+    <div class="stat" id="pauseStat" style="pointer-events:auto;">
+      <button id="pauseBtn" class="pause-btn" title="Pause (P/Esc)">⏸</button>
+    </div>
+  </div>
+
+  <!-- Difficulty Indicator -->
+  <div id="difficultyIndicator" class="difficulty-indicator">
+    <span id="difficultyText">Wave 1</span>
+    <div id="difficultyBar"><div></div></div>
+  </div>
+
+  <!-- Pause Overlay -->
+      <div id="pauseOverlay" class="overlay">
+        <div class="card">
+          <h1>⏸ Paused</h1>
+          <p>Game is paused. Press button or P/Esc to resume.</p>
+          <button id="resumeBtn" class="btn">▶ Resume</button>
+        </div>
+      </div>
+
+  <script src="td.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Asteroids — HTML Canvas</title>
+  <link rel="stylesheet" href="asteroids.css">
+</head>
+<body>
+  <div id="hud">
+    <div id="score">Score: 0</div>
+    <div id="lives">Lives: 3</div>
+    <div id="best">Best: 0</div>
+    <div id="power">Power: 1</div>
+    <div id="shield">Shield: Off</div>
+    <div id="bombs">Bombs: 0</div>
+    <button id="backBtn" class="special-btn">Backshot</button>
+    <button id="sideBtn" class="special-btn">Side Guns</button>
+    <button id="rocketBtn" class="special-btn">Rocket</button>
+    <button id="megaBombBtn">Mega Bomb</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="startBtn">Start</button>
+  </div>
+  <div id="overlay" class="overlay active">
+    <div class="overlay-card">
+      <h1>Shooter</h1>
+      <p id="overlayTitle">Asteroids in Space</p>
+      <p id="overlayText">Rotate, thrust, and shoot the asteroids before they hit you.</p>
+      <button id="overlayBtn">Start Game</button>
+    </div>
+  </div>
+  <div id="touch-left" class="touch-side" aria-hidden="false">
+    <button class="tc-btn fire" data-key="Space" aria-label="Fire">●</button>
+  </div>
+  <div id="touch-right" class="touch-side" aria-hidden="false">
+    <div class="horz-group">
+      <button class="tc-btn" data-key="ArrowLeft" aria-label="Left">◀</button>
+      <button class="tc-btn" data-key="ArrowRight" aria-label="Right">▶</button>
+    </div>
+    <button class="tc-btn big" data-key="ArrowUp" aria-label="Thrust">▲</button>
+    <button class="tc-btn bomb" data-key="KeyB" aria-label="Mega Bomb">💥</button>
+  </div>
+  <canvas id="game"></canvas>
+  <script src="asteroids.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+{
+  "source": "https://www.metzgereiwasner.de/angebote/",
+  "scraped_at": "2026-08-03T09:21:15.629Z",
+  "metzgerei": "Metzgerei Wasner",
+  "standort": "Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele weitere Filialen",
+  "angebote": [
+    {
+      "typ": "Wochenangebote (Plakat KW 32/33)",
+      "gueltig": "03.08.-15.08.2026",
+      "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_260708.jpg",
+      "produkte": [
+        {
+          "name": "OKTOBERFEST-KRUSTENBRATEN",
+          "preis": "0,89 €/100g"
+        },
+        {
+          "name": "HAXE",
+          "preis": "8,90 €/Stück"
+        },
+        {
+          "name": "PUTENSCHNITZEL",
+          "preis": "1,39 €/100g"
+        },
+        {
+          "name": "PIZZALEBERKÄSE",
+          "preis": "1,19 €/100g"
+        },
+        {
+          "name": "NUDELSALAT",
+          "preis": "0,99 €/100g"
+        },
+        {
+          "name": "OBAZDA",
+          "preis": "0,99 €/100g"
+        }
+      ]
+    },
+    {
+      "typ": "Wochenangebote (Plakat KW 32/33 - Seite 2)",
+      "gueltig": "03.08.-15.08.2026",
+      "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607082.jpg",
+      "produkte": [
+        {
+          "name": "REGENSBURGER",
+          "preis": "0,99 €/100g"
+        },
+        {
+          "name": "GESCHWOLLENE HÜTTENSPECK",
+          "preis": "1,19 €/100g"
+        },
+        {
+          "name": "BIERKUGEL",
+          "preis": "1,29 €/100g"
+        },
+        {
+          "name": "FEUERTEUFEL",
+          "preis": "1,69 €/100g"
+        }
+      ]
+    },
+    {
+      "typ": "Grillhaxe Angebot",
+      "gueltig": "03.08.-15.08.2026",
+      "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607083.jpg",
+      "produkte": [
+        {
+          "name": "GRILLHAXE mit Beilage",
+          "preis": "€/Portion (genauer Preis OCR-unscharf)"
+        }
+      ]
+    },
+    {
+      "typ": "Brotzeit & Wurstplatte (Passau Flyer)",
+      "gueltig": "KW 32/33",
+      "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607022.jpg",
+      "produkte": [
+        {
+          "name": "BROTZEITPLATTN",
+          "preis": "k.A."
+        },
+        {
+          "name": "WÜRSTLPARADE",
+          "preis": "k.A."
+        },
+        {
+          "name": "SCHWEINESCHNITZEL",
+          "preis": "k.A."
+        }
+      ]
+    },
+    {
+      "typ": "Wasners Bayrische Wurstspezialitäten",
+      "gueltig": "KW 32/33",
+      "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607023.jpg",
+      "produkte": [
+        {
+          "name": "KÄSEKRAINER",
+          "preis": "k.A."
+        },
+        {
+          "name": "FEUERWEHRGRILLER (scharf)",
+          "preis": "k.A."
+        },
+        {
+          "name": "SCHWEINSBRATWÜRSTL",
+          "preis": "k.A."
+        }
+      ]
+    },
+    {
+      "typ": "Sortiment: Fleisch & Wurstwaren",
+      "gueltig": "KW 32/33",
+      "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607024.jpg",
+      "produkte": [
+        {
+          "name": "PUTENSCHNITZEL (zart geschnitten)",
+          "preis": "k.A."
+        },
+        {
+          "name": "SCHWEINEKOTELETT",
+          "preis": "k.A."
+        },
+        {
+          "name": "SCHWEINEKRUSTENBRATEN (aus der Schutter)",
+          "preis": "k.A."
+        },
+        {
+          "name": "SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)",
+          "preis": "k.A."
+        },
+        {
+          "name": "GRILLBAUCHSCHEIBEN",
+          "preis": "k.A."
+        },
+        {
+          "name": "BAYR. LEBERKÄSE (fein, ofengebacken)",
+          "preis": "k.A."
+        },
+        {
+          "name": "HAUSSALAMI",
+          "preis": "k.A."
+        },
+        {
+          "name": "PRESSSACK (weiß und rot)",
+          "preis": "k.A."
+        },
+        {
+          "name": "BIERSCHINKEN",
+          "preis": "k.A."
+        },
+        {
+          "name": "BROTZEITPLATTN",
+          "preis": "k.A."
+        }
+      ]
+    },
+    {
+      "typ": "Tagesangebote / Wochenaktion",
+      "gueltig": "Montag bis Samstag",
+      "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_260702.jpg",
+      "produkte": [
+        {
+          "name": "1/2 HENDL",
+          "preis": "k.A."
+        },
+        {
+          "name": "KRUSTENBRATEN",
+          "preis": "k.A."
+        },
+        {
+          "name": "HAXE",
+          "preis": "k.A."
+        },
+        {
+          "name": "BAYRISCHER OBAZDA",
+          "preis": "k.A."
+        },
+        {
+          "name": "APFEL-GRIEBEN-WURSTSALAT",
+          "preis": "k.A."
+        },
+        {
+          "name": "SCHMALZ (1909-Becher)",
+          "preis": "k.A."
+        },
+        {
+          "name": "Volksfestpaket",
+          "preis": "k.A."
+        }
+      ]
+    },
+    {
+      "typ": "Wochenmenüplan (Mittagstisch)",
+      "gueltig": "Woche 32 | 03.08. bis 08.08.2026",
+      "quelle_bild": "wasner_menueplan_a1_kw31_32_v01_cc_2607082.jpg",
+      "produkte": [
+        {
+          "tag": "Montag",
+          "gericht": "Cordon bleu mit Pommes",
+          "preis": "k.A."
+        },
+        {
+          "tag": "Montag",
+          "gericht": "Spaghetti Carbonara",
+          "preis": "k.A."
+        },
+        {
+          "tag": "Dienstag",
+          "gericht": "Spanferkelbraten mit Knödel und Kraut",
+          "preis": "k.A."
+        },
+        {
+          "tag": "Dienstag",
+          "gericht": "Nudelauflauf mit Tomatensoße",
+          "preis": "k.A."
+        },
+        {
+          "tag": "Mittwoch",
+          "gericht": "Rinderroulade mit Blaukraut und Knödel",
+          "preis": "10,00 €"
+        },
+        {
+          "tag": "Mittwoch",
+          "gericht": "Putensteak mit Ratatouille und Reis",
+          "preis": "10,00 €"
+        },
+        {
+          "tag": "Donnerstag",
+          "gericht": "Gebratene Leber in Zwiebelsoße mit Kartoffelpüree",
+          "preis": "4,90 €"
+        },
+        {
+          "tag": "Donnerstag",
+          "gericht": "Hähnchenkeule mit Pommes",
+          "preis": "k.A."
+        },
+        {
+          "tag": "Freitag",
+          "gericht": "Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße",
+          "preis": "12,90 €"
+        },
+        {
+          "tag": "Freitag",
+          "gericht": "Schweinerückensteaks mit Spätzle und Buttergemüse",
+          "preis": "10,30 €"
+        },
+        {
+          "tag": "Samstag",
+          "gericht": "Haxenfleisch mit Zwiebelsoße und Beilage",
+          "preis": "k.A."
+        },
+        {
+          "tag": "Samstag",
+          "gericht": "Filettöpfle mit Eierknöpfle und kleinem grünem Salat",
+          "preis": "10,80 €"
+        }
+      ],
+      "hinweis": "Alle Speisen auch zum Mitnehmen. Catering für Familienfeiern verfügbar."
+    }
+  ],
+  "filialen_landshut": [
+    "Am alten Viehmarkt 5, 84028 Landshut"
+  ],
+  "filialen_weitere": [
+    "Straubinger Str. 64, 94405 Landau",
+    "Danziger Str. 1, 85221 Dachau",
+    "Industriestr. 37, 89269 Vöhringen",
+    "Blaubeurerstr. 29, 89077 Ulm",
+    "Theresienstr. 2, 83278 Traunstein",
+    "Regensburger Straße 55, 94036 Passau (Norma Markt)",
+    "Neuburger Straße 128, 94036 Passau (Kaufland)",
+    "Eichfeld 1, 94137 Bayerbach",
+    "Passauer Straße 9, 84364 Bad Birnbach",
+    "Am Ludwigsplatz 11, 94315 Straubing",
+    "Scheuerer Straße 1, 93096 Köfering",
+    "Steffelsöd 6, 84347 Pfarrkirchen (REWE-Markt)",
+    "Dr.-Gessler-Str. 45, 93051 Regensburg (Köwe-Center)",
+    "Bahnhofstraße 24, 94209 Regen (REWE-Markt)",
+    "Verdistr. 15, 83395 Freilassing",
+    "Dr. Adolf-Schneider-Str. 20, 73479 Ellwangen",
+    "Steinbeisweg 31, 74523 Schwäbisch Hall",
+    "Im Gründe, Raiffeisenstr. 22, 74523 Sch. Hall Hessental",
+    "Äussere Münchner Str. 101, 83026 Rosenheim",
+    "Nattheimer Str. 100, 89522 Heidenheim",
+    "Im Steingerüst, 76437 Rastatt",
+    "Rauentaler Str. 65, Theresienstr. 2, 83278 Traunstein",
+    "Marlener Str. 11, 77656 Offenburg",
+    "Schwieberdinger Str. 94, 71636 Ludwigsburg",
+    "Pfalzgraf-Otto-Str. 50, 74821 Mosbach",
+    "Steinbeisstr. 15, 71711 Steinheim a.d. Murr",
+    "Dieselstr. 1, 78073 Bad Dürrheim",
+    "Neuburger Str. 128, 94036 Passau",
+    "Dr.-Gessler-Straße 45, 93051 Regensburg"
+  ],
+  "kontakt": {
+    "firma": "Johann Wasner GmbH Rottaler-Land-Feinkost",
+    "adresse": "Emil-Schwate-Str. 24, 84364 Bad Birnbach",
+    "telefon": "+49 (0) 8563 293-0",
+    "email": "info@metzgereiwasner.de"
+  }
+}
