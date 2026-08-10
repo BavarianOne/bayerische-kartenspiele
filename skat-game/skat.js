@@ -46,10 +46,12 @@ async function init() {
             playerNames: ['Du', 'Gegner 1', 'Gegner 2'],
             aiDifficulty: 'normal'
         });
+        console.log('[Skat] Game instance created:', game);
         
         console.log('[Skat] Creating UI...');
         // Create UI
         ui = new UI(game);
+        console.log('[Skat] UI created:', ui);
         
         // Make globally accessible for inline handlers
         window.game = game;
@@ -59,6 +61,7 @@ async function init() {
         // Create Tutorial
         tutorial = new Tutorial(ui);
         window.tutorial = tutorial;
+        console.log('[Skat] Tutorial created:', tutorial);
         
         // Load preferences
         const prefs = Storage.getPreferences();
@@ -73,6 +76,7 @@ async function init() {
         // Start with tutorial
         console.log('[Skat] Starting tutorial...');
         tutorial.start();
+        console.log('[Skat] Tutorial started');
         
         // Listen for game events
         game.on('gameOver', (result) => {
