@@ -12,8 +12,11 @@ export class UI {
         this.discardSelection = new Set();
         this.animating = false;
         
+        console.log('[UI] Constructor called');
         this._cacheElements();
+        console.log('[UI] Elements cached:', Object.keys(this.elements).length);
         this._bindEvents();
+        console.log('[UI] Events bound');
     }
 
     _cacheElements() {
@@ -22,10 +25,22 @@ export class UI {
         this.elements.gamePanel = document.getElementById('game');
         this.elements.scoringPanel = document.getElementById('scoring');
         
+        console.log('[UI] Panels found:', {
+            tutorial: !!this.elements.tutorialPanel,
+            game: !!this.elements.gamePanel,
+            scoring: !!this.elements.scoringPanel
+        });
+        
         // Mode buttons
         this.elements.btnTutorial = document.getElementById('btn-tutorial');
         this.elements.btnGame = document.getElementById('btn-game');
         this.elements.btnScoring = document.getElementById('btn-scoring');
+        
+        console.log('[UI] Mode buttons found:', {
+            tutorial: !!this.elements.btnTutorial,
+            game: !!this.elements.btnGame,
+            scoring: !!this.elements.btnScoring
+        });
         
         // Game areas
         this.elements.hands = {
