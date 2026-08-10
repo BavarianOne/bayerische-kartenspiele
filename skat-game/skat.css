@@ -727,6 +727,137 @@ main {
 }
 
 /* ========================================
+   Utility Classes
+   ======================================== */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ========================================
+   Tutorial Start Screen
+   ======================================== */
+.tutorial-start {
+    text-align: center;
+    padding: var(--spacing-xl);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.tutorial-start h2 {
+    color: var(--gold);
+    margin-bottom: var(--spacing-md);
+    font-size: 2rem;
+}
+
+.tutorial-start p {
+    color: var(--light-gray);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.tutorial-nav {
+    margin-top: var(--spacing-lg);
+}
+
+.tutorial-step {
+    text-align: center;
+}
+
+.tutorial-step h2 {
+    color: var(--gold);
+    margin-bottom: var(--spacing-lg);
+    font-size: 2rem;
+}
+
+.step-content {
+    margin-bottom: var(--spacing-lg);
+    text-align: left;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step-content p {
+    margin-bottom: var(--spacing-md);
+    line-height: 1.6;
+    color: var(--light-gray);
+}
+
+.step-content table {
+    margin: var(--spacing-lg) auto;
+    border-collapse: collapse;
+}
+
+.step-content th,
+.step-content td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.step-content th {
+    background: rgba(255,215,0,0.2);
+    color: var(--gold);
+}
+
+.interactive-demo {
+    margin: var(--spacing-xl) auto;
+    padding: var(--spacing-lg);
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    max-width: 600px;
+}
+
+.tutorial-nav {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.step-indicator {
+    align-self: center;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+@keyframes dealCard {
+    from {
+        transform: translate(-50%, -50%) scale(0) rotate(180deg);
+        opacity: 0;
+    }
+    to {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.card.dealing {
+    animation: dealCard 0.5s ease-out forwards;
+}
+
+@keyframes collectTrick {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.5) translateY(-50px); opacity: 0.5; }
+    100% { transform: scale(0) translateY(-100px); opacity: 0; }
+}
+
+.card.collecting {
+    animation: collectTrick 0.4s ease-in forwards;
+}
+
+/* ========================================
    Scrollbar
    ======================================== */
 ::-webkit-scrollbar {
