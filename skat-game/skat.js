@@ -91,6 +91,11 @@ async function init() {
             Storage.recordGame(result);
         });
         
+        // Listen for game state changes and update UI
+        game.on('gameStateChanged', (state) => {
+            ui.render(state);
+        });
+        
         // Auto-save game state periodically
         setInterval(() => {
             if (game.currentPhase !== 'DEALING' && game.currentPhase !== 'GAME_OVER') {
