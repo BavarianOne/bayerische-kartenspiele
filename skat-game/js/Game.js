@@ -65,6 +65,7 @@ export class Game {
      * Initialize and start new game
      */
     init() {
+        console.log('[Game] init() called - starting new game');
         this._resetGame();
         this._dealCards();
         this._startBidding();
@@ -94,13 +95,16 @@ export class Game {
      * Deal cards to all players
      */
     _dealCards() {
+        console.log('[Game] _dealCards() - dealing cards');
         this.deck.shuffle();
         const { hands, skat } = this.deck.deal(3, 10);
         
         this.skat = skat;
+        console.log('[Game] Skat cards:', this.skat.map(c => c.toString()));
         
         for (let i = 0; i < 3; i++) {
             this.players[i].receiveCards(hands[i]);
+            console.log('[Game] Player', i, 'received', hands[i].length, 'cards');
         }
         
         this.currentPhase = 'BIDDING';
@@ -110,6 +114,7 @@ export class Game {
      * Start bidding phase
      */
     _startBidding() {
+        console.log('[Game] _startBidding() - starting bidding phase');
         this.bidding = new Bidding(this.players);
         this.bidding.start();
         this.currentPhase = 'BIDDING';
@@ -132,6 +137,7 @@ export class Game {
     }
 
     _processBid(playerIndex, value) {
+        console.log('[Game] _processBid() playerIndex:', playerIndex, 'value:', value);
         const result = this.bidding.bid(playerIndex, value);
         
         if (result.success) {
@@ -151,6 +157,7 @@ export class Game {
     }
 
     _processPass(playerIndex) {
+        console.log('[Game] _processPass() playerIndex:', playerIndex);
         const result = this.bidding.pass(playerIndex);
         
         if (result.success) {
@@ -338,6 +345,7 @@ export class Game {
      * Play a card (human)
      */
     humanPlayCard(cardIndex) {
+        console.log('[Game] humanPlayCard() cardIndex:', cardIndex, 'phase:', this.currentPhase, 'trickLeader:', this.trickLeader);
         if (this.currentPhase !== 'PLAYING') return { success: false };
         if (this.trickLeader !== 0) return { success: false, error: 'Nicht am Zug' };
         
@@ -348,6 +356,7 @@ export class Game {
      * Play card for any player
      */
     _playCard(playerIndex, cardIndex) {
+        console.log('[Game] _playCard() playerIndex:', playerIndex, 'cardIndex:', cardIndex);
         const player = this.players[playerIndex];
         const leadSuit = this.currentTrick.length > 0 ? this.currentTrick[0].card.suit : null;
         
@@ -364,6 +373,7 @@ export class Game {
         
         // Play the card
         const playedCard = player.playCard(cardIndex);
+        console.log('[Game] Card played:', playedCard.toString(), 'by player', playerIndex);
         this.currentTrick.push({ player: playerIndex, card: playedCard });
         
         this.moveHistory.push({ 
@@ -411,6 +421,7 @@ export class Game {
      * Complete current trick
      */
     _completeTrick() {
+        console.log('[Game] _completeTrick() - completing trick', this.tricksPlayed + 1);
         // Determine winner
         const leadSuit = this.currentTrick[0].card.suit;
         let winnerIndex = this.currentTrick[0].player;
@@ -423,6 +434,8 @@ export class Game {
                 winningCard = this.currentTrick[i].card;
             }
         }
+        
+        console.log('[Game] Trick winner: player', winnerIndex, 'card:', winningCard.toString());
         
         // Winner takes trick
         const trickCards = this.currentTrick.map(t => t.card);
@@ -461,6 +474,7 @@ export class Game {
      * End game and calculate score
      */
     _endGame() {
+        console.log('[Game] _endGame() - calculating final score');
         this.currentPhase = 'SCORING';
         
         const declarer = this.players.find(p => p.isDeclarer);
@@ -470,6 +484,8 @@ export class Game {
         const declarerPoints = declarer.getCardPoints();
         const opponentPoints = opponents.reduce((sum, p) => sum + p.getCardPoints(), 0);
         const totalPoints = declarerPoints + opponentPoints; // Should be 120
+        
+        console.log('[Game] Points - Declarer:', declarerPoints, 'Opponents:', opponentPoints);
         
         // Determine game outcome
         const gt = this.declarerGame;
@@ -487,6 +503,8 @@ export class Game {
             schneider = declarerPoints >= 90 || opponentPoints >= 90;
             schwarz = declarer.getTrickCount() === 10 || opponents.every(p => p.getTrickCount() === 0);
         }
+        
+        console.log('[Game] Game result - Won:', won, 'Schneider:', schneider, 'Schwarz:', schwarz);
         
         // Calculate final score
         const scoreParams = {

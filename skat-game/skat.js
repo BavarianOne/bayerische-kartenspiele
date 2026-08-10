@@ -37,6 +37,7 @@ let tutorial = null;
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[Skat] DOMContentLoaded - starting init');
+    console.log('Skat-Game initialisiert.');
     init();
 });
 
