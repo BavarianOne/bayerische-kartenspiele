@@ -12,6 +12,14 @@
  * - Ramsch: Augen zählen negativ, Jungfrau = doppelt
  */
 
+// Export für Tutorial.js
+export const NULL_VALUES = {
+    simple: 23,
+    hand: 35,
+    ouvert: 46,
+    hand_ouvert: 59
+};
+
 export function calculateScore(params) {
     const {
         gameValue,      // Reizwert (berechneter Spielwert)

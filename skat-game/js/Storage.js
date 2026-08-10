@@ -167,7 +167,7 @@ export class Storage {
         }
     }
 
-    _defaultPreferences() {
+    static _defaultPreferences() {
         return {
             aiDifficulty: 'normal',
             cardAnimationSpeed: 'normal', // 'slow', 'normal', 'fast'
