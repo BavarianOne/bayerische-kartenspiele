@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Module Test</title>
+</head>
+<body>
+    <h1>Module Loading Test</h1>
+    <div id="status">Loading...</div>
+    <script type="module">
+        console.log('[Test] Starting module test...');
+        document.getElementById('status').textContent = 'Testing imports...';
+        
+        try {
+            import { Card, createDeck } from './js/Card.js';
+            console.log('[Test] Card.js loaded OK');
+            document.getElementById('status').textContent += '\n✓ Card.js';
+            
+            const deck = createDeck();
+            console.log('[Test] Deck created:', deck.length, 'cards');
+            document.getElementById('status').textContent += '\n✓ Deck created (' + deck.length + ' cards)';
+            
+            import { Deck } from './js/Deck.js';
+            console.log('[Test] Deck.js loaded OK');
+            document.getElementById('status').textContent += '\n✓ Deck.js';
+            
+            const d = new Deck();
+            d.shuffle();
+            const { hands, skat } = d.deal(3, 10);
+            console.log('[Test] Deal OK:', hands.map(h => h.length), 'skat:', skat.length);
+            document.getElementById('status').textContent += '\n✓ Deal works';
+            
+            import { Game } from './js/Game.js';
+            console.log('[Test] Game.js loaded OK');
+            document.getElementById('status').textContent += '\n✓ Game.js';
+            
+            const game = new Game();
+            console.log('[Test] Game created');
+            document.getElementById('status').textContent += '\n✓ Game instance created';
+            
+            document.getElementById('status').textContent += '\n\n🎉 ALL MODULES LOADED SUCCESSFULLY!';
+            document.getElementById('status').style.color = 'green';
+            
+        } catch (e) {
+            console.error('[Test] ERROR:', e);
+            document.getElementById('status').textContent += '\n\n❌ ERROR: ' + e.message;
+            document.getElementById('status').style.color = 'red';
+            document.getElementById('status').textContent += '\nStack: ' + e.stack;
+        }
+    </script>
+</body>
+</html>

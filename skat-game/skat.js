@@ -75,7 +75,12 @@ async function init() {
         
         // Start with tutorial
         console.log('[Skat] Starting tutorial...');
-        tutorial.start();
+        try {
+            tutorial.start();
+            console.log('[Skat] Tutorial.start() returned successfully');
+        } catch (e) {
+            console.error('[Skat] ERROR in tutorial.start():', e);
+        }
         console.log('[Skat] Tutorial started');
         
         // Listen for game events
