@@ -326,7 +326,8 @@ export class Tutorial {
             const values = { 'J': 2, 'A': 11, '10': 10, 'K': 4, 'Q': 3, '9': 0, '8': 0, '7': 0 };
             total += values[rank] || 0;
         });
-        document.getElementById('demo-points-total').textContent = `Gesamt: ${total} Augen`;
+        const totalEl = document.getElementById('demo-points-total');
+        if (totalEl) totalEl.textContent = `Gesamt: ${total} Augen`;
     }
 
     _demoDealAnimation(container) {
@@ -340,6 +341,7 @@ export class Tutorial {
 
     _runDealAnimation() {
         const area = document.getElementById('deal-animation-area');
+        if (!area) return;
         area.innerHTML = '<div style="color:var(--gold);">Gebe Karten...</div>';
         
         const deck = new Deck();
@@ -426,8 +428,10 @@ export class Tutorial {
         const active = this._biddingState.passed.filter(p => !p).length;
         
         if (active <= 1) {
-            document.getElementById('bid-player').textContent = 'Reizen beendet!';
-            document.getElementById('bid-value').textContent = this._biddingState.currentBid;
+            const bidPlayerEl = document.getElementById('bid-player');
+            const bidValueEl = document.getElementById('bid-value');
+            if (bidPlayerEl) bidPlayerEl.textContent = 'Reizen beendet!';
+            if (bidValueEl) bidValueEl.textContent = this._biddingState.currentBid;
             return;
         }
         
@@ -445,12 +449,16 @@ export class Tutorial {
 
     _updateBiddingDisplay() {
         const names = ['Vorhand (Du)', 'Mittelhand', 'Hinterhand'];
-        document.getElementById('bid-value').textContent = this._biddingState.currentBid;
-        document.getElementById('bid-player').textContent = names[this._biddingState.currentPlayer] + (this._biddingState.passed[this._biddingState.currentPlayer] ? ' (passed)' : '');
+        const bidValueEl = document.getElementById('bid-value');
+        const bidPlayerEl = document.getElementById('bid-player');
+        const bidPossibleEl = document.getElementById('bid-possible');
+        
+        if (bidValueEl) bidValueEl.textContent = this._biddingState.currentBid;
+        if (bidPlayerEl) bidPlayerEl.textContent = names[this._biddingState.currentPlayer] + (this._biddingState.passed[this._biddingState.currentPlayer] ? ' (passed)' : '');
         
         const possible = [18, 20, 22, 23, 24, 27, 30, 33, 35, 36, 40, 44, 45, 46, 48, 50, 54, 55, 59]
             .filter(v => v > this._biddingState.currentBid).slice(0, 5);
-        document.getElementById('bid-possible').textContent = possible.join(', ') + '...';
+        if (bidPossibleEl) bidPossibleEl.textContent = possible.join(', ') + '...';
     }
 
     _demoGameTypePicker(container) {
@@ -475,17 +483,20 @@ export class Tutorial {
         ];
         
         const btnContainer = document.getElementById('game-type-buttons');
-        games.forEach(g => {
-            const btn = document.createElement('button');
-            btn.className = 'btn secondary';
-            btn.textContent = `${g.label} (${g.base}${g.hand ? ' H' : ''}${g.ouvert ? ' O' : ''})`;
-            btn.onclick = () => this._showGameTypeDetail(g);
-            btnContainer.appendChild(btn);
-        });
+        if (btnContainer) {
+            games.forEach(g => {
+                const btn = document.createElement('button');
+                btn.className = 'btn secondary';
+                btn.textContent = `${g.label} (${g.base}${g.hand ? ' H' : ''}${g.ouvert ? ' O' : ''})`;
+                btn.onclick = () => this._showGameTypeDetail(g);
+                btnContainer.appendChild(btn);
+            });
+        }
     }
 
     _showGameTypeDetail(game) {
         const detail = document.getElementById('game-type-detail');
+        if (!detail) return;
         let html = `<strong>${game.label}</strong>: Basiswert ${game.base}`;
         
         if (game.type === 'suit') {
@@ -510,6 +521,7 @@ export class Tutorial {
 
     _newTrickDemo() {
         const area = document.getElementById('trick-demo-area');
+        if (!area) return;
         const deck = new Deck();
         deck.shuffle();
         
@@ -577,20 +589,29 @@ export class Tutorial {
     }
 
     _calcDemoScore() {
+        const gameValueEl = document.getElementById('demo-game-value');
+        const matadorsEl = document.getElementById('demo-matadors');
+        const handEl = document.getElementById('demo-hand');
+        const schneiderEl = document.getElementById('demo-schneider');
+        const schwarzEl = document.getElementById('demo-schwarz');
+        const wonEl = document.getElementById('demo-won');
+        const resultEl = document.getElementById('demo-score-result');
+        
+        if (!gameValueEl || !matadorsEl || !handEl || !schneiderEl || !schwarzEl || !wonEl || !resultEl) return;
+        
         const params = {
             gameType: 'suit',
-            gameValue: parseInt(document.getElementById('demo-game-value').value) || 18,
-            matadors: parseInt(document.getElementById('demo-matadors').value) || 0,
-            hand: document.getElementById('demo-hand').checked,
-            schneider: document.getElementById('demo-schneider').checked,
-            schwarz: document.getElementById('demo-schwarz').checked,
+            gameValue: parseInt(gameValueEl.value) || 18,
+            matadors: parseInt(matadorsEl.value) || 0,
+            hand: handEl.checked,
+            schneider: schneiderEl.checked,
+            schwarz: schwarzEl.checked,
             ouvert: false,
-            won: document.getElementById('demo-won').checked
+            won: wonEl.checked
         };
         
         const result = calculateScoreDetails(params);
-        const el = document.getElementById('demo-score-result');
-        el.innerHTML = `
+        resultEl.innerHTML = `
             <strong>${result.won ? '🎉 GEWONNEN' : '😞 VERLOREN'}: ${result.total > 0 ? '+' : ''}${result.total} Punkte</strong>
             <br><small>Multiplikator: ${result.multiplier} × Reizwert ${params.gameValue} = ${params.gameValue * result.multiplier}${result.won ? '' : ' (doppelt)'}</small>
             <br><small>${result.breakdown.map(b => `${b.label}: ${b.value > 0 ? '+' : ''}${b.value}`).join(' | ')}</small>
