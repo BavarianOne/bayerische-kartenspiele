@@ -2,6 +2,17 @@
 // skat.js – Main entry point
 // ============================================
 
+// Global error handlers FIRST
+window.addEventListener('error', (e) => {
+    console.error('[Skat] Global error:', e.message, e.filename, e.lineno, e.colno, e.error);
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('[Skat] Unhandled promise rejection:', e.reason);
+});
+
+console.log('[Skat] skat.js loaded, waiting for DOM...');
+
 import { Game } from './js/Game.js';
 import { UI } from './js/UI.js';
 import { Tutorial } from './js/Tutorial.js';
@@ -14,17 +25,20 @@ let tutorial = null;
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('[Skat] DOMContentLoaded - starting init');
     init();
 });
 
 async function init() {
     try {
+        console.log('[Skat] Creating Game instance...');
         // Create game instance
         game = new Game({
             playerNames: ['Du', 'Gegner 1', 'Gegner 2'],
             aiDifficulty: 'normal'
         });
         
+        console.log('[Skat] Creating UI...');
         // Create UI
         ui = new UI(game);
         
@@ -32,6 +46,7 @@ async function init() {
         window.game = game;
         window.ui = ui;
         
+        console.log('[Skat] Creating Tutorial...');
         // Create Tutorial
         tutorial = new Tutorial(ui);
         window.tutorial = tutorial;
@@ -43,11 +58,11 @@ async function init() {
         // Check for saved game
         const savedGame = Storage.loadGame();
         if (savedGame && confirm('Gespeichertes Spiel fortsetzen?')) {
-            // TODO: Restore game state
-            console.log('Saved game found:', savedGame);
+            console.log('[Skat] Saved game found:', savedGame);
         }
         
         // Start with tutorial
+        console.log('[Skat] Starting tutorial...');
         tutorial.start();
         
         // Listen for game events
@@ -60,12 +75,12 @@ async function init() {
             if (game.currentPhase !== 'DEALING' && game.currentPhase !== 'GAME_OVER') {
                 Storage.saveGame(game.getState());
             }
-        }, 30000); // Every 30 seconds
+        }, 30000);
         
-        console.log('Skat initialized successfully!');
+        console.log('[Skat] Initialized successfully!');
         
     } catch (error) {
-        console.error('Failed to initialize Skat:', error);
+        console.error('[Skat] Initialization failed:', error);
         showError('Fehler beim Starten: ' + error.message);
     }
 }
