@@ -5,10 +5,19 @@
 // Global error handlers FIRST
 window.addEventListener('error', (e) => {
     console.error('[Skat] Global error:', e.message, e.filename, e.lineno, e.colno, e.error);
+    // Show error on screen for debugging
+    const div = document.createElement('div');
+    div.style.cssText = 'position:fixed;top:10px;left:10px;background:#d32f2f;color:white;padding:1rem;z-index:10000;max-width:90%;font-family:monospace;font-size:0.8rem;';
+    div.textContent = `ERROR: ${e.message}\n${e.filename}:${e.lineno}:${e.colno}`;
+    document.body.appendChild(div);
 });
 
 window.addEventListener('unhandledrejection', (e) => {
     console.error('[Skat] Unhandled promise rejection:', e.reason);
+    const div = document.createElement('div');
+    div.style.cssText = 'position:fixed;top:10px;left:10px;background:#d32f2f;color:white;padding:1rem;z-index:10000;max-width:90%;font-family:monospace;font-size:0.8rem;';
+    div.textContent = `PROMISE REJECTION: ${e.reason}`;
+    document.body.appendChild(div);
 });
 
 console.log('[Skat] skat.js loaded, waiting for DOM...');
