@@ -2,6 +2,8 @@
 // skat.js – Main entry point
 // ============================================
 
+console.log('[Skat] skat.js module loading...');
+
 // Global error handlers FIRST
 window.addEventListener('error', (e) => {
     console.error('[Skat] Global error:', e.message, e.filename, e.lineno, e.colno, e.error);
