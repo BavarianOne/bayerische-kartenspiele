@@ -393,7 +393,7 @@ export class Tutorial {
                 <div>Mögliche Gebote: <span id="bid-possible">18, 20, 22, 23, 24...</span></div>
             </div>
             <div style="display:flex; gap:0.5rem;">
-                <button class="btn primary" onclick="tutorial._simBid()">Bieten (${document.getElementById('bid-value').textContent})</button>
+                <button class="btn primary" onclick="tutorial._simBid()">Bieten (17)</button>
                 <button class="btn secondary" onclick="tutorial._simPass()">Passen</button>
                 <button class="btn secondary" onclick="tutorial._resetBidding()">Neustart</button>
             </div>
