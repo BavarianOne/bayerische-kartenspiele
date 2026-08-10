@@ -105,41 +105,47 @@ export class Tutorial {
     }
 
     start() {
-        console.log('[Tutorial] start() called');
-        this.currentStep = 0;
-        // Don't call ui.switchMode - we render directly into the tutorial panel
-        const tutorialPanel = document.getElementById('tutorial');
-        console.log('[Tutorial] tutorialPanel found:', !!tutorialPanel);
-        if (tutorialPanel) {
-            tutorialPanel.hidden = false;
-            console.log('[Tutorial] tutorialPanel.hidden set to false');
-        } else {
-            console.error('[Tutorial] tutorialPanel NOT FOUND!');
+            console.log('[Tutorial] start() called');
+            this.currentStep = 0;
+            // Don't call ui.switchMode - we render directly into the tutorial panel
+            const tutorialPanel = document.getElementById('tutorial');
+            console.log('[Tutorial] tutorialPanel found:', !!tutorialPanel);
+            if (tutorialPanel) {
+                tutorialPanel.hidden = false;
+                console.log('[Tutorial] tutorialPanel.hidden set to false');
+                console.log('[Tutorial] tutorialPanel style.display:', tutorialPanel.style.display);
+                console.log('[Tutorial] tutorialPanel computed hidden:', tutorialPanel.hidden);
+            } else {
+                console.error('[Tutorial] tutorialPanel NOT FOUND!');
+            }
+            // Hide other panels
+            const gamePanel = document.getElementById('game');
+            const scoringPanel = document.getElementById('scoring');
+            if (gamePanel) gamePanel.hidden = true;
+            if (scoringPanel) scoringPanel.hidden = true;
+        
+            // Update mode buttons
+            const btnTutorial = document.getElementById('btn-tutorial');
+            const btnGame = document.getElementById('btn-game');
+            const btnScoring = document.getElementById('btn-scoring');
+            if (btnTutorial) btnTutorial.classList.add('active');
+            if (btnGame) btnGame.classList.remove('active');
+            if (btnScoring) btnScoring.classList.remove('active');
+        
+            // Check tutorial-content
+            const content = document.getElementById('tutorial-content');
+            console.log('[Tutorial] tutorial-content element:', !!content);
+            if (content) {
+                console.log('[Tutorial] content innerHTML length before:', content.innerHTML.length);
+            }
+        
+            // DEBUG: Add visual indicator
+            this._addDebugInfo('Tutorial started, step: ' + this.currentStep);
+        
+            // Force render
+            this.renderStep();
+            console.log('[Tutorial] start() completed');
         }
-        // Hide other panels
-        const gamePanel = document.getElementById('game');
-        const scoringPanel = document.getElementById('scoring');
-        if (gamePanel) gamePanel.hidden = true;
-        if (scoringPanel) scoringPanel.hidden = true;
-        
-        // Update mode buttons
-        const btnTutorial = document.getElementById('btn-tutorial');
-        const btnGame = document.getElementById('btn-game');
-        const btnScoring = document.getElementById('btn-scoring');
-        if (btnTutorial) btnTutorial.classList.add('active');
-        if (btnGame) btnGame.classList.remove('active');
-        if (btnScoring) btnScoring.classList.remove('active');
-        
-        // Check tutorial-content
-        const content = document.getElementById('tutorial-content');
-        console.log('[Tutorial] tutorial-content element:', !!content);
-        
-        // DEBUG: Add visual indicator
-        this._addDebugInfo('Tutorial started, step: ' + this.currentStep);
-        
-        this.renderStep();
-        console.log('[Tutorial] start() completed');
-    }
     
     _addDebugInfo(msg) {
         const debugDiv = document.getElementById('tutorial-debug') || document.createElement('div');
