@@ -131,8 +131,15 @@ export class Tutorial {
     }
 
     renderStep() {
+        console.log('[Tutorial] renderStep() called, currentStep:', this.currentStep);
         const step = this.steps[this.currentStep];
         const container = document.getElementById('tutorial-content');
+        console.log('[Tutorial] container found:', !!container);
+        
+        if (!container) {
+            console.error('[Tutorial] tutorial-content element NOT FOUND!');
+            return;
+        }
         
         container.innerHTML = `
             <div class="tutorial-step">
@@ -148,6 +155,7 @@ export class Tutorial {
                 </div>
             </div>
         `;
+        console.log('[Tutorial] HTML injected into container');
         
         // Initialize demo
         setTimeout(() => this.initDemo(step.demo), 50);
@@ -172,10 +180,13 @@ export class Tutorial {
     }
 
     initDemo(type) {
-        const demoEl = document.getElementById(`demo-${type}`);
-        if (!demoEl) return;
-
-        switch (type) {
+            console.log('[Tutorial] initDemo called with type:', type);
+            const demoEl = document.getElementById(`demo-${type}`);
+            console.log('[Tutorial] demo element found:', !!demoEl);
+            if (!demoEl) return;
+        
+            console.log('[Tutorial] initializing demo type:', type);
+            switch (type) {
             case 'card-sorting':
                 this._demoCardSorting(demoEl);
                 break;
