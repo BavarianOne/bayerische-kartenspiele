@@ -134,8 +134,19 @@ export class Tutorial {
         const content = document.getElementById('tutorial-content');
         console.log('[Tutorial] tutorial-content element:', !!content);
         
+        // DEBUG: Add visual indicator
+        this._addDebugInfo('Tutorial started, step: ' + this.currentStep);
+        
         this.renderStep();
         console.log('[Tutorial] start() completed');
+    }
+    
+    _addDebugInfo(msg) {
+        const debugDiv = document.getElementById('tutorial-debug') || document.createElement('div');
+        debugDiv.id = 'tutorial-debug';
+        debugDiv.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#333;color:#0f0;padding:10px;z-index:10000;font-family:monospace;font-size:0.7rem;max-width:300px;';
+        debugDiv.textContent = msg + '\n' + (debugDiv.textContent || '');
+        document.body.appendChild(debugDiv);
     }
 
     renderStep() {
