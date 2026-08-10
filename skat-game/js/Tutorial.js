@@ -8,6 +8,7 @@ import { calculateScoreDetails, NULL_VALUES } from './Scoring.js';
 
 export class Tutorial {
     constructor(ui) {
+        console.log('[Tutorial] Constructor called');
         this.ui = ui;
         this.currentStep = 0;
         this.demoInstances = {};

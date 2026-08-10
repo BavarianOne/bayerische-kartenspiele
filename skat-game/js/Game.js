@@ -28,6 +28,7 @@ export const GAME_TYPES = {
 
 export class Game {
     constructor(options = {}) {
+        console.log('[Game] Constructor called with options:', options);
         this.options = {
             playerNames: ['Du', 'Gegner 1', 'Gegner 2'],
             aiDifficulty: 'normal',
