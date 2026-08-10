@@ -142,15 +142,18 @@ export class UI {
     }
 
     switchMode(mode) {
+        console.log('[UI] switchMode called with:', mode);
         // Hide all panels
         this.elements.tutorialPanel.hidden = true;
         this.elements.gamePanel.hidden = true;
         this.elements.scoringPanel.hidden = true;
+        console.log('[UI] All panels hidden');
         
         // Show selected
         if (mode === 'tutorial') this.elements.tutorialPanel.hidden = false;
         if (mode === 'game') this.elements.gamePanel.hidden = false;
         if (mode === 'scoring') this.elements.scoringPanel.hidden = false;
+        console.log('[UI] Panel shown:', mode);
         
         // Update button states
         this.elements.btnTutorial.classList.toggle('active', mode === 'tutorial');
@@ -159,6 +162,7 @@ export class UI {
         
         if (mode === 'tutorial') this.renderTutorial();
         if (mode === 'scoring') this.renderScoringCalculator();
+        console.log('[UI] switchMode completed for:', mode);
     }
 
     // ========================================
@@ -535,21 +539,13 @@ export class UI {
     }
 
     // ========================================
-    // Tutorial Rendering
+    // Tutorial Rendering - DELEGATED TO Tutorial CLASS
     // ========================================
+    // Tutorial is now handled by the Tutorial class directly
+    // This method is kept for backwards compatibility but does nothing
     renderTutorial() {
-        const container = document.getElementById('tutorial-content');
-        container.innerHTML = `
-            <div class="tutorial-step" id="tutorial-step-0">
-                <h2>🃏 Willkommen beim Skat!</h2>
-                <p>Skat ist das beliebteste deutsche Kartenspiel für 3 Spieler.</p>
-                <p>Ziel: Als Solist (Alleinspieler) mindestens 61 Augen erreichen oder als Gegner das verhindern.</p>
-                <div class="tutorial-nav">
-                    <button class="btn secondary" onclick="ui.tutorialNext()">Weiter →</button>
-                </div>
-            </div>
-        `;
-        this._tutorialStep = 0;
+        console.log('[UI] renderTutorial called - delegating to Tutorial class');
+        // Tutorial class handles its own rendering now
     }
 
     tutorialNext() {

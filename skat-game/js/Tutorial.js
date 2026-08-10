@@ -105,9 +105,29 @@ export class Tutorial {
     }
 
     start() {
+        console.log('[Tutorial] start() called');
         this.currentStep = 0;
-        this.ui.switchMode('tutorial');
+        // Don't call ui.switchMode - we render directly into the tutorial panel
+        const tutorialPanel = document.getElementById('tutorial');
+        if (tutorialPanel) {
+            tutorialPanel.hidden = false;
+        }
+        // Hide other panels
+        const gamePanel = document.getElementById('game');
+        const scoringPanel = document.getElementById('scoring');
+        if (gamePanel) gamePanel.hidden = true;
+        if (scoringPanel) scoringPanel.hidden = true;
+        
+        // Update mode buttons
+        const btnTutorial = document.getElementById('btn-tutorial');
+        const btnGame = document.getElementById('btn-game');
+        const btnScoring = document.getElementById('btn-scoring');
+        if (btnTutorial) btnTutorial.classList.add('active');
+        if (btnGame) btnGame.classList.remove('active');
+        if (btnScoring) btnScoring.classList.remove('active');
+        
         this.renderStep();
+        console.log('[Tutorial] start() completed');
     }
 
     renderStep() {
