@@ -109,8 +109,12 @@ export class Tutorial {
         this.currentStep = 0;
         // Don't call ui.switchMode - we render directly into the tutorial panel
         const tutorialPanel = document.getElementById('tutorial');
+        console.log('[Tutorial] tutorialPanel found:', !!tutorialPanel);
         if (tutorialPanel) {
             tutorialPanel.hidden = false;
+            console.log('[Tutorial] tutorialPanel.hidden set to false');
+        } else {
+            console.error('[Tutorial] tutorialPanel NOT FOUND!');
         }
         // Hide other panels
         const gamePanel = document.getElementById('game');
@@ -125,6 +129,10 @@ export class Tutorial {
         if (btnTutorial) btnTutorial.classList.add('active');
         if (btnGame) btnGame.classList.remove('active');
         if (btnScoring) btnScoring.classList.remove('active');
+        
+        // Check tutorial-content
+        const content = document.getElementById('tutorial-content');
+        console.log('[Tutorial] tutorial-content element:', !!content);
         
         this.renderStep();
         console.log('[Tutorial] start() completed');
