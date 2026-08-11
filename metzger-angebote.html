@@ -256,7 +256,7 @@
         <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
             <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
             <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
-            <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 11.08.2026 11:43 Uhr</span>
+            <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 11.08.2026 11:48 Uhr</span>
         </div>
     </header>
 
@@ -319,111 +319,90 @@ ${window.location.href}`;
         <table class="uebersicht-table">
             <thead>
                 <tr>
-                    <th>Produkt</th>
-                    <th>Preis</th>
+                    <th>Produkt & Preis</th>
                     <th>Metzger</th>
                 </tr>
             </thead>
             <tbody>
 
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Backschinken</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,79 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Backschinken – <span class="uebersicht-preis">1,79 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Currywurst</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,19 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Currywurst – <span class="uebersicht-preis">1,19 € / 100 g</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Delikatess Leberwurst</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,18 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Delikatess Leberwurst – <span class="uebersicht-preis">1,18 € / 100 g</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Emmentaler</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,49 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Emmentaler – <span class="uebersicht-preis">1,49 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Gelbwurst</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,29 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Gelbwurst – <span class="uebersicht-preis">1,29 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,49 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Hackfleisch gemischt – <span class="uebersicht-preis">1,49 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Kochsalami</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,49 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Kochsalami – <span class="uebersicht-preis">1,49 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Lachsschinken</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,95 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Lachsschinken – <span class="uebersicht-preis">1,95 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Ochsenfetz’n</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Ochsenfetz’n – <span class="uebersicht-preis">1,99 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Schweine-Filet</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,69 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Schweine-Filet – <span class="uebersicht-preis">1,69 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Schweinelendchen</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,09 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Schweinelendchen – <span class="uebersicht-preis">1,09 € / 100 g</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Schweinswürstl</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,39 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Schweinswürstl – <span class="uebersicht-preis">1,39 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse</td>
-                    <td class="uebersicht-preis" data-label="Preis">2,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Sommerduett Käse – <span class="uebersicht-preis">2,99 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse Tomate - Basilikum</td>
-                    <td class="uebersicht-preis" data-label="Preis">2,59 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Sommerduett Käse Tomate - Basilikum – <span class="uebersicht-preis">2,59 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Wammerl</td>
-                    <td class="uebersicht-preis" data-label="Preis">0,99 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Wammerl – <span class="uebersicht-preis">0,99 € / 100 g</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">Weißwürste</td>
-                    <td class="uebersicht-preis" data-label="Preis">1,29 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">Weißwürste – <span class="uebersicht-preis">1,29 €</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">📸 Wochenangebote als Flyer-Bilder</td>
-                    <td class="uebersicht-preis" data-label="Preis"></td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">📸 Wochenangebote als Flyer-Bilder – <span class="uebersicht-preis"></span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">🥩 Hackfleischtag: Mageres Schwein & Rind</td>
-                    <td class="uebersicht-preis" data-label="Preis">4,98 € / 500 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">🥩 Hackfleischtag: Mageres Schwein & Rind – <span class="uebersicht-preis">4,98 € / 500 g</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt">🥩 Haxentag: Frisch & kross</td>
-                    <td class="uebersicht-preis" data-label="Preis">0,79 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt & Preis">🥩 Haxentag: Frisch & kross – <span class="uebersicht-preis">0,79 € / 100 g</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
             </tbody>
