@@ -814,12 +814,6 @@ async function shareFullContent() {{
     <div class="wochen-uebersicht">
         <h2>📋 Wochen-Übersicht ({aktuelle_woche_datum.strftime('%d.%m.%Y') if aktuelle_woche_datum else 'keine Daten'})</h2>
         <table class="uebersicht-table">
-            <thead>
-                <tr>
-                    <th>Produkt</th>
-                    <th>Metzger</th>
-                </tr>
-            </thead>
             <tbody>
 """
     
