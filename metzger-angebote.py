@@ -816,7 +816,7 @@ async function shareFullContent() {{
         <table class="uebersicht-table">
             <thead>
                 <tr>
-                    <th>Produkt & Preis</th>
+                    <th>Produkt</th>
                     <th>Metzger</th>
                 </tr>
             </thead>
@@ -835,7 +835,7 @@ async function shareFullContent() {{
             
             html_content += f"""
                 <tr>
-                    <td class="uebersicht-produkt" data-label="Produkt & Preis">{eintrag['name']} – <span class="uebersicht-preis">{eintrag['angebote'][0]['preis']}</span></td>
+                    <td class="uebersicht-produkt" data-label="Produkt">{eintrag['name']} – <span class="uebersicht-preis">{eintrag['angebote'][0]['preis']}</span></td>
                     <td class="uebersicht-metzger" data-label="Metzger">{metzger_html}</td>
                 </tr>"""
     else:
