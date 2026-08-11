@@ -705,13 +705,9 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
             .uebersicht-table td:last-child {{
                 border-bottom: none;
             }}
+            /* KEINE Labels (data-label) auf Mobile */
             .uebersicht-table td::before {{
-                content: attr(data-label);
-                font-weight: 600;
-                color: #8b4513;
-                font-size: 0.8em;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
+                display: none;
             }}
             .uebersicht-produkt {{
                 min-width: auto;
