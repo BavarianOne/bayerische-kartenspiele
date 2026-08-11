@@ -9,22 +9,23 @@
   
   /* Virtual Joystick */
   #joystickContainer {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    width: 120px;
-    height: 120px;
-    z-index: 10000;
-    pointer-events: none;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 120px;
+  height: 120px;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
   }
   #joystickContainer.hidden {
-    opacity: 0;
-    pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
   }
-  #joystickContainer:not(.hidden):active {
-    opacity: 1;
+  #joystickContainer:not(.hidden) {
+  opacity: 0.7;
+  pointer-events: auto;
   }
   #joystickBase {
     position: absolute;
@@ -150,7 +151,7 @@
   <button id="sB">Start Game</button>
   <p style="margin:5px 0">Level: <select id="lvl"><option value="1">1 - Beginner</option><option value="2">2 - Easy</option><option value="3">3 - Medium</option><option value="4">4 - Hard</option><option value="5">5 - Expert</option><option value="6">6 - Master</option><option value="7">7 - Insane</option></select></p>
 </div>
-<div id="hud"><div>Level: <span id="lv">1</span></div><div>Keys: <span id="ky">0/0</span></div><div>Time: <span id="tm">0</span> s</div><div>Score: <span id="sc">0</span></div><div>Lives: <span id="li">3</span></div><div id="lookMode">Look: Click-Drag (Right/Middle Mouse)</div></div>
+<div id="hud"><div>Level: <span id="lv">1</span></div><div>Keys: <span id="ky">0/0</span></div><div>Time: <span id="tm">0</span> s</div><div>Score: <span id="sc">0</span></div><div>Lives: <span id="li">3</span></div><div id="lookMode">Look: Click-Drag (Right/Middle Mouse)</div><div id="msg" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:#fff;padding:15px 30px;border-radius:8px;font-size:20px;z-index:99999;pointer-events:none;white-space:nowrap;"></div></div>
 <button id="fs">Full Screen</button>
 <button id="plBtn" style="display:none;margin-left:10px;padding:5px 10px;font-size:14px;background:#444;color:#fff;border:none;border-radius:3px;cursor:pointer;">Enable Pointer Lock</button>
 <div id="joystickContainer">

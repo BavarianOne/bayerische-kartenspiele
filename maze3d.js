@@ -152,9 +152,10 @@ function IM() {
   });
   
   // ===== MOUSE LOOK - Simple Click & Drag (Desktop) =====
-  // This replaces the complex pointer lock system
-  let mouseLookActive = false;
-  
+  // Use the global mouseLookActive declared at top of file (line 2)
+  // Reset look angle when game restarts
+  function resetLook() { mx = 0; my = 0; }
+
   // Mouse events for simple click-drag look (works on desktop without pointer lock)
   ae(g, 'mousedown', (e) => {
     // Right click or middle click for looking (left click could be for interaction later)
