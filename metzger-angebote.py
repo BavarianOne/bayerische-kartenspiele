@@ -747,20 +747,18 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
     </style>
 </head>
 <body>
-    <!-- WhatsApp Teilen Buttons - ganz oben -->
-    <div class="top-share-banner" style="background-color: #f0f2f5; padding: 12px; text-align: center; border-bottom: 1px solid #ddd; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-  
-    <!-- Button 1: Nur Link -->
-    <button onclick="shareLinkOnly()" style="background-color: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-      🔗 Nur Link teilen
-    </button>
-
-    <!-- Button 2: Inhalt teilen -->
-    <button onclick="shareFullContent()" style="background-color: #128C7E; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-      📱 Inhalt & Angebote teilen
-    </button>
-
-</div>
+    <!-- Kompakter Header: Titel + Teilen-Buttons + Update-Zeile -->
+    <header style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #d4af37;">
+        <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+            <h1 style="margin:0; font-size:1.5rem; color:#8b4513; white-space:nowrap;">🥩 Metzger-Angebote aus Bayern</h1>
+            <p style="margin:0; font-size:0.85rem; color:#666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+            <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
+            <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
+            <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 {timestamp}</span>
+        </div>
+    </header>
 
 <script>
 // Funktion 1: Nur Link teilen
@@ -811,13 +809,6 @@ async function shareFullContent() {{
   }}
 }}
 </script>
-
-    <h1>🥩 Metzger-Angebote aus Bayern</h1>
-    <p style="text-align: center; color: #666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
-    
-    <div class="last-update">
-        Letzte Aktualisierung: {timestamp}
-    </div>
 
     <!-- NEU: Wochen-Übersicht für die aktuelle Woche -->
     <div class="wochen-uebersicht">
