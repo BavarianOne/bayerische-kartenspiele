@@ -461,6 +461,9 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
     if aktuelle_woche_datum:
         aktuelle_woche_str = aktuelle_woche_datum.strftime("%d.%m.%Y")
         for o in all_offers_flat:
+            # Überspringe Metzgerei Hahn in der Wochen-Übersicht
+            if o["metzger"] == "Metzgerei Hahn":
+                continue
             if o["gueltig_bis"] == aktuelle_woche_str:
                 # Normalisiere Produktnamen für Gruppierung
                 name = o["typ"].strip()
