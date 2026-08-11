@@ -212,42 +212,42 @@ def fetch_ruemenapf_offers() -> List[Dict]:
 def fetch_wasner_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Wasner (nur Bild-Links, daher Hinweis)"""
     # Wasner bietet Angebote nur als JPG-Flyer an - kein strukturierter Text
-    # Wir geben einen Link-Hinweis zurück
+    # Wir geben einen Link-Hinweis zurück mit aktuellem Gültigkeitsdatum
     return [{
-        "typ": "📸 Wochenangebote als Flyer-Bilder (KW 30/31)",
+        "typ": "📸 Wochenangebote als Flyer-Bilder (KW 32/33)",
         "preis": "",
-        "gueltig_bis": "01.08.2026",
+        "gueltig_bis": "15.08.2026",
         "beschreibung": "Filiale Landshut: Am alten Viehmarkt 5, 84028 Landshut | Angebote nur als Bilder verfügbar - siehe Website",
         "website": "https://www.metzgereiwasner.de/angebote/"
     }]
 
 def fetch_tristlhof_offers() -> List[Dict]:
     """Statische Angebote für Metzgerei Tristlhof (manuell gepflegt)"""
-    # Angebote für 03.08.2026 - 08.08.2026
+    # Angebote für 10.08.2026 - 15.08.2026 (aus aktuellem Flyer)
     return [
-        {"typ": "frische Hähnchenbrust (natur oder gewürzt)", "preis": "1,49 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "frisch und eiweißreich - Wochenangebot - Landshut", "website": ""},
-        {"typ": "Salami-Aufschnitt (gut gemischt, gut gereift)", "preis": "1,99 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Frisch aus Stadler's Wurstküche - Wochenangebot - Landshut", "website": ""},
-        {"typ": "Dicke oder Regensburger (hausgemacht, frisch vom Rauch)", "preis": "1,19 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "Leberkäse (täglich frisch)", "preis": "1,19 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "🥩 Hackfleischtag (Mo): Mageres Schwein & Rind", "preis": "4,98 € / 500 g", "gueltig_bis": "08.08.2026", "beschreibung": "Aktionstag Montag - Landshut", "website": ""},
-        {"typ": "🥩 Haxentag (Sa): Frisch & kross", "preis": "0,79 € / 100 g", "gueltig_bis": "08.08.2026", "beschreibung": "Aktionstag Samstag - Landshut", "website": ""},
+        {"typ": "Schweinelendchen (für den leichten Genuss)", "preis": "1,09 € / 100 g", "gueltig_bis": "15.08.2026", "beschreibung": "frisch vom Tristlhof - Wochenangebot - Frontenhausen/Landshut/Ergolding", "website": ""},
+        {"typ": "Wammerl", "preis": "0,99 € / 100 g", "gueltig_bis": "15.08.2026", "beschreibung": "frisch vom Tristlhof - Wochenangebot - Frontenhausen/Landshut/Ergolding", "website": ""},
+        {"typ": "Delikatess Leberwurst (im Golddarm, extra crémig)", "preis": "1,18 € / 100 g", "gueltig_bis": "15.08.2026", "beschreibung": "Frisch aus Stadler's Wurstküche - Wochenangebot - Frontenhausen/Landshut/Ergolding", "website": ""},
+        {"typ": "Currywurst (frisch vom Rauch, schön knackig)", "preis": "1,19 € / 100 g", "gueltig_bis": "15.08.2026", "beschreibung": "Frisch aus Stadler's Wurstküche - Wochenangebot - Frontenhausen/Landshut/Ergolding", "website": ""},
+        {"typ": "🥩 Hackfleischtag (Mo): Mageres Schwein & Rind", "preis": "4,98 € / 500 g", "gueltig_bis": "15.08.2026", "beschreibung": "Aktionstag Montag - Frontenhausen/Landshut/Ergolding", "website": ""},
+        {"typ": "🥩 Haxentag (Sa): Frisch & kross", "preis": "0,79 € / 100 g", "gueltig_bis": "15.08.2026", "beschreibung": "Aktionstag Samstag - Frontenhausen/Landshut/Ergolding", "website": ""},
     ]
 
 def fetch_hahn_offers() -> List[Dict]:
     """Statische Angebote für Metzgerei Hahn Eggenfelden (OCR aus Bild extrahiert)"""
-    # Angebote für KW 31/32 (extrahiert aus ANGEBOTE.png)
+    # Angebote für KW 32/33 (extrahiert aus ANGEBOTE.png, Gültigkeit bis 15.08.2026)
     return [
-        {"typ": "Färsen-Hackfleisch", "preis": "12,00 € / kg (500g = 6,00 €)", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Frischwurst-Aufschnitt", "preis": "9,90 € / kg (500g = 4,95 €)", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Gyros-Pfanne", "preis": "10,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Lyoner-Stange", "preis": "3,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Schweinelendchen im Ganzen", "preis": "6,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Rauchfrische Wiener", "preis": "10,49 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Unsere Scharfen", "preis": "9,99 €", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Grillfleisch", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Ententeile gefroren", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Fisch gefroren", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        {"typ": "Sauerkonserven", "preis": "Preis auf Anfrage", "gueltig_bis": "08.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Färsen-Hackfleisch", "preis": "12,00 € / kg (500g = 6,00 €)", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Frischwurst-Aufschnitt", "preis": "9,90 € / kg (500g = 4,95 €)", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Gyros-Pfanne", "preis": "10,99 €", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Lyoner-Stange", "preis": "3,99 €", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Schweinelendchen im Ganzen", "preis": "6,99 €", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Rauchfrische Wiener", "preis": "10,49 €", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Unsere Scharfen", "preis": "9,99 €", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Grillfleisch", "preis": "Preis auf Anfrage", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Ententeile gefroren", "preis": "Preis auf Anfrage", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Fisch gefroren", "preis": "Preis auf Anfrage", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Sauerkonserven", "preis": "Preis auf Anfrage", "gueltig_bis": "15.08.2026", "beschreibung": "Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
     ]
 
 def fetch_brunner_offers() -> List[Dict]:
