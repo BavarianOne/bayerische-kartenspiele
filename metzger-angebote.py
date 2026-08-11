@@ -671,6 +671,69 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
         .uebersicht-metzger strong {{
             color: #8b4513;
         }}
+        /* Responsive: Card-Layout auf Mobile, Tabelle auf Desktop */
+        @media (max-width: 700px) {{
+            .uebersicht-table {{
+                display: block;
+            }}
+            .uebersicht-table thead {{
+                display: none;
+            }}
+            .uebersicht-table tbody {{
+                display: block;
+            }}
+            .uebersicht-table tr {{
+                display: block;
+                background: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 12px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }}
+            .uebersicht-table td {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 4px;
+                border-bottom: 1px solid #f0f0f0;
+                font-size: 0.9em;
+            }}
+            .uebersicht-table td:last-child {{
+                border-bottom: none;
+            }}
+            .uebersicht-table td::before {{
+                content: attr(data-label);
+                font-weight: 600;
+                color: #8b4513;
+                font-size: 0.8em;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }}
+            .uebersicht-produkt {{
+                min-width: auto;
+                font-size: 1em;
+                text-align: right;
+                padding-right: 12px;
+            }}
+            .uebersicht-preis {{
+                min-width: auto;
+                font-size: 1em;
+                padding: 4px 10px;
+            }}
+            .uebersicht-metzger {{
+                font-size: 0.85em;
+                text-align: right;
+                line-height: 1.4;
+            }}
+            .uebersicht-metzger br {{
+                display: none;
+            }}
+            .uebersicht-metzger strong {{
+                display: inline-block;
+                margin-right: 8px;
+            }}
+        }}
         @media (max-width: 700px) {{
             .uebersicht-table th, .uebersicht-table td {{
                 padding: 8px 6px;
@@ -771,17 +834,17 @@ async function shareFullContent() {{
     if wochen_uebersicht:
         for key in sorted(wochen_uebersicht.keys()):
             eintrag = wochen_uebersicht[key]
-            # Sammle alle Metzger für dieses Produkt
+            # Sammle alle Metzger für dieses Produkt (OHNE Preis, da bereits in Spalte 2)
             metzger_infos = []
             for a in eintrag["angebote"]:
-                metzger_infos.append(f"<strong>{a['metzger']}</strong> ({a['stadt']}) – {a['preis']}")
+                metzger_infos.append(f"<strong>{a['metzger']}</strong> ({a['stadt']})")
             metzger_html = "<br>".join(metzger_infos)
             
             html_content += f"""
                 <tr>
-                    <td class="uebersicht-produkt">{eintrag['name']}</td>
-                    <td class="uebersicht-preis">{eintrag['angebote'][0]['preis']}</td>
-                    <td class="uebersicht-metzger">{metzger_html}</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">{eintrag['name']}</td>
+                    <td class="uebersicht-preis" data-label="Preis">{eintrag['angebote'][0]['preis']}</td>
+                    <td class="uebersicht-metzger" data-label="Metzger">{metzger_html}</td>
                 </tr>"""
     else:
         html_content += """

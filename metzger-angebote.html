@@ -174,6 +174,69 @@
         .uebersicht-metzger strong {
             color: #8b4513;
         }
+        /* Responsive: Card-Layout auf Mobile, Tabelle auf Desktop */
+        @media (max-width: 700px) {
+            .uebersicht-table {
+                display: block;
+            }
+            .uebersicht-table thead {
+                display: none;
+            }
+            .uebersicht-table tbody {
+                display: block;
+            }
+            .uebersicht-table tr {
+                display: block;
+                background: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 12px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }
+            .uebersicht-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 4px;
+                border-bottom: 1px solid #f0f0f0;
+                font-size: 0.9em;
+            }
+            .uebersicht-table td:last-child {
+                border-bottom: none;
+            }
+            .uebersicht-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #8b4513;
+                font-size: 0.8em;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .uebersicht-produkt {
+                min-width: auto;
+                font-size: 1em;
+                text-align: right;
+                padding-right: 12px;
+            }
+            .uebersicht-preis {
+                min-width: auto;
+                font-size: 1em;
+                padding: 4px 10px;
+            }
+            .uebersicht-metzger {
+                font-size: 0.85em;
+                text-align: right;
+                line-height: 1.4;
+            }
+            .uebersicht-metzger br {
+                display: none;
+            }
+            .uebersicht-metzger strong {
+                display: inline-block;
+                margin-right: 8px;
+            }
+        }
         @media (max-width: 700px) {
             .uebersicht-table th, .uebersicht-table td {
                 padding: 8px 6px;
@@ -256,7 +319,7 @@ ${window.location.href}`;
     <p style="text-align: center; color: #666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
     
     <div class="last-update">
-        Letzte Aktualisierung: 11.08.2026 11:05 Uhr
+        Letzte Aktualisierung: 11.08.2026 11:32 Uhr
     </div>
 
     <!-- NEU: Wochen-Übersicht für die aktuelle Woche -->
@@ -273,159 +336,159 @@ ${window.location.href}`;
             <tbody>
 
                 <tr>
-                    <td class="uebersicht-produkt">Backschinken</td>
-                    <td class="uebersicht-preis">1,79 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding) – 1,79 €<br><strong>Brunner Metzgerei</strong> (Landshut) – 1,79 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Backschinken</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,79 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Currywurst</td>
-                    <td class="uebersicht-preis">1,19 € / 100 g</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Tristlhof</strong> (Landshut) – 1,19 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Currywurst</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,19 € / 100 g</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Delikatess Leberwurst</td>
-                    <td class="uebersicht-preis">1,18 € / 100 g</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Tristlhof</strong> (Landshut) – 1,18 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Delikatess Leberwurst</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,18 € / 100 g</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Emmentaler</td>
-                    <td class="uebersicht-preis">1,49 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Brandl</strong> (Landshut) – 1,49 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Emmentaler</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,49 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Ententeile gefroren</td>
-                    <td class="uebersicht-preis">Preis auf Anfrage</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – Preis auf Anfrage</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Ententeile gefroren</td>
+                    <td class="uebersicht-preis" data-label="Preis">Preis auf Anfrage</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Fisch gefroren</td>
-                    <td class="uebersicht-preis">Preis auf Anfrage</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – Preis auf Anfrage</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Fisch gefroren</td>
+                    <td class="uebersicht-preis" data-label="Preis">Preis auf Anfrage</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Frischwurst-Aufschnitt</td>
-                    <td class="uebersicht-preis">9,90 € / kg (500g = 4,95 €)</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – 9,90 € / kg (500g = 4,95 €)</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Frischwurst-Aufschnitt</td>
+                    <td class="uebersicht-preis" data-label="Preis">9,90 € / kg (500g = 4,95 €)</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Färsen-Hackfleisch</td>
-                    <td class="uebersicht-preis">12,00 € / kg (500g = 6,00 €)</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – 12,00 € / kg (500g = 6,00 €)</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Färsen-Hackfleisch</td>
+                    <td class="uebersicht-preis" data-label="Preis">12,00 € / kg (500g = 6,00 €)</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Gelbwurst</td>
-                    <td class="uebersicht-preis">1,29 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Brandl</strong> (Landshut) – 1,29 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Gelbwurst</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,29 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Grillfleisch</td>
-                    <td class="uebersicht-preis">Preis auf Anfrage</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – Preis auf Anfrage</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Grillfleisch</td>
+                    <td class="uebersicht-preis" data-label="Preis">Preis auf Anfrage</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Gyros-Pfanne</td>
-                    <td class="uebersicht-preis">10,99 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – 10,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Gyros-Pfanne</td>
+                    <td class="uebersicht-preis" data-label="Preis">10,99 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Hackfleisch gemischt</td>
-                    <td class="uebersicht-preis">1,49 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding) – 1,49 €<br><strong>Brunner Metzgerei</strong> (Landshut) – 1,49 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,49 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Kochsalami</td>
-                    <td class="uebersicht-preis">1,49 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding) – 1,49 €<br><strong>Brunner Metzgerei</strong> (Landshut) – 1,49 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Kochsalami</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,49 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Lachsschinken</td>
-                    <td class="uebersicht-preis">1,95 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Brandl</strong> (Landshut) – 1,95 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Lachsschinken</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,95 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Lyoner-Stange</td>
-                    <td class="uebersicht-preis">3,99 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – 3,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Lyoner-Stange</td>
+                    <td class="uebersicht-preis" data-label="Preis">3,99 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Ochsenfetz’n</td>
-                    <td class="uebersicht-preis">1,99 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding) – 1,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Ochsenfetz’n</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,99 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Rauchfrische Wiener</td>
-                    <td class="uebersicht-preis">10,49 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – 10,49 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Rauchfrische Wiener</td>
+                    <td class="uebersicht-preis" data-label="Preis">10,49 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Rinderfetzen</td>
-                    <td class="uebersicht-preis">1,99 €</td>
-                    <td class="uebersicht-metzger"><strong>Brunner Metzgerei</strong> (Landshut) – 1,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,99 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Sauerkonserven</td>
-                    <td class="uebersicht-preis">Preis auf Anfrage</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – Preis auf Anfrage</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Sauerkonserven</td>
+                    <td class="uebersicht-preis" data-label="Preis">Preis auf Anfrage</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Schweine-Filet</td>
-                    <td class="uebersicht-preis">1,69 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Brandl</strong> (Landshut) – 1,69 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Schweine-Filet</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,69 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Schweinelendchen</td>
-                    <td class="uebersicht-preis">1,09 € / 100 g</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Tristlhof</strong> (Landshut) – 1,09 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Schweinelendchen</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,09 € / 100 g</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Schweinelendchen im Ganzen</td>
-                    <td class="uebersicht-preis">6,99 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – 6,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Schweinelendchen im Ganzen</td>
+                    <td class="uebersicht-preis" data-label="Preis">6,99 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Schweinswürstl</td>
-                    <td class="uebersicht-preis">1,39 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Brandl</strong> (Landshut) – 1,39 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Schweinswürstl</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,39 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Sommerduett Käse</td>
-                    <td class="uebersicht-preis">2,99 €</td>
-                    <td class="uebersicht-metzger"><strong>Brunner Metzgerei</strong> (Landshut) – 2,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse</td>
+                    <td class="uebersicht-preis" data-label="Preis">2,99 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Sommerduett Käse Tomate - Basilikum</td>
-                    <td class="uebersicht-preis">2,59 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding) – 2,59 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse Tomate - Basilikum</td>
+                    <td class="uebersicht-preis" data-label="Preis">2,59 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Unsere Scharfen</td>
-                    <td class="uebersicht-preis">9,99 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden) – 9,99 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Unsere Scharfen</td>
+                    <td class="uebersicht-preis" data-label="Preis">9,99 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Wammerl</td>
-                    <td class="uebersicht-preis">0,99 € / 100 g</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Tristlhof</strong> (Landshut) – 0,99 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Wammerl</td>
+                    <td class="uebersicht-preis" data-label="Preis">0,99 € / 100 g</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">Weißwürste</td>
-                    <td class="uebersicht-preis">1,29 €</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding) – 1,29 €<br><strong>Brunner Metzgerei</strong> (Landshut) – 1,29 €</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">Weißwürste</td>
+                    <td class="uebersicht-preis" data-label="Preis">1,29 €</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)<br><strong>Brunner Metzgerei</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">📸 Wochenangebote als Flyer-Bilder</td>
-                    <td class="uebersicht-preis"></td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Wasner</strong> (Landshut) – </td>
+                    <td class="uebersicht-produkt" data-label="Produkt">📸 Wochenangebote als Flyer-Bilder</td>
+                    <td class="uebersicht-preis" data-label="Preis"></td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">🥩 Hackfleischtag: Mageres Schwein & Rind</td>
-                    <td class="uebersicht-preis">4,98 € / 500 g</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Tristlhof</strong> (Landshut) – 4,98 € / 500 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">🥩 Hackfleischtag: Mageres Schwein & Rind</td>
+                    <td class="uebersicht-preis" data-label="Preis">4,98 € / 500 g</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
                 <tr>
-                    <td class="uebersicht-produkt">🥩 Haxentag: Frisch & kross</td>
-                    <td class="uebersicht-preis">0,79 € / 100 g</td>
-                    <td class="uebersicht-metzger"><strong>Metzgerei Tristlhof</strong> (Landshut) – 0,79 € / 100 g</td>
+                    <td class="uebersicht-produkt" data-label="Produkt">🥩 Haxentag: Frisch & kross</td>
+                    <td class="uebersicht-preis" data-label="Preis">0,79 € / 100 g</td>
+                    <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
                 </tr>
             </tbody>
         </table>
