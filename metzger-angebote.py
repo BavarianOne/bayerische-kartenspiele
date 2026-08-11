@@ -22,13 +22,13 @@ METZGERIEN = [
 ]
 
 def fetch_brandl_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Brandl (PDF-basiert) - ALLE zukünftigen Wochen"""
+    """Holt Angebote von Metzgerei Brandl (PDF-basiert) - NUR ZUKÜNFTIGE Wochen"""
     angebote = []
-    
+
     try:
         import pdfplumber
         import io
-        
+
         # Versuche die aktuellen PDF-URLs zu finden
         # Die URLs folgen einem Muster: /uploads/media/{id}/angebot-vom-{datum}.pdf
         # Wir holen die Hauptseite um die aktuellen PDF-Links zu finden
@@ -36,11 +36,11 @@ def fetch_brandl_offers() -> List[Dict]:
         req = urllib.request.Request(main_url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
-        
+
         # Finde ALLE PDF-Links für Angebote
         pdf_pattern = r'href="(/uploads/media/[^"]*angebot-vom-[^"]*\.pdf)"'
         pdf_links = re.findall(pdf_pattern, html)
-        
+
         # Remove duplicates while preserving order
         seen = set()
         unique_pdf_links = []
@@ -48,30 +48,53 @@ def fetch_brandl_offers() -> List[Dict]:
             if link not in seen:
                 seen.add(link)
                 unique_pdf_links.append(link)
-        
+
         print(f"  Brandl: {len(unique_pdf_links)} eindeutige PDF-Wochen gefunden")
-        
-        # Parse ALLE PDFs (jede Woche)
+
+        # Heute als Vergleichsdatum
+        heute = datetime.now().date()
+
+        # Parse ALLE PDFs, aber filter vergangene Wochen
+        zukuenftige_wochen = 0
         for pdf_link in unique_pdf_links:
             pdf_url = "https://www.metzgerei-brandl.de" + pdf_link
             print(f"  Brandl PDF: {pdf_url}")
-            
+
+            # Extrahiere End-Datum aus der URL: angebot-vom-27-07-01-08-26.pdf -> 01.08.2026
+            gueltig_bis_str = ""
+            url_date_match = re.search(r'angebot-vom-\d{2}-\d{2}-(\d{2})-(\d{2})-(\d{2})\.pdf', pdf_link)
+            if url_date_match:
+                tag, monat, jahr = url_date_match.groups()
+                gueltig_bis_str = f"{tag}.{monat}.20{jahr}"
+                try:
+                    gueltig_bis = datetime.strptime(gueltig_bis_str, "%d.%m.%Y").date()
+                    if gueltig_bis < heute:
+                        print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis_str})")
+                        continue
+                except ValueError:
+                    print(f"  Warnung: Ungültiges Datumsformat in URL '{gueltig_bis_str}', parse trotzdem")
+            else:
+                print(f"  Warnung: Kein Datum in URL gefunden, parse trotzdem")
+
+            zukuenftige_wochen += 1
+            print(f"  -> Nimm Woche (bis {gueltig_bis_str or 'unbekannt'})")
+
             try:
                 pdf_req = urllib.request.Request(pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
                 pdf_response = urllib.request.urlopen(pdf_req, timeout=30)
                 pdf_data = pdf_response.read()
-                
+
                 with pdfplumber.open(io.BytesIO(pdf_data)) as pdf:
-                    # Extrahiere Gültigkeitsdatum aus dem Header (vor dem Parsen der Angebote)
-                    gueltig_bis = ""
-                    for page in pdf.pages:
-                        text = page.extract_text()
-                        if text:
-                            date_match = re.search(r'(\d{2}\.\d{2}\.\s*-\s*\d{2}\.\d{2}\.\d{2})', text)
-                            if date_match:
-                                gueltig_bis = date_match.group(1).split('-')[-1].strip()
-                                break
-                    
+                    # Extrahiere Gültigkeitsdatum aus dem Header (falls URL kein Datum hatte)
+                    if not gueltig_bis_str:
+                        for page in pdf.pages:
+                            text = page.extract_text()
+                            if text:
+                                date_match = re.search(r'(\d{2}\.\d{2}\.\s*-\s*\d{2}\.\d{2}\.\d{2})', text)
+                                if date_match:
+                                    gueltig_bis_str = date_match.group(1).split('-')[-1].strip()
+                                    break
+
                     # Jetzt parse die Angebote mit dem gefundenen Datum
                     for page in pdf.pages:
                         text = page.extract_text()
@@ -88,14 +111,16 @@ def fetch_brandl_offers() -> List[Dict]:
                                         angebote.append({
                                             "typ": name,
                                             "preis": preis,
-                                            "gueltig_bis": gueltig_bis,
-                                            "beschreibung": f"Wochenangebot - Landshut (gültig bis {gueltig_bis})" if gueltig_bis else "Wochenangebot - Landshut",
+                                            "gueltig_bis": gueltig_bis_str,
+                                            "beschreibung": f"Wochenangebot - Landshut (gültig bis {gueltig_bis_str})" if gueltig_bis_str else "Wochenangebot - Landshut",
                                             "website": "https://www.metzgerei-brandl.de"
                                         })
             except Exception as e:
                 print(f"  Fehler bei Brandl PDF {pdf_url}: {e}")
                 continue
-                
+
+        print(f"  Brandl: {zukuenftige_wochen} zukünftige Wochen genommen")
+
     except Exception as e:
         print(f"  Fehler bei Brandl: {e}")
         # Fallback: Mindestdaten
@@ -106,7 +131,7 @@ def fetch_brandl_offers() -> List[Dict]:
             {"typ": "Polnische", "preis": "1,59 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": "https://www.metzgerei-brandl.de"},
             {"typ": "Kochsalami", "preis": "1,59 €", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": "https://www.metzgerei-brandl.de"},
         ]
-    
+
     return angebote
 
 def fetch_ruemenapf_offers() -> List[Dict]:
@@ -288,10 +313,23 @@ def fetch_brunner_offers() -> List[Dict]:
                 ]}
             ]
             
+            # Heute als Vergleichsdatum
+            heute = datetime.now().date()
+            zukuenftige_wochen = 0
+            
             for w_idx, woche in enumerate(wochen_daten):
                 gueltig_bis = woche["ende"]
-                print(f"  Brunner Woche {w_idx+1}: bis {gueltig_bis}")
-                
+                try:
+                    gueltig_bis_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
+                    if gueltig_bis_date < heute:
+                        print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis})")
+                        continue
+                except ValueError:
+                    print(f"  Warnung: Ungültiges Datumsformat '{gueltig_bis}', parse trotzdem")
+
+                zukuenftige_wochen += 1
+                print(f"  -> Nimm Woche (bis {gueltig_bis})")
+
                 for angebot_text in woche["angebote"]:
                     # Parse: "Name 100g 1,39" oder "Name 1,39"
                     preis_match = re.search(r'^(.+?)\s+(\d+,\d{2})$', angebot_text.strip())
