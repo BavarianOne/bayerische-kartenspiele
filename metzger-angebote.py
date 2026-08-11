@@ -423,7 +423,67 @@ def scrape_metzger_websites() -> Dict[str, List[Dict]]:
 def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-angebote.html"):
     """Generiert eine HTML-Seite mit allen Angeboten, gruppiert nach Wochen"""
     
+    import re
+    
     timestamp = datetime.now().strftime("%d.%m.%Y %H:%M Uhr")
+    
+    # ===== NEU: Sammle alle Angebote und finde die aktuelle Woche (früheste zukünftige) =====
+    all_offers_flat = []
+    for metzger_name, angebote_list in angebote.items():
+        stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
+        for angebot in angebote_list:
+            all_offers_flat.append({
+                "metzger": metzger_name,
+                "stadt": stadt,
+                "typ": angebot.get("typ", ""),
+                "preis": angebot.get("preis", ""),
+                "gueltig_bis": angebot.get("gueltig_bis", ""),
+                "beschreibung": angebot.get("beschreibung", ""),
+                "website": angebot.get("website", "")
+            })
+    
+    # Finde die früheste zukünftige Woche (aktuellste Woche)
+    heute = datetime.now().date()
+    zukuenftige_daten = []
+    for o in all_offers_flat:
+        g = o["gueltig_bis"]
+        try:
+            d = datetime.strptime(g, "%d.%m.%Y").date()
+            if d >= heute:
+                zukuenftige_daten.append(d)
+        except:
+            pass
+    
+    aktuelle_woche_datum = min(zukuenftige_daten) if zukuenftige_daten else None
+    
+    # Gruppiere Angebote der aktuellen Woche nach Produktnamen (normalisiert)
+    wochen_uebersicht = {}
+    if aktuelle_woche_datum:
+        aktuelle_woche_str = aktuelle_woche_datum.strftime("%d.%m.%Y")
+        for o in all_offers_flat:
+            if o["gueltig_bis"] == aktuelle_woche_str:
+                # Normalisiere Produktnamen für Gruppierung
+                name = o["typ"].strip()
+                # Entferne Zusätze in Klammern, Gewichtsangaben am Ende
+                name_norm = re.sub(r'\s*\([^)]*\)', '', name)  # (100g) etc.
+                name_norm = re.sub(r'\s+\d+[,\.]\d*\s*(g|kg|€).*$', '', name_norm, flags=re.IGNORECASE)
+                name_norm = re.sub(r'\s+€.*$', '', name_norm)
+                # Normalisiere Abkürzungen
+                name_norm = re.sub(r'\bgem\.?\b', 'gemischt', name_norm, flags=re.IGNORECASE)
+                name_norm = re.sub(r'\bca\.?\b', 'circa', name_norm, flags=re.IGNORECASE)
+                # Entferne trailing Punkte
+                name_norm = re.sub(r'\.$', '', name_norm)
+                name_norm = name_norm.strip()
+                
+                key = name_norm.lower()
+                if key not in wochen_uebersicht:
+                    wochen_uebersicht[key] = {"name": name_norm, "angebote": []}
+                wochen_uebersicht[key]["angebote"].append({
+                    "metzger": o["metzger"],
+                    "stadt": o["stadt"],
+                    "preis": o["preis"],
+                    "original_name": o["typ"]
+                })
     
     # Farbpalette für Wochen-Abgrenzung
     WEEK_COLORS = [
@@ -554,6 +614,70 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
             font-style: italic;
             padding: 20px;
         }}
+        /* NEU: Wochen-Übersicht Styles */
+        .wochen-uebersicht {{
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }}
+        .wochen-uebersicht h2 {{
+            color: #8b4513;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }}
+        .uebersicht-table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }}
+        .uebersicht-table th {{
+            background: #8b4513;
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+        }}
+        .uebersicht-table td {{
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }}
+        .uebersicht-table tr:hover td {{
+            background: #fff8dc;
+        }}
+        .uebersicht-produkt {{
+            font-weight: 600;
+            color: #8b4513;
+            min-width: 250px;
+        }}
+        .uebersicht-preis {{
+            font-weight: bold;
+            color: #d4af37;
+            background: #8b4513;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+        }}
+        .uebersicht-metzger {{
+            color: #555;
+            font-size: 0.9em;
+        }}
+        .uebersicht-metzger strong {{
+            color: #8b4513;
+        }}
+        @media (max-width: 700px) {{
+            .uebersicht-table th, .uebersicht-table td {{
+                padding: 8px 6px;
+                font-size: 0.85em;
+            }}
+            .uebersicht-produkt {{ min-width: 180px; }}
+        }}
     </style>
 </head>
 <body>
@@ -627,6 +751,47 @@ async function shareFullContent() {{
     
     <div class="last-update">
         Letzte Aktualisierung: {timestamp}
+    </div>
+
+    <!-- NEU: Wochen-Übersicht für die aktuelle Woche -->
+    <div class="wochen-uebersicht">
+        <h2>📋 Wochen-Übersicht ({aktuelle_woche_datum.strftime('%d.%m.%Y') if aktuelle_woche_datum else 'keine Daten'})</h2>
+        <table class="uebersicht-table">
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Preis</th>
+                    <th>Metzger</th>
+                </tr>
+            </thead>
+            <tbody>
+"""
+    
+    # Fülle Wochen-Übersicht Tabelle
+    if wochen_uebersicht:
+        for key in sorted(wochen_uebersicht.keys()):
+            eintrag = wochen_uebersicht[key]
+            # Sammle alle Metzger für dieses Produkt
+            metzger_infos = []
+            for a in eintrag["angebote"]:
+                metzger_infos.append(f"<strong>{a['metzger']}</strong> ({a['stadt']}) – {a['preis']}")
+            metzger_html = "<br>".join(metzger_infos)
+            
+            html_content += f"""
+                <tr>
+                    <td class="uebersicht-produkt">{eintrag['name']}</td>
+                    <td class="uebersicht-preis">{eintrag['angebote'][0]['preis']}</td>
+                    <td class="uebersicht-metzger">{metzger_html}</td>
+                </tr>"""
+    else:
+        html_content += """
+                <tr>
+                    <td colspan="3" style="text-align:center; color:#999; padding:20px;">Keine Angebote für diese Woche gefunden</td>
+                </tr>"""
+    
+    html_content += """
+            </tbody>
+        </table>
     </div>
 
     <!-- Container für alle Angebote (für WhatsApp Teilen) -->
