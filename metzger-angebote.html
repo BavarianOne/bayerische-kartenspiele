@@ -179,6 +179,28 @@
  .uebersicht-metzger strong {
  color: #8b4513;
  }
+ /* Suche Styles */
+ .search-container {
+ margin: 15px 0;
+ display: flex;
+ justify-content: center;
+ }
+ .search-input {
+ width: 100%;
+ max-width: 400px;
+ padding: 10px 15px;
+ font-size: 1rem;
+ border: 2px solid #d4af37;
+ border-radius: 20px;
+ outline: none;
+ transition: border-color 0.2s;
+ }
+ .search-input:focus {
+ border-color: #8b4513;
+ }
+ .search-input::placeholder {
+ color: #999;
+ }
  @media (max-width: 700px) {
  .uebersicht-table {
  display: block;
@@ -237,6 +259,36 @@
  }
  }
  </style>
+ <script>
+ function filterAngebote() {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const cards = document.querySelectorAll('.metzger-card, .wochen-uebersicht');
+  if (!query) {
+  cards.forEach(el => el.style.display = '');
+  document.querySelectorAll('.angebot').forEach(el => el.classList.remove('search-match'));
+  return;
+  }
+  let anyMatch = false;
+  cards.forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.angebot').forEach(el => {
+  const text = el.textContent.toLowerCase();
+  const match = text.includes(query);
+  el.classList.toggle('search-match', match);
+  if (match) {
+  const card = el.closest('.metzger-card');
+  const week = el.closest('.week-section');
+  const wochenUebersicht = el.closest('.wochen-uebersicht');
+  if (card) card.style.display = '';
+  if (week) week.style.display = '';
+  if (wochenUebersicht) wochenUebersicht.style.display = '';
+  anyMatch = true;
+  }
+  });
+  if (!anyMatch) {
+  cards.forEach(el => el.style.display = '');
+  }
+  }
+ </script>
 </head>
 <body>
  <header style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #d4af37;">
@@ -247,9 +299,13 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 14.08.2026 09:45 Uhr</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 14.08.2026 10:22 Uhr</span>
  </div>
  </header>
+
+ <div class="search-container">
+ <input type="text" id="searchInput" class="search-input" placeholder="🔍 Produkte suchen..." oninput="filterAngebote()">
+ </div>
 
 <script>
 async function shareLinkOnly() {
