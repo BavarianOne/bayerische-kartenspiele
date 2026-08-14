@@ -855,31 +855,52 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
  <script>
  function filterAngebote() {{
   const query = document.getElementById('searchInput').value.toLowerCase().trim();
-  const cards = document.querySelectorAll('.metzger-card, .wochen-uebersicht');
+  const allOffers = document.querySelectorAll('.angebot');
+  const cards = document.querySelectorAll('.metzger-card');
+  const weeks = document.querySelectorAll('.wochen-uebersicht');
+
   if (!query) {{
-  cards.forEach(el => el.style.display = '');
-  document.querySelectorAll('.angebot').forEach(el => el.classList.remove('search-match'));
+  allOffers.forEach(el => el.style.display = '');
+  updateContainerEmptyState(cards, weeks);
   return;
   }}
-  let anyMatch = false;
-  cards.forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.angebot').forEach(el => {{
+
+  let anyOfferMatch = false;
+  allOffers.forEach(el => {{
   const text = el.textContent.toLowerCase();
   const match = text.includes(query);
-  el.classList.toggle('search-match', match);
-  if (match) {{
-  const card = el.closest('.metzger-card');
-  const week = el.closest('.week-section');
-  const wochenUebersicht = el.closest('.wochen-uebersicht');
-  if (card) card.style.display = '';
-  if (week) week.style.display = '';
-  if (wochenUebersicht) wochenUebersicht.style.display = '';
-  anyMatch = true;
+  el.style.display = match ? '' : 'none';
+  if (match) anyOfferMatch = true;
+  }});
+
+  updateContainerEmptyState(cards, weeks, anyOfferMatch);
+ }}
+
+ function updateContainerEmptyState(cards, weeks, anyOfferMatch) {{
+  cards.forEach(card => {{
+  if (!anyOfferMatch) {{
+  card.style.display = '';
+  return;
+  }}
+  const visibleOffers = card.querySelectorAll('.angebot[style=""]');
+  if (visibleOffers.length === 0 && card.querySelectorAll('.angebot[style="none"]').length > 0) {{
+  card.style.display = 'none';
+  }} else {{
+  card.style.display = '';
   }}
   }});
-  if (!anyMatch) {{
-  cards.forEach(el => el.style.display = '');
+  weeks.forEach(week => {{
+  if (!anyOfferMatch) {{
+  week.style.display = '';
+  return;
   }}
+  const visibleRows = week.querySelectorAll('.uebersicht-table tr:not([style*="display: none"])');
+  if (visibleRows.length === 0) {{
+  week.style.display = 'none';
+  }} else {{
+  week.style.display = '';
+  }}
+  }});
   }}
  </script>
 </head>
