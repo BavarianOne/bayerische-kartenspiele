@@ -748,6 +748,11 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
  font-weight: 600;
  color: #8b4513;
  min-width: 250px;
+ background: #8b4513;
+ color: white;
+ padding: 3px 8px;
+ border-radius: 4px;
+ display: inline-block;
  }}
  .uebersicht-preis {{
  font-weight: bold;
