@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-11T12:11:30.864864",
+  "timestamp": "2026-08-14T09:31:56.240210",
   "file": "metzger-angebote.html",
   "anzahl_metzger": 6,
-  "gesamt_angebote": 41,
+  "gesamt_angebote": 59,
   "metzger": [
     {
       "name": "Metzgerei Brandl",
@@ -10,7 +10,7 @@
       "website": "https://www.metzgerei-brandl.de"
     },
     {
-      "name": "Metzgerei R\u00fcmenapf",
+      "name": "Metzgerei Rümenapf",
       "city": "Ergolding",
       "website": "https://www.metzgerei-ruemenapf.de"
     },
