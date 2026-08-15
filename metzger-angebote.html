@@ -131,7 +131,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 15.08.2026 19:40</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 15.08.2026 19:54</span>
  </div>
  </header>
 
@@ -194,22 +194,151 @@ ${window.location.href}`;
   <table class="uebersicht-table">
   <tbody>
   <tr>
-  <td class="uebersicht-produkt" data-label="Produkt">8 Angebote (z.B. Regensburger)</td>
+  <td class="uebersicht-produkt" data-label="Produkt">Backschinken – <span class="uebersicht-preis">1,79 €</span></td>
   <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">8 Angebote (z.B. Leberkäse)</td>
-  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
-</tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">8 Angebote (z.B. Feuerteufel)</td>
-  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
-</tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">8 Angebote (z.B. Backschinken)</td>
+  <td class="uebersicht-produkt" data-label="Produkt">Backschinken – <span class="uebersicht-preis">1,79 €</span></td>
   <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">8 Angebote (z.B. Schweineschnitzel)</td>
+  <td class="uebersicht-produkt" data-label="Produkt">Backschinken – <span class="uebersicht-preis">1,79 €</span></td>
   <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">9 Angebote (z.B. Krustenbraten)</td>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Blauschimmelwurst – <span class="uebersicht-preis">3,49 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,59 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Debreziner – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Debreziner – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Frankfurter – <span class="uebersicht-preis">0,89 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Gelbwurst – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Kassler – <span class="uebersicht-preis">2,49 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Kochsalami pikant im Geschmack – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Krustenbraten</td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Milzwurst pikant</td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Paprikawurst – <span class="uebersicht-preis">1,49 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Regensburger – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Regensburger – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Regensburger – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderroulade – <span class="uebersicht-preis">3,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Schweineschnitzel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse – <span class="uebersicht-preis">2,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse – <span class="uebersicht-preis">2,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Wammerl – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Wammerl – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weitere Angebote – <span class="uebersicht-preis">100 g 0,88 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weitere Angebote – <span class="uebersicht-preis">100 g 1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weitere Angebote – <span class="uebersicht-preis">100 g 1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste frisch aus der Wurstküche – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">🥩 Hackfleischtag (Montag) – <span class="uebersicht-preis">500 g 4,98 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">🥩 Haxentag (Samstag) – <span class="uebersicht-preis">100 g 0,79 €</span></td>
   <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
 </tr>
   </tbody>
@@ -224,7 +353,15 @@ ${window.location.href}`;
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
  <div class="week-header" style="background: #ff9800;">Woche vom 17.08.2026 - 22.08.2026</div>
- <div class="week-content" style="background: #fff3e0;"><div class="angebot"> <div class="angebot-header"><span class="angebot-name">Regensburger</span> <span class="angebot-preis">1,39 €</span></div></div>
+ <div class="week-content" style="background: #fff3e0;">  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Regensburger</span> <span class="angebot-preis">1,39 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Leberkäse</span> <span class="angebot-preis">1,19 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Bierkugel</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Rinderfetzen</span> <span class="angebot-preis">1,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Backschinken</span> <span class="angebot-preis">1,79 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weißwürste</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Wammerl</span> <span class="angebot-preis">1,29 €</span></div></div>
+</div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Leberkäse</span> <span class="angebot-preis">1,19 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Bierkugel</span> <span class="angebot-preis">1,29 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
@@ -267,7 +404,15 @@ ${window.location.href}`;
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
  <div class="week-header" style="background: #ff9800;">Woche vom 17.08.2026 - 22.08.2026</div>
- <div class="week-content" style="background: #fff3e0;"><div class="angebot"> <div class="angebot-header"><span class="angebot-name">Leberkäse</span> <span class="angebot-preis">1,19 €</span></div></div>
+ <div class="week-content" style="background: #fff3e0;">  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Leberkäse</span> <span class="angebot-preis">1,19 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Bierkugel</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Rinderfetzen</span> <span class="angebot-preis">1,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Sommerduett Käse</span> <span class="angebot-preis">2,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Debreziner</span> <span class="angebot-preis">1,39 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Blauschimmelwurst</span> <span class="angebot-preis">3,49 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Frankfurter</span> <span class="angebot-preis">0,89 €</span></div></div>
+</div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Bierkugel</span> <span class="angebot-preis">1,29 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Rinderfetzen</span> <span class="angebot-preis">1,99 €</span></div></div>
@@ -302,7 +447,15 @@ ${window.location.href}`;
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
  <div class="week-header" style="background: #ff9800;">Woche vom 17.08.2026 - 22.08.2026</div>
- <div class="week-content" style="background: #fff3e0;"><div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
+ <div class="week-content" style="background: #fff3e0;">  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Rinderfetzen</span> <span class="angebot-preis">1,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Sommerduett Käse</span> <span class="angebot-preis">2,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Gelbwurst</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Debreziner</span> <span class="angebot-preis">1,39 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Paprikawurst</span> <span class="angebot-preis">1,49 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Currywurst</span> <span class="angebot-preis">1,59 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weißwürste</span> <span class="angebot-preis">1,29 €</span></div></div>
+</div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Rinderfetzen</span> <span class="angebot-preis">1,99 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Sommerduett Käse</span> <span class="angebot-preis">2,99 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Gelbwurst</span> <span class="angebot-preis">1,29 €</span></div></div>
@@ -337,7 +490,15 @@ ${window.location.href}`;
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
  <div class="week-header" style="background: #ff9800;">Woche vom 17.08.2026 - 22.08.2026</div>
- <div class="week-content" style="background: #fff3e0;"><div class="angebot"> <div class="angebot-header"><span class="angebot-name">Backschinken</span> <span class="angebot-preis">1,79 €</span></div></div>
+ <div class="week-content" style="background: #fff3e0;">  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Backschinken</span> <span class="angebot-preis">1,79 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weißwürste</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Wammerl</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Regensburger</span> <span class="angebot-preis">1,39 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Leberkäse</span> <span class="angebot-preis">1,19 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Bierkugel</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Rinderroulade</span> <span class="angebot-preis">3,99 €</span></div></div>
+</div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weißwürste</span> <span class="angebot-preis">1,29 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Wammerl</span> <span class="angebot-preis">1,29 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Regensburger</span> <span class="angebot-preis">1,39 €</span></div></div>
@@ -372,7 +533,15 @@ ${window.location.href}`;
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
  <div class="week-header" style="background: #ff9800;">Woche vom 17.08.2026 - 22.08.2026</div>
- <div class="week-content" style="background: #fff3e0;"><div class="angebot"> <div class="angebot-header"><span class="angebot-name">Schweineschnitzel</span> <span class="angebot-preis">1,29 €</span></div></div>
+ <div class="week-content" style="background: #fff3e0;">  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Schweineschnitzel</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Regensburger</span> <span class="angebot-preis">1,39 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Leberkäse</span> <span class="angebot-preis">1,19 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Bierkugel</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Feuerteufel</span> <span class="angebot-preis">0,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Rinderfetzen</span> <span class="angebot-preis">1,99 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Backschinken</span> <span class="angebot-preis">1,79 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Kassler</span> <span class="angebot-preis">2,49 €</span></div></div>
+</div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Regensburger</span> <span class="angebot-preis">1,39 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Leberkäse</span> <span class="angebot-preis">1,19 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Bierkugel</span> <span class="angebot-preis">1,29 €</span></div></div>
@@ -416,7 +585,16 @@ ${window.location.href}`;
  <hr>
  <div class="week-section" style="border-left: 5px solid #ff9800;">
  <div class="week-header" style="background: #ff9800;">Woche vom 17.08.2026 - 22.08.2026</div>
- <div class="week-content" style="background: #fff3e0;"><div class="angebot"> <div class="angebot-header"><span class="angebot-name">Krustenbraten</span></div> <div class="angebot-desc">magere Stücke von Schlegel oder Schulter</div></div>
+ <div class="week-content" style="background: #fff3e0;">  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Krustenbraten</span></div> <div class="angebot-desc">magere Stücke von Schlegel oder Schulter</div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Milzwurst pikant</span></div> <div class="angebot-desc">Frisch aus Stadler's Wurstküche</div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Kochsalami pikant im Geschmack</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weißwürste frisch aus der Wurstküche</span> <span class="angebot-preis">1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">🥩 Hackfleischtag (Montag)</span> <span class="angebot-preis">500 g 4,98 €</span></div> <div class="angebot-desc">mageres Schwein und Rind</div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">🥩 Haxentag (Samstag)</span> <span class="angebot-preis">100 g 0,79 €</span></div> <div class="angebot-desc">frisch & kross</div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weitere Angebote</span> <span class="angebot-preis">100 g 0,88 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weitere Angebote</span> <span class="angebot-preis">100 g 1,29 €</span></div></div>
+  <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weitere Angebote</span> <span class="angebot-preis">100 g 1,29 €</span></div></div>
+</div> <div class="angebot-desc">magere Stücke von Schlegel oder Schulter</div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Milzwurst pikant</span></div> <div class="angebot-desc">Frisch aus „Stadler's Wurstküche"</div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Kochsalami pikant im Geschmack</span> <span class="angebot-preis">1,29 €</span></div></div>
   <div class="angebot"> <div class="angebot-header"><span class="angebot-name">Weißwürste frisch aus der Wurstküche</span> <span class="angebot-preis">1,29 €</span></div></div>
