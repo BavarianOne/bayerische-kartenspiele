@@ -1128,6 +1128,7 @@
     <script>
       // Game Data Configuration
       const GAME_CATEGORIES = [
+  {
     id: "featured",
     title: "⭐ Empfohlen",
     icon: "⭐",
@@ -1153,22 +1154,10 @@
           "Funktioniert Offline",
           "Musik & Sounds"
         ]
-      },
-      {
-        id: "skat",
-        title: "Skat",
-        description: "Das klassische deutsche 3-Personen-Kartenspiel! Mit interaktivem Tutorial (7 Schritte), Reizen, 5 Spielarten (Farbspiel, Grand, Null, Null Ouvert, Ramsch), KI-Gegnern und vollständiger Punkteberechnung. Perfekt zum Lernen und Spielen!",
-        path: "skat-game/skat.html",
-        tags: { age: "10+", type: "Kartenspiel", players: "3 Spieler" },
-        badges: ["new", "featured", "educational"],
-        colorStart: "#c9a84c",
-        colorEnd: "#b8963a",
-        icon: "🃏",
-        featured: true
       }
     ]
   },
-
+  {
     id: "education",
     title: "🎓 Kinder & Lernen",
     icon: "🎓",
@@ -1185,87 +1174,10 @@
         colorStart: "#48bb78",
         colorEnd: "#38a169",
         icon: "🧠"
-      },
-      {
-        id: "neontangram",
-        title: "Neon Tangram",
-        description: "Löse bunte geometrische Puzzles! Setze 7 Teile zusammen, um die Silhouette zu matchen. Super für räumliches Denken.",
-        path: "neontangram.html",
-        tags: { age: "5+", type: "Puzzle", players: "1 Spieler" },
-        badges: ["educational"],
-        colorStart: "#48bb78",
-        colorEnd: "#38a169",
-        icon: "🔷"
-      },
-      {
-        id: "shapefusion",
-        title: "Shape Fusion",
-        description: "Verschmelze Formen zu neuen! Lerne Geometrie durch Spielen. Kombiniere Kreise, Quadrate, Dreiecke und mehr.",
-        path: "shapefusion.html",
-        tags: { age: "4+", type: "Lernspiel", players: "1 Spieler" },
-        badges: ["educational", "new"],
-        colorStart: "#48bb78",
-        colorEnd: "#38a169",
-        icon: "🔴"
-      },
-      {
-        id: "wordament",
-        title: "Wordmnt",
-        description: "Finde Wörter in einem Buchstaben-Gitter! Boggle-ähnliche Wortsuche. Erweitere Wortschatz und Rechtschreibung.",
-        path: "wordament.html",
-        tags: { age: "7+", type: "Wortspiel", players: "1 Spieler" },
-        badges: ["educational"],
-        colorStart: "#48bb78",
-        colorEnd: "#38a169",
-        icon: "📝"
-      },
-      {
-        id: "typing-adventure",
-        title: "Tipp-Abenteuer",
-        description: "Lerne das 10-Finger-System spielerisch! 5 Welten, 50 Level, virtuelles Keyboard mit Finger-Farbcodes, Echtzeit-WPM & Genauigkeit. Perfekt für Schule & Zuhause.",
-        path: "typing-adventure.html",
-        tags: { age: "6+", type: "Lernspiel", players: "1 Spieler" },
-        badges: ["educational", "new", "featured"],
-        colorStart: "#4a90d9",
-        colorEnd: "#667eea",
-        icon: "⌨️"
-      },
-      {
-        id: "rhythm-quest",
-        title: "Rhythm Quest",
-        description: "Rhythmus-Abenteuer durch 5 Welten! Tippe im Takt, meistere 50 Level von Viertel- bis Sechzehntelnoten, Synkopen & Polyrhythmen. Perfekt für Musikalität & Timing.",
-        path: "rhythm-quest.html",
-        tags: { age: "6+", type: "Rhythmus", players: "1 Spieler" },
-        badges: ["educational", "new", "featured"],
-        colorStart: "#9f7aea",
-        colorEnd: "#805ad5",
-        icon: "🎵"
-      },
-      {
-        id: "earth-dashboard",
-        title: "Live Earth Dashboard",
-        description: "Echtzeit-Globus mit ISS-Position, Erdbeben, Blitzeinschlägen & Aurora-Vorhersage. Interaktive 3D-Visualisierung mit Live-Daten von NASA, USGS & NOAA.",
-        path: "earth-dashboard.html",
-        tags: { age: "8+", type: "Wissenschaft", players: "1 Spieler" },
-        badges: ["educational", "new", "featured"],
-        colorStart: "#06b6d4",
-        colorEnd: "#8b5cf6",
-        icon: "🌍"
-      },
-      {
-        id: "sternhimmel",
-        title: "Sternenhimmel Simulator",
-        description: "Astronomie-Simulator mit ~300 Sternen, 88 Sternbildern, Planeten & Mond in Echtzeit! GPS-Standort, Zeitreise, Touch-Drag & Pinch-Zoom. Perfekt für kleine Astronomen.",
-        path: "sternhimmel.html",
-        tags: { age: "5+", type: "Wissenschaft", players: "1 Spieler" },
-        badges: ["educational", "new"],
-        colorStart: "#030310",
-        colorEnd: "#4a90d9",
-        icon: "🌌"
       }
     ]
   },
-
+  {
     id: "card",
     title: "🃏 Bayerische Kartenspiele",
     icon: "🃏",
@@ -1283,76 +1195,10 @@
         colorEnd: "#b8963a",
         icon: "🃏",
         featured: true
-      },
-      {
-        id: "schafkopf",
-        title: "Schafkopf",
-        description: "Der klassische bayerische Kartenspiel-Klassiker! Spiele mit 4 Spielern, Trumpf-Farben und kniffligen Regeln. Authentische Regeln inklusive.",
-        path: "schafkopf.html",
-        tags: { age: "10+", type: "Kartenspiel", players: "4 Spieler" },
-        badges: ["popular"],
-        colorStart: "#ed8936",
-        colorEnd: "#dd6b20",
-        icon: "🃏"
-      },
-      {
-        id: "schafkopf2",
-        title: "Schafkopf 2",
-        description: "Neuere Version mit verbesserter KI, besserer Kartenverteilung und sauberem Code. Gleiche Regeln, flüssigeres Spiel.",
-        path: "schafkopf2.html",
-        tags: { age: "10+", type: "Kartenspiel", players: "4 Spieler" },
-        badges: ["new"],
-        colorStart: "#c9a84c",
-        colorEnd: "#b8963a",
-        icon: "🃏"
-      },
-      {
-        id: "watten",
-        title: "Watten",
-        description: "Traditionelles bayerisch/österreichisches Kartenspiel. Bildet Teams, ratet den Trumpf und überlistet eure Gegner!",
-        path: "watten.html",
-        tags: { age: "10+", type: "Kartenspiel", players: "4 Spieler" },
-        badges: [],
-        colorStart: "#ed8936",
-        colorEnd: "#dd6b20",
-        icon: "🎴"
-      },
-      {
-        id: "wallacher",
-        title: "Wallacher Mobile 3",
-        description: "Mobile-optimiertes Wallacher (Bayerischer Whist). Spiele solo oder mit Freunden. Saubere Touch-Steuerung.",
-        path: "WallacherMobile3.html",
-        tags: { age: "10+", type: "Kartenspiel", players: "1-4 Spieler" },
-        badges: ["new"],
-        colorStart: "#ed8936",
-        colorEnd: "#dd6b20",
-        icon: "📱"
-      },
-      {
-        id: "neunerln",
-        title: "Neunerln 3",
-        description: "Temporeiches bayerisches Stichspiel. Einfache Regeln, tiefe Strategie. Perfekt für schnelle Runden.",
-        path: "neunerln3.html",
-        tags: { age: "8+", type: "Kartenspiel", players: "3-4 Spieler" },
-        badges: [],
-        colorStart: "#ed8936",
-        colorEnd: "#dd6b20",
-        icon: "🂡"
-      },
-      {
-        id: "uno",
-        title: "UNO",
-        description: "Klassisches UNO Kartenspiel! Farben und Zahlen matchen, Aktionskarten spielen und als Erster alle Karten loswerden.",
-        path: "uno.html",
-        tags: { age: "6+", type: "Kartenspiel", players: "2-4 Spieler" },
-        badges: ["popular"],
-        colorStart: "#ed8936",
-        colorEnd: "#dd6b20",
-        icon: "🎯"
       }
     ]
   },
-
+  {
     id: "arcade",
     title: "🕹️ Arcade & Action",
     icon: "🕹️",
@@ -1369,76 +1215,10 @@
         colorStart: "#fc8181",
         colorEnd: "#f56565",
         icon: "🐍"
-      },
-      {
-        id: "asteroids",
-        title: "Asteroids",
-        description: "Retro-Weltraum-Shooter! Ballere Asteroiden weg, weiche Trümmern aus und überlebe Welle um Welle. Vektor-Grafik-Stil.",
-        path: "asteroids.html",
-        tags: { age: "7+", type: "Arcade", players: "1 Spieler" },
-        badges: [],
-        colorStart: "#fc8181",
-        colorEnd: "#f56565",
-        icon: "☄️"
-      },
-      {
-        id: "neonshooter",
-        title: "Neon Shooter",
-        description: "Twin-Stick Neon Arcade Shooter! Überlebe endlose Gegnerwellen. Power-Ups, Bosse und Bestenlisten.",
-        path: "neonshooter.html",
-        tags: { age: "8+", type: "Action", players: "1 Spieler" },
-        badges: ["new"],
-        colorStart: "#fc8181",
-        colorEnd: "#f56565",
-        icon: "🔫"
-      },
-      {
-        id: "neonblocks",
-        title: "Neon Blocks",
-        description: "Breakout-Ziegelbrecher mit Neon-Glow! Fange Power-Ups, Multi-Ball und räume alle Level ab.",
-        path: "neonblocks.html",
-        tags: { age: "6+", type: "Arcade", players: "1 Spieler" },
-        badges: [],
-        colorStart: "#fc8181",
-        colorEnd: "#f56565",
-        icon: "🧱"
-      },
-      {
-        id: "neonufo",
-        title: "Neon UFO",
-        description: "Steuere ein UFO durch Neon-Hindernisse! Sammle Sterne, weiche Lasern aus und erreiche das Portal. Flüssige Physik.",
-        path: "neonufo.html",
-        tags: { age: "7+", type: "Action", players: "1 Spieler" },
-        badges: [],
-        colorStart: "#fc8181",
-        colorEnd: "#f56565",
-        icon: "🛸"
-      },
-      {
-        id: "flappy-bird",
-        title: "Flappy Bird",
-        description: "Der kultige Vogel-Klassiker! Tippe zum Fliegen, weiche den grünen Röhren aus und knacke den Highscore. Mit Touch-Steuerung, Vogel-Neigung, localStorage-Highscore und Retro-Grafik.",
-        path: "flappy-bird.html",
-        tags: { age: "6+", type: "Arcade", players: "1 Spieler" },
-        badges: ["new", "popular"],
-        colorStart: "#fc8181",
-        colorEnd: "#f56565",
-        icon: "🐦"
-      },
-      {
-        id: "2048",
-        title: "2048",
-        description: "Das klassische Zahlen-Schiebe-Puzzle! Verschiebe die Kacheln, gleiche Zahlen verschmelzen. Erreiche die 2048! Mit Highscore, Touch-Steuerung und localStorage-Bestwert.",
-        path: "2048.html",
-        tags: { age: "8+", type: "Puzzle", players: "1 Spieler" },
-        badges: ["new", "popular"],
-        colorStart: "#fc8181",
-        colorEnd: "#f56565",
-        icon: "🔢"
       }
     ]
   },
-
+  {
     id: "puzzle3d",
     title: "🧩 Puzzles & 3D Spiele",
     icon: "🧩",
@@ -1455,98 +1235,10 @@
         colorStart: "#9f7aea",
         colorEnd: "#805ad5",
         icon: "🏰"
-      },
-      {
-        id: "space3d",
-        title: "Space 3D",
-        description: "Erkunde den Weltraum in 3D! Fliege durch Asteroidenfelder, besuche Planeten und erfülle Missionen. WebGL powered.",
-        path: "space3d.html",
-        tags: { age: "10+", type: "3D Erkundung", players: "1 Spieler" },
-        badges: [],
-        colorStart: "#9f7aea",
-        colorEnd: "#805ad5",
-        icon: "🚀"
-      },
-      {
-        id: "solar-system",
-        title: "Sonnensystem 3D",
-        description: "Interaktives 3D-Sonnensystem zum Entdecken! Alle 8 Planeten, 5 Zwergplaneten, Kometen (Halley, Hale-Bopp, NEOWISE...), Asteroidengürtel. Klick für spannende Fakten!",
-        path: "solar-system-kids.html",
-        tags: { age: "8+", type: "3D Bildung", players: "1 Spieler" },
-        badges: ["new", "featured"],
-        colorStart: "#ffd700",
-        colorEnd: "#ff8c00",
-        icon: "🌞"
-      },
-      {
-        id: "subway3d",
-        title: "Subway Runner 3D",
-        description: "Endlos-Runner in 3D-U-Bahn-Tunneln! Weiche Zügen aus, sammle Münzen, schalte Charaktere frei. Rasante Action.",
-        path: "subway-runner-3d.html",
-        tags: { age: "7+", type: "3D Runner", players: "1 Spieler" },
-        badges: ["popular"],
-        colorStart: "#9f7aea",
-        colorEnd: "#805ad5",
-        icon: "🏃"
-      },
-      {
-        id: "neonvelocity",
-        title: "Neon Velocity Chrono Run",
-        description: "Hochgeschwindigkeits-Neon-Rennen durch die Zeit! Dimensionen wechseln, Paradoxa vermeiden, die Uhr schlagen.",
-        path: "neon-velocity-chrono-run-3d.html",
-        tags: { age: "10+", type: "3D Racing", players: "1 Spieler" },
-        badges: ["new"],
-        colorStart: "#9f7aea",
-        colorEnd: "#805ad5",
-        icon: "⚡"
-      },
-      {
-        id: "schach",
-        title: "Schach",
-        description: "Klassisches Schach mit wunderschönen 3D-Figuren! Spiele gegen KI oder lokal zu zweit. Mehrere Schwierigkeitsgrade.",
-        path: "schach.html",
-        tags: { age: "8+", type: "Strategie", players: "1-2 Spieler" },
-        badges: ["popular"],
-        colorStart: "#9f7aea",
-        colorEnd: "#805ad5",
-        icon: "♟️"
-      },
-      {
-        id: "bauermeister",
-        title: "Baumeister",
-        description: "Baue Häuser, Schlösser & Burgen in 3D! Stapel Bausteine, nutze Physik und erstelle deine eigene bayerische Burg. Touch-optimiert.",
-        path: "bauermeister/index.html",
-        tags: { age: "6+", type: "3D Bauen", players: "1 Spieler" },
-        badges: ["new"],
-        colorStart: "#9f7aea",
-        colorEnd: "#805ad5",
-        icon: "🏗️"
-      },
-      {
-        id: "space-explorer",
-        title: "Space Explorer 3D",
-        description: "Fliege durchs Sonnensystem! Erkunde Planeten (Merkur bis Saturn), weiche Asteroiden aus, lande auf Felsen und entdecke den Weltraum. Touch-Joysticks für Tablet & Phone.",
-        path: "space-explorer-3d.html",
-        tags: { age: "6+", type: "3D Fliegen", players: "1 Spieler" },
-        badges: ["new", "featured"],
-        colorStart: "#0a0a4a",
-        colorEnd: "#1a1a8a",
-        icon: "🚀"
-      },
-      {
-        id: "domino-simulator",
-        title: "Domino Simulator 3D",
-        description: "Baue Dominostein-Ketten und sieh sie in 3D Physik umfallen! 8 Farben, Touch-optimiert für Tablets, Echtzeit-Physik mit Cannon-es. Kreativ & entspannend.",
-        path: "DominoSimulator.html",
-        tags: { age: "6+", type: "3D Physik", players: "1 Spieler" },
-        badges: ["new", "featured"],
-        colorStart: "#8b5cf6",
-        colorEnd: "#6366f1",
-        icon: "🎲"
       }
     ]
   },
-
+  {
     id: "metzger",
     title: "🥩 Metzger-Angebote",
     icon: "🥩",
@@ -1566,7 +1258,7 @@
       }
     ]
   },
-
+  {
     id: "einkaufen",
     title: "🛒 Supermarkt & Einkaufen",
     icon: "🛒",
@@ -1586,7 +1278,7 @@
       }
     ]
   },
-
+  {
     id: "benzinpreise",
     title: "⛽ Spritpreise",
     icon: "⛽",
@@ -1617,7 +1309,7 @@
       }
     ]
   },
-
+  {
     id: "other",
     title: "🎲 Weitere Spiele",
     icon: "🎲",
@@ -1634,141 +1326,10 @@
         colorStart: "#4fd1c5",
         colorEnd: "#38b2ac",
         icon: "🦔"
-      },
-      {
-        id: "brecher",
-        title: "Brecher",
-        description: "Breakout-Spiel mit Twist! Zerschlage Steine, fange Power-Ups und räume alle Level ab.",
-        path: "brecher.html",
-        tags: { age: "6+", type: "Arcade", players: "1 Spieler" },
-        badges: [],
-        colorStart: "#4fd1c5",
-        colorEnd: "#38b2ac",
-        icon: "🔨"
-      },
-      {
-        id: "monster-schnapp",
-        title: "Schnapp das Monster!",
-        description: "Whack-a-Mole für Kinder! Tippe schnell auf die süßen Monster (👾🐸🐙🤖), bevor sie in ihren Löchern verschwinden. 3 Schwierigkeitsgrade, Sounds & Highscore!",
-        path: "monster-schnapp.html",
-        tags: { age: "5+", type: "Reaktion", players: "1 Spieler" },
-        badges: ["new", "educational"],
-        colorStart: "#ec4899",
-        colorEnd: "#f97316",
-        icon: "🎯"
-      },
-      {
-        id: "auto",
-        title: "Auto Racing",
-        description: "Top-Down Rennspiel! Steuere dein Auto, vermeide Hindernisse und rase ins Ziel.",
-        path: "auto.html",
-        tags: { age: "7+", type: "Rennspiel", players: "1 Spieler" },
-        badges: [],
-        colorStart: "#4fd1c5",
-        colorEnd: "#38b2ac",
-        icon: "🏎️"
-      },
-      {
-        id: "td",
-        title: "Tower Defense",
-        description: "Strategisches Tower Defense! Baue Türme, verbessere sie und stoppe Wellen von Feinden, bevor sie deine Basis erreichen.",
-        path: "td.html",
-        tags: { age: "10+", type: "Strategie", players: "1 Spieler" },
-        badges: [],
-        colorStart: "#4fd1c5",
-        colorEnd: "#38b2ac",
-        icon: "🏰"
-      },
-      {
-        id: "weather",
-        title: "Wetter App",
-        description: "Schönes Wetter-Dashboard! Aktuelle Bedingungen, Vorhersagen und interaktive Karten. Lehrreich & praktisch.",
-        path: "weather.html",
-        tags: { age: "Alle", type: "Nützlich", players: "1 Spieler" },
-        badges: ["educational"],
-        colorStart: "#4fd1c5",
-        colorEnd: "#38b2ac",
-        icon: "🌤️"
-      },
-      {
-        id: "shapecreate",
-        title: "Shape Creator",
-        description: "Kreatives Zeichenwerkzeug! Kombiniere Formen, Farben und Muster zu Kunst. Exportiere deine Kreationen.",
-        path: "shapeCreate.html",
-        tags: { age: "4+", type: "Kreativ", players: "1 Spieler" },
-        badges: ["educational", "new"],
-        colorStart: "#4fd1c5",
-        colorEnd: "#38b2ac",
-        icon: "🎨"
-      },
-      {
-        id: "muehle",
-        title: "Mühle",
-        description: "Klassisches Neuner-Mühle! Setze, ziehe und fliege – bilde Mühlen und entferne gegnerische Steine. Gegen Freund oder KI.",
-        path: "muehle.html",
-        tags: { age: "8+", type: "Brettspiel", players: "1-2 Spieler" },
-        badges: ["new", "popular"],
-        colorStart: "#2c1a0c",
-        colorEnd: "#8b7355",
-        icon: "🏭"
-      },
-      {
-        id: "towers-of-hanoi-3d",
-        title: "Türme von Hanoi 3D",
-        description: "Das klassische Denkspiel in 3D! Bewege alle Scheiben vom Start- zum Ziel-Turm unter Einhaltung der Regeln: Nur eine Scheibe auf einmal, und nie eine größere auf eine kleinere! Mit Touch-Steuerung, Drag & Drop, Zug-Zähler, Timer, Highscore, Tipp-Funktion und verschiedenen Schwierigkeitsgraden (3-8 Scheiben).",
-        path: "towers-of-hanoi-3d.html",
-        tags: { age: "8+", type: "Denkspiel", players: "1 Spieler" },
-        badges: ["new", "educational"],
-        colorStart: "#4a90d9",
-        colorEnd: "#667eea",
-        icon: "🏗️"
-      },
-      {
-        id: "towers-of-hanoi-2d",
-        title: "Türme von Hanoi 2D",
-        description: "Das klassische Denkspiel in 2D! Bewege alle Scheiben vom Start- zum Ziel-Turm unter Einhaltung der Regeln: Nur eine Scheibe auf einmal, und nie eine größere auf eine kleinere! Leichtgewichtige Canvas-Implementierung, Touch-Steuerung, Zug-Zähler, Timer, Highscore, Tipp-Funktion und verschiedene Schwierigkeitsgraden (3-8 Scheiben). Perfekt für ältere Geräte.",
-        path: "towers-of-hanoi-2d.html",
-        tags: { age: "8+", type: "Denkspiel", players: "1 Spieler" },
-        badges: ["new", "educational"],
-        colorStart: "#4a90d9",
-        colorEnd: "#667eea",
-        icon: "🏗️"
-      },
-      {
-        id: "pong-3d",
-        title: "Pong 3D",
-        description: "Der klassische Arcade-Klassiker in 3D! Spiele gegen den Computer oder einen Freund. Touch-Steuerung für Mobile: Linke Bildschirmhälfte für linken Paddle, rechte für rechten Paddle. Mit verschiedenen Geschwindigkeiten, Sound-Effekten und Highscore. Perfekt für schnelle Spielrunden auf dem Tablet.",
-        path: "pong-3d.html",
-        tags: { age: "6+", type: "Action", players: "1-2 Spieler" },
-        badges: ["new"],
-        colorStart: "#00d4ff",
-        colorEnd: "#ff00aa",
-        icon: "🏓"
-      },
-      {
-        id: "viergewinnt",
-        title: "Vier Gewinnt",
-        description: "Der klassische Verbind-Vier-Spiel! Lasse deine Chips fallen, bilde Reihen aus 4 und besiege deinen Gegner. Mit Touch-Steuerung, KI-Gegner, wählbaren Brettgrößen (6x5 bis 10x8) und spektakulären Animationen.",
-        path: "viergewinnt.html",
-        tags: { age: "6+", type: "Strategie", players: "1-2 Spieler" },
-        badges: ["new", "popular", "featured"],
-        colorStart: "#1a237e",
-        colorEnd: "#0d47a1",
-        icon: "🔴"
-      },
-      {
-        id: "qr-code-reader",
-        title: "QR & Barcode Scanner",
-        description: "Scanne QR-Codes UND Barcodes mit deiner Tablet-Kamera! Vollbildmodus, Touch-optimiert, Vibration-Feedback, Scan-Historie, Blitz-Funktion, Kamera-Wechsel. Unterstützt EAN, UPC, Code 39/93/128, ITF, Codabar, Data Matrix, PDF417, Aztec und mehr.",
-        path: "qr-code-reader.html",
-        tags: { age: "Alle", type: "Nützlich", players: "1 Spieler" },
-        badges: ["new"],
-        colorStart: "#4a90d9",
-        colorEnd: "#667eea",
-        icon: "📷"
       }
     ]
-  }];
+  }
+];
 
       // Badge Labels (German)
       const BADGE_LABELS = {
