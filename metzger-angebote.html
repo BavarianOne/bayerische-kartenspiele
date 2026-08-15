@@ -13,7 +13,339 @@
  background-color: #f5f5f5;
  }
  h1 {
- color: #8b<div id="angebote-inhalt">
+ color: #8b4513;
+ text-align: center;
+ border-bottom: 3px solid #d4af37;
+ padding-bottom: 10px;
+ }
+ .metzger-card {
+ background: white;
+ border-radius: 8px;
+ padding: 20px;
+ margin: 15px 0;
+ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+ }
+ .metzger-name {
+ color: #8b4513;
+ font-size: 1.4em;
+ font-weight: bold;
+ margin-bottom: 10px;
+ }
+ .city {
+ color: #666;
+ font-style: italic;
+ margin-bottom: 15px;
+ }
+ .week-section {
+ margin: 20px 0;
+ border-radius: 8px;
+ overflow: hidden;
+ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+ }
+ .week-header {
+ padding: 15px 20px;
+ font-weight: bold;
+ font-size: 1.1em;
+ color: white;
+ text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+ }
+ .week-content {
+ padding: 15px 20px;
+ }
+ .angebot {
+ background: #fff8dc;
+ border-left: 4px solid #d4af37;
+ padding: 12px 15px;
+ margin: 10px 0;
+ border-radius: 0 8px 8px 0;
+ transition: transform 0.2s, box-shadow 0.2s;
+ }
+ .angebot:hover {
+ transform: translateX(5px);
+ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+ }
+ .angebot-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: baseline;
+ margin-bottom: 5px;
+ }
+ .angebot-name {
+ font-weight: bold;
+ color: #8b4513;
+ font-size: 1.05em;
+ }
+ .angebot-preis {
+ font-weight: bold;
+ color: #d4af37;
+ font-size: 1.1em;
+ background: #8b4513;
+ color: white;
+ padding: 2px 8px;
+ border-radius: 4px;
+ }
+ .angebot-desc {
+ font-size: 0.85em;
+ color: #666;
+ margin-top: 4px;
+ }
+ .angebot-link {
+ display: inline-block;
+ margin-top: 8px;
+ padding: 4px 12px;
+ background: #8b4513;
+ color: white;
+ text-decoration: none;
+ border-radius: 4px;
+ font-size: 0.85em;
+ transition: background 0.2s;
+ }
+ .angebot-link:hover {
+ background: #a0522d;
+ }
+ .last-update {
+ text-align: center;
+ color: #666;
+ font-size: 0.9em;
+ margin-top: 30px;
+ padding-top: 15px;
+ border-top: 1px solid #ddd;
+ }
+ </style>
+  <script>
+   function filterAngebote() {
+    var query = document.getElementById('searchInput').value.toLowerCase().trim();
+    document.querySelectorAll('.angebot').forEach(function(el) {
+     var text = (el.textContent || '').toLowerCase();
+     el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
+    });
+   }
+  </script>
+ </head>
+ <body>
+ <header style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #d4af37;">
+ <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+ <h1 style="margin:0; font-size:1.5rem; color:#8b4513; white-space:nowrap;">🥩 Metzger-Angebote aus Bayern</h1>
+ <p style="margin:0; font-size:0.85rem; color:#666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
+ </div>
+ <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+ <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
+ <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 15.08.2026 21:15</span>
+ </div>
+ </header>
+
+ <div class="search-container">
+ <input type="text" id="searchInput" class="search-input" placeholder="🔍 Produkte suchen..." oninput="filterAngebote()">
+ </div>
+
+<script>
+async function shareLinkOnly() {
+ const shareData = {
+ title: document.title,
+ text: 'Schau dir diese Seite an:',
+ url: window.location.href
+ };
+
+ if (navigator.share) {
+ try {
+ await navigator.share(shareData);
+ } catch (err) {
+ console.log('Teilen abgebrochen:', err);
+ }
+ } else {
+ const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(shareData.text + ' ' + shareData.url)}`;
+ window.open(fallbackUrl, '_blank');
+ }}
+}
+
+async function shareFullContent() {
+ const contentElement = document.getElementById('angebote-inhalt');
+ let bodyText = "";
+
+ if (contentElement) {
+ bodyText = contentElement.innerText.trim();
+ } else {
+ bodyText = "Schau dir diese aktuellen Angebote an!";
+ }
+
+ const fullMessage = `${bodyText}
+
+👉 Hier online ansehen:
+${window.location.href}`;
+
+ if (navigator.share) {
+ try {
+ await navigator.share({
+ title: document.title,
+ text: fullMessage
+ });
+ } catch (err) {
+ console.log('Teilen abgebrochen:', err);
+ }
+ } else {
+ const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
+ window.open(fallbackUrl, '_blank');
+ }}
+</script>
+
+ <div class="wochen-uebersicht">
+  <h2>📋 Wochen-Übersicht (17.08.2026)</h2>
+  <table class="uebersicht-table">
+  <tbody>
+  <tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Backschinken – <span class="uebersicht-preis">1,79 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Backschinken – <span class="uebersicht-preis">1,79 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Backschinken – <span class="uebersicht-preis">1,79 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Bierkugel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Blauschimmelwurst – <span class="uebersicht-preis">3,49 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,59 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Debreziner – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Debreziner – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Feuerteufel – <span class="uebersicht-preis">0,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Frankfurter – <span class="uebersicht-preis">0,89 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Gelbwurst – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Kassler – <span class="uebersicht-preis">2,49 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Kochsalami pikant im Geschmack – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Krustenbraten</td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Leberkäse – <span class="uebersicht-preis">1,19 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Milzwurst pikant</td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Paprikawurst – <span class="uebersicht-preis">1,49 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Regensburger – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Regensburger – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Regensburger – <span class="uebersicht-preis">1,39 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderfetzen – <span class="uebersicht-preis">1,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Rinderroulade – <span class="uebersicht-preis">3,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Schweineschnitzel – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse – <span class="uebersicht-preis">2,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Sommerduett Käse – <span class="uebersicht-preis">2,99 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Wammerl – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Wammerl – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weitere Angebote – <span class="uebersicht-preis">100 g 0,88 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weitere Angebote – <span class="uebersicht-preis">100 g 1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weitere Angebote – <span class="uebersicht-preis">100 g 1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste frisch aus der Wurstküche – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste – <span class="uebersicht-preis">1,29 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">🥩 Hackfleischtag (Montag) – <span class="uebersicht-preis">500 g 4,98 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr><tr>
+  <td class="uebersicht-produkt" data-label="Produkt">🥩 Haxentag (Samstag) – <span class="uebersicht-preis">100 g 0,79 €</span></td>
+  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> ()</td>
+</tr>
+  </tbody>
+  </table>
+  </div>
+
+ <div id="angebote-inhalt">
 
 <div class="wochen-uebersicht">
   <h2>📋 Wochen-Übersicht (17.08.2026)</h2>
@@ -307,7 +639,5 @@ span> <span class="angebot-preis">100 g 1,29 €</span></div></div>
 </div>
 
 
-</div>
-
- </body>
+</body>
  </html>
