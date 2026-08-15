@@ -852,59 +852,17 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
  }}
  }}
  </style>
- <script>
- function filterAngebote() {{
-  const query = document.getElementById('searchInput').value.toLowerCase().trim();
-  const allOffers = document.querySelectorAll('.angebot');
-  const cards = document.querySelectorAll('.metzger-card');
-  const weeks = document.querySelectorAll('.wochen-uebersicht');
-
-  if (!query) {{
-  allOffers.forEach(el => el.style.display = '');
-  updateContainerEmptyState(cards, weeks);
-  return;
-  }}
-
-  let anyOfferMatch = false;
-  allOffers.forEach(el => {{
-  const text = el.textContent.toLowerCase();
-  const match = text.includes(query);
-  el.style.display = match ? '' : 'none';
-  if (match) anyOfferMatch = true;
-  }});
-
-  updateContainerEmptyState(cards, weeks, anyOfferMatch);
- }}
-
- function updateContainerEmptyState(cards, weeks, anyOfferMatch) {{
-  cards.forEach(card => {{
-  if (!anyOfferMatch) {{
-  card.style.display = '';
-  return;
-  }}
-  const visibleOffers = card.querySelectorAll('.angebot[style=""]');
-  if (visibleOffers.length === 0 && card.querySelectorAll('.angebot[style="none"]').length > 0) {{
-  card.style.display = 'none';
-  }} else {{
-  card.style.display = '';
-  }}
-  }});
-  weeks.forEach(week => {{
-  if (!anyOfferMatch) {{
-  week.style.display = '';
-  return;
-  }}
-  const visibleRows = week.querySelectorAll('.uebersicht-table tr:not([style*="display: none"])');
-  if (visibleRows.length === 0) {{
-  week.style.display = 'none';
-  }} else {{
-  week.style.display = '';
-  }}
-  }});
-  }}
- </script>
-</head>
-<body>
+  <script>
+   function filterAngebote() {
+    var query = document.getElementById('searchInput').value.toLowerCase().trim();
+    document.querySelectorAll('.angebot').forEach(function(el) {
+     var text = (el.textContent || '').toLowerCase();
+     el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
+    });
+   }
+  </script>
+ </head>
+ <body>
  <header style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #d4af37;">
  <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
  <h1 style="margin:0; font-size:1.5rem; color:#8b4513; white-space:nowrap;">🥩 Metzger-Angebote aus Bayern</h1>
