@@ -1596,57 +1596,5 @@
         });
       }
     </script>
-
-      // Intersection Observer for lazy loading images
-      if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const img = entry.target;
-              if (img.dataset.src) {
-                img.src = img.dataset.src;
-                img.removeAttribute('data-src');
-              }
-              imageObserver.unobserve(img);
-            }
-          });
-        });
-      }
-
-      // Add visual feedback for taps on mobile
-      document.addEventListener('touchstart', function(e){}, {passive: true});
-      document.addEventListener('touchend', function(e){}, {passive: true});
-
-      // Prevent double tap to zoom on mobile
-      let lastTouchEnd = 0;
-      document.addEventListener('touchend', function (event) {
-        const now = window.performance.now();
-        if (now - lastTouchEnd <= 300) {
-          event.preventDefault();
-        }
-        lastTouchEnd = now;
-      }, false);
-
-      // Improved click handling for better UX
-      mainContent.addEventListener('mousedown', (e) => {
-        const card = e.target.closest('.game-card');
-        if (card) {
-          card.style.transform = 'translateY(4px) scale(0.98)';
-        }
-      });
-
-      mainContent.addEventListener('mouseup', (e) => {
-        const card = e.target.closest('.game-card');
-        if (card) {
-          card.style.transform = '';
-        }
-      });
-
-      mainContent.addEventListener('mouseleave', (e) => {
-        const card = e.target.closest('.game-card');
-        if (card) {
-          card.style.transform = '';
-        }
-      });
-  </body>
+</body>
 </html>
