@@ -853,12 +853,12 @@ def generate_html(angebote: Dict[str, List[Dict]], output_file: str = "metzger-a
  }}
  </style>
   <script>
-   function filterAngebote() {
+   function filterAngebote() {{
     var query = document.getElementById('searchInput').value.toLowerCase().trim();
-    document.querySelectorAll('.angebot').forEach(function(el) {
+    document.querySelectorAll('.angebot').forEach(function(el) {{
      var text = (el.textContent || '').toLowerCase();
      el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
-    });
+    }});
    }
   </script>
  </head>
@@ -916,7 +916,7 @@ async function shareFullContent() {{
  await navigator.share({{
  title: document.title,
  text: fullMessage
- }});
+ }}}});
  }} catch (err) {{
  console.log('Teilen abgebrochen:', err);
  }}
