@@ -1,5 +1,5 @@
 {
-  "scraped_at": "2026-08-15T22:03:39.596628",
+  "scraped_at": "2026-08-16T14:20:16.703557",
   "source": "https://github.com/BavarianOne/bayerische-kartenspiele",
   "metzgereien": [
     {
@@ -9,6 +9,786 @@
       "website": "https://www.metzgereiwasner.de/angebote/",
       "logo": null,
       "angebote": [
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "typ": "Wochenangebote (Plakat KW 32/33)",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_260708.jpg",
+              "produkte": [
+                {
+                  "name": "OKTOBERFEST-KRUSTENBRATEN",
+                  "preis": "0,89 €/100g"
+                },
+                {
+                  "name": "HAXE",
+                  "preis": "8,90 €/Stück"
+                },
+                {
+                  "name": "PUTENSCHNITZEL",
+                  "preis": "1,39 €/100g"
+                },
+                {
+                  "name": "PIZZALEBERKÄSE",
+                  "preis": "1,19 €/100g"
+                },
+                {
+                  "name": "NUDELSALAT",
+                  "preis": "0,99 €/100g"
+                },
+                {
+                  "name": "OBAZDA",
+                  "preis": "0,99 €/100g"
+                }
+              ]
+            },
+            {
+              "typ": "Wochenangebote (Plakat KW 32/33 - Seite 2)",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607082.jpg",
+              "produkte": [
+                {
+                  "name": "REGENSBURGER",
+                  "preis": "0,99 €/100g"
+                },
+                {
+                  "name": "GESCHWOLLENE HÜTTENSPECK",
+                  "preis": "1,19 €/100g"
+                },
+                {
+                  "name": "BIERKUGEL",
+                  "preis": "1,29 €/100g"
+                },
+                {
+                  "name": "FEUERTEUFEL",
+                  "preis": "1,69 €/100g"
+                }
+              ]
+            },
+            {
+              "typ": "Grillhaxe Angebot",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607083.jpg",
+              "produkte": [
+                {
+                  "name": "GRILLHAXE mit Beilage",
+                  "preis": "€/Portion (genauer Preis OCR-unscharf)"
+                }
+              ]
+            },
+            {
+              "typ": "Brotzeit & Wurstplatte (Passau Flyer)",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607022.jpg",
+              "produkte": [
+                {
+                  "name": "BROTZEITPLATTN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "WÜRSTLPARADE",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINESCHNITZEL",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Wasners Bayrische Wurstspezialitäten",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607023.jpg",
+              "produkte": [
+                {
+                  "name": "KÄSEKRAINER",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "FEUERWEHRGRILLER (scharf)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINSBRATWÜRSTL",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Sortiment: Fleisch & Wurstwaren",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607024.jpg",
+              "produkte": [
+                {
+                  "name": "PUTENSCHNITZEL (zart geschnitten)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINEKOTELETT",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINEKRUSTENBRATEN (aus der Schutter)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "GRILLBAUCHSCHEIBEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BAYR. LEBERKÄSE (fein, ofengebacken)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "HAUSSALAMI",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "PRESSSACK (weiß und rot)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BIERSCHINKEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BROTZEITPLATTN",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Tagesangebote / Wochenaktion",
+              "gueltig": "Montag bis Samstag",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_260702.jpg",
+              "produkte": [
+                {
+                  "name": "1/2 HENDL",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "KRUSTENBRATEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "HAXE",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BAYRISCHER OBAZDA",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "APFEL-GRIEBEN-WURSTSALAT",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHMALZ (1909-Becher)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "Volksfestpaket",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Wochenmenüplan (Mittagstisch)",
+              "gueltig": "Woche 32 | 03.08. bis 08.08.2026",
+              "quelle_bild": "wasner_menueplan_a1_kw31_32_v01_cc_2607082.jpg",
+              "produkte": [
+                {
+                  "tag": "Montag",
+                  "gericht": "Cordon bleu mit Pommes",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Montag",
+                  "gericht": "Spaghetti Carbonara",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Dienstag",
+                  "gericht": "Spanferkelbraten mit Knödel und Kraut",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Dienstag",
+                  "gericht": "Nudelauflauf mit Tomatensoße",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Mittwoch",
+                  "gericht": "Rinderroulade mit Blaukraut und Knödel",
+                  "preis": "10,00 €"
+                },
+                {
+                  "tag": "Mittwoch",
+                  "gericht": "Putensteak mit Ratatouille und Reis",
+                  "preis": "10,00 €"
+                },
+                {
+                  "tag": "Donnerstag",
+                  "gericht": "Gebratene Leber in Zwiebelsoße mit Kartoffelpüree",
+                  "preis": "4,90 €"
+                },
+                {
+                  "tag": "Donnerstag",
+                  "gericht": "Hähnchenkeule mit Pommes",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Freitag",
+                  "gericht": "Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße",
+                  "preis": "12,90 €"
+                },
+                {
+                  "tag": "Freitag",
+                  "gericht": "Schweinerückensteaks mit Spätzle und Buttergemüse",
+                  "preis": "10,30 €"
+                },
+                {
+                  "tag": "Samstag",
+                  "gericht": "Haxenfleisch mit Zwiebelsoße und Beilage",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Samstag",
+                  "gericht": "Filettöpfle mit Eierknöpfle und kleinem grünem Salat",
+                  "preis": "10,80 €"
+                }
+              ],
+              "hinweis": "Alle Speisen auch zum Mitnehmen. Catering für Familienfeiern verfügbar."
+            }
+          ],
+          "scraped_at": "2026-08-16T14:20:13.611689"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "typ": "Wochenangebote (Plakat KW 32/33)",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_260708.jpg",
+              "produkte": [
+                {
+                  "name": "OKTOBERFEST-KRUSTENBRATEN",
+                  "preis": "0,89 €/100g"
+                },
+                {
+                  "name": "HAXE",
+                  "preis": "8,90 €/Stück"
+                },
+                {
+                  "name": "PUTENSCHNITZEL",
+                  "preis": "1,39 €/100g"
+                },
+                {
+                  "name": "PIZZALEBERKÄSE",
+                  "preis": "1,19 €/100g"
+                },
+                {
+                  "name": "NUDELSALAT",
+                  "preis": "0,99 €/100g"
+                },
+                {
+                  "name": "OBAZDA",
+                  "preis": "0,99 €/100g"
+                }
+              ]
+            },
+            {
+              "typ": "Wochenangebote (Plakat KW 32/33 - Seite 2)",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607082.jpg",
+              "produkte": [
+                {
+                  "name": "REGENSBURGER",
+                  "preis": "0,99 €/100g"
+                },
+                {
+                  "name": "GESCHWOLLENE HÜTTENSPECK",
+                  "preis": "1,19 €/100g"
+                },
+                {
+                  "name": "BIERKUGEL",
+                  "preis": "1,29 €/100g"
+                },
+                {
+                  "name": "FEUERTEUFEL",
+                  "preis": "1,69 €/100g"
+                }
+              ]
+            },
+            {
+              "typ": "Grillhaxe Angebot",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607083.jpg",
+              "produkte": [
+                {
+                  "name": "GRILLHAXE mit Beilage",
+                  "preis": "€/Portion (genauer Preis OCR-unscharf)"
+                }
+              ]
+            },
+            {
+              "typ": "Brotzeit & Wurstplatte (Passau Flyer)",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607022.jpg",
+              "produkte": [
+                {
+                  "name": "BROTZEITPLATTN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "WÜRSTLPARADE",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINESCHNITZEL",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Wasners Bayrische Wurstspezialitäten",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607023.jpg",
+              "produkte": [
+                {
+                  "name": "KÄSEKRAINER",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "FEUERWEHRGRILLER (scharf)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINSBRATWÜRSTL",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Sortiment: Fleisch & Wurstwaren",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607024.jpg",
+              "produkte": [
+                {
+                  "name": "PUTENSCHNITZEL (zart geschnitten)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINEKOTELETT",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINEKRUSTENBRATEN (aus der Schutter)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "GRILLBAUCHSCHEIBEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BAYR. LEBERKÄSE (fein, ofengebacken)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "HAUSSALAMI",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "PRESSSACK (weiß und rot)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BIERSCHINKEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BROTZEITPLATTN",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Tagesangebote / Wochenaktion",
+              "gueltig": "Montag bis Samstag",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_260702.jpg",
+              "produkte": [
+                {
+                  "name": "1/2 HENDL",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "KRUSTENBRATEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "HAXE",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BAYRISCHER OBAZDA",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "APFEL-GRIEBEN-WURSTSALAT",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHMALZ (1909-Becher)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "Volksfestpaket",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Wochenmenüplan (Mittagstisch)",
+              "gueltig": "Woche 32 | 03.08. bis 08.08.2026",
+              "quelle_bild": "wasner_menueplan_a1_kw31_32_v01_cc_2607082.jpg",
+              "produkte": [
+                {
+                  "tag": "Montag",
+                  "gericht": "Cordon bleu mit Pommes",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Montag",
+                  "gericht": "Spaghetti Carbonara",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Dienstag",
+                  "gericht": "Spanferkelbraten mit Knödel und Kraut",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Dienstag",
+                  "gericht": "Nudelauflauf mit Tomatensoße",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Mittwoch",
+                  "gericht": "Rinderroulade mit Blaukraut und Knödel",
+                  "preis": "10,00 €"
+                },
+                {
+                  "tag": "Mittwoch",
+                  "gericht": "Putensteak mit Ratatouille und Reis",
+                  "preis": "10,00 €"
+                },
+                {
+                  "tag": "Donnerstag",
+                  "gericht": "Gebratene Leber in Zwiebelsoße mit Kartoffelpüree",
+                  "preis": "4,90 €"
+                },
+                {
+                  "tag": "Donnerstag",
+                  "gericht": "Hähnchenkeule mit Pommes",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Freitag",
+                  "gericht": "Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße",
+                  "preis": "12,90 €"
+                },
+                {
+                  "tag": "Freitag",
+                  "gericht": "Schweinerückensteaks mit Spätzle und Buttergemüse",
+                  "preis": "10,30 €"
+                },
+                {
+                  "tag": "Samstag",
+                  "gericht": "Haxenfleisch mit Zwiebelsoße und Beilage",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Samstag",
+                  "gericht": "Filettöpfle mit Eierknöpfle und kleinem grünem Salat",
+                  "preis": "10,80 €"
+                }
+              ],
+              "hinweis": "Alle Speisen auch zum Mitnehmen. Catering für Familienfeiern verfügbar."
+            }
+          ],
+          "scraped_at": "2026-08-16T13:51:20.023349"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "typ": "Wochenangebote (Plakat KW 32/33)",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_260708.jpg",
+              "produkte": [
+                {
+                  "name": "OKTOBERFEST-KRUSTENBRATEN",
+                  "preis": "0,89 €/100g"
+                },
+                {
+                  "name": "HAXE",
+                  "preis": "8,90 €/Stück"
+                },
+                {
+                  "name": "PUTENSCHNITZEL",
+                  "preis": "1,39 €/100g"
+                },
+                {
+                  "name": "PIZZALEBERKÄSE",
+                  "preis": "1,19 €/100g"
+                },
+                {
+                  "name": "NUDELSALAT",
+                  "preis": "0,99 €/100g"
+                },
+                {
+                  "name": "OBAZDA",
+                  "preis": "0,99 €/100g"
+                }
+              ]
+            },
+            {
+              "typ": "Wochenangebote (Plakat KW 32/33 - Seite 2)",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607082.jpg",
+              "produkte": [
+                {
+                  "name": "REGENSBURGER",
+                  "preis": "0,99 €/100g"
+                },
+                {
+                  "name": "GESCHWOLLENE HÜTTENSPECK",
+                  "preis": "1,19 €/100g"
+                },
+                {
+                  "name": "BIERKUGEL",
+                  "preis": "1,29 €/100g"
+                },
+                {
+                  "name": "FEUERTEUFEL",
+                  "preis": "1,69 €/100g"
+                }
+              ]
+            },
+            {
+              "typ": "Grillhaxe Angebot",
+              "gueltig": "03.08.-15.08.2026",
+              "quelle_bild": "wasner_plakate_kw32_33_a1_v01_cc_2607083.jpg",
+              "produkte": [
+                {
+                  "name": "GRILLHAXE mit Beilage",
+                  "preis": "€/Portion (genauer Preis OCR-unscharf)"
+                }
+              ]
+            },
+            {
+              "typ": "Brotzeit & Wurstplatte (Passau Flyer)",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607022.jpg",
+              "produkte": [
+                {
+                  "name": "BROTZEITPLATTN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "WÜRSTLPARADE",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINESCHNITZEL",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Wasners Bayrische Wurstspezialitäten",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607023.jpg",
+              "produkte": [
+                {
+                  "name": "KÄSEKRAINER",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "FEUERWEHRGRILLER (scharf)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINSBRATWÜRSTL",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Sortiment: Fleisch & Wurstwaren",
+              "gueltig": "KW 32/33",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_2607024.jpg",
+              "produkte": [
+                {
+                  "name": "PUTENSCHNITZEL (zart geschnitten)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINEKOTELETT",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINEKRUSTENBRATEN (aus der Schutter)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "GRILLBAUCHSCHEIBEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BAYR. LEBERKÄSE (fein, ofengebacken)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "HAUSSALAMI",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "PRESSSACK (weiß und rot)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BIERSCHINKEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BROTZEITPLATTN",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Tagesangebote / Wochenaktion",
+              "gueltig": "Montag bis Samstag",
+              "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_260702.jpg",
+              "produkte": [
+                {
+                  "name": "1/2 HENDL",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "KRUSTENBRATEN",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "HAXE",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "BAYRISCHER OBAZDA",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "APFEL-GRIEBEN-WURSTSALAT",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "SCHMALZ (1909-Becher)",
+                  "preis": "k.A."
+                },
+                {
+                  "name": "Volksfestpaket",
+                  "preis": "k.A."
+                }
+              ]
+            },
+            {
+              "typ": "Wochenmenüplan (Mittagstisch)",
+              "gueltig": "Woche 32 | 03.08. bis 08.08.2026",
+              "quelle_bild": "wasner_menueplan_a1_kw31_32_v01_cc_2607082.jpg",
+              "produkte": [
+                {
+                  "tag": "Montag",
+                  "gericht": "Cordon bleu mit Pommes",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Montag",
+                  "gericht": "Spaghetti Carbonara",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Dienstag",
+                  "gericht": "Spanferkelbraten mit Knödel und Kraut",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Dienstag",
+                  "gericht": "Nudelauflauf mit Tomatensoße",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Mittwoch",
+                  "gericht": "Rinderroulade mit Blaukraut und Knödel",
+                  "preis": "10,00 €"
+                },
+                {
+                  "tag": "Mittwoch",
+                  "gericht": "Putensteak mit Ratatouille und Reis",
+                  "preis": "10,00 €"
+                },
+                {
+                  "tag": "Donnerstag",
+                  "gericht": "Gebratene Leber in Zwiebelsoße mit Kartoffelpüree",
+                  "preis": "4,90 €"
+                },
+                {
+                  "tag": "Donnerstag",
+                  "gericht": "Hähnchenkeule mit Pommes",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Freitag",
+                  "gericht": "Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße",
+                  "preis": "12,90 €"
+                },
+                {
+                  "tag": "Freitag",
+                  "gericht": "Schweinerückensteaks mit Spätzle und Buttergemüse",
+                  "preis": "10,30 €"
+                },
+                {
+                  "tag": "Samstag",
+                  "gericht": "Haxenfleisch mit Zwiebelsoße und Beilage",
+                  "preis": "k.A."
+                },
+                {
+                  "tag": "Samstag",
+                  "gericht": "Filettöpfle mit Eierknöpfle und kleinem grünem Salat",
+                  "preis": "10,80 €"
+                }
+              ],
+              "hinweis": "Alle Speisen auch zum Mitnehmen. Catering für Familienfeiern verfügbar."
+            }
+          ],
+          "scraped_at": "2026-08-16T13:31:08.028298"
+        },
         {
           "typ": "Wochenangebote",
           "gueltig": "10.08.2026 - 14.08.2026",
@@ -418,109 +1198,6 @@
               "preis": "k.A."
             }
           ]
-        },
-        {
-          "typ": "Tagesangebote / Wochenaktion",
-          "gueltig": "Montag bis Samstag",
-          "quelle_bild": "wasner_passau_flyer_kw32_33_a4_v01_cc_260702.jpg",
-          "produkte": [
-            {
-              "name": "1/2 HENDL",
-              "preis": "k.A."
-            },
-            {
-              "name": "KRUSTENBRATEN",
-              "preis": "k.A."
-            },
-            {
-              "name": "HAXE",
-              "preis": "k.A."
-            },
-            {
-              "name": "BAYRISCHER OBAZDA",
-              "preis": "k.A."
-            },
-            {
-              "name": "APFEL-GRIEBEN-WURSTSALAT",
-              "preis": "k.A."
-            },
-            {
-              "name": "SCHMALZ (1909-Becher)",
-              "preis": "k.A."
-            },
-            {
-              "name": "Volksfestpaket",
-              "preis": "k.A."
-            }
-          ]
-        },
-        {
-          "typ": "Wochenmenüplan (Mittagstisch)",
-          "gueltig": "Woche 32 | 03.08. bis 08.08.2026",
-          "quelle_bild": "wasner_menueplan_a1_kw31_32_v01_cc_2607082.jpg",
-          "produkte": [
-            {
-              "tag": "Montag",
-              "gericht": "Cordon bleu mit Pommes",
-              "preis": "k.A."
-            },
-            {
-              "tag": "Montag",
-              "gericht": "Spaghetti Carbonara",
-              "preis": "k.A."
-            },
-            {
-              "tag": "Dienstag",
-              "gericht": "Spanferkelbraten mit Knödel und Kraut",
-              "preis": "k.A."
-            },
-            {
-              "tag": "Dienstag",
-              "gericht": "Nudelauflauf mit Tomatensoße",
-              "preis": "k.A."
-            },
-            {
-              "tag": "Mittwoch",
-              "gericht": "Rinderroulade mit Blaukraut und Knödel",
-              "preis": "10,00 €"
-            },
-            {
-              "tag": "Mittwoch",
-              "gericht": "Putensteak mit Ratatouille und Reis",
-              "preis": "10,00 €"
-            },
-            {
-              "tag": "Donnerstag",
-              "gericht": "Gebratene Leber in Zwiebelsoße mit Kartoffelpüree",
-              "preis": "4,90 €"
-            },
-            {
-              "tag": "Donnerstag",
-              "gericht": "Hähnchenkeule mit Pommes",
-              "preis": "k.A."
-            },
-            {
-              "tag": "Freitag",
-              "gericht": "Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße",
-              "preis": "12,90 €"
-            },
-            {
-              "tag": "Freitag",
-              "gericht": "Schweinerückensteaks mit Spätzle und Buttergemüse",
-              "preis": "10,30 €"
-            },
-            {
-              "tag": "Samstag",
-              "gericht": "Haxenfleisch mit Zwiebelsoße und Beilage",
-              "preis": "k.A."
-            },
-            {
-              "tag": "Samstag",
-              "gericht": "Filettöpfle mit Eierknöpfle und kleinem grünem Salat",
-              "preis": "10,80 €"
-            }
-          ],
-          "hinweis": "Alle Speisen auch zum Mitnehmen. Catering für Familienfeiern verfügbar."
         }
       ]
     },
@@ -884,6 +1561,777 @@
             },
             {
               "name": "Mo",
+              "preis": "Geschnetzeltes mit Reis",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Di",
+              "preis": "Schinkennudeln mit Salat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mi",
+              "preis": "Schnitzel mit Kartoffelsalat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Do",
+              "preis": "Spaghetti âBologneseâ mit Salat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Fr",
+              "preis": "Backfisch mit Kartoffelsalat und Remoulade",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "geb. WeiÃwurststrudel mit buntem Kartoffelsalat und Senf",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Di",
+              "preis": "Grillfleisch mit Bratkartoffeln und Speckbohnen",
+              "gewicht": "8,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "geb. Champignons mit Salat und Remoulade",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mi",
+              "preis": "Hähnchenkeule mit Nudelsalat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "Käspressknödel mit Salat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Do",
+              "preis": "Lasagne mit Salat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "gemischter Salat mit Hähnchenbrust und Dressing",
+              "gewicht": "7,00 â¬"
+            },
+            {
+              "name": "Fr",
+              "preis": "Backfisch mit Kartoffel-Gurkensalat und Remoulade",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "Marillenknödel mit VanillesoÃe und Zimtzucker",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 30 - 13:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "06: 30 - 12:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 00 - 13:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "07: 00 - 12:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 00 - 12:30",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "07: 00 - 12:30",
+              "gewicht": ""
+            }
+          ],
+          "scraped_at": "2026-08-16T14:20:13.984059"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "name": "Wammerl mariniert",
+              "preis": "100 g",
+              "gewicht": "1,39 â¬"
+            },
+            {
+              "name": "Schweineschnitzel",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Stadtwurst",
+              "preis": "100 g",
+              "gewicht": "1,39 â¬"
+            },
+            {
+              "name": "Leberkäs fein",
+              "preis": "100 g",
+              "gewicht": "1,19 â¬"
+            },
+            {
+              "name": "Leberwurst i. Golddarm",
+              "preis": "100 g",
+              "gewicht": "1,25 â¬"
+            },
+            {
+              "name": "Kabanossi",
+              "preis": "100 g",
+              "gewicht": "1,69 â¬"
+            },
+            {
+              "name": "Ochsenfetzân",
+              "preis": "100 g",
+              "gewicht": "1,99 â¬"
+            },
+            {
+              "name": "Hackfleisch gem.",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "Backschinken",
+              "preis": "100 g",
+              "gewicht": "1,79 â¬"
+            },
+            {
+              "name": "Kochsalami",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "WeiÃwürste",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Sommerduett Käse Tomate - Basilikum",
+              "preis": "100 g",
+              "gewicht": "2,59 â¬"
+            },
+            {
+              "name": "Schweinekrustenbraten",
+              "preis": "100 g",
+              "gewicht": "1,09 â¬"
+            },
+            {
+              "name": "Hähnchenbrustfilet",
+              "preis": "100 g",
+              "gewicht": "1,59 â¬"
+            },
+            {
+              "name": "Wiener",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "Stuttgarter Leberkäs",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Streichwurst grob",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Bayer. Käseaufstrich",
+              "preis": "100 g",
+              "gewicht": "1,65 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "Geschnetzeltes mit Reis",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Di",
+              "preis": "Schinkennudeln mit Salat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mi",
+              "preis": "Schnitzel mit Kartoffelsalat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Do",
+              "preis": "Spaghetti âBologneseâ mit Salat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Fr",
+              "preis": "Backfisch mit Kartoffelsalat und Remoulade",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "geb. WeiÃwurststrudel mit buntem Kartoffelsalat und Senf",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Di",
+              "preis": "Grillfleisch mit Bratkartoffeln und Speckbohnen",
+              "gewicht": "8,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "geb. Champignons mit Salat und Remoulade",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mi",
+              "preis": "Hähnchenkeule mit Nudelsalat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "Käspressknödel mit Salat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Do",
+              "preis": "Lasagne mit Salat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "gemischter Salat mit Hähnchenbrust und Dressing",
+              "gewicht": "7,00 â¬"
+            },
+            {
+              "name": "Fr",
+              "preis": "Backfisch mit Kartoffel-Gurkensalat und Remoulade",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "Marillenknödel mit VanillesoÃe und Zimtzucker",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 30 - 13:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "06: 30 - 12:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 00 - 13:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "07: 00 - 12:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 00 - 12:30",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "07: 00 - 12:30",
+              "gewicht": ""
+            }
+          ],
+          "scraped_at": "2026-08-16T13:51:20.218070"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "name": "Wammerl mariniert",
+              "preis": "100 g",
+              "gewicht": "1,39 â¬"
+            },
+            {
+              "name": "Schweineschnitzel",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Stadtwurst",
+              "preis": "100 g",
+              "gewicht": "1,39 â¬"
+            },
+            {
+              "name": "Leberkäs fein",
+              "preis": "100 g",
+              "gewicht": "1,19 â¬"
+            },
+            {
+              "name": "Leberwurst i. Golddarm",
+              "preis": "100 g",
+              "gewicht": "1,25 â¬"
+            },
+            {
+              "name": "Kabanossi",
+              "preis": "100 g",
+              "gewicht": "1,69 â¬"
+            },
+            {
+              "name": "Ochsenfetzân",
+              "preis": "100 g",
+              "gewicht": "1,99 â¬"
+            },
+            {
+              "name": "Hackfleisch gem.",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "Backschinken",
+              "preis": "100 g",
+              "gewicht": "1,79 â¬"
+            },
+            {
+              "name": "Kochsalami",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "WeiÃwürste",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Sommerduett Käse Tomate - Basilikum",
+              "preis": "100 g",
+              "gewicht": "2,59 â¬"
+            },
+            {
+              "name": "Schweinekrustenbraten",
+              "preis": "100 g",
+              "gewicht": "1,09 â¬"
+            },
+            {
+              "name": "Hähnchenbrustfilet",
+              "preis": "100 g",
+              "gewicht": "1,59 â¬"
+            },
+            {
+              "name": "Wiener",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "Stuttgarter Leberkäs",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Streichwurst grob",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Bayer. Käseaufstrich",
+              "preis": "100 g",
+              "gewicht": "1,65 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "Geschnetzeltes mit Reis",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Di",
+              "preis": "Schinkennudeln mit Salat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mi",
+              "preis": "Schnitzel mit Kartoffelsalat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Do",
+              "preis": "Spaghetti âBologneseâ mit Salat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Fr",
+              "preis": "Backfisch mit Kartoffelsalat und Remoulade",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "geb. WeiÃwurststrudel mit buntem Kartoffelsalat und Senf",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Di",
+              "preis": "Grillfleisch mit Bratkartoffeln und Speckbohnen",
+              "gewicht": "8,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "geb. Champignons mit Salat und Remoulade",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mi",
+              "preis": "Hähnchenkeule mit Nudelsalat",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "Käspressknödel mit Salat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Do",
+              "preis": "Lasagne mit Salat",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "gemischter Salat mit Hähnchenbrust und Dressing",
+              "gewicht": "7,00 â¬"
+            },
+            {
+              "name": "Fr",
+              "preis": "Backfisch mit Kartoffel-Gurkensalat und Remoulade",
+              "gewicht": "7,90 â¬"
+            },
+            {
+              "name": "Â",
+              "preis": "Marillenknödel mit VanillesoÃe und Zimtzucker",
+              "gewicht": "7,50 â¬"
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 30 - 13:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 30 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "06: 30 - 12:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 00 - 13:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "07: 00 - 12:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mo",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Di",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Mi",
+              "preis": "07: 00 - 12:30",
+              "gewicht": ""
+            },
+            {
+              "name": "Do",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Fr",
+              "preis": "07: 00 - 18:00",
+              "gewicht": ""
+            },
+            {
+              "name": "Sa",
+              "preis": "07: 00 - 12:30",
+              "gewicht": ""
+            }
+          ],
+          "scraped_at": "2026-08-16T13:31:08.330465"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "name": "Wammerl mariniert",
+              "preis": "100 g",
+              "gewicht": "1,39 â¬"
+            },
+            {
+              "name": "Schweineschnitzel",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Stadtwurst",
+              "preis": "100 g",
+              "gewicht": "1,39 â¬"
+            },
+            {
+              "name": "Leberkäs fein",
+              "preis": "100 g",
+              "gewicht": "1,19 â¬"
+            },
+            {
+              "name": "Leberwurst i. Golddarm",
+              "preis": "100 g",
+              "gewicht": "1,25 â¬"
+            },
+            {
+              "name": "Kabanossi",
+              "preis": "100 g",
+              "gewicht": "1,69 â¬"
+            },
+            {
+              "name": "Ochsenfetzân",
+              "preis": "100 g",
+              "gewicht": "1,99 â¬"
+            },
+            {
+              "name": "Hackfleisch gem.",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "Backschinken",
+              "preis": "100 g",
+              "gewicht": "1,79 â¬"
+            },
+            {
+              "name": "Kochsalami",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "WeiÃwürste",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Sommerduett Käse Tomate - Basilikum",
+              "preis": "100 g",
+              "gewicht": "2,59 â¬"
+            },
+            {
+              "name": "Schweinekrustenbraten",
+              "preis": "100 g",
+              "gewicht": "1,09 â¬"
+            },
+            {
+              "name": "Hähnchenbrustfilet",
+              "preis": "100 g",
+              "gewicht": "1,59 â¬"
+            },
+            {
+              "name": "Wiener",
+              "preis": "100 g",
+              "gewicht": "1,49 â¬"
+            },
+            {
+              "name": "Stuttgarter Leberkäs",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Streichwurst grob",
+              "preis": "100 g",
+              "gewicht": "1,29 â¬"
+            },
+            {
+              "name": "Bayer. Käseaufstrich",
+              "preis": "100 g",
+              "gewicht": "1,65 â¬"
+            },
+            {
+              "name": "Mo",
               "preis": "2 St. Wollwürstl mit Püree und Karottengemüse",
               "gewicht": "7,90 â¬"
             },
@@ -1151,6 +2599,214 @@
       "website": "https://www.metzgerei-tristlhof.de/",
       "logo": null,
       "angebote": [
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "name": "Krustenbraten",
+              "preis": "",
+              "desc": "magere Stücke von Schlegel oder Schulter"
+            },
+            {
+              "name": "Milzwurst pikant",
+              "preis": "",
+              "desc": "Frisch aus Stadler's Wurstküche"
+            },
+            {
+              "name": "Kochsalami pikant im Geschmack",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weißwürste frisch aus der Wurstküche",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "500 g 4,98 €",
+              "desc": "mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "100 g 0,79 €",
+              "desc": "frisch & kross"
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 0,88 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            }
+          ],
+          "scraped_at": "2026-08-16T14:20:16.703492"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "name": "Krustenbraten",
+              "preis": "",
+              "desc": "magere Stücke von Schlegel oder Schulter"
+            },
+            {
+              "name": "Milzwurst pikant",
+              "preis": "",
+              "desc": "Frisch aus Stadler's Wurstküche"
+            },
+            {
+              "name": "Kochsalami pikant im Geschmack",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weißwürste frisch aus der Wurstküche",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "500 g 4,98 €",
+              "desc": "mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "100 g 0,79 €",
+              "desc": "frisch & kross"
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 0,88 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            }
+          ],
+          "scraped_at": "2026-08-16T13:51:22.267226"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "name": "Krustenbraten",
+              "preis": "",
+              "desc": "magere Stücke von Schlegel oder Schulter"
+            },
+            {
+              "name": "Milzwurst pikant",
+              "preis": "",
+              "desc": "Frisch aus Stadler's Wurstküche"
+            },
+            {
+              "name": "Kochsalami pikant im Geschmack",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weißwürste frisch aus der Wurstküche",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "500 g 4,98 €",
+              "desc": "mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "100 g 0,79 €",
+              "desc": "frisch & kross"
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 0,88 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            }
+          ],
+          "scraped_at": "2026-08-16T13:49:26.119006"
+        },
+        {
+          "typ": "Wochenangebote",
+          "gueltig": "10.08.2026 - 14.08.2026",
+          "produkte": [
+            {
+              "name": "Krustenbraten",
+              "preis": "",
+              "desc": "magere Stücke von Schlegel oder Schulter"
+            },
+            {
+              "name": "Milzwurst pikant",
+              "preis": "",
+              "desc": "Frisch aus Stadler's Wurstküche"
+            },
+            {
+              "name": "Kochsalami pikant im Geschmack",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weißwürste frisch aus der Wurstküche",
+              "preis": "1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "500 g 4,98 €",
+              "desc": "mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "100 g 0,79 €",
+              "desc": "frisch & kross"
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 0,88 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            },
+            {
+              "name": "Weitere Angebote",
+              "preis": "100 g 1,29 €",
+              "desc": ""
+            }
+          ],
+          "scraped_at": "2026-08-16T13:31:10.502549"
+        },
         {
           "typ": "Wochenangebote",
           "gueltig": "10.08.2026 - 14.08.2026",
