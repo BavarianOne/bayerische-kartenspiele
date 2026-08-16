@@ -197,7 +197,13 @@
  border-radius: 8px;
  box-sizing: border-box;
  }
- </style>
+ 
+ .uebersicht-produkt::before {
+   content: none !important;
+ }
+ .uebersicht-produkt *::before {
+   content: none !important;
+ }</style>
   <script>
    function filterAngebote() {
     var query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -278,277 +284,277 @@ async function shareFullContent() {
   <table class="uebersicht-table">
   <tbody>
 <tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Backschinken – <span class="uebersicht-preis">1,79 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Bayer. Käseaufstrich – <span class="uebersicht-preis">1,65 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">BIERKUGEL – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Cabanossi – <span class="uebersicht-preis">0,89 €/100g</span></div>
     <div class="uebersicht-metzger-small">Brunner Metzgerei</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Emmentaler – <span class="uebersicht-preis">1,49 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">FEUERTEUFEL – <span class="uebersicht-preis">1,69 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Frischwurst-Aufschnitt – <span class="uebersicht-preis">9,90 €/kg</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Hahn</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Färsen-Hackfleisch – <span class="uebersicht-preis">12,00 €/kg</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Hahn</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Gelbwurst – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Geräuchertes gekocht – <span class="uebersicht-preis">1,85 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">GESCHWOLLENE HÜTTENSPECK – <span class="uebersicht-preis">1,19 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Gyros-Pfanne – <span class="uebersicht-preis">10,99 €/kg</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Hahn</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Hackfleisch gem. – <span class="uebersicht-preis">1,49 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Hackfleisch gemischt – <span class="uebersicht-preis">1,59 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Hals gewürzt – <span class="uebersicht-preis">1,49 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">HAXE – <span class="uebersicht-preis">8,90 €/Stück</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Hähnchenbrustfilet – <span class="uebersicht-preis">1,59 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Kabanossi – <span class="uebersicht-preis">1,69 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Kalbskäs – <span class="uebersicht-preis">1,49 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Kochsalami – <span class="uebersicht-preis">1,49 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Kochsalami pikant im Geschmack – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Tristlhof</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Käswürstl – <span class="uebersicht-preis">1,59 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Lachsschinken – <span class="uebersicht-preis">1,95 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Leberkäs fein – <span class="uebersicht-preis">1,19 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Leberkäse – <span class="uebersicht-preis">1,19 €/100g</span></div>
     <div class="uebersicht-metzger-small">Brunner Metzgerei</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Leberwurst i. Golddarm – <span class="uebersicht-preis">1,25 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Lyoner-Stange – <span class="uebersicht-preis">3,99 €/Stk</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Hahn</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">NUDELSALAT – <span class="uebersicht-preis">0,99 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">OBAZDA – <span class="uebersicht-preis">0,99 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Ochsenfetzen – <span class="uebersicht-preis">1,99 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">OKTOBERFEST-KRUSTENBRATEN – <span class="uebersicht-preis">0,89 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">PIZZALEBERKÄSE – <span class="uebersicht-preis">1,19 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">PUTENSCHNITZEL – <span class="uebersicht-preis">1,39 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Rauchfrische Wiener – <span class="uebersicht-preis">10,49 €/kg</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Hahn</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">REGENSBURGER – <span class="uebersicht-preis">0,99 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Wasner</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Regensburger – <span class="uebersicht-preis">1,39 €/100g</span></div>
     <div class="uebersicht-metzger-small">Brunner Metzgerei</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Schweine-Filet – <span class="uebersicht-preis">1,69 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Schweine-Schnitzel – <span class="uebersicht-preis">1,49 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Schweinekrustenbraten – <span class="uebersicht-preis">1,09 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Schweinelendchen im Ganzen – <span class="uebersicht-preis">6,99 €/Stk</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Hahn</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Schweineschnitzel – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Brunner Metzgerei</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Schweinswürstl – <span class="uebersicht-preis">1,39 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Sommerduett Käse Tomate-Basilikum – <span class="uebersicht-preis">2,59 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Stadtwurst – <span class="uebersicht-preis">1,39 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Streichwurst – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Brunner Metzgerei</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Streichwurst grob – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Stuttgarter Leberkäs – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Unsere Scharfen – <span class="uebersicht-preis">9,99 €/kg</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Hahn</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Wammerl mariniert – <span class="uebersicht-preis">1,99 €/100g</span></div>
     <div class="uebersicht-metzger-small">Brunner Metzgerei</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Wammerlscheiben gewürzt – <span class="uebersicht-preis">1,39 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Brandl</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Weißwürste – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Weißwürste frisch aus der Wurstküche – <span class="uebersicht-preis">1,29 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Tristlhof</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">Wiener – <span class="uebersicht-preis">1,49 €/100g</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Rümenapf</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">🥩 Hackfleischtag (Montag) – <span class="uebersicht-preis">500 g 4,98 €</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Tristlhof</div>
   </td>
 </tr><tr>
-  <td class="uebersicht-produkt" data-label="Produkt">
+  <td class="uebersicht-produkt">
     <div class="uebersicht-produkt-name">🥩 Haxentag (Samstag) – <span class="uebersicht-preis">100 g 0,79 €</span></div>
     <div class="uebersicht-metzger-small">Metzgerei Tristlhof</div>
   </td>
