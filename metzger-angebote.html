@@ -48,8 +48,8 @@
  <p style="margin:0; font-size:0.85rem; color:#666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
  </div>
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
- <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Link</button>
- <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Inhalt</button>
+ <button  style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Link</button>
+ <button  style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Inhalt</button>
  <span style="font-size:0.75rem; color:#888; white-space:nowrap;">16.08.2026 19:17</span>
  </div>
 </header>
@@ -369,8 +369,8 @@ ml lang="de">
  <p style="margin:0; font-size:0.85rem; color:#666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
  </div>
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
- <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Link</button>
- <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Inhalt</button>
+ <button  style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Link</button>
+ <button  style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">Inhalt</button>
  <span style="font-size:0.75rem; color:#888; white-space:nowrap;">16.08.2026 19:17</span>
  </div>
 </header>
@@ -837,5 +837,24 @@ async function shareFullContent() {
 
 <div class="last-update">Zuletzt aktualisiert: 16.08.2026 19:17</div>
 
+<script>
+document.querySelectorAll('.share-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const url = window.location.href;
+    const title = document.title;
+    const text = 'Schau dir diese Metzger-Angebote an:';
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch (err) {
+        console.log('Teilen abgebrochen:', err);
+      }
+    } else {
+      const wa = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
+      window.open(wa, '_blank');
+    }
+  });
+});
+</script>
 </body>
 </html>
