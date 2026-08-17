@@ -2063,16 +2063,6 @@
         }
       });
 
-      // Register Service Worker
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("math-quest/sw.js", { scope: "./" })
-            .then((reg) => console.log("SW registered:", reg.scope))
-            .catch((err) => console.log("SW registration failed:", err));
-        });
-      }
-
       // Performance: Lazy load images if any added later
       if ("IntersectionObserver" in window) {
         const imageObserver = new IntersectionObserver((entries) => {
