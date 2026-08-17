@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bayerischer Maibaum-Kraxler - Asset Atlas</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: auto; background: #e0e0e0; }
+    canvas { display: block; margin: 20px auto; }
+  </style>
+</head>
+<body>
+<script>
+p5.disableFriendlyErrors = true;
+
+const CONFIG = {
+  bg: '#87CEEB',
+  atlasWidth: 2400,
+  atlasHeight: 1600
+};
+
+let atlas;
+
+function setup() {
+  createCanvas(CONFIG.atlasWidth, CONFIG.atlasHeight);
+  pixelDensity(1);
+  noLoop();
+  renderAtlas();
+}
+
+function renderAtlas() {
+  background('#87CEEB');
+  noSmooth();
+  strokeJoin(ROUND);
+  strokeCap(ROUND);
+  
+  // === 1. PLAYER CHARACTER - Bavarian Boy (Kraxler) ===
+  drawPlayerCharacter(80, 160);
+  
+  // === 2. MAIBAUM POLE SECTIONS (3 vertical sections) ===
+  drawPoleSection(400, 80, 'A');    // Top section
+  drawPoleSection(560, 80, 'B');    // Middle section
+  drawPoleSection(720, 80, 'C');    // Bottom section
+  
+  // === 3. OBSTACLES ===
+  drawRibbons(900, 120);           // Tangled ribbons
+  drawCuckooBird(1060, 120);       // Bavarian cuckoo
+  drawSoap(1220, 120);            // Slippery soap
+  
+  // === 4. COLLECTIBLES ===
+  drawPretzel(1380, 120);         // Golden pretzel
+  drawMassKrug(1540, 120);        // Maßkrug power-up
+  
+  // === 5. UI ELEMENT ===
+  drawScoreBanner(80, 400);
+  
+  // === LABELS ===
+  drawLabels();
+  
+  // Save button hint
+  fill(0);
+  noStroke();
+  textAlign(CENTER, BOTTOM);
+  textSize(16);
+  text('Press "S" to save PNG', width/2, height - 20);
+}
+
+function keyPressed() {
+  if (key === 's' || key === 'S') {
+    saveCanvas('maibaum-kraxler-atlas', 'png');
+  }
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+function drawLabel(x, y, text) {
+  fill(0, 0, 0, 180);
+  noStroke();
+  textAlign(CENTER, BOTTOM);
+  textSize(14);
+  textFont('Arial');
+  text(text, x, y - 10);
+}
+
+function drawLabels() {
+  drawLabel(160, 50, '1. PLAYER (KRAXLER)');
+  drawLabel(520, 50, '2A. POLESECTION TOP');
+  drawLabel(680, 50, '2B. POLESECTION MID');
+  drawLabel(840, 50, '2C. POLESECTION BOT');
+  drawLabel(1000, 50, '3A. RIBBONS OBSTACLE');
+  drawLabel(1160, 50, '3B. CUCKOO BIRD');
+  drawLabel(1320, 50, '3C. SOAP OBSTACLE');
+  drawLabel(1480, 50, '4A. PRETZEL (SCORE)');
+  drawLabel(1640, 50, '4B. MASSKRUG (POWER)');
+  drawLabel(230, 370, '5. SCORE BANNER UI');
+}
+
+// ============================================
+// 1. PLAYER CHARACTER - BAVARIAN BOY
+// ============================================
+function drawPlayerCharacter(x, y) {
+  push();
+  translate(x, y);
+  
+  // Shadow
+  noStroke();
+  fill(0, 0, 0, 30);
+  ellipse(60, 190, 70, 15);
+  
+  // === LEGS (Lederhosen) ===
+  stroke(60, 40, 20);
+  strokeWeight(2.5);
+  fill(70, 50, 30);
+  
+  // Left leg (bent climbing pose)
+  beginShape();
+  vertex(35, 120);
+  vertex(25, 145);
+  vertex(20, 165);
+  vertex(35, 165);
+  vertex(40, 145);
+  vertex(45, 120);
+  endShape(CLOSE);
+  
+  // Right leg
+  beginShape();
+  vertex(55, 120);
+  vertex(50, 145);
+  vertex(48, 165);
+  vertex(65, 165);
+  vertex(70, 145);
+  vertex(70, 120);
+  endShape(CLOSE);
+  
+  // === SOCKS ===
+  fill(245, 245, 220);
+  stroke(60, 40, 20);
+  strokeWeight(1.5);
+  rect(22, 155, 14, 12, 3);
+  rect(50, 155, 14, 12, 3);
+  
+  // === CLIMBING SHOES ===
+  fill(80, 50, 30);
+  stroke(40, 25, 15);
+  strokeWeight(2);
+  // Left shoe
+  ellipse(28, 170, 18, 10);
+  // Right shoe
+  ellipse(58, 170, 18, 10);
+  
+  // === BODY / SHIRT ===
+  fill(255, 255, 255);
+  stroke(60, 40, 20);
+  strokeWeight(2.5);
+  
+  // Checkered shirt pattern (simplified)
+  beginShape();
+  vertex(30, 70);
+  vertex(75, 65);
+  vertex(85, 110);
+  vertex(80, 130);
+  vertex(25, 130);
+  vertex(20, 110);
+  endShape(CLOSE);
+  
+  // Checker pattern overlay
+  stroke(100, 140, 200);
+  strokeWeight(1);
+  line(40, 70, 35, 130);
+  line(55, 68, 50, 130);
+  line(70, 65, 65, 130);
+  line(30, 85, 80, 82);
+  line(28, 100, 82, 97);
+  line(26, 115, 81, 112);
+  
+  // === SUSPENDERS (HENTENSCHNUR) ===
+  stroke(40, 100, 40);
+  strokeWeight(4);
+  line(38, 72, 35, 125);
+  line(62, 70, 65, 125);
+  
+  // === ARMS ===
+  stroke(60, 40, 20);
+  strokeWeight(2.5);
+  fill(255, 220, 190);
+  
+  // Left arm (reaching up)
+  beginShape();
+  vertex(75, 75);
+  vertex(95, 50);
+  vertex(100, 45);
+  vertex(105, 50);
+  vertex(100, 55);
+  vertex(85, 80);
+  endShape(CLOSE);
+  
+  // Right arm (holding pole)
+  beginShape();
+  vertex(30, 75);
+  vertex(15, 95);
+  vertex(12, 100);
+  vertex(18, 105);
+  vertex(22, 100);
+  vertex(38, 85);
+  endShape(CLOSE);
+  
+  // === HANDS ===
+  fill(255, 220, 190);
+  stroke(60, 40, 20);
+  strokeWeight(1.5);
+  ellipse(102, 52, 14, 14);  // Left hand (reaching)
+  ellipse(16, 102, 14, 14);  // Right hand (gripping)
+  
+  // === HEAD ===
+  fill(255, 220, 190);
+  stroke(60, 40, 20);
+  strokeWeight(2.5);
+  ellipse(50, 45, 45, 48);
+  
+  // === HAIR ===
+  fill(80, 50, 30);
+  noStroke();
+  arc(50, 35, 40, 30, PI, 0);
+  
+  // === FACE ===
+  fill(60, 40, 20);
+  ellipse(42, 48, 4, 4);
+  ellipse(58, 48, 4, 4);
+  
+  // Smile
+  stroke(60, 40, 20);
+  strokeWeight(1.5);
+  noFill();
+  arc(50, 55, 15, 10, 0.2, PI - 0.2);
+  
+  // Rosy cheeks
+  fill(255, 150, 150, 150);
+  noStroke();
+  ellipse(38, 55, 10, 7);
+  ellipse(62, 55, 10, 7);
+  
+  // === HAT (Bavarian style) ===
+  fill(30, 100, 30);
+  stroke(20, 70, 20);
+  strokeWeight(2);
+  ellipse(50, 28, 50, 15);
+  rect(25, 10, 50, 20, 5);
+  
+  pop();
+}
+
+// ============================================
+// 2. MAIBAUM POLE SECTIONS
+// ============================================
+function drawPoleSection(x, y, id) {
+  push();
+  translate(x, y);
+  
+  const h = 200;
+  const w = 100;
+  
+  // === WOODEN POLE BASE ===
+  stroke(120, 80, 50);
+  strokeWeight(2);
+  fill(180, 140, 100);
+  rect(0, 0, w, h, 8);
+  
+  // Wood grain lines
+  stroke(160, 120, 80);
+  strokeWeight(1);
+  for (let i = 20; i < h; i += 15) {
+    line(10, i, 90, i);
+  }
+  
+  // === SPIRAL PAINTING (white/light blue stripes) ===
+  noStroke();
+  fill(255, 255, 255);
+  
+  // Diagonal white stripe
+  beginShape();
+  vertex(0, 0);
+  vertex(w, 40);
+  vertex(w, 70);
+  vertex(0, 30);
+  endShape(CLOSE);
+  
+  beginShape();
+  vertex(0, 80);
+  vertex(w, 120);
+  vertex(w, 150);
+  vertex(0, 110);
+  endShape(CLOSE);
+  
+  beginShape();
+  vertex(0, 160);
+  vertex(w, 200);
+  vertex(0, 200);
+  vertex(0, 160);
+  endShape(CLOSE);
+  
+  // Blue stripes
+  fill(100, 160, 220);
+  beginShape();
+  vertex(0, 30);
+  vertex(w, 70);
+  vertex(w, 100);
+  vertex(0, 60);
+  endShape(CLOSE);
+  
+  beginShape();
+  vertex(0, 110);
+  vertex(w, 150);
+  vertex(w, 180);
+  vertex(0, 140);
+  endShape(CLOSE);
+  
+  // === METAL BRACKETS at ends ===
+  fill(120);
+  stroke(60);
+  strokeWeight(1.5);
+  
+  // Top bracket
+  rect(-5, -5, w + 10, 12, 3);
+  fill(160);
+  rect(10, -3, 25, 8, 2);
+  rect(65, -3, 25, 8, 2);
+  
+  // Bottom bracket
+  fill(120);
+  rect(-5, h - 7, w + 10, 12, 3);
+  fill(160);
+  rect(10, h - 5, 25, 8, 2);
+  rect(65, h - 5, 25, 8, 2);
+  
+  // === ROPE HANGER ===
+  stroke(80, 60, 40);
+  strokeWeight(2);
+  noFill();
+  arc(w/2, -5, 30, 20, PI, 0);
+  
+  pop();
+}
+
+// ============================================
+// 3A. OBSTACLE - TANGLED RIBBONS
+// ============================================
+function drawRibbons(x, y) {
+  push();
+  translate(x, y);
+  
+  // === WOODEN PLATE (where ribbons attach) ===
+  fill(140, 100, 60);
+  stroke(100, 70, 40);
+  strokeWeight(2);
+  rect(20, 100, 80, 15, 4);
+  
+  // === COLORFUL RIBBONS ===
+  const colors = [
+    color(220, 50, 50),    // Red
+    color(50, 150, 220),   // Blue
+    color(255, 200, 50),   // Yellow
+    color(255, 140, 180),  // Pink
+    color(50, 180, 100)    // Green
+  ];
+  
+  noStroke();
+  for (let i = 0; i < 12; i++) {
+    let ribbonX = 30 + i * 7;
+    let ribbonY = 95;
+    let c = colors[i % colors.length];
+    
+    fill(c);
+    
+    // Wavy ribbon
+    beginShape();
+    vertex(ribbonX, ribbonY);
+    bezierVertex(
+      ribbonX - 10, ribbonY - 20,
+      ribbonX + 15, ribbonY - 35,
+      ribbonX + 5, ribbonY - 50
+    );
+    bezierVertex(
+      ribbonX - 5, ribbonY - 60,
+      ribbonX + 10, ribbonY - 70,
+      ribbonX, ribbonY - 80
+    );
+    endShape();
+    
+    // Ribbon tail
+    fill(c);
+    triangle(
+      ribbonX - 3, ribbonY - 75,
+      ribbonX + 3, ribbonY - 75,
+      ribbonX, ribbonY - 90
+    );
+  }
+  
+  // Some tangled cross lines
+  stroke(200, 100, 100);
+  strokeWeight(2);
+  line(40, 70, 70, 50);
+  line(60, 80, 90, 40);
+  line(35, 60, 80, 70);
+  
+  pop();
+}
+
+// ============================================
+// 3B. OBSTACLE - BAVARIAN CUCKOO BIRD
+// ============================================
+function drawCuckooBird(x, y) {
+  push();
+  translate(x, y);
+  
+  // === BIRD BODY ===
+  fill(60, 50, 40);
+  stroke(30, 25, 20);
+  strokeWeight(2);
+  ellipse(70, 80, 50, 60);
+  
+  // === HEAD ===
+  fill(70, 60, 50);
+  ellipse(70, 45, 40, 38);
+  
+  // === BEAK ===
+  fill(255, 180, 50);
+  stroke(200, 140, 30);
+  strokeWeight(1.5);
+  triangle(95, 45, 115, 42, 95, 50);
+  
+  // === EYE (annoyed look) ===
+  fill(255);
+  stroke(30);
+  strokeWeight(1.5);
+  ellipse(80, 40, 14, 14);
+  fill(30);
+  noStroke();
+  ellipse(83, 40, 5, 5);
+  
+  // Angry eyebrow
+  stroke(30);
+  strokeWeight(2.5);
+  line(75, 32, 88, 35);
+  
+  // === WING ===
+  fill(50, 40, 35);
+  stroke(30, 25, 20);
+  strokeWeight(2);
+  ellipse(50, 85, 30, 45);
+  
+  // === TAIL FEATHERS ===
+  fill(40, 35, 30);
+  noStroke();
+  triangle(30, 80, 10, 70, 10, 95);
+  triangle(30, 85, 5, 80, 5, 100);
+  triangle(30, 90, 8, 95, 8, 105);
+  
+  // === WATCH / CLOCKWORK KEY ON BACK ===
+  fill(200);
+  stroke(100);
+  strokeWeight(1.5);
+  rect(50, 95, 20, 22, 3);
+  
+  // Clock face
+  fill(255);
+  noStroke();
+  ellipse(60, 106, 14, 14);
+  
+  fill(30);
+  ellipse(60, 106, 3, 3);
+  
+  // Key sticking out
+  fill(180);
+  stroke(100);
+  strokeWeight(1.5);
+  rect(58, 115, 4, 12);
+  fill(150);
+  noStroke();
+  ellipse(60, 129, 10, 8);
+  fill(200);
+  ellipse(60, 129, 5, 5);
+  
+  // === CLAWS (gripping pole) ===
+  fill(255, 180, 50);
+  stroke(200, 140, 30);
+  strokeWeight(1.5);
+  ellipse(55, 115, 10, 10);
+  ellipse(80, 110, 10, 10);
+  
+  pop();
+}
+
+// ============================================
+// 3C. OBSTACLE - SLIPPERY SOAP WITH BUBBLES
+// ============================================
+function drawSoap(x, y) {
+  push();
+  translate(x, y);
+  
+  // === GREEN SOAP BAR ===
+  fill(120, 200, 80);
+  stroke(70, 150, 40);
+  strokeWeight(2);
+  
+  // Tilted soap bar
+  push();
+  rotate(PI / 12);
+  rect(20, 30, 50, 30, 8);
+  
+  // Worn edges (lighter)
+  noStroke();
+  fill(150, 220, 100);
+  rect(25, 35, 40, 8, 4);
+  
+  // Wet/shiny streak
+  fill(255, 255, 255, 150);
+  rect(30, 38, 30, 3, 2);
+  pop();
+  
+  // === BUBBLES ===
+  noFill();
+  stroke(255, 255, 255, 200);
+  strokeWeight(1.5);
+  
+  // Bubble 1
+  ellipse(35, 15, 20, 20);
+  fill(255, 255, 255, 100);
+  noStroke();
+  ellipse(30, 10, 6, 6);
+  
+  // Bubble 2
+  noFill();
+  stroke(255, 255, 255, 180);
+  strokeWeight(1.5);
+  ellipse(60, 20, 15, 15);
+  fill(255, 255, 255, 80);
+  noStroke();
+  ellipse(56, 16, 5, 5);
+  
+  // Bubble 3
+  noFill();
+  stroke(255, 255, 255, 160);
+  strokeWeight(1);
+  ellipse(50, 8, 12, 12);
+  fill(255, 255, 255, 70);
+  noStroke();
+  ellipse(47, 5, 4, 4);
+  
+  // === STRAP (to attach to pole) ===
+  stroke(80, 60, 40);
+  strokeWeight(2);
+  line(55, 55, 55, 90);
+  line(70, 52, 70, 88);
+  
+  pop();
+}
+
+// ============================================
+// 4A. COLLECTIBLE - BAVARIAN PRETZEL
+// ============================================
+function drawPretzel(x, y) {
+  push();
+  translate(x, y);
+  
+  // === GOLDEN PRETZEL ===
+  stroke(180, 120, 20);
+  strokeWeight(3);
+  fill(220, 170, 50);
+  
+  // Pretzel shape (twisted knot)
+  beginShape();
+  vertex(30, 20);
+  bezierVertex(10, 20, 5, 40, 20, 55);
+  bezierVertex(35, 70, 65, 70, 80, 55);
+  bezierVertex(95, 40, 90, 20, 70, 20);
+  bezierVertex(55, 20, 50, 35, 55, 45);
+  bezierVertex(60, 55, 75, 55, 80, 45);
+  bezierVertex(85, 35, 80, 25, 70, 25);
+  bezierVertex(55, 25, 50, 35, 45, 45);
+  bezierVertex(40, 55, 25, 55, 20, 45);
+  bezierVertex(15, 35, 20, 20, 30, 20);
+  endShape();
+  
+  // Inner hole
+  fill(220, 170, 50);
+  noStroke();
+  ellipse(50, 42, 12, 12);
+  
+  // === SALT CRYSTALS ===
+  fill(255);
+  noStroke();
+  ellipse(25, 30, 4, 4);
+  ellipse(40, 20, 3, 3);
+  ellipse(65, 22, 4, 4);
+  ellipse(80, 35, 3, 3);
+  ellipse(75, 55, 4, 4);
+  ellipse(30, 60, 3, 3);
+  ellipse(50, 65, 4, 4);
+  ellipse(60, 50, 3, 3);
+  
+  // === GLOW / HIGHLIGHT ===
+  noFill();
+  stroke(255, 230, 150, 150);
+  strokeWeight(2);
+  ellipse(45, 25, 25, 15);
+  
+  pop();
+}
+
+// ============================================
+// 4B. COLLECTIBLE - MASSKRUG (Beer Mug)
+// ============================================
+function drawMassKrug(x, y) {
+  push();
+  translate(x, y);
+  
+  // === MUG BODY (ceramic) ===
+  fill(255, 255, 250);
+  stroke(150);
+  strokeWeight(2.5);
+  
+  // Mug shape (wider at top)
+  beginShape();
+  vertex(25, 30);
+  vertex(75, 30);
+  vertex(70, 90);
+  vertex(30, 90);
+  endShape(CLOSE);
+  
+  // === HIGHLIGHT (ceramic shine) ===
+  noStroke();
+  fill(255, 255, 255, 180);
+  rect(30, 35, 8, 50, 2);
+  
+  // === HANDLE ===
+  stroke(180);
+  strokeWeight(4);
+  noFill();
+  arc(75, 60, 25, 35, -PI/2, PI/2);
+  
+  // === FOAM ( cerveza head ) ===
+  fill(255, 250, 230);
+  stroke(200, 180, 150);
+  strokeWeight(1.5);
+  
+  // Foam overflow at top
+  beginShape();
+  vertex(23, 32);
+  bezierVertex(20, 22, 30, 15, 40, 20);
+  bezierVertex(50, 12, 60, 15, 70, 20);
+  bezierVertex(80, 18, 82, 28, 78, 30);
+  endShape(CLOSE);
+  
+  // Foam bubbles
+  fill(255, 252, 245);
+  noStroke();
+  ellipse(35, 25, 8, 7);
+  ellipse(50, 20, 9, 8);
+  ellipse(65, 25, 8, 7);
+  ellipse(42, 30, 6, 5);
+  ellipse(58, 28, 7, 6);
+  
+  // === LIGHTNING ICON (power-up) ===
+  fill(255, 220, 50);
+  stroke(200, 160, 20);
+  strokeWeight(2);
+  
+  beginShape();
+  vertex(48, 48);
+  vertex(38, 62);
+  vertex(48, 62);
+  vertex(42, 78);
+  vertex(60, 58);
+  vertex(50, 58);
+  vertex(56, 42);
+  endShape(CLOSE);
+  
+  // Lightning outline
+  stroke(255, 180, 20);
+  strokeWeight(1);
+  noFill();
+  line(48, 48, 38, 62);
+  line(48, 62, 42, 78);
+  line(42, 78, 60, 58);
+  line(60, 58, 50, 58);
+  line(50, 58, 56, 42);
+  line(56, 42, 48, 48);
+  
+  // === BASE ===
+  fill(230);
+  stroke(150);
+  strokeWeight(2);
+  rect(28, 87, 44, 6, 2);
+  
+  pop();
+}
+
+// ============================================
+// 5. UI ELEMENT - SCORE BANNER
+// ============================================
+function drawScoreBanner(x, y) {
+  push();
+  translate(x, y);
+  
+  // === ROPES ===
+  stroke(100, 70, 40);
+  strokeWeight(3);
+  line(20, 0, 40, 30);   // Left rope top
+  line(230, 0, 210, 30); // Right rope top
+  line(10, -10, 15, 0);
+  line(240, -10, 235, 0);
+  
+  // === WOODEN SIGN BOARD ===
+  fill(180, 130, 80);
+  stroke(120, 80, 40);
+  strokeWeight(3);
+  rect(15, 30, 220, 60, 8);
+  
+  // Wood grain
+  stroke(160, 110, 60);
+  strokeWeight(1);
+  for (let i = 45; i < 75; i += 8) {
+    line(25, i, 225, i);
+  }
+  
+  // === Nail heads ===
+  fill(180);
+  stroke(100);
+  strokeWeight(1);
+  ellipse(25, 38, 8, 8);
+  ellipse(225, 38, 8, 8);
+  ellipse(25, 82, 8, 8);
+  ellipse(225, 82, 8, 8);
+  
+  // === TEXT BACKGROUND ===
+  fill(255, 240, 200);
+  stroke(150, 100, 50);
+  strokeWeight(2);
+  rect(30, 42, 160, 32, 4);
+  
+  // === "SCORE:" TEXT ===
+  fill(60, 40, 20);
+  noStroke();
+  textFont('Arial');
+  textSize(28);
+  textStyle(BOLD);
+  textAlign(LEFT, CENTER);
+  text('SCORE:', 42, 58);
+  
+  // Number placeholder box
+  fill(255, 255, 220);
+  stroke(150, 100, 50);
+  strokeWeight(1.5);
+  rect(155, 50, 25, 20, 3);
+  
+  pop();
+}
+</script>
+</body>
+</html>
