@@ -73,6 +73,8 @@ function updateLastUpdatedDisplay(payload) {
     }
     el.textContent = html;
     if (bar) bar.style.display = 'block';
+  } else if (bar) {
+    bar.style.display = 'none';
   }
 }
 

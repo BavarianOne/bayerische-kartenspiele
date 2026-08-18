@@ -202,6 +202,3 @@ input, select { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--border);
   text-align: center;
 }
-.last-updated-bar[style*="display: none"] {
-  display: none !important;
-}
