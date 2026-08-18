@@ -33,11 +33,29 @@ jobs:
         run: |
           git config user.name "spritalarm-bot"
           git config user.email "spritalarm@users.noreply.github.com"
-          git add spritpreise-pwa/data/prices.json
-          if git diff --cached --quiet; then
-            echo "No price changes, but updating timestamp..."
-            git commit --allow-empty -m "chore: update sprit prices check $(date -u +'%Y-%m-%d %H:%M UTC')"
+          
+          # Capture hash before
+          BEFORE_HASH=$(git hash-object spritpreise-pwa/data/prices.json 2>/dev/null || echo "none")
+          
+          # Run fetch (already done in previous step, but ensure file is fresh)
+          python .github/workflows/fetch_prices.py
+          
+          # Capture hash after
+          AFTER_HASH=$(git hash-object spritpreise-pwa/data/prices.json 2>/dev/null || echo "none")
+          
+          echo "Before: $BEFORE_HASH"
+          echo "After:  $AFTER_HASH"
+          
+          if [ "$BEFORE_HASH" != "$AFTER_HASH" ]; then
+            echo "File changed, committing..."
+            git add spritpreise-pwa/data/prices.json
+            git commit -m "chore: update sprit prices $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
           else
-            git commit -m "chore: update sprit prices"
+            echo "File unchanged (should not happen with workflowRunAt), forcing commit..."
+            # Force update workflowRunAt by touching and re-running
+            python .github/workflows/fetch_prices.py
+            git add spritpreise-pwa/data/prices.json
+            git commit -m "chore: update sprit prices check $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
           fi
-          git push
