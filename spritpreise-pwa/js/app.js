@@ -43,10 +43,36 @@ async function loadBundledPrices() {
     const payload = await res.json();
     if (!payload?.fuels) return false;
     stationsByFuel = payload.fuels;
+    // Update last updated timestamp display
+    updateLastUpdatedDisplay(payload);
     return true;
   } catch (err) {
     console.warn('Bundled prices not available', err);
     return false;
+  }
+}
+
+function updateLastUpdatedDisplay(payload) {
+  const fetchedAt = payload.fetchedAt;
+  const workflowRunAt = payload.workflowRunAt;
+  const el = document.getElementById('lastUpdatedDisplay');
+  const bar = document.getElementById('lastUpdatedBar');
+  if (el && (fetchedAt || workflowRunAt)) {
+    const formatTime = (iso) => {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } catch { return iso; }
+    };
+    let html = '';
+    if (workflowRunAt) {
+      html += `GitHub Actions: ${formatTime(workflowRunAt)}`;
+    }
+    if (fetchedAt && fetchedAt !== workflowRunAt) {
+      html += html ? ` | Daten: ${formatTime(fetchedAt)}` : `Daten: ${formatTime(fetchedAt)}`;
+    }
+    el.textContent = html;
+    if (bar) bar.style.display = 'block';
   }
 }
 

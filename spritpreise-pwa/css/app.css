@@ -192,3 +192,16 @@ input, select { font: inherit; color: inherit; }
 .card-updated { font-size: 11px; color: var(--muted); margin-top: 6px; }
 .price-new { color: var(--success); font-weight: 700; }
 .price-old { color: var(--muted); text-decoration: line-through; margin-right: 6px; }
+
+/* ── Last Updated Bar ─────────────────────────────────── */
+.last-updated-bar {
+  padding: 4px 16px;
+  background: rgba(15, 18, 38, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.last-updated-bar[style*="display: none"] {
+  display: none !important;
+}
