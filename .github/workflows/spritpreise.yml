@@ -34,6 +34,10 @@ jobs:
           git config user.name "spritalarm-bot"
           git config user.email "spritalarm@users.noreply.github.com"
           git add spritpreise-pwa/data/prices.json
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "chore: update sprit prices"
+          if git diff --cached --quiet; then
+            echo "No price changes, but updating timestamp..."
+            git commit --allow-empty -m "chore: update sprit prices check $(date -u +'%Y-%m-%d %H:%M UTC')"
+          else
+            git commit -m "chore: update sprit prices"
+          fi
           git push

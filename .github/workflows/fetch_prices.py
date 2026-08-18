@@ -81,7 +81,7 @@ def main() -> None:
         payload["fuels"][fuel_key] = stations
     DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
     DATA_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {DATA_PATH}")
+    print(f"Wrote {DATA_PATH} at {now.isoformat()}")
 
 
 if __name__ == "__main__":
