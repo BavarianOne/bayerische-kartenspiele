@@ -38,7 +38,7 @@ async function loadInitialData() {
 
 async function loadBundledPrices() {
   try {
-    const res = await fetch('/spritpreise-pwa/data/prices.json', { headers: { 'Accept': 'application/json' } });
+    const res = await fetch('data/prices.json', { headers: { 'Accept': 'application/json' } });
     if (!res.ok) return false;
     const payload = await res.json();
     if (!payload?.fuels) return false;
