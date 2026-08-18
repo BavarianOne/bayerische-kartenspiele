@@ -8,7 +8,10 @@ from pathlib import Path
 import httpx
 from bs4 import BeautifulSoup
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+# Find repo root (works both locally and in CI)
+REPO_ROOT = Path(__file__).resolve()
+while REPO_ROOT != REPO_ROOT.parent and not (REPO_ROOT / ".git").exists():
+    REPO_ROOT = REPO_ROOT.parent
 DATA_PATH = REPO_ROOT / "spritpreise-pwa" / "data" / "prices.json"
 
 LAT = "48.5763411758753"

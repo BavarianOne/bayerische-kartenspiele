@@ -34,16 +34,12 @@ jobs:
           git config user.name "spritalarm-bot"
           git config user.email "spritalarm@users.noreply.github.com"
           
-          # Always run fetch to update workflowRunAt
-          python .github/workflows/fetch_prices.py
-          
           # Check if file changed
           if git diff --quiet spritpreise-pwa/data/prices.json; then
-            echo "No changes detected (unexpected), but committing anyway to update timestamp"
+            echo "No changes detected"
           else
             echo "File changed, committing..."
+            git add spritpreise-pwa/data/prices.json
+            git commit -m "chore: update sprit prices $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
           fi
-          
-          git add spritpreise-pwa/data/prices.json
-          git commit -m "chore: update sprit prices $(date -u +'%Y-%m-%d %H:%M UTC')"
-          git push
