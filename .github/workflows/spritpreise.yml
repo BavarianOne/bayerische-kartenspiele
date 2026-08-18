@@ -26,20 +26,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install httpx beautifulsoup4
 
-      - name: Fetch fuel prices
-        run: python .github/workflows/fetch_prices.py
-
-      - name: Commit and push if changed
+      - name: Fetch fuel prices and commit
         run: |
           git config user.name "spritalarm-bot"
           git config user.email "spritalarm@users.noreply.github.com"
           
-          # Check if file changed
-          if git diff --quiet spritpreise-pwa/data/prices.json; then
-            echo "No changes detected"
-          else
-            echo "File changed, committing..."
-            git add spritpreise-pwa/data/prices.json
-            git commit -m "chore: update sprit prices $(date -u +'%Y-%m-%d %H:%M UTC')"
-            git push
-          fi
+          # Always fetch to update workflowRunAt timestamp
+          python .github/workflows/fetch_prices.py
+          
+          # Commit and push (always, to update workflowRunAt)
+          git add spritpreise-pwa/data/prices.json
+          git commit -m "chore: update sprit prices $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
