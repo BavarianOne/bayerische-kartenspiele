@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-18T18:50:29.816385+00:00",
-  "workflowRunAt": "2026-08-18T18:50:29.816385+00:00",
+  "fetchedAt": "2026-08-18T19:08:03.219125+00:00",
+  "workflowRunAt": "2026-08-18T19:08:03.219125+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -82,14 +82,6 @@
         "price": 2.209
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.209
-      },
-      {
         "lat": "48.542111332336",
         "lon": "12.13959734008",
         "address": null,
@@ -112,6 +104,14 @@
         "name": "Shell",
         "radius": "60",
         "price": 2.209
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": null
       }
     ],
     "e10": [
@@ -122,14 +122,6 @@
         "name": "ARAL",
         "radius": "60",
         "price": 2.049
-      },
-      {
-        "lat": "48.613932",
-        "lon": "12.219227",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.079
       },
       {
         "lat": "48.558857",
@@ -218,6 +210,14 @@
         "name": "SIT",
         "radius": "60",
         "price": 2.099
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": null
       }
     ],
     "e5": [
@@ -236,14 +236,6 @@
         "name": "SIT",
         "radius": "60",
         "price": 2.129
-      },
-      {
-        "lat": "48.613932",
-        "lon": "12.219227",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.139
       },
       {
         "lat": "48.558857",
@@ -324,6 +316,14 @@
         "name": "Shell",
         "radius": "60",
         "price": 2.149
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": null
       }
     ]
   }
