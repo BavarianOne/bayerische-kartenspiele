@@ -22,12 +22,33 @@ document.addEventListener('DOMContentLoaded', () => {
     loadConfig();
     bindUI();
     bindTabs();
-    render();
-    refreshPrices();
+    loadInitialData();
     registerSW();
     window.addEventListener('focus', onFocus);
   });
 });
+
+async function loadInitialData() {
+  const loaded = await loadBundledPrices();
+  if (loaded) {
+    render();
+  }
+  refreshPrices();
+}
+
+async function loadBundledPrices() {
+  try {
+    const res = await fetch('/spritpreise-pwa/data/prices.json', { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) return false;
+    const payload = await res.json();
+    if (!payload?.fuels) return false;
+    stationsByFuel = payload.fuels;
+    return true;
+  } catch (err) {
+    console.warn('Bundled prices not available', err);
+    return false;
+  }
+}
 
 async function initDB() {
   db = await idb.open(DB_NAME, DB_VER, (db) => {
