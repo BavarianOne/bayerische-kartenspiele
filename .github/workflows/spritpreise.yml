@@ -37,6 +37,6 @@ jobs:
           git config user.name "spritalarm-bot"
           git config user.email "spritalarm@users.noreply.github.com"
           
-          git add spritpreise-pwa/data/prices.json landshut-spritpreise.html
+          git add spritpreise-pwa/data/prices.json landshut-spritpreise.html landshut-spritpreise-pwa/data/prices.json
           git commit -m "chore: update sprit prices $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push

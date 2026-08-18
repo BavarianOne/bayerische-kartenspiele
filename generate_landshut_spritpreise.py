@@ -60,8 +60,8 @@ def build_station_table(data):
     all_names.update(e10_stations.keys())
     all_names.update(e5_stations.keys())
     
-    # Sortiert nach Diesel-Preis (günstigste zuerst)
-    sorted_names = sorted(all_names, key=lambda n: diesel_stations.get(n, {}).get("price", 999))
+    # Sortiert nach Diesel-Preis (günstigste zuerst), None ans Ende
+    sorted_names = sorted(all_names, key=lambda n: diesel_stations.get(n, {}).get("price", 999) or 999)
     
     rows = []
     for name in sorted_names:
@@ -218,10 +218,17 @@ def generate_html():
         for s in fuel_list:
             all_names.add(s["name"])
     
+    # Also copy prices.json to PWA data folder
+    pwa_data_dir = REPO_ROOT / "landshut-spritpreise-pwa" / "data"
+    pwa_data_dir.mkdir(exist_ok=True)
+    import shutil
+    shutil.copy2(DATA_FILE, pwa_data_dir / "prices.json")
+    
     print(f"✅ Generiert: {OUTPUT_FILE}")
     print(f"   Letzter Workflow-Run: {workflow_run_de}")
     print(f"   Datenstand: {fetched_de}")
     print(f"   Stationen: {len(all_names)}")
+    print(f"   PWA data/prices.json kopiert")
 
 if __name__ == "__main__":
     generate_html()
