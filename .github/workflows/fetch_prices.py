@@ -68,6 +68,7 @@ def main() -> None:
     now = datetime.now(timezone.utc)
     payload = {
         "fetchedAt": now.isoformat(),
+        "workflowRunAt": now.isoformat(),
         "location": {
             "lat": LAT,
             "lon": LON,
