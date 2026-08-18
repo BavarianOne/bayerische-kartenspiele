@@ -26,15 +26,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install httpx beautifulsoup4
 
-      - name: Fetch fuel prices and commit
+      - name: Fetch fuel prices
+        run: python .github/workflows/fetch_prices.py
+
+      - name: Generate landshut-spritpreise.html
+        run: python generate_landshut_spritpreise.py
+
+      - name: Commit and push
         run: |
           git config user.name "spritalarm-bot"
           git config user.email "spritalarm@users.noreply.github.com"
           
-          # Always fetch to update workflowRunAt timestamp
-          python .github/workflows/fetch_prices.py
-          
-          # Commit and push (always, to update workflowRunAt)
-          git add spritpreise-pwa/data/prices.json
+          git add spritpreise-pwa/data/prices.json landshut-spritpreise.html
           git commit -m "chore: update sprit prices $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
