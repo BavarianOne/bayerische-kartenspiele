@@ -1564,6 +1564,18 @@
               icon: "🔨",
             },
             {
+              id: "monster-schnapp",
+              title: "Schnapp das Monster!",
+              description:
+                "Whack-a-Mole für Kinder! Tippe schnell auf die süßen Monster (👾🐸🐙🤖), bevor sie in ihren Löchern verschwinden. 3 Schwierigkeitsgrade, Sounds & Highscore!",
+              path: "monster-schnapp.html",
+              tags: { age: "5+", type: "Reaktion", players: "1 Spieler" },
+              badges: ["new", "educational"],
+              colorStart: "#ec4899",
+              colorEnd: "#f97316",
+              icon: "🎯",
+            },
+            {
               id: "auto",
               title: "Auto Racing",
               description:
@@ -1928,16 +1940,6 @@
           deferredPrompt = null;
         }
       });
-
-      // Register Service Worker
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("math-quest/sw.js", { scope: "./" })
-            .then((reg) => console.log("SW registered:", reg.scope))
-            .catch((err) => console.log("SW registration failed:", err));
-        });
-      }
 
       // Performance: Lazy load images if any added later
       if ("IntersectionObserver" in window) {
