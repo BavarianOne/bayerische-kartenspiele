@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spritpreise Landshut - Diesel, Super E10, Super E5</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }
+        header { background: #1a73e8; color: white; padding: 20px; text-align: center; }
+        h1 { margin: 0; font-size: 1.5rem; }
+        .updated { font-size: 0.85rem; opacity: 0.9; margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; color: #333; position: sticky; top: 0; }
+        tr:hover { background: #fafafa; }
+        .station-name { font-weight: 600; color: #1a73e8; }
+        .price { font-weight: 700; font-size: 1.1rem; }
+        .price-diesel { color: #0066cc; }
+        .price-e10 { color: #cc6600; }
+        .price-e5 { color: #009933; }
+        .no-price { color: #999; font-style: italic; }
+        .legend { display: flex; gap: 20px; padding: 15px 20px; background: #f8f9fa; font-size: 0.85rem; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+        footer { text-align: center; padding: 15px; color: #666; font-size: 0.8rem; }
+        @media (max-width: 600px) {
+            th, td { padding: 10px 12px; font-size: 0.9rem; }
+            .legend { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛽ Spritpreise Landshut</h1>
+            <div class="updated">Aktualisiert: 18.08.2026 11:30</div>
+        </header>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tankstelle</th>
+                    <th>Diesel</th>
+                    <th>Super E10</th>
+                    <th>Super E5</th>
+                </tr>
+            </thead>
+            <tbody><tr><td class="station-name">SIT</td><td class="price price-diesel">2.16 €</td><td class="price price-e10">2.05 €</td><td class="price price-e5">2.08 €</td></tr><tr><td class="station-name">Sprint</td><td class="price price-diesel">2.17 €</td><td class="price price-e10">2.03 €</td><td class="price price-e5">2.09 €</td></tr><tr><td class="station-name">ESSO</td><td class="price price-diesel">2.18 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">ESSO</td><td class="price price-diesel">2.18 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">AVIA</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">Shell</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.07 €</td><td class="price price-e5">2.12 €</td></tr><tr><td class="station-name">AGIP ENI</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">ESSO</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">ESSO</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">ESSO</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">AGIP ENI</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">ESSO</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">ESSO</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">TotalEnergies</td><td class="price price-diesel">2.19 €</td><td class="price price-e10">2.04 €</td><td class="price price-e5">2.10 €</td></tr><tr><td class="station-name">ARAL</td><td class="price price-diesel">2.20 €</td><td class="price price-e10">2.06 €</td><td class="price price-e5">2.12 €</td></tr><tr><td class="station-name">Shell</td><td class="price price-diesel">2.20 €</td><td class="price price-e10">2.08 €</td><td class="price price-e5">2.14 €</td></tr>            </tbody>
+        </table>
+        <div class="legend">
+            <div class="legend-item"><span class="legend-color" style="background:#0066cc"></span> Diesel</div>
+            <div class="legend-item"><span class="legend-color" style="background:#cc6600"></span> Super E10</div>
+            <div class="legend-item"><span class="legend-color" style="background:#009933"></span> Super E5</div>
+        </div>
+        <footer>
+            Datenquelle: <a href="https://www.clever-tanken.de/tankstelle_liste?ort=Landshut" target="_blank">clever-tanken.de</a> (MTS-K)<br>
+            Preise können abweichen. Stand: 18.08.2026 11:30
+        </footer>
+    </div>
+</body>
+</html>
