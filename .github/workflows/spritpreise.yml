@@ -2,8 +2,8 @@ name: Update Spritpreise
 
 on:
   schedule:
-    # alle 30 Minuten, zwischen 06:00 und 22:00 UTC -> 08:00-00:00 MESZ
-    - cron: "0,30 6-21 * * *"
+    # alle 30 Minuten, 07:00-20:30 MESZ = 05:00-18:30 UTC
+    - cron: "*/30 5-18 * * *"
   workflow_dispatch:
 
 permissions:
