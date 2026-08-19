@@ -580,6 +580,8 @@ async function shareFullContent() {{
                 html_parts.append("""
  </div>
  </div>""")
+            html_parts.append("""
+</div>""")
 
     html_parts.append("""
  </div>
