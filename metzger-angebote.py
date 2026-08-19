@@ -260,28 +260,29 @@ def fetch_hahn_offers() -> List[Dict]:
 
 
 def fetch_brunner_offers() -> List[Dict]:
-    """Holt Angebote von Brunner Metzgerei"""
-    try:
-        url = "https://www.brunner-metzgerei.de/angebot-der-woche"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req, timeout=30)
-        html = response.read().decode('utf-8')
-        from datetime import timedelta
-        heute = datetime.now().date()
-        woche1 = heute + timedelta(days=(7 - heute.weekday()))
-        angebote = [
-            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        ]
-        print(f"  Brunner: {len(angebote)} Angebote")
-    except Exception as e:
-        print(f"  Fehler bei Brunner: {e}")
-        from datetime import timedelta
-        heute = datetime.now().date()
-        woche1 = heute + timedelta(days=(7 - heute.weekday()))
-        angebote = [
-            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        ]
-    return angebote
+    """Holt Angebote von Brunner Metzgerei (aus Flyer auf Webseite)"""
+    from datetime import timedelta
+    
+    # Woche 1: 19.08.-22.08.2026 (aus Flyer auf Webseite)
+    # Woche 2: 26.08.-29.08.2026 (aus Flyer auf Webseite)
+    
+    return [
+        # Woche 1: 19.08.-22.08.2026
+        {"typ": "Schweinebraten", "preis": "1,09 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Angebot von Mi. 19.08. bis Sa. 22.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Hähnchenbrustfilet", "preis": "1,59 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Angebot von Mi. 19.08. bis Sa. 22.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Wiener", "preis": "1,49 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Angebot von Mi. 19.08. bis Sa. 22.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Stuttgarter", "preis": "1,29 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Angebot von Mi. 19.08. bis Sa. 22.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Streichwurst", "preis": "1,29 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Angebot von Mi. 19.08. bis Sa. 22.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Obazda", "preis": "1,65 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Angebot von Mi. 19.08. bis Sa. 22.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        
+        # Woche 2: 26.08.-29.08.2026
+        {"typ": "Putenschnitzel", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Angebot von Mi. 26.08. bis Sa. 29.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Pfannengyros", "preis": "1,59 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Angebot von Mi. 26.08. bis Sa. 29.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Currywurst", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Angebot von Mi. 26.08. bis Sa. 29.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Polnische", "preis": "1,49 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Angebot von Mi. 26.08. bis Sa. 29.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Haussalami", "preis": "1,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Angebot von Mi. 26.08. bis Sa. 29.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Fleischsalat", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Angebot von Mi. 26.08. bis Sa. 29.08.2026", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+    ]
 
 
 def main():
