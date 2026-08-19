@@ -58,6 +58,7 @@ def fetch_brandl_offers() -> List[Dict]:
     angebote = []
 
     try:
+        # Scraping von der Seite wo die PDFs gelistet sind
         url = "https://www.metzgerei-brandl.de/speisekarten-angebote"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(req, timeout=30)
