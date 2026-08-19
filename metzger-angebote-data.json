@@ -1,38 +1,44 @@
 {
-  "timestamp": "2026-08-19T11:04:10.742665",
+  "timestamp": "2026-08-19T11:15:10.669771",
   "file": "metzger-angebote.html",
   "anzahl_metzger": 6,
-  "gesamt_angebote": 48,
+  "gesamt_angebote": 40,
   "metzger": [
     {
       "name": "Metzgerei Brandl",
       "city": "Landshut",
-      "website": "https://www.metzgerei-brandl.de"
+      "website": "https://www.metzgerei-brandl.de",
+      "url": "https://www.metzgerei-brandl.de/aktuelle-angebote/"
     },
     {
       "name": "Metzgerei Rümenapf",
       "city": "Ergolding",
-      "website": "https://www.metzgerei-ruemenapf.de"
+      "website": "https://www.metzgerei-ruemenapf.de",
+      "url": "https://www.metzgerei-ruemenapf.de/"
     },
     {
       "name": "Metzgerei Wasner",
       "city": "Landshut",
-      "website": "https://www.metzgereiwasner.de/angebote/"
+      "website": "https://www.metzgereiwasner.de/angebote/",
+      "url": "https://www.metzgereiwasner.de/angebote/"
     },
     {
       "name": "Metzgerei Tristlhof",
       "city": "Landshut",
-      "website": ""
+      "website": "",
+      "url": ""
     },
     {
       "name": "Metzgerei Hahn",
       "city": "Eggenfelden",
-      "website": "https://metzgerei-hahn.de/Lauterbachstrasse"
+      "website": "https://metzgerei-hahn.de/Lauterbachstrasse",
+      "url": "https://metzgerei-hahn.de/Lauterbachstrasse"
     },
     {
       "name": "Brunner Metzgerei",
       "city": "Landshut",
-      "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
+      "website": "https://www.brunner-metzgerei.de/angebot-der-woche",
+      "url": "https://www.brunner-metzgerei.de/angebot-der-woche"
     }
   ]
 }

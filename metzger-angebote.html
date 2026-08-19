@@ -8,36 +8,41 @@
  body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
  h1 { color: #8b4513; text-align: center; border-bottom: 3px solid #d4af37; padding-bottom: 10px; }
  h2 { color: #8b4513; }
+ h3 { color: #8b4513; margin-top: 0; }
  .metzger-card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
  .metzger-name { color: #8b4513; font-size: 1.4em; font-weight: bold; margin-bottom: 10px; }
  .city { color: #666; font-style: italic; margin-bottom: 15px; }
- .week-section { margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
- .week-header { padding: 15px 20px; font-weight: bold; font-size: 1.1em; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
- .week-content { padding: 15px 20px; }
+ .wochen-tabelle { margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; }
+ .wochen-header { padding: 12px 16px; font-weight: bold; font-size: 1.05em; color: #8b4513; background: #fff8dc; border-bottom: 2px solid #d4af37; }
+ .uebersicht-table { width: 100%; border-collapse: collapse; margin: 0; font-size: 0.9em; }
+ .uebersicht-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+ .uebersicht-table tr:last-child td { border-bottom: none; }
+ .uebersicht-produkt { font-weight: 500; color: #333; }
+ .uebersicht-preis { color: #d4af37; font-weight: bold; background: #8b4513; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; }
+ .uebersicht-metzger { color: #666; font-size: 0.8em; line-height: 1.3; }
+ .uebersicht-metzger br { display: inline; }
+ .uebersicht-metzger strong { display: inline-block; margin-right: 6px; }
  .angebot { background: #fff8dc; border-left: 4px solid #d4af37; padding: 12px 15px; margin: 10px 0; border-radius: 0 8px 8px 0; transition: transform 0.2s, box-shadow 0.2s; }
  .angebot:hover { transform: translateX(5px); box-shadow: 2px 2px 8px rgba(0,0,0,0.1); }
  .angebot-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
  .angebot-name { font-weight: bold; color: #8b4513; font-size: 1.05em; }
  .angebot-preis { font-weight: bold; color: #d4af37; font-size: 1.1em; background: #8b4513; color: white; padding: 2px 8px; border-radius: 4px; }
  .angebot-desc { font-size: 0.85em; color: #666; margin-top: 4px; }
- .uebersicht-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
- .uebersicht-table td { padding: 10px; border-bottom: 1px solid #eee; }
- .uebersicht-produkt-name { font-weight: bold; color: #8b4513; font-size: 1em; }
- .uebersicht-preis { color: #d4af37; font-weight: bold; background: #8b4513; color: white; padding: 2px 8px; border-radius: 4px; }
- .uebersicht-metzger-small { color: #666; font-size: 0.75em; margin-top: 2px; }
-
+ .week-section { margin: 15px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+ .week-header { padding: 12px 16px; font-weight: bold; font-size: 1em; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+ .week-content { padding: 12px 16px; }
  @media (max-width: 600px) {
   .uebersicht-table thead { display: none; }
   .uebersicht-table tbody { display: block; }
   .uebersicht-table tr { display: block; background: white; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .uebersicht-table td { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
   .uebersicht-table td:last-child { border-bottom: none; }
-  .uebersicht-table td::before { display: none; }
   .uebersicht-produkt { min-width: auto; font-size: 1em; text-align: right; padding-right: 12px; }
   .uebersicht-preis { min-width: auto; font-size: 1em; padding: 4px 10px; }
   .uebersicht-metzger { font-size: 0.85em; text-align: right; line-height: 1.4; }
   .uebersicht-metzger br { display: none; }
   .uebersicht-metzger strong { display: inline-block; margin-right: 8px; }
+  .wochen-header { font-size: 1em; padding: 10px 12px; }
  }
  .last-update { text-align: center; color: #666; font-size: 0.9em; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; }
  .search-container { margin: 20px 0; }
@@ -62,7 +67,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 19.08.2026 11:04</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 19.08.2026 11:15</span>
  </div>
 </header>
 
@@ -103,19 +108,12 @@ async function shareFullContent() {
 }
 </script>
 <div class="wochen-uebersicht">
- <h2>📋 Wochen-Übersicht (22.08.2026)</h2>
+ <h2>📋 Wochen-Übersicht</h2>
+
+ <div class="wochen-tabelle">
+ <h3 class="wochen-header">Woche 17.08. - 22.08.2026</h3>
  <table class="uebersicht-table">
  <tbody>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Apfel-Griebenschmalz – <span class="uebersicht-preis">0,99 €/Becher</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Bad Birnbacher Knacker – <span class="uebersicht-preis">1,29 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
 
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Bayer. Käseaufstrich (100 g) – <span class="uebersicht-preis">1,65 € €</span></td>
@@ -123,73 +121,8 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Bayrischer Wurstsalat – <span class="uebersicht-preis">0,99 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Burgschinken – <span class="uebersicht-preis">1,85 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,69 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Emmentaler – <span class="uebersicht-preis">0,99 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Fleischsalat – <span class="uebersicht-preis">0,99 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Fleischsalat – <span class="uebersicht-preis">1,29 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Färsen-Hackfleisch – <span class="uebersicht-preis">12,00 €/kg</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Gemischtes Hackfleisch (Schwein & Rind, 500g) – <span class="uebersicht-preis">4,98 €/500g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Geräuchertes gekocht – <span class="uebersicht-preis">1,85 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt – <span class="uebersicht-preis">0,89 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt – <span class="uebersicht-preis">1,59 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Hals gewürzt – <span class="uebersicht-preis">1,49 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Haussalami – <span class="uebersicht-preis">1,99 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -203,16 +136,6 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Kalbskäs – <span class="uebersicht-preis">1,49 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Kochsalami – <span class="uebersicht-preis">1,39 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Kochsalami (pikant im Geschmack, aus Stadler's Wurstküche) – <span class="uebersicht-preis">1,29 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
@@ -220,21 +143,6 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Krustenbraten (magere Stücke vom Schlegel/Schulter) – <span class="uebersicht-preis">0,88 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Krüstenschinken – <span class="uebersicht-preis">1,69 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Käswürstl – <span class="uebersicht-preis">1,59 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Leberkäs – <span class="uebersicht-preis">1,29 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -248,48 +156,13 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Pfannengyros – <span class="uebersicht-preis">1,59 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Polnische – <span class="uebersicht-preis">1,49 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Putenschnitzel – <span class="uebersicht-preis">1,69 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Rohpolnische – <span class="uebersicht-preis">1,29 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schweine-Schnitzel – <span class="uebersicht-preis">1,49 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten – <span class="uebersicht-preis">1,09 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schweinefilet – <span class="uebersicht-preis">1,99 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Schweinekrustenbraten (100 g) – <span class="uebersicht-preis">1,09 € €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schweineschnitzel mit Beilage – <span class="uebersicht-preis">6,90 €/Portion</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -318,16 +191,6 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Surhals – <span class="uebersicht-preis">1,69 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Wammerlscheiben gewürzt – <span class="uebersicht-preis">1,39 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Weißwürste (frisch aus der Wurstküche) – <span class="uebersicht-preis">1,29 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
@@ -342,21 +205,146 @@ async function shareFullContent() {
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
  </tr>
 
+ </tbody>
+ </table>
+ </div>
+
+ <div class="wochen-tabelle">
+ <h3 class="wochen-header">Woche 24.08. - 24.08.2026</h3>
+ <table class="uebersicht-table">
+ <tbody>
+
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Wollwürstl – <span class="uebersicht-preis">1,25 €</span></td>
+ <td class="uebersicht-produkt" data-label="Produkt">Färsen-Hackfleisch – <span class="uebersicht-preis">12,00 €/kg</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Hahn</strong> (Eggenfelden)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hals gewürzt – <span class="uebersicht-preis">1,49 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
-</tbody>
- </table>
-</div>
 
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweine-Schnitzel – <span class="uebersicht-preis">1,49 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ </tbody>
+ </table>
+ </div>
+
+ <div class="wochen-tabelle">
+ <h3 class="wochen-header">Woche 24.08. - 29.08.2026</h3>
+ <table class="uebersicht-table">
+ <tbody>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Apfel-Griebenschmalz – <span class="uebersicht-preis">0,99 €/Becher</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bad Birnbacher Knacker – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bayrischer Wurstsalat – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Emmentaler – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Fleischsalat – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Fleischsalat – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt – <span class="uebersicht-preis">0,89 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Haussalami – <span class="uebersicht-preis">1,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Kochsalami – <span class="uebersicht-preis">1,39 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Krüstenschinken – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Pfannengyros – <span class="uebersicht-preis">1,59 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Polnische – <span class="uebersicht-preis">1,49 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Putenschnitzel – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Rohpolnische – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinefilet – <span class="uebersicht-preis">1,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweineschnitzel mit Beilage – <span class="uebersicht-preis">6,90 €/Portion</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Surhals – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ </tbody>
+ </table>
+ </div>
+
+</div>
 <div id="angebote-inhalt">
 <div class="metzger-card">
  <div class="metzger-name"><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">Metzgerei Brandl</a></div>
  <div class="city">📍 Landshut</div>
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
- <div class="week-header" style="background: #ff9800;">Woche bis 22.08.2026</div>
+ <div class="week-header" style="background: #ff9800;">Woche bis 24.08.2026</div>
  <div class="week-content" style="background: #fff3e0;">
 
  <div class="angebot">
@@ -364,7 +352,7 @@ async function shareFullContent() {
  <span class="angebot-name">Schweine-Schnitzel</span>
  <span class="angebot-preis">1,49 €</span>
  </div>
- 
+ <div class="angebot-desc">Angebot v. 24.08.2026 - Landshut</div>
  </div>
 
  <div class="angebot">
@@ -372,78 +360,7 @@ async function shareFullContent() {
  <span class="angebot-name">Hals gewürzt</span>
  <span class="angebot-preis">1,49 €</span>
  </div>
- 
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Geräuchertes gekocht</span>
- <span class="angebot-preis">1,85 €</span>
- </div>
- 
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Käswürstl</span>
- <span class="angebot-preis">1,59 €</span>
- </div>
- 
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Kalbskäs</span>
- <span class="angebot-preis">1,49 €</span>
- </div>
- 
- </div>
-
- </div>
- </div>
-
- <div class="week-section" style="border-left: 5px solid #4caf50;">
- <div class="week-header" style="background: #4caf50;">Woche bis 29.08.2026</div>
- <div class="week-content" style="background: #e8f5e9;">
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Hackfleisch gemischt</span>
- <span class="angebot-preis">1,59 €</span>
- </div>
- 
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Wammerlscheiben gewürzt</span>
- <span class="angebot-preis">1,39 €</span>
- </div>
- 
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Burgschinken</span>
- <span class="angebot-preis">1,85 €</span>
- </div>
- 
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Wollwürstl</span>
- <span class="angebot-preis">1,25 €</span>
- </div>
- 
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Leberkäs</span>
- <span class="angebot-preis">1,29 €</span>
- </div>
- 
+ <div class="angebot-desc">Angebot v. 24.08.2026 - Landshut</div>
  </div>
 
  </div>
@@ -822,11 +739,10 @@ async function shareFullContent() {
 
 </div>
 
- </div>
 </div>
 
 <div class="last-update">
- Letzte Aktualisierung: 19.08.2026 11:04 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+ Letzte Aktualisierung: 19.08.2026 11:15 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
 </div>
 </body>
 </html>
