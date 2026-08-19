@@ -226,8 +226,11 @@ def fetch_hahn_offers() -> List[Dict]:
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
+        from datetime import timedelta
+        heute = datetime.now().date()
+        woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
         ]
         print(f"  Hahn: {len(angebote)} Angebote")
     except Exception as e:
@@ -248,8 +251,11 @@ def fetch_brunner_offers() -> List[Dict]:
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
+        from datetime import timedelta
+        heute = datetime.now().date()
+        woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot der Woche - Landshut", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
         ]
         print(f"  Brunner: {len(angebote)} Angebote")
     except Exception as e:
