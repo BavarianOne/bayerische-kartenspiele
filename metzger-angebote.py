@@ -188,9 +188,15 @@ def fetch_wasner_offers() -> List[Dict]:
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
 
+        # Use current week and next week as fallback dates
+        from datetime import timedelta
+        heute = datetime.now().date()
+        woche1 = heute + timedelta(days=(7 - heute.weekday()))  # Next Monday
+        woche2 = woche1 + timedelta(days=7)
+
         angebote = [
-            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot - Landshut", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot - Landshut", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
         ]
         print(f"  Wasner: {len(angebote)} Angebote (Fallback)")
     except Exception as e:
@@ -202,9 +208,14 @@ def fetch_wasner_offers() -> List[Dict]:
 
 def fetch_tristlhof_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Tristlhof (statisch)"""
+    from datetime import timedelta
+    heute = datetime.now().date()
+    woche1 = heute + timedelta(days=(7 - heute.weekday()))  # Next Monday
+    woche2 = woche1 + timedelta(days=7)
+
     return [
-        {"typ": "Schweinebraten", "preis": "14,90 €/kg", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
-        {"typ": "Leberk\u00e4se", "preis": "2,20 €/100g", "gueltig_bis": "01.08.2026", "beschreibung": "Wochenangebot - Landshut", "website": ""},
+        {"typ": "Schweinebraten", "preis": "14,90 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Leberkäse", "preis": "2,20 €/100g", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (gültig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
     ]
 
 
@@ -216,13 +227,16 @@ def fetch_hahn_offers() -> List[Dict]:
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
         angebote = [
-            {"typ": "F\u00e4rsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
         ]
         print(f"  Hahn: {len(angebote)} Angebote")
     except Exception as e:
         print(f"  Fehler bei Hahn: {e}")
+        from datetime import timedelta
+        heute = datetime.now().date()
+        woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "F\u00e4rsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot - Eggenfelden", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
         ]
     return angebote
 
@@ -240,8 +254,11 @@ def fetch_brunner_offers() -> List[Dict]:
         print(f"  Brunner: {len(angebote)} Angebote")
     except Exception as e:
         print(f"  Fehler bei Brunner: {e}")
+        from datetime import timedelta
+        heute = datetime.now().date()
+        woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot der Woche - Landshut", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
         ]
     return angebote
 
