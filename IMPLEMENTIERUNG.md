@@ -62,7 +62,7 @@ Cron Job: metzger-angebote-daily-update  # Täglich 06:00 via Hermes cron
 
 | Metzger | Ort | Quelle | Methode |
 |---------|-----|--------|---------|
-| Metzgerei Brandl | Landshut | PDF-Links auf `/speisekarten-angebote` | HTML-Parsing + statische Mapping |
+| Metzgerei Brandl | Landshut | PDF-Links auf `/speisekarten-angebote` (User-Link: `/aktuelle-angebote/`) | HTML-Parsing + statisches Mapping |
 | Metzgerei Rümenapf | Ergolding | Joomla-Tabs auf Website | HTML-Tabellen-Parsing (alle 3 Wochen) |
 | Metzgerei Wasner | Landshut | Flyer-Bilder auf `/angebote/` | OCR (pytesseract) + manuelle Preise |
 | Metzgerei Tristlhof | Landshut | Zeitungsanzeige (manuell) | Statisch hardcoded |
@@ -79,7 +79,7 @@ Cron Job: metzger-angebote-daily-update  # Täglich 06:00 via Hermes cron
 - **Hahn aus Wochen-Übersicht**: Nur in eigener Card (wenig/unkregelmäßige Angebote)
 
 ### Wichtige Fixes
-1. **Brandl URL**: Geändert von `/aktuelle-angebote/` (404) zu `/speisekarten-angebote`
+1. **Brandl URL**: Scraping von `/speisekarten-angebote`, User-Link ist `/aktuelle-angebote/`
 2. **Brandl Datums-Parsing**: Aus Link-Text "Angebot vom DD.MM.YYYY bis DD.MM.YYYY" im HTML
 3. **Rümenapf**: Parsed alle 3 Joomla-Tabs, nimmt nur zukünftige Wochen
 4. **Wasner**: OCR von 3 Hauptflyern + 4 Passau-Flyern, nur Items mit echten Preisen
