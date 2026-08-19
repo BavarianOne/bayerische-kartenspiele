@@ -213,10 +213,7 @@ def fetch_wasner_offers() -> List[Dict]:
 
 def fetch_tristlhof_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeige 17.-22.08.2026)"""
-    from datetime import timedelta
-    # Woche 17.08.-22.08.2026
-    woche1 = datetime(2026, 8, 17).date()
-    woche2 = datetime(2026, 8, 31).date()
+    # Woche 17.08.-22.08.2026 (nur aus Zeitungsanzeige, keine Angebote für nächste Woche verfügbar)
 
     return [
         # Woche 17.08.-22.08.2026 (aus Zeitungsanzeige Frontenhausen)
@@ -227,10 +224,6 @@ def fetch_tristlhof_offers() -> List[Dict]:
         # Aktionstage
         {"typ": "Gemischtes Hackfleisch (Schwein & Rind, 500g)", "preis": "4,98 €/500g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
         {"typ": "Schweinshaxe frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: Samstag ist Haxentag, frisch & kross, solange Vorrat reicht", "website": ""},
-        
-        # Woche 2 (Placeholder für nächste Woche)
-        {"typ": "Schweinebraten", "preis": "14,90 €/kg", "gueltig_bis": "31.08.2026", "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis 31.08.2026)", "website": ""},
-        {"typ": "Leberk\u00e4se", "preis": "2,20 €/100g", "gueltig_bis": "31.08.2026", "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis 31.08.2026)", "website": ""},
     ]
 
 
