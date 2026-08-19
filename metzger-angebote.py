@@ -185,9 +185,10 @@ def fetch_ruemenapf_offers() -> List[Dict]:
 
 
 def fetch_wasner_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Wasner (aus Flyern auf Webseite)"""
+    """Holt Angebote von Metzgerei Wasner (aus Flyern auf Webseite - nur mit echten Preisen)"""
     try:
         # Flyer zeigt KW34/35: 17.08.-29.08.2026
+        # Nur Artikel MIT echten Preisen aus den Flyern
         angebote = [
             # Hauptflyer 1: 17.08.-29.08.2026
             {"typ": "Surhals", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
@@ -206,33 +207,13 @@ def fetch_wasner_offers() -> List[Dict]:
             # Hauptflyer 3: 17.08.-29.08.2026
             {"typ": "Schweineschnitzel mit Beilage", "preis": "6,90 €/Portion", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
             
-            # Passau-Flyer 1: 17.08.-29.08.2026
+            # Passau-Flyer 1: 17.08.-29.08.2026 (nur Hackfleisch hatte Preis)
             {"typ": "Hackfleisch gemischt", "preis": "0,89 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
             
-            # Passau-Flyer 2: 17.08.-29.08.2026
-            {"typ": "Käsekrainer (Family-Pack)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: bis zu 45% Preisvorteil", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Weißwurst Münchner Art (840g Pack)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Family-Pack", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Leberkäsbrät fein zum Selberbacken (1kg)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Family-Pack", "website": "https://www.metzgereiwasner.de/angebote/"},
-            
-            # Passau-Flyer 3: 17.08.-29.08.2026
+            # Passau-Flyer 3: 17.08.-29.08.2026 (nur Kochsalami hatte Preis)
             {"typ": "Kochsalami", "preis": "1,39 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Brühwurst, heiß geräuchert", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Kantsalami", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: ideal für die Brotzeit", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Gelbwurst (mit/ohne Petersilie)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Brotzeit", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Bad Birnbacher Knacker", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: mit feinem Bratenaroma", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Krüstenschinken", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: mit feinem Bratenaroma", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Schweineschopfbraten", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: zart", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Schweinegulasch", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: zart", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Lendensteaks", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Putengeschnetzeltes", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
-            
-            # Passau-Flyer 4: 17.08.-29.08.2026
-            {"typ": "Schnitzelsemmel (Schwein oder Hähnchen)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: mit Beilage", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Grillhaxe", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Krautsalat", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: knackig", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Nudelsalat (Muttis Bester)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Leerdammer", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Käsesorte", "website": "https://www.metzgereiwasner.de/angebote/"},
         ]
-        print(f"  Wasner: {len(angebote)} Angebote (aus Flyern)")
+        print(f"  Wasner: {len(angebote)} Angebote (nur mit echten Preisen)")
     except Exception as e:
         print(f"  Fehler bei Wasner: {e}")
         from datetime import timedelta
