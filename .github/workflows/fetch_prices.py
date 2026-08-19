@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 REPO_ROOT = Path(__file__).resolve()
 while REPO_ROOT != REPO_ROOT.parent and not (REPO_ROOT / ".git").exists():
     REPO_ROOT = REPO_ROOT.parent
-DATA_PATH = REPO_ROOT / "spritpreise-pwa" / "data" / "prices.json"
-HISTORY_PATH = REPO_ROOT / "spritpreise-pwa" / "data" / "history.json"
+DATA_PATH = REPO_ROOT / "data" / "prices.json"
+HISTORY_PATH = REPO_ROOT / "data" / "history.json"
 
 LAT = "48.5763411758753"
 LON = "12.1714786340021"

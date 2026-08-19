@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Generiert landshut-spritpreise.html aus spritpreise-pwa/data/prices.json
+Generiert landshut-spritpreise.html aus data/prices.json
 Zeigt auch letzten Workflow-Run (workflowRunAt) an
-Enthält jetzt: TT/TH/WT/WH, Sparklines, Trend-Indikatoren
+Enthält: TT/TH/WT/WH, Sparklines, Trend-Indikatoren
 """
 
 import json
@@ -11,8 +11,8 @@ from pathlib import Path
 from collections import defaultdict
 
 REPO_ROOT = Path("/root/bayerische-kartenspiele")
-DATA_FILE = REPO_ROOT / "spritpreise-pwa" / "data" / "prices.json"
-HISTORY_FILE = REPO_ROOT / "landshut-fuel-history.json"
+DATA_FILE = REPO_ROOT / "data" / "prices.json"
+HISTORY_FILE = REPO_ROOT / "data" / "history.json"
 OUTPUT_FILE = REPO_ROOT / "landshut-spritpreise.html"
 
 # Tankstellen-Adressen Mapping (aus clever-tanken)
@@ -25,17 +25,6 @@ STATION_ADDRESSES = {
     "TotalEnergies": "Oberndorfer Str. 23a, 84034 Landshut",
     "AGIP ENI": "Luitpoldstr. 55, 84034 Landshut",
     "AVIA": "Veldener Str. 52, 84034 Landshut",
-}
-
-# Mehrere ESSO-Stationen unterscheiden
-ESSO_ADDRESSES = {
-    "ESSO (Siemensstr.)": "Siemensstr. 19, 84034 Landshut",
-    "ESSO (Neue Regensburger Str.)": "Neue Regensburger Str. 44, 84034 Landshut",
-    "ESSO (Am Aicher Feld)": "Am Aicher Feld 1, 84034 Landshut",
-    "ESSO (Luitpoldstr.)": "Luitpoldstr. 34, 84034 Landshut",
-    "ESSO (Ludwig-Erhard-Str.)": "Ludwig-Erhard-Str. 14, 84034 Landshut",
-    "ESSO (Äußere Parkstr.)": "Äußere Parkstr. 21, 84034 Landshut",
-    "ESSO (Hofmark-Aich-Str.)": "Hofmark-Aich-Str. 22, 84034 Landshut",
 }
 
 
@@ -423,20 +412,11 @@ def generate_html():
         for s in fuel_list:
             all_names.add(s["name"])
     
-    # Also copy prices.json to PWA data folder
-    pwa_data_dir = REPO_ROOT / "landshut-spritpreise-pwa" / "data"
-    pwa_data_dir.mkdir(exist_ok=True)
-    import shutil
-    shutil.copy2(DATA_FILE, pwa_data_dir / "prices.json")
-    # Also copy history
-    shutil.copy2(HISTORY_FILE, pwa_data_dir / "history.json")
-    
     print(f"✅ Generiert: {OUTPUT_FILE}")
     print(f"   Letzter Workflow-Run: {workflow_run_de}")
     print(f"   Datenstand: {fetched_de}")
     print(f"   Stationen: {len(all_names)}")
     print(f"   History entries: {len(history.get('entries', []))}")
-    print(f"   PWA data/prices.json & history.json kopiert")
 
 
 if __name__ == "__main__":
