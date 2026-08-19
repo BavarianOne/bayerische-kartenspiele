@@ -62,7 +62,7 @@ def parse_addpoi(text: str) -> list[dict]:
     seen = set()
     for match in pattern.finditer(text):
         lat_s, lon_s, addr, name, _nullish, _id_a, _id_b, radius, price = match.groups()
-        if name in {"Standort", "Supermarkt-Tankstelle"}:
+        if name in {"Standort"}:
             continue
         key = (lat_s, lon_s, name)
         if key in seen:
