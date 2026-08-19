@@ -9,6 +9,13 @@ import json
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import defaultdict
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
+# German timezone (handles DST automatically)
+LOCAL_TZ = ZoneInfo("Europe/Berlin")
 
 # Find repo root (works both locally and in CI)
 REPO_ROOT = Path(__file__).resolve().parent
@@ -44,10 +51,14 @@ def load_history():
 
 
 def format_iso_to_de(iso_str):
-    """Konvertiert ISO-Timestamp zu deutschem Format"""
+    """Konvertiert ISO-Timestamp zu deutschem Format (Lokalzeit)"""
     try:
         dt = datetime.fromisoformat(iso_str.replace('Z', '+00:00'))
-        return dt.strftime("%d.%m.%Y %H:%M")
+        # Convert UTC to German local time
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        dt_local = dt.astimezone(LOCAL_TZ)
+        return dt_local.strftime("%d.%m.%Y %H:%M") + " Uhr"
     except:
         return iso_str
 
@@ -422,7 +433,7 @@ def generate_html():
             <div class="updated">Datenstand: {fetched_de}</div>
         </header>
         <div class="workflow-info">
-            🔄 Letzter GitHub Actions Run: {workflow_run_de} UTC
+            🔄 Letzter GitHub Actions Run: {workflow_run_de}
         </div>
         {stats}
         <table>
