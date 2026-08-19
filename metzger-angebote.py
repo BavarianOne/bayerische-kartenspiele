@@ -473,6 +473,10 @@ async function shareFullContent() {{
 
     # Metzger-Karten
     for metzger_name, angebote_list in alle_angebote.items():
+        # Skip butchers with no offers
+        if not angebote_list:
+            continue
+            
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         metzger_website = next((m.get("website", "") for m in METZGERIEN if m["name"] == metzger_name), "")
 
@@ -486,8 +490,7 @@ async function shareFullContent() {{
 
         sorted_weeks = sorted(wochen.items(), key=lambda x: x[0] if x[0] else 'zzz')
 
-        html_parts.append(f"""
- <div class="metzger-card">
+        html_parts.append(f"""<div class="metzger-card">
  <div class="metzger-name">{f'<a href="{metzger_website}" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">{metzger_name}</a>' if metzger_website else metzger_name}</div>
  <div class="city">\U0001f4cd {stadt}</div>""")
 
