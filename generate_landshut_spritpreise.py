@@ -65,7 +65,7 @@ def compute_price_stats(history_entries, station_name, fuel, lat=None, lon=None)
     entries = [
         {"ts": datetime.fromisoformat(e["timestamp"]), "price": e["price"]}
         for e in history_entries
-        if matches(e)
+        if matches(e) and e["fuel"] == fuel
     ]
     entries.sort(key=lambda x: x["ts"])
     
