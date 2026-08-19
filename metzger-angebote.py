@@ -291,28 +291,27 @@ def fetch_tristlhof_offers() -> List[Dict]:
 
 
 def fetch_hahn_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Hahn"""
-    try:
-        url = "https://metzgerei-hahn.de/Lauterbachstrasse"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req, timeout=30)
-        html = response.read().decode('utf-8')
-        from datetime import timedelta
-        heute = datetime.now().date()
-        woche1 = heute + timedelta(days=(7 - heute.weekday()))
-        angebote = [
-            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        ]
-        print(f"  Hahn: {len(angebote)} Angebote")
-    except Exception as e:
-        print(f"  Fehler bei Hahn: {e}")
-        from datetime import timedelta
-        heute = datetime.now().date()
-        woche1 = heute + timedelta(days=(7 - heute.weekday()))
-        angebote = [
-            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        ]
-    return angebote
+    """Holt Angebote von Metzgerei Hahn (aus OCR des Angebote-Bildes)"""
+    from datetime import timedelta
+    heute = datetime.now().date()
+    # Woche 17.08.-22.08.2026
+    woche1 = datetime(2026, 8, 17).date()
+    woche2 = datetime(2026, 8, 24).date()
+
+    # OCR aus https://metzgerei-hahn.de/media/upload/ANGEBOTE.png
+    return [
+        {"typ": "Färsen-Hackfleisch (1 kg = 12,00 €)", "preis": "12,00 €/kg", "gueltig_bis": "22.08.2026", "beschreibung": "OCR aus Angebot-Bild: Färsen-Hackfleisch, 1 kg = 12,00 €", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Frischwurst-Aufschnitt (500g = 6,00 €)", "preis": "6,00 €/500g", "gueltig_bis": "22.08.2026", "beschreibung": "OCR aus Angebot-Bild: Frischwurst-Aufschnitt, 500g = 6,00 € (1 kg = 9,90 €)", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Gyros-Pfanne (1 kg = 10,99 €)", "preis": "10,99 €/kg", "gueltig_bis": "22.08.2026", "beschreibung": "OCR aus Angebot-Bild: Gyros-Pfanne, 1 kg = 10,99 €", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Lyoner-Stange (500g = 3,99 €)", "preis": "3,99 €/500g", "gueltig_bis": "22.08.2026", "beschreibung": "OCR aus Angebot-Bild: Lyoner-Stange, 500g = 3,99 €", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Schweinelendchen im Ganzen (1 kg = 6,99 €)", "preis": "6,99 €/kg", "gueltig_bis": "22.08.2026", "beschreibung": "OCR aus Angebot-Bild: Schweinelendchen im Ganzen, 1 kg = 6,99 €", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Rauchfrische Wiener (1 kg = 10,49 €)", "preis": "10,49 €/kg", "gueltig_bis": "22.08.2026", "beschreibung": "OCR aus Angebot-Bild: Rauchfrische Wiener, 1 kg = 10,49 €", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Unsere Scharfen (1 kg = 9,99 €)", "preis": "9,99 €/kg", "gueltig_bis": "22.08.2026", "beschreibung": "OCR aus Angebot-Bild: Unsere Scharfen, 1 kg = 9,99 €", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        # Nächste Woche (Platzhalter)
+        {"typ": "Grillfleisch", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "OCR aus Angebot-Bild: Grillfleisch (Preis im Bild nicht lesbar)", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Ententeile gefroren / Fisch gefroren", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "OCR aus Angebot-Bild: Ententeile gefroren, Fisch gefroren", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+        {"typ": "Sauerkonserven", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "OCR aus Angebot-Bild: Sauerkonserven", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+    ]
 
 
 def fetch_brunner_offers() -> List[Dict]:
@@ -592,16 +591,6 @@ async function shareFullContent() {{
     # Metzger-Karten
     html_parts.append("""<div id="angebote-inhalt">""")
 
-    # Bild-URLs für Metzger-Karten
-    METZGER_IMAGES = {
-        "Metzgerei Hahn": "https://metzgerei-hahn.de/media/upload/ANGEBOTE.png",
-        "Metzgerei Rümenapf": "https://www.metzgerei-ruemenapf.de/templates/ja_erica/images/logo.png",
-        "Metzgerei Brandl": "https://www.metzgerei-brandl.de/templates/brandl/images/logo.png",
-        "Metzgerei Wasner": "https://www.metzgereiwasner.de/fileadmin/razor/Images/Logos/wasner-logo.svg",
-        "Brunner Metzgerei": "https://www.brunner-metzgerei.de/media/97e119_09404734318049fdbee138cb0c8b979f~mv2.png",
-        "Metzgerei Tristlhof": "",
-    }
-
     for metzger_name, angebote_list in alle_angebote.items():
         # Skip butchers with no offers
         if not angebote_list:
@@ -609,7 +598,6 @@ async function shareFullContent() {{
             
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         metzger_website = next((m.get("website", "") for m in METZGERIEN if m["name"] == metzger_name), "")
-        metzger_image = METZGER_IMAGES.get(metzger_name, "")
 
         # Gruppiere nach Woche
         wochen = {}
@@ -621,11 +609,7 @@ async function shareFullContent() {{
 
         sorted_weeks = sorted(wochen.items(), key=lambda x: x[0] if x[0] else 'zzz')
 
-        # Bild-URL für Karte
-        image_html = f'<img src="{metzger_image}" alt="{metzger_name}" style="max-width:100%; height:auto; margin-bottom:15px; border-radius:8px;">' if metzger_image else ''
-
         html_parts.append(f"""<div class="metzger-card">
- {image_html}
  <div class="metzger-name">{f'<a href="{metzger_website}" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">{metzger_name}</a>' if metzger_website else metzger_name}</div>
  <div class="city">📍 {stadt}</div>""")
 
