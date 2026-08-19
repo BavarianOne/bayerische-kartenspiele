@@ -68,7 +68,7 @@ def compute_price_stats(history_entries, station_name, fuel, lat=None, lon=None)
         return False
     
     entries = [
-        {"ts": datetime.fromisoformat(e["timestamp"]), "price": e["price"]}
+        {"ts": datetime.fromisoformat(e["timestamp"]).replace(tzinfo=None) if datetime.fromisoformat(e["timestamp"]).tzinfo is None else datetime.fromisoformat(e["timestamp"]).astimezone(timezone.utc).replace(tzinfo=None), "price": e["price"]}
         for e in history_entries
         if matches(e) and e["fuel"] == fuel
     ]
@@ -86,7 +86,7 @@ def compute_price_stats(history_entries, station_name, fuel, lat=None, lon=None)
         by_date[date_key].append(e["price"])
     
     # Today's stats (TT/TH)
-    today = entries[-1]["ts"].date()
+    today = entries[-1]["ts"].date() if entries[-1]["ts"].tzinfo is None else entries[-1]["ts"].astimezone(timezone.utc).date()
     today_prices = by_date.get(today, [])
     tt = min(today_prices) if today_prices else None
     th = max(today_prices) if today_prices else None
