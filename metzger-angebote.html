@@ -62,7 +62,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 19.08.2026 10:22</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 19.08.2026 10:25</span>
  </div>
 </header>
 
@@ -123,6 +123,11 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Burgschinken – <span class="uebersicht-preis">1,85 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Cabanossi – <span class="uebersicht-preis">0,89 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
@@ -145,6 +150,11 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt – <span class="uebersicht-preis">1,59 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt – <span class="uebersicht-preis">1,59 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -178,12 +188,32 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Rindergulasch – <span class="uebersicht-preis">3,20 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Rouladen – <span class="uebersicht-preis">3,90 €/Stück</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Schweine-Schnitzel – <span class="uebersicht-preis">1,49 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)<br><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
 
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten – <span class="uebersicht-preis">14,90 €/kg</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinefilet – <span class="uebersicht-preis">4,90 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinekrustenbraten – <span class="uebersicht-preis">1,09 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
 
@@ -215,6 +245,11 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Wollwürstl – <span class="uebersicht-preis">1,25 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Wollwürstl – <span class="uebersicht-preis">1,25 €/Stück</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
 </tbody>
  </table>
@@ -424,6 +459,38 @@ async function shareFullContent() {
  
  </div>
 
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweine-Schnitzel</span>
+ <span class="angebot-preis">1,49 €</span>
+ </div>
+ 
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweinekrustenbraten</span>
+ <span class="angebot-preis">1,09 €/100g</span>
+ </div>
+ 
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweinefilet</span>
+ <span class="angebot-preis">4,90 €/100g</span>
+ </div>
+ 
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Burgschinken</span>
+ <span class="angebot-preis">1,85 €/100g</span>
+ </div>
+ 
+ </div>
+
  </div>
  </div>
 
@@ -435,6 +502,38 @@ async function shareFullContent() {
  <div class="angebot-header">
  <span class="angebot-name">Leberkäse</span>
  <span class="angebot-preis">2,20 €/100g</span>
+ </div>
+ 
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Rouladen</span>
+ <span class="angebot-preis">3,90 €/Stück</span>
+ </div>
+ 
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Rindergulasch</span>
+ <span class="angebot-preis">3,20 €/100g</span>
+ </div>
+ 
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Hackfleisch gemischt</span>
+ <span class="angebot-preis">1,59 €/100g</span>
+ </div>
+ 
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Wollwürstl</span>
+ <span class="angebot-preis">1,25 €/Stück</span>
  </div>
  
  </div>
@@ -488,7 +587,7 @@ async function shareFullContent() {
 </div>
 
 <div class="last-update">
- Letzte Aktualisierung: 19.08.2026 10:22 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+ Letzte Aktualisierung: 19.08.2026 10:25 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
 </div>
 </body>
 </html>

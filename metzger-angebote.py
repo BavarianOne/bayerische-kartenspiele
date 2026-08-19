@@ -221,6 +221,14 @@ def fetch_tristlhof_offers() -> List[Dict]:
     return [
         {"typ": "Schweinebraten", "preis": "14,90 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
         {"typ": "Leberk\u00e4se", "preis": "2,20 €/100g", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Schweine-Schnitzel", "preis": "1,49 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Schweinekrustenbraten", "preis": "1,09 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Schweinefilet", "preis": "4,90 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Burgschinken", "preis": "1,85 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Rouladen", "preis": "3,90 €/Stück", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Rindergulasch", "preis": "3,20 €/100g", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Hackfleisch gemischt", "preis": "1,59 €/100g", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Wollwürstl", "preis": "1,25 €/Stück", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
     ]
 
 
