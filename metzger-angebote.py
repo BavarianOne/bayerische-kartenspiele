@@ -54,17 +54,17 @@ METZGERIEN = [
 
 
 def fetch_brandl_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Brandl (PDF-Links)"""
+    """Holt Angebote von Metzgerei Brandl (PDF-Links von /speisekarten-angebote)"""
     angebote = []
 
     try:
-        url = "https://www.metzgerei-brandl.de/aktuelle-angebote/"
+        url = "https://www.metzgerei-brandl.de/speisekarten-angebote"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
 
-        # Suche nach PDF-Links mit Angebot
-        pdf_pattern = re.compile(r'href="([^"]*angebot[^"]*\.pdf)"')
+        # Suche nach Angebot-PDF-Links (nicht Speisekarte!)
+        pdf_pattern = re.compile(r'href="([^"]*angebot-vom-[^"]*\.pdf)"')
         pdf_urls = pdf_pattern.findall(html)
 
         # Duplikate entfernen
@@ -73,24 +73,40 @@ def fetch_brandl_offers() -> List[Dict]:
             if pdf_url not in unique_pdfs:
                 unique_pdfs.append(pdf_url)
 
-        print(f"  Brandl: {len(unique_pdfs)} PDF-Links gefunden")
-
-        # Filtere nur eindeutige Wochen (erste 3)
-        wochen_pdfs = unique_pdfs[:3]
+        print(f"  Brandl: {len(unique_pdfs)} Angebot-PDFs gefunden")
 
         from datetime import datetime
         heute = datetime.now().date()
 
-        for pdf_url in wochen_pdfs:
-            # Versuche Datum aus URL zu extrahieren
+        for pdf_url in unique_pdfs:
+            # Vollständige URL bauen
+            if pdf_url.startswith('/'):
+                pdf_url = "https://www.metzgerei-brandl.de" + pdf_url
+
+            # Versuche Datum aus HTML-Seiten-Text zu extrahieren (besser als PDF-Dateinamen)
+        # Suche nach allen "Angebot vom ... bis ..." im HTML und mapp sie auf PDF-URLs
+        angebot_dates = re.findall(r'Angebot vom \d{2}\.\d{2}\.\d{4}\s*bis\s*(\d{2}\.\d{2}\.\d{4})', html)
+        print(f"  Brandl: Gefundene End-Daten im HTML: {angebot_dates}")
+
+        # Für jeden PDF-Link den passenden End-Datum finden
+        # Die Reihenfolge im HTML stimmt mit der Reihenfolge der PDFs überein
+        for i, pdf_url in enumerate(unique_pdfs):
+            # Vollständige URL bauen
+            if pdf_url.startswith('/'):
+                pdf_url = "https://www.metzgerei-brandl.de" + pdf_url
+
             gueltig_bis = ""
-            date_match = re.search(r'angebot-vom-(\d{2})-(\d{2})-(\d{2})', pdf_url)
-            if date_match:
-                tag, monat, jahr = date_match.groups()
-                try:
-                    gueltig_bis = datetime(2000 + int(jahr), int(monat), int(tag)).strftime("%d.%m.%Y")
-                except:
-                    pass
+            if i < len(angebot_dates):
+                gueltig_bis = angebot_dates[i]
+            else:
+                # Fallback: try to extract from PDF filename
+                date_matches = re.findall(r'(\d{2})-(\d{2})-(\d{2})', pdf_url)
+                if len(date_matches) >= 2:
+                    tag, monat, jahr = date_matches[-1]
+                    try:
+                        gueltig_bis = datetime(2000 + int(jahr), int(monat), int(tag)).strftime("%d.%m.%Y")
+                    except:
+                        pass
 
             if gueltig_bis:
                 try:
@@ -104,10 +120,19 @@ def fetch_brandl_offers() -> List[Dict]:
             else:
                 print(f"  -> Kein Datum erkannt: {pdf_url}")
 
-            # Fallback: PDF nicht parsen, verwende statische Daten
-            woche1 = heute + timedelta(days=(7 - heute.weekday()))
-            woche2 = woche1 + timedelta(days=7)
+            if gueltig_bis:
+                try:
+                    gueltig_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
+                    if gueltig_date < heute:
+                        print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis})")
+                        continue
+                except:
+                    pass
+                print(f"  -> Nimm Woche (bis {gueltig_bis})")
+            else:
+                print(f"  -> Kein Datum erkannt: {pdf_url}")
 
+            # Fallback: PDF nicht parsen, verwende statische Daten basierend auf Datum
             if "17-08" in pdf_url or "22-08" in pdf_url:
                 gueltig_bis = "22.08.2026"
                 angebote.extend([
