@@ -30,11 +30,15 @@ STATION_ADDRESSES = {
 
 
 def load_prices():
+    if not DATA_FILE.exists():
+        return {"fuels": {}, "fetchedAt": "", "workflowRunAt": "", "location": {}}
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def load_history():
+    if not HISTORY_FILE.exists():
+        return {"entries": []}
     with open(HISTORY_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
