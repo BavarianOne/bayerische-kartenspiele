@@ -210,17 +210,18 @@ def build_station_table(data, history):
         e5_stats = compute_price_stats(history.get("entries", []), name, "Super E5",
                                       e5.get("lat"), e5.get("lon"))
         
-        # Choose stats based on active fuel (default to Diesel for row display)
-        stats = diesel_stats or e10_stats or e5_stats
-        
-        sparkline = render_sparkline_svg(stats['sparkline'], stats['trend']) if stats else ''
-        stat_badges = render_stat_badges(stats) if stats else ''
-        trend = render_trend_indicator(stats['trend']) if stats else ''
-        
         # Add trend to price headers
         diesel_trend = render_trend_indicator(diesel_stats['trend']) if diesel_stats else ''
         e10_trend = render_trend_indicator(e10_stats['trend']) if e10_stats else ''
         e5_trend = render_trend_indicator(e5_stats['trend']) if e5_stats else ''
+        
+        # Per-fuel stats rows
+        diesel_sparkline = render_sparkline_svg(diesel_stats['sparkline'], diesel_stats['trend']) if diesel_stats else ''
+        diesel_badges = render_stat_badges(diesel_stats) if diesel_stats else ''
+        e10_sparkline = render_sparkline_svg(e10_stats['sparkline'], e10_stats['trend']) if e10_stats else ''
+        e10_badges = render_stat_badges(e10_stats) if e10_stats else ''
+        e5_sparkline = render_sparkline_svg(e5_stats['sparkline'], e5_stats['trend']) if e5_stats else ''
+        e5_badges = render_stat_badges(e5_stats) if e5_stats else ''
         
         row = f"""<tr>
     <td class="station-name">{name}<br><span class="station-address">{addr}</span></td>
@@ -231,8 +232,21 @@ def build_station_table(data, history):
 <tr class="stats-row">
     <td colspan="4">
         <div class="card-stats">
-            {sparkline}
-            <div class="stat-badges">{stat_badges}</div>
+            <div class="fuel-stats fuel-diesel">
+                <span class="fuel-label">Diesel:</span>
+                {diesel_sparkline}
+                <div class="stat-badges">{diesel_badges}</div>
+            </div>
+            <div class="fuel-stats fuel-e10">
+                <span class="fuel-label">E10:</span>
+                {e10_sparkline}
+                <div class="stat-badges">{e10_badges}</div>
+            </div>
+            <div class="fuel-stats fuel-e5">
+                <span class="fuel-label">E5:</span>
+                {e5_sparkline}
+                <div class="stat-badges">{e5_badges}</div>
+            </div>
         </div>
     </td>
 </tr>"""
@@ -353,6 +367,26 @@ def generate_html():
         .trend-down {{ color: #2e7d32; }}
         .trend-stable {{ color: #757575; }}
         
+        /* Per-fuel stats */
+        .fuel-stats {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 16px;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 6px;
+        }}
+        .fuel-label {{
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #555;
+            margin-right: 4px;
+        }}
+        .fuel-diesel .fuel-label {{ color: #0066cc; }}
+        .fuel-e10 .fuel-label {{ color: #cc6600; }}
+        .fuel-e5 .fuel-label {{ color: #009933; }}
+        
         .legend {{ display: flex; gap: 20px; padding: 15px 20px; background: #f8f9fa; font-size: 0.8rem; flex-wrap: wrap; justify-content: center; }}
         .legend-item {{ display: flex; align-items: center; gap: 6px; }}
         .legend-color {{ width: 12px; height: 12px; border-radius: 3px; }}
@@ -364,6 +398,15 @@ def generate_html():
             .station-address {{ font-size: 0.65rem; }}
             .sparkline {{ width: 100%; height: 18px; margin: 4px 0; }}
             .stat-badges {{ width: 100%; }}
+            .fuel-stats {{ 
+                display: block; 
+                margin: 4px 0; 
+                padding: 6px 8px; 
+            }}
+            .fuel-label {{
+                display: inline-block;
+                margin-bottom: 4px;
+            }}
         }}
     </style>
 </head>
