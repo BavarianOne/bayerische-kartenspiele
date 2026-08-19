@@ -1,3 +1,7 @@
+import { FUEL_MAP, FUEL_LABEL, FUEL_ICON, fetchAllFuelTypes } from './clever-tanken.js';
+import { computePriceStats } from './clever-tanken.js';
+import * as idb from './idb.js';
+
 const CONFIG = {
   LAT: '48.5763411758753',
   LON: '12.1714786340021',
@@ -13,6 +17,7 @@ const DB_VER = 1;
 let db;
 let activeFuel = 3;
 let stationsByFuel = { diesel: [], e10: [], e5: [] };
+let priceHistory = [];
 
 const els = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -30,10 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadInitialData() {
   const loaded = await loadBundledPrices();
+  await loadPriceHistory();
   if (loaded) {
     render();
   }
   refreshPrices();
+}
+
+async function loadPriceHistory() {
+  try {
+    const res = await fetch('data/history.json', { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) return;
+    const payload = await res.json();
+    if (payload?.entries) {
+      priceHistory = payload.entries;
+      console.log(`Loaded ${priceHistory.length} historical price entries`);
+    }
+  } catch (err) {
+    console.warn('Price history not available', err);
+  }
 }
 
 async function loadBundledPrices() {
@@ -43,7 +63,6 @@ async function loadBundledPrices() {
     const payload = await res.json();
     if (!payload?.fuels) return false;
     stationsByFuel = payload.fuels;
-    // Update last updated timestamp display
     updateLastUpdatedDisplay(payload);
     return true;
   } catch (err) {
@@ -203,9 +222,47 @@ function renderCached() {
   render();
 }
 
+function getStatLabel(fuelKey) {
+  const labels = { diesel: 'Diesel', e10: 'E10', e5: 'E5' };
+  return labels[fuelKey] || fuelKey;
+}
+
+function renderSparkline(sparkData) {
+  if (!sparkData || sparkData.length < 2) return '';
+  const width = 60;
+  const height = 20;
+  const points = sparkData.map((v, i) => {
+    const x = (i / (sparkData.length - 1)) * width;
+    const y = height - v * height;
+    return `${x},${y}`;
+  }).join(' ');
+  const trendColor = sparkData[sparkData.length - 1] > sparkData[0] ? '#c62828' : '#2e7d32';
+  return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="vertical-align: middle;">
+    <polyline fill="none" stroke="${trendColor}" stroke-width="1.5" points="${points}" />
+  </svg>`;
+}
+
+function renderStatBadges(stats) {
+  if (!stats) return '';
+  const badges = [];
+  if (stats.tt != null) badges.push(`<span class="stat-badge stat-tt" title="Tages-Tief">TT ${stats.tt.toFixed(3)}</span>`);
+  if (stats.th != null) badges.push(`<span class="stat-badge stat-th" title="Tages-Hoch">TH ${stats.th.toFixed(3)}</span>`);
+  if (stats.wt != null) badges.push(`<span class="stat-badge stat-wt" title="Wochen-Tief">WT ${stats.wt.toFixed(3)}</span>`);
+  if (stats.wh != null) badges.push(`<span class="stat-badge stat-wh" title="Wochen-Hoch">WH ${stats.wh.toFixed(3)}</span>`);
+  return badges.join(' ');
+}
+
+function renderTrendIndicator(trend) {
+  const icons = { up: '▲', down: '▼', stable: '●' };
+  const colors = { up: '#c62828', down: '#2e7d32', stable: '#757575' };
+  const labels = { up: 'steigend', down: 'fallend', stable: 'stabil' };
+  return `<span class="trend-indicator trend-${trend}" style="color: ${colors[trend]}" title="${labels[trend]}">${icons[trend]}</span>`;
+}
+
 async function render() {
   localStorage.setItem('spritalarm.cached', JSON.stringify(stationsByFuel));
-  const list = stationsByFuel[FUEL_MAP[activeFuel]] || [];
+  const fuelKey = FUEL_MAP[activeFuel];
+  const list = stationsByFuel[fuelKey] || [];
   const favs = new Set((await dbGetAll('favorites') || []).map((x) => x.key));
   const sortBy = document.getElementById('sortSelect')?.value || 'price';
   const favOnly = document.getElementById('favOnlyCheck')?.checked || false;
@@ -233,6 +290,13 @@ function sortByName(items) { return [...items].sort((a, b) => a.name.localeCompa
 function stationCardHTML(s, isFav) {
   const price = s.price != null ? `${s.price.toFixed(3)}€` : '–';
   const meta = [s.distance, s.address].filter(Boolean).join(' · ');
+  
+  // Compute stats from history
+  const stats = computePriceStats(priceHistory, s.name, FUEL_MAP[activeFuel], parseFloat(s.lat), parseFloat(s.lon));
+  const sparkline = renderSparkline(stats?.sparkline);
+  const statBadges = renderStatBadges(stats);
+  const trend = renderTrendIndicator(stats?.trend || 'stable');
+  
   return `
     <li class="station-card${isFav ? ' fav' : ''}" data-key="${s.key}">
       <div class="card-main">
@@ -242,8 +306,12 @@ function stationCardHTML(s, isFav) {
         </div>
         <div class="card-price">
           <div class="price-value">${price}</div>
-          <div class="price-hint">${FUEL_LABEL[activeFuel]}</div>
+          <div class="price-hint">${FUEL_LABEL[activeFuel]} ${trend}</div>
         </div>
+      </div>
+      <div class="card-stats">
+        ${sparkline}
+        <div class="stat-badges">${statBadges}</div>
       </div>
       <div class="card-actions">
         <button class="btn-fav${isFav ? ' active' : ''}" data-action="fav">${isFav ? '★' : '☆'}</button>
@@ -365,13 +433,13 @@ function showToast(text, type = 'info') {
   setTimeout(() => el.remove(), 2800);
 }
 
-function escapeHtml(str) { return String(str ?? '').replace(/[&<>"]+/g, (c) => ({ '&': '&', '<': '<', '>': '>', '"': '"' }[c])); }
+function escapeHtml(str) { return String(str ?? '').replace(/[&<>\"]+/g, (c) => ({ '&': '&', '<': '<', '>': '>', '"': '"' }[c])); }
 function escapeAttr(str) { return escapeHtml(str); }
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   try {
-    const reg = await navigator.serviceWorker.register('/sw.js');
+    const reg = await navigator.serviceWorker.register('/landshut-spritpreise-pwa/sw.js', { scope: '/landshut-spritpreise-pwa/' });
     console.log('SW registered', reg);
     if ('periodicSync' in reg) {
       try { await reg.periodicSync.register('fuel-prices', { minInterval: 30 * 60 * 1000 }); } catch {}

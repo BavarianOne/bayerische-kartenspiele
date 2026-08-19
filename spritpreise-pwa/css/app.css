@@ -202,3 +202,66 @@ input, select { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--border);
   text-align: center;
 }
+
+/* ── Station Card Stats & Sparkline ─────────────────────── */
+.card-stats {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.sparkline {
+  flex: 0 0 60px;
+  height: 20px;
+}
+
+.stat-badges {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.stat-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.stat-tt { background: #2e7d32; color: #fff; }
+.stat-th { background: #c62828; color: #fff; }
+.stat-wt { background: #1565c0; color: #fff; }
+.stat-wh { background: #e65100; color: #fff; }
+
+.trend-indicator {
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.trend-up { color: #c62828; }
+.trend-down { color: #2e7d32; }
+.trend-stable { color: #757575; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .card-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .sparkline {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+  .stat-badges {
+    width: 100%;
+  }
+}

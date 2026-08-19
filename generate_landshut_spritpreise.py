@@ -2,14 +2,17 @@
 """
 Generiert landshut-spritpreise.html aus spritpreise-pwa/data/prices.json
 Zeigt auch letzten Workflow-Run (workflowRunAt) an
+Enthält jetzt: TT/TH/WT/WH, Sparklines, Trend-Indikatoren
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from collections import defaultdict
 
 REPO_ROOT = Path("/root/bayerische-kartenspiele")
 DATA_FILE = REPO_ROOT / "spritpreise-pwa" / "data" / "prices.json"
+HISTORY_FILE = REPO_ROOT / "landshut-fuel-history.json"
 OUTPUT_FILE = REPO_ROOT / "landshut-spritpreise.html"
 
 # Tankstellen-Adressen Mapping (aus clever-tanken)
@@ -35,9 +38,16 @@ ESSO_ADDRESSES = {
     "ESSO (Hofmark-Aich-Str.)": "Hofmark-Aich-Str. 22, 84034 Landshut",
 }
 
+
 def load_prices():
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_history():
+    with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 
 def format_iso_to_de(iso_str):
     """Konvertiert ISO-Timestamp zu deutschem Format"""
@@ -47,7 +57,124 @@ def format_iso_to_de(iso_str):
     except:
         return iso_str
 
-def build_station_table(data):
+
+def compute_price_stats(history_entries, station_name, fuel, lat=None, lon=None):
+    """Compute TT, TH, WT, WH, trend, and sparkline data for a station+fuel"""
+    # Filter entries for this station+fuel - match by name and optionally lat/lon
+    def matches(entry):
+        if entry["station_key"].startswith(f"{station_name}|"):
+            if lat and lon:
+                # Extract lat/lon from station_key
+                parts = entry["station_key"].split("|")
+                if len(parts) >= 3:
+                    entry_lat = float(parts[1])
+                    entry_lon = float(parts[2])
+                    return abs(entry_lat - float(lat)) < 0.001 and abs(entry_lon - float(lon)) < 0.001
+            return True
+        return False
+    
+    entries = [
+        {"ts": datetime.fromisoformat(e["timestamp"]), "price": e["price"]}
+        for e in history_entries
+        if matches(e)
+    ]
+    entries.sort(key=lambda x: x["ts"])
+    
+    if not entries:
+        return None
+    
+    prices = [e["price"] for e in entries]
+    
+    # Group by date
+    by_date = defaultdict(list)
+    for e in entries:
+        date_key = e["ts"].date()
+        by_date[date_key].append(e["price"])
+    
+    # Today's stats (TT/TH)
+    today = entries[-1]["ts"].date()
+    today_prices = by_date.get(today, [])
+    tt = min(today_prices) if today_prices else None
+    th = max(today_prices) if today_prices else None
+    
+    # Weekly stats (last 7 days) (WT/WH)
+    week_ago = today - timedelta(days=6)
+    week_prices = []
+    for date, day_prices in by_date.items():
+        if date >= week_ago:
+            week_prices.extend(day_prices)
+    wt = min(week_prices) if week_prices else None
+    wh = max(week_prices) if week_prices else None
+    
+    # Trend: compare latest vs previous
+    trend = 'stable'
+    if len(prices) >= 2:
+        if prices[-1] < prices[-2]:
+            trend = 'down'
+        elif prices[-1] > prices[-2]:
+            trend = 'up'
+    
+    # Sparkline data (last 30 points, normalized 0-1)
+    spark_data = prices[-30:]
+    if len(spark_data) >= 2:
+        mn, mx = min(spark_data), max(spark_data)
+        if mx > mn:
+            sparkline = [(p - mn) / (mx - mn) for p in spark_data]
+        else:
+            sparkline = [0.5] * len(spark_data)
+    else:
+        sparkline = [0.5]
+    
+    return {
+        'tt': tt, 'th': th, 'wt': wt, 'wh': wh,
+        'trend': trend,
+        'current': prices[-1] if prices else None,
+        'sparkline': sparkline,
+        'history_count': len(prices)
+    }
+
+
+def render_sparkline_svg(spark_data, trend):
+    """Render inline SVG sparkline"""
+    if not spark_data or len(spark_data) < 2:
+        return ''
+    width = 60
+    height = 20
+    points = []
+    for i, v in enumerate(spark_data):
+        x = (i / (len(spark_data) - 1)) * width
+        y = height - v * height
+        points.append(f"{x},{y}")
+    points_str = " ".join(points)
+    trend_color = '#c62828' if trend == 'up' else '#2e7d32' if trend == 'down' else '#757575'
+    return f'<svg class="sparkline" width="{width}" height="{height}" viewBox="0 0 {width} {height}"><polyline fill="none" stroke="{trend_color}" stroke-width="1.5" points="{points_str}" /></svg>'
+
+
+def render_stat_badges(stats):
+    """Render TT/TH/WT/WH badges"""
+    if not stats:
+        return ''
+    badges = []
+    if stats['tt'] is not None:
+        badges.append(f'<span class="stat-badge stat-tt" title="Tages-Tief">TT {stats["tt"]:.3f}</span>')
+    if stats['th'] is not None:
+        badges.append(f'<span class="stat-badge stat-th" title="Tages-Hoch">TH {stats["th"]:.3f}</span>')
+    if stats['wt'] is not None:
+        badges.append(f'<span class="stat-badge stat-wt" title="Wochen-Tief">WT {stats["wt"]:.3f}</span>')
+    if stats['wh'] is not None:
+        badges.append(f'<span class="stat-badge stat-wh" title="Wochen-Hoch">WH {stats["wh"]:.3f}</span>')
+    return " ".join(badges)
+
+
+def render_trend_indicator(trend):
+    """Render trend arrow"""
+    icons = {'up': '▲', 'down': '▼', 'stable': '●'}
+    colors = {'up': '#c62828', 'down': '#2e7d32', 'stable': '#757575'}
+    labels = {'up': 'steigend', 'down': 'fallend', 'stable': 'stabil'}
+    return f'<span class="trend-indicator trend-{trend}" style="color: {colors[trend]}" title="{labels[trend]}">{icons[trend]}</span>'
+
+
+def build_station_table(data, history):
     """Baut HTML-Tabelle aus Preisdaten"""
     fuels = data.get("fuels", {})
     diesel_stations = {s["name"]: s for s in fuels.get("diesel", [])}
@@ -71,7 +198,6 @@ def build_station_table(data):
         
         # Adresse bestimmen
         if name == "ESSO":
-            # Mehrere ESSO - wir nutzen die erste mit Adresse
             addr = "Siemensstr. 19, 84034 Landshut"
         elif name == "Shell":
             addr = "Weickmannshöhe 1, 84034 Landshut"
@@ -87,18 +213,48 @@ def build_station_table(data):
                 return f'<span class="price-main no-price">–</span>'
             return f'<span class="price-main {css_class}">{price:.3f} €</span>'
         
+        # Compute stats for each fuel type
+        diesel_stats = compute_price_stats(history.get("entries", []), name, "Diesel", 
+                                          d.get("lat"), d.get("lon"))
+        e10_stats = compute_price_stats(history.get("entries", []), name, "Super E10",
+                                       e10.get("lat"), e10.get("lon"))
+        e5_stats = compute_price_stats(history.get("entries", []), name, "Super E5",
+                                      e5.get("lat"), e5.get("lon"))
+        
+        # Choose stats based on active fuel (default to Diesel for row display)
+        stats = diesel_stats or e10_stats or e5_stats
+        
+        sparkline = render_sparkline_svg(stats['sparkline'], stats['trend']) if stats else ''
+        stat_badges = render_stat_badges(stats) if stats else ''
+        trend = render_trend_indicator(stats['trend']) if stats else ''
+        
+        # Add trend to price headers
+        diesel_trend = render_trend_indicator(diesel_stats['trend']) if diesel_stats else ''
+        e10_trend = render_trend_indicator(e10_stats['trend']) if e10_stats else ''
+        e5_trend = render_trend_indicator(e5_stats['trend']) if e5_stats else ''
+        
         row = f"""<tr>
     <td class="station-name">{name}<br><span class="station-address">{addr}</span></td>
-    <td><div class="price-cell">{price_html(diesel_price, "price-diesel")}</div></td>
-    <td><div class="price-cell">{price_html(e10_price, "price-e10")}</div></td>
-    <td><div class="price-cell">{price_html(e5_price, "price-e5")}</div></td>
+    <td><div class="price-cell">{price_html(diesel_price, "price-diesel")} {diesel_trend}</div></td>
+    <td><div class="price-cell">{price_html(e10_price, "price-e10")} {e10_trend}</div></td>
+    <td><div class="price-cell">{price_html(e5_price, "price-e5")} {e5_trend}</div></td>
+</tr>
+<tr class="stats-row">
+    <td colspan="4">
+        <div class="card-stats">
+            {sparkline}
+            <div class="stat-badges">{stat_badges}</div>
+        </div>
+    </td>
 </tr>"""
         rows.append(row)
     
     return "\n".join(rows)
 
+
 def generate_html():
     data = load_prices()
+    history = load_history()
     fuels = data.get("fuels", {})
     
     # Timestamps
@@ -129,7 +285,7 @@ def generate_html():
     </div>
     """
     
-    table_rows = build_station_table(data)
+    table_rows = build_station_table(data, history)
     
     html = f"""<!DOCTYPE html>
 <html lang="de">
@@ -161,6 +317,53 @@ def generate_html():
         .price-e10 {{ color: #cc6600; }}
         .price-e5 {{ color: #009933; }}
         .no-price {{ color: #999; font-style: italic; font-size: 1.05rem; }}
+        
+        /* Stats row */
+        .stats-row td {{
+            padding: 8px 12px;
+            background: #fafafa;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }}
+        
+        /* Sparkline */
+        .sparkline {{
+            display: inline-block;
+            width: 60px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }}
+        
+        /* Stat badges */
+        .stat-badges {{
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }}
+        .stat-badge {{
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }}
+        .stat-tt {{ background: #2e7d32; color: #fff; }}
+        .stat-th {{ background: #c62828; color: #fff; }}
+        .stat-wt {{ background: #1565c0; color: #fff; }}
+        .stat-wh {{ background: #e65100; color: #fff; }}
+        
+        /* Trend indicator */
+        .trend-indicator {{
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-left: 6px;
+            vertical-align: middle;
+        }}
+        .trend-up {{ color: #c62828; }}
+        .trend-down {{ color: #2e7d32; }}
+        .trend-stable {{ color: #757575; }}
+        
         .legend {{ display: flex; gap: 20px; padding: 15px 20px; background: #f8f9fa; font-size: 0.8rem; flex-wrap: wrap; justify-content: center; }}
         .legend-item {{ display: flex; align-items: center; gap: 6px; }}
         .legend-color {{ width: 12px; height: 12px; border-radius: 3px; }}
@@ -170,6 +373,8 @@ def generate_html():
             th:first-child, td:first-child {{ width: 110px; }}
             .station-name {{ font-size: 0.85rem; }}
             .station-address {{ font-size: 0.65rem; }}
+            .sparkline {{ width: 100%; height: 18px; margin: 4px 0; }}
+            .stat-badges {{ width: 100%; }}
         }}
     </style>
 </head>
@@ -223,12 +428,16 @@ def generate_html():
     pwa_data_dir.mkdir(exist_ok=True)
     import shutil
     shutil.copy2(DATA_FILE, pwa_data_dir / "prices.json")
+    # Also copy history
+    shutil.copy2(HISTORY_FILE, pwa_data_dir / "history.json")
     
     print(f"✅ Generiert: {OUTPUT_FILE}")
     print(f"   Letzter Workflow-Run: {workflow_run_de}")
     print(f"   Datenstand: {fetched_de}")
     print(f"   Stationen: {len(all_names)}")
-    print(f"   PWA data/prices.json kopiert")
+    print(f"   History entries: {len(history.get('entries', []))}")
+    print(f"   PWA data/prices.json & history.json kopiert")
+
 
 if __name__ == "__main__":
     generate_html()
