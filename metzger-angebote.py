@@ -370,10 +370,16 @@ def main():
         alle_angebote[name] = angebote
 
     # Wochen-Übersicht bauen (alle Produkte + Preise pro Woche)
+    # Exkludiere Metzger mit zu wenigen/nicht wöchentlichen Angeboten
+    EXCLUDE_FROM_WOCHENUEBERSICHT = {"Metzgerei Hahn"}
+
     wochen_uebersicht = {}
     aktuelle_woche_datum = None
 
     for metzger_name, angebote_list in alle_angebote.items():
+        # Skip in Wochen-Übersicht
+        if metzger_name in EXCLUDE_FROM_WOCHENUEBERSICHT:
+            continue
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         for angebot in angebote_list:
             gueltig = angebot.get('gueltig_bis', '')
@@ -586,6 +592,16 @@ async function shareFullContent() {{
     # Metzger-Karten
     html_parts.append("""<div id="angebote-inhalt">""")
 
+    # Bild-URLs für Metzger-Karten
+    METZGER_IMAGES = {
+        "Metzgerei Hahn": "https://metzgerei-hahn.de/media/upload/ANGEBOTE.png",
+        "Metzgerei Rümenapf": "https://www.metzgerei-ruemenapf.de/templates/ja_erica/images/logo.png",
+        "Metzgerei Brandl": "https://www.metzgerei-brandl.de/templates/brandl/images/logo.png",
+        "Metzgerei Wasner": "https://www.metzgereiwasner.de/fileadmin/razor/Images/Logos/wasner-logo.svg",
+        "Brunner Metzgerei": "https://www.brunner-metzgerei.de/media/97e119_09404734318049fdbee138cb0c8b979f~mv2.png",
+        "Metzgerei Tristlhof": "",
+    }
+
     for metzger_name, angebote_list in alle_angebote.items():
         # Skip butchers with no offers
         if not angebote_list:
@@ -593,6 +609,7 @@ async function shareFullContent() {{
             
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         metzger_website = next((m.get("website", "") for m in METZGERIEN if m["name"] == metzger_name), "")
+        metzger_image = METZGER_IMAGES.get(metzger_name, "")
 
         # Gruppiere nach Woche
         wochen = {}
@@ -604,7 +621,11 @@ async function shareFullContent() {{
 
         sorted_weeks = sorted(wochen.items(), key=lambda x: x[0] if x[0] else 'zzz')
 
+        # Bild-URL für Karte
+        image_html = f'<img src="{metzger_image}" alt="{metzger_name}" style="max-width:100%; height:auto; margin-bottom:15px; border-radius:8px;">' if metzger_image else ''
+
         html_parts.append(f"""<div class="metzger-card">
+ {image_html}
  <div class="metzger-name">{f'<a href="{metzger_website}" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">{metzger_name}</a>' if metzger_website else metzger_name}</div>
  <div class="city">📍 {stadt}</div>""")
 
