@@ -33,6 +33,7 @@ STATION_ADDRESSES = {
     "TotalEnergies": "Oberndorfer Str. 23a, 84034 Landshut",
     "AGIP ENI": "Luitpoldstr. 55, 84034 Landshut",
     "AVIA": "Veldener Str. 52, 84034 Landshut",
+    "Supermarkt-Tankstelle": "Alte Regensburger Str. 21, 84030 Ergolding",
 }
 
 
