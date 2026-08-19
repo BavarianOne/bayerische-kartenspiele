@@ -185,28 +185,63 @@ def fetch_ruemenapf_offers() -> List[Dict]:
 
 
 def fetch_wasner_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Wasner"""
-    angebote = []
+    """Holt Angebote von Metzgerei Wasner (aus Flyern auf Webseite)"""
     try:
-        url = "https://www.metzgereiwasner.de/angebote/"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req, timeout=30)
-        html = response.read().decode('utf-8')
-
-        # Use current week and next week as fallback dates
+        # Flyer zeigt KW34/35: 17.08.-29.08.2026
+        angebote = [
+            # Hauptflyer 1: 17.08.-29.08.2026
+            {"typ": "Surhals", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Schweinefilet", "preis": "1,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Fleischsalat", "preis": "0,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Bayrischer Wurstsalat", "preis": "0,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            
+            # Hauptflyer 2: 17.08.-29.08.2026
+            {"typ": "Currywurst", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Bad Birnbacher Knacker", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Krüstenschinken", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Rohpolnische", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Apfel-Griebenschmalz", "preis": "0,99 €/Becher", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Emmentaler", "preis": "0,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            
+            # Hauptflyer 3: 17.08.-29.08.2026
+            {"typ": "Schweineschnitzel mit Beilage", "preis": "6,90 €/Portion", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            
+            # Passau-Flyer 1: 17.08.-29.08.2026
+            {"typ": "Hackfleisch gemischt", "preis": "0,89 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+            
+            # Passau-Flyer 2: 17.08.-29.08.2026
+            {"typ": "Käsekrainer (Family-Pack)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: bis zu 45% Preisvorteil", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Weißwurst Münchner Art (840g Pack)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Family-Pack", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Leberkäsbrät fein zum Selberbacken (1kg)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Family-Pack", "website": "https://www.metzgereiwasner.de/angebote/"},
+            
+            # Passau-Flyer 3: 17.08.-29.08.2026
+            {"typ": "Kochsalami", "preis": "1,39 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Brühwurst, heiß geräuchert", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Kantsalami", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: ideal für die Brotzeit", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Gelbwurst (mit/ohne Petersilie)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Brotzeit", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Bad Birnbacher Knacker", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: mit feinem Bratenaroma", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Krüstenschinken", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: mit feinem Bratenaroma", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Schweineschopfbraten", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: zart", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Schweinegulasch", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: zart", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Lendensteaks", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Putengeschnetzeltes", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
+            
+            # Passau-Flyer 4: 17.08.-29.08.2026
+            {"typ": "Schnitzelsemmel (Schwein oder Hähnchen)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: mit Beilage", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Grillhaxe", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Krautsalat", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: knackig", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Nudelsalat (Muttis Bester)", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "Leerdammer", "preis": "Angebotspreis", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Käsesorte", "website": "https://www.metzgereiwasner.de/angebote/"},
+        ]
+        print(f"  Wasner: {len(angebote)} Angebote (aus Flyern)")
+    except Exception as e:
+        print(f"  Fehler bei Wasner: {e}")
         from datetime import timedelta
         heute = datetime.now().date()
-        woche1 = heute + timedelta(days=(7 - heute.weekday()))  # Next Monday
-        woche2 = woche1 + timedelta(days=7)
-
+        woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
             {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
             {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
         ]
-        print(f"  Wasner: {len(angebote)} Angebote (Fallback)")
-    except Exception as e:
-        print(f"  Fehler bei Wasner: {e}")
-        angebote = []
 
     return angebote
 

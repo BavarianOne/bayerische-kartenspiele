@@ -62,7 +62,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 19.08.2026 10:47</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 19.08.2026 10:57</span>
  </div>
 </header>
 
@@ -108,13 +108,28 @@ async function shareFullContent() {
  <tbody>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">BIERKUGEL – <span class="uebersicht-preis">1,29 €</span></td>
+ <td class="uebersicht-produkt" data-label="Produkt">Apfel-Griebenschmalz – <span class="uebersicht-preis">0,99 €/Becher</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bad Birnbacher Knacker – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bad Birnbacher Knacker – <span class="uebersicht-preis">Angebotspreis</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Bayer. Käseaufstrich (100 g) – <span class="uebersicht-preis">1,65 € €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bayrischer Wurstsalat – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -128,7 +143,17 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">FEUERTEUFEL – <span class="uebersicht-preis">1,69 €</span></td>
+ <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Emmentaler – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Fleischsalat – <span class="uebersicht-preis">0,99 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
@@ -143,6 +168,11 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Gelbwurst (mit/ohne Petersilie) – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Gemischtes Hackfleisch (Schwein & Rind, 500g) – <span class="uebersicht-preis">4,98 €/500g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
@@ -150,6 +180,16 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Geräuchertes gekocht – <span class="uebersicht-preis">1,85 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Grillhaxe – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt – <span class="uebersicht-preis">0,89 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -183,13 +223,43 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Kantsalami – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Kochsalami – <span class="uebersicht-preis">1,39 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Kochsalami (pikant im Geschmack, aus Stadler's Wurstküche) – <span class="uebersicht-preis">1,29 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Krautsalat – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Krustenbraten (magere Stücke vom Schlegel/Schulter) – <span class="uebersicht-preis">0,88 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Krüstenschinken – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Krüstenschinken – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Käsekrainer (Family-Pack) – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -203,8 +273,28 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Leberkäsbrät fein zum Selberbacken (1kg) – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Leerdammer – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Lendensteaks – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Milzwurst pikant – <span class="uebersicht-preis">1,29 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Nudelsalat (Muttis Bester) – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -223,8 +313,23 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Putengeschnetzeltes – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Putenschnitzel – <span class="uebersicht-preis">1,69 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Rohpolnische – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schnitzelsemmel (Schwein oder Hähnchen) – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -238,8 +343,28 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinefilet – <span class="uebersicht-preis">1,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinegulasch – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Schweinekrustenbraten (100 g) – <span class="uebersicht-preis">1,09 € €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweineschnitzel mit Beilage – <span class="uebersicht-preis">6,90 €/Portion</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweineschopfbraten – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -268,8 +393,18 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Surhals – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Wammerlscheiben gewürzt – <span class="uebersicht-preis">1,39 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Weißwurst Münchner Art (840g Pack) – <span class="uebersicht-preis">Angebotspreis</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -460,23 +595,239 @@ async function shareFullContent() {
  <div class="city">📍 Landshut</div>
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
- <div class="week-header" style="background: #ff9800;">Woche bis 24.08.2026</div>
+ <div class="week-header" style="background: #ff9800;">Woche bis 29.08.2026</div>
  <div class="week-content" style="background: #fff3e0;">
 
  <div class="angebot">
  <div class="angebot-header">
- <span class="angebot-name">BIERKUGEL</span>
- <span class="angebot-preis">1,29 €</span>
+ <span class="angebot-name">Surhals</span>
+ <span class="angebot-preis">1,69 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot - Landshut</div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
  </div>
 
  <div class="angebot">
  <div class="angebot-header">
- <span class="angebot-name">FEUERTEUFEL</span>
- <span class="angebot-preis">1,69 €</span>
+ <span class="angebot-name">Schweinefilet</span>
+ <span class="angebot-preis">1,99 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot - Landshut</div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Fleischsalat</span>
+ <span class="angebot-preis">0,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bayrischer Wurstsalat</span>
+ <span class="angebot-preis">0,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Currywurst</span>
+ <span class="angebot-preis">1,69 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bad Birnbacher Knacker</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Krüstenschinken</span>
+ <span class="angebot-preis">1,69 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Rohpolnische</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Apfel-Griebenschmalz</span>
+ <span class="angebot-preis">0,99 €/Becher</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Emmentaler</span>
+ <span class="angebot-preis">0,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweineschnitzel mit Beilage</span>
+ <span class="angebot-preis">6,90 €/Portion</span>
+ </div>
+ <div class="angebot-desc">Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Hackfleisch gemischt</span>
+ <span class="angebot-preis">0,89 €/100g</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: KW34/35</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Käsekrainer (Family-Pack)</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: bis zu 45% Preisvorteil</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Weißwurst Münchner Art (840g Pack)</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: Family-Pack</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Leberkäsbrät fein zum Selberbacken (1kg)</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: Family-Pack</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Kochsalami</span>
+ <span class="angebot-preis">1,39 €/100g</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: Brühwurst, heiß geräuchert</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Kantsalami</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: ideal für die Brotzeit</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Gelbwurst (mit/ohne Petersilie)</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: Brotzeit</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bad Birnbacher Knacker</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: mit feinem Bratenaroma</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Krüstenschinken</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: mit feinem Bratenaroma</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweineschopfbraten</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: zart</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweinegulasch</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: zart</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Lendensteaks</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Putengeschnetzeltes</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schnitzelsemmel (Schwein oder Hähnchen)</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: mit Beilage</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Grillhaxe</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Krautsalat</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: knackig</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Nudelsalat (Muttis Bester)</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Leerdammer</span>
+ <span class="angebot-preis">Angebotspreis</span>
+ </div>
+ <div class="angebot-desc">Passau-Flyer 17.-29.08.2026: Käsesorte</div>
  </div>
 
  </div>
@@ -683,7 +1034,7 @@ async function shareFullContent() {
 </div>
 
 <div class="last-update">
- Letzte Aktualisierung: 19.08.2026 10:47 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+ Letzte Aktualisierung: 19.08.2026 10:57 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
 </div>
 </body>
 </html>
