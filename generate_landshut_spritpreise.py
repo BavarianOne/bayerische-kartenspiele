@@ -10,7 +10,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import defaultdict
 
-REPO_ROOT = Path("/root/bayerische-kartenspiele")
+# Find repo root (works both locally and in CI)
+REPO_ROOT = Path(__file__).resolve().parent
 DATA_FILE = REPO_ROOT / "data" / "prices.json"
 HISTORY_FILE = REPO_ROOT / "data" / "history.json"
 OUTPUT_FILE = REPO_ROOT / "landshut-spritpreise.html"
