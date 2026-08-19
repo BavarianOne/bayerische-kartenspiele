@@ -129,6 +129,7 @@ def fetch_ruemenapf_offers() -> List[Dict]:
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
 
+        # Find all h2 + table pairs in the entire HTML (joomla tabs)
         angebot_sections = re.findall(r'<h2>(Angebot v\.[^<]+)</h2>\s*<table class="angebote">(.*?)</table>', html, re.DOTALL)
 
         print(f"  R\u00fcmenapf: {len(angebot_sections)} Wochen insgesamt gefunden")
@@ -154,13 +155,14 @@ def fetch_ruemenapf_offers() -> List[Dict]:
             zukuenftige_wochen += 1
             print(f"  -> Nimm Woche (bis {gueltig_bis_str})")
 
-            rows = re.findall(r'<tr>\s*<td[^>]*>([^<]+)</td>\s*<td[^>]*>([^<]+)</td>\s*</tr>', table_html)
-            for name, preis in rows:
+            rows = re.findall(r'<tr>\s*<td[^>]*>([^<]+)</td>\s*<td[^>]*>([^<]+)</td>\s*<td[^>]*>([^<]+)</td>\s*</tr>', table_html)
+            for name, gewicht, preis in rows:
                 name = name.strip()
+                gewicht = gewicht.strip()
                 preis = preis.strip() + " €"
                 if name and len(name) > 2 and not re.match(r'^\d', name):
                     angebote.append({
-                        "typ": name,
+                        "typ": f"{name} ({gewicht})",
                         "preis": preis,
                         "gueltig_bis": gueltig_bis_str,
                         "beschreibung": f"Angebot v. {gueltig_bis_str} - Ergolding",
@@ -171,9 +173,12 @@ def fetch_ruemenapf_offers() -> List[Dict]:
 
     except Exception as e:
         print(f"  Fehler bei R\u00fcmenapf: {e}")
+        from datetime import timedelta
+        heute = datetime.now().date()
+        woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Bayer. K\u00e4seaufstrich", "preis": "1,65 €", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot v. 01.08.2026 - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
-            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": "01.08.2026", "beschreibung": "Angebot v. 01.08.2026 - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+            {"typ": "Bayer. K\u00e4seaufstrich", "preis": "1,65 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot v. {woche1.strftime('%d.%m.%Y')} - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
+            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot v. {woche1.strftime('%d.%m.%Y')} - Ergolding", "website": "https://www.metzgerei-ruemenapf.de"},
         ]
 
     return angebote
@@ -195,8 +200,8 @@ def fetch_wasner_offers() -> List[Dict]:
         woche2 = woche1 + timedelta(days=7)
 
         angebote = [
-            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
         ]
         print(f"  Wasner: {len(angebote)} Angebote (Fallback)")
     except Exception as e:
@@ -214,8 +219,8 @@ def fetch_tristlhof_offers() -> List[Dict]:
     woche2 = woche1 + timedelta(days=7)
 
     return [
-        {"typ": "Schweinebraten", "preis": "14,90 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
-        {"typ": "Leberkäse", "preis": "2,20 €/100g", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (gültig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Schweinebraten", "preis": "14,90 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": ""},
+        {"typ": "Leberk\u00e4se", "preis": "2,20 €/100g", "gueltig_bis": woche2.strftime("%d.%m.%Y"), "beschreibung": f"Wochenangebot - Landshut (g\u00fcltig bis {woche2.strftime('%d.%m.%Y')})", "website": ""},
     ]
 
 
@@ -230,7 +235,7 @@ def fetch_hahn_offers() -> List[Dict]:
         heute = datetime.now().date()
         woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+            {"typ": "F\u00e4rsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
         ]
         print(f"  Hahn: {len(angebote)} Angebote")
     except Exception as e:
@@ -239,7 +244,7 @@ def fetch_hahn_offers() -> List[Dict]:
         heute = datetime.now().date()
         woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Färsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
+            {"typ": "F\u00e4rsen-Hackfleisch", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Eggenfelden (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
         ]
     return angebote
 
@@ -255,7 +260,7 @@ def fetch_brunner_offers() -> List[Dict]:
         heute = datetime.now().date()
         woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
         ]
         print(f"  Brunner: {len(angebote)} Angebote")
     except Exception as e:
@@ -264,7 +269,7 @@ def fetch_brunner_offers() -> List[Dict]:
         heute = datetime.now().date()
         woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+            {"typ": "Cabanossi", "preis": "0,89 €/100g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot der Woche - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
         ]
     return angebote
 
