@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-19T17:54:38.305313+00:00",
-  "workflowRunAt": "2026-08-19T17:54:38.305313+00:00",
+  "fetchedAt": "2026-08-19T18:39:22.523905+00:00",
+  "workflowRunAt": "2026-08-19T18:39:22.523905+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -9,14 +9,6 @@
   },
   "fuels": {
     "diesel": [
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
-        "radius": "60",
-        "price": 2.179
-      },
       {
         "lat": "48.54391202",
         "lon": "12.15421289",
@@ -120,6 +112,14 @@
         "name": "ESSO",
         "radius": "60",
         "price": 2.229
+      },
+      {
+        "lat": "48.5519",
+        "lon": "12.1616",
+        "address": null,
+        "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
       }
     ],
     "e10": [
@@ -128,14 +128,6 @@
         "lon": "12.219227",
         "address": null,
         "name": "Shell",
-        "radius": "60",
-        "price": 2.089
-      },
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": 2.089
       },
@@ -234,6 +226,14 @@
         "name": "SIT",
         "radius": "60",
         "price": 2.119
+      },
+      {
+        "lat": "48.5519",
+        "lon": "12.1616",
+        "address": null,
+        "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
       }
     ],
     "e5": [
@@ -242,14 +242,6 @@
         "lon": "12.219227",
         "address": null,
         "name": "Shell",
-        "radius": "60",
-        "price": 2.149
-      },
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": 2.149
       },
@@ -348,6 +340,14 @@
         "name": "ESSO",
         "radius": "60",
         "price": 2.169
+      },
+      {
+        "lat": "48.5519",
+        "lon": "12.1616",
+        "address": null,
+        "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
       }
     ]
   }
