@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a3a2e">
+    <title>Bayerischer Kompass 🧭</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Fira+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1b14;
+            --bg-card: #142d20;
+            --bg-elevated: #1a3a2e;
+            --accent-gold: #c9a84c;
+            --accent-gold-light: #e8c86d;
+            --accent-gold-dim: #9a7d35;
+            --text-primary: #f5efe6;
+            --text-secondary: #b8b0a0;
+            --text-muted: #7a7468;
+            --border-color: #2d4a3d;
+            --danger: #c05a4a;
+            --success: #5a9c6e;
+            --shadow: 0 4px 24px rgba(0,0,0,0.5);
+            --shadow-glow: 0 0 32px rgba(201,168,76,0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+
+        body {
+            font-family: 'Fira Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(90,156,110,0.06) 0%, transparent 60%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0 L50 100 M0 50 L100 50' stroke='%232d4a3d' stroke-width='0.3' fill='none'/%3E%3C/svg%3E");
+            background-size: 100%, 100%, 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                180deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 1.5rem 1rem 1rem;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.5rem 1.25rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-badge::before {
+            content: '🃏';
+            font-size: 1.1rem;
+        }
+
+        .header-badge span {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            font-family: 'EB Garamond', serif;
+        }
+
+        h1 {
+            font-family: 'EB Garamond', serif;
+            font-size: clamp(2rem, 6vw, 2.75rem);
+            font-weight: 600;
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-gold) 50%, var(--text-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+
+        /* Compass Container */
+        .compass-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .compass-card {
+            width: 100%;
+            max-width: 360px;
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow:
+                var(--shadow),
+                var(--shadow-glow),
+                inset 0 1px 0 rgba(255,255,255,0.05),
+                inset 0 -1px 0 rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .compass-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: conic-gradient(from 0deg, var(--accent-gold-dim), var(--accent-gold), var(--accent-gold-light), var(--accent-gold), var(--accent-gold-dim));
+            border-radius: 26px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            filter: blur(8px);
+        }
+
+        .compass-card.active::before {
+            opacity: 0.6;
+            animation: borderRotate 8s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Compass Rose */
+        .compass-rose {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-origin: center;
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .compass-layer {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Outer degree markings */
+        .degree-marks {
+            pointer-events: none;
+        }
+
+        .degree-mark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: calc(50% - 12px);
+            transform-origin: bottom center;
+            background: linear-gradient(to top, transparent, var(--text-muted));
+            opacity: 0.4;
+        }
+
+        .degree-mark.major {
+            width: 2px;
+            height: calc(50% - 8px);
+            background: linear-gradient(to top, transparent, var(--accent-gold));
+            opacity: 0.8;
+        }
+
+        .degree-mark.cardinal {
+            width: 3px;
+            height: calc(50% - 4px);
+            background: linear-gradient(to top, transparent, var(--accent-gold-light));
+            opacity: 1;
+        }
+
+        /* Direction labels */
+        .direction-labels {
+            pointer-events: none;
+            font-family: 'EB Garamond', serif;
+        }
+
+        .dir-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateY(calc(-50% + 28px)) rotate(var(--label-rot));
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transform-origin: center center;
+        }
+
+        .dir-label.cardinal {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            text-shadow: 0 0 8px rgba(201,168,76,0.5);
+        }
+
+        .dir-label.cardinal::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 2px;
+            background: var(--accent-gold);
+            border-radius: 1px;
+        }
+
+        /* Compass needle */
+        .needle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 10;
+            pointer-events: none;
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+        }
+
+        .needle-svg {
+            width: 80%;
+            height: 80%;
+            transform: rotate(-90deg); /* Point north initially */
+        }
+
+        .needle-tip { fill: #e8c86d; filter: drop-shadow(0 0 4px rgba(232,200,109,0.8)); }
+        .needle-tip-shadow { fill: #8b6f2e; }
+        .needle-base { fill: #c9a84c; }
+        .needle-center { fill: var(--bg-dark); stroke: var(--accent-gold); stroke-width: 1.5; }
+
+        /* Center pivot */
+        .pivot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle at 30% 30%, var(--accent-gold-light), var(--accent-gold) 60%, #6b541a);
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            box-shadow:
+                inset 0 -2px 4px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(255,255,255,0.1),
+                0 4px 12px rgba(0,0,0,0.5);
+            z-index: 11;
+        }
+
+        .pivot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle at 30% 30%, #fff8, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            width: 100%;
+            max-width: 360px;
+            margin-top: 1.25rem;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            text-align: center;
+        }
+
+        .info-item {
+            padding: 0.5rem 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-family: 'EB Garamond', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .info-value.accent {
+            color: var(--accent-gold);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            width: 100%;
+            max-width: 360px;
+            margin-top: 1rem;
+            padding: 0.875rem 1rem;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .status-bar.calibrating {
+            border-color: var(--accent-gold);
+            background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.05));
+        }
+
+        .status-bar.error {
+            border-color: var(--danger);
+            background: linear-gradient(135deg, rgba(192,90,74,0.1), rgba(192,90,74,0.05));
+            color: var(--danger);
+        }
+
+        .status-bar.ready {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(90,156,110,0.1), rgba(90,156,110,0.05));
+            color: var(--success);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .status-bar.calibrating .status-indicator {
+            background: var(--accent-gold);
+            animation: pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--accent-gold);
+        }
+
+        .status-bar.ready .status-indicator {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .status-bar.error .status-indicator {
+            background: var(--danger);
+            box-shadow: 0 0 8px var(--danger);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .status-text {
+            font-weight: 500;
+        }
+
+        /* Calibration Modal */
+        .calibration-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .calibration-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .calibration-card {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: var(--shadow), var(--shadow-glow);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .calibration-overlay.show .calibration-card {
+            transform: scale(1);
+        }
+
+        .calibration-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: figure8 4s ease-in-out infinite;
+        }
+
+        @keyframes figure8 {
+            0%, 100% { transform: rotate(0deg) translateX(0); }
+            25% { transform: rotate(15deg) translateX(10px); }
+            50% { transform: rotate(0deg) translateX(0); }
+            75% { transform: rotate(-15deg) translateX(-10px); }
+        }
+
+        .calibration-title {
+            font-family: 'EB Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .calibration-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .calibration-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .cal-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .cal-step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold-dim), var(--accent-gold));
+            color: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .btn {
+            appearance: none;
+            border: none;
+            border-radius: 10px;
+            padding: 0.875rem 1.5rem;
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dim));
+            color: var(--bg-dark);
+            box-shadow: 0 4px 16px rgba(201,168,76,0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(201,168,76,0.3);
+        }
+
+        /* Footer */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+        }
+
+        footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        footer a:hover { text-decoration: underline; }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .compass-rose { transition: none !important; }
+            .needle { transition: none !important; }
+            .calibration-icon { animation: none !important; }
+            .status-bar.calibrating .status-indicator { animation: none !important; }
+            .compass-card.active::before { animation: none !important; }
+        }
+
+        /* Landscape adjustments */
+        @media (orientation: landscape) and (max-height: 500px) {
+            header { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .compass-card { max-width: 280px; }
+            .info-panel { grid-template-columns: repeat(3, 1fr); }
+            .compass-wrapper { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="header-badge"><span>Bayerische Kartenspiele</span></div>
+            <h1>Kompass</h1>
+            <p class="subtitle">Traditionell navigieren • Modern messen</p>
+        </header>
+
+        <main class="compass-wrapper">
+            <div class="compass-card" id="compassCard">
+                <div class="compass-rose" id="compassRose">
+                    <!-- Degree marks -->
+                    <div class="degree-marks" id="degreeMarks"></div>
+
+                    <!-- Direction labels -->
+                    <div class="direction-labels" id="directionLabels"></div>
+
+                    <!-- Needle -->
+                    <div class="needle" id="needle">
+                        <svg class="needle-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <filter id="needleGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <!-- Needle shadow (back) -->
+                            <path class="needle-tip-shadow" d="M50 10 L62 50 L50 58 L38 50 Z" filter="url(#needleGlow)"/>
+                            <!-- Needle tip (front, gold) -->
+                            <path class="needle-tip" d="M50 12 L60 50 L50 56 L40 50 Z" filter="url(#needleGlow)"/>
+                            <!-- Needle base -->
+                            <path class="needle-base" d="M50 50 L56 88 L44 88 Z"/>
+                            <!-- Center circle -->
+                            <circle class="needle-center" cx="50" cy="50" r="10"/>
+                        </svg>
+                    </div>
+
+                    <!-- Pivot center -->
+                    <div class="pivot"></div>
+                </div>
+            </div>
+
+            <div class="info-panel" role="region" aria-label="Kompass-Details">
+                <div class="info-item">
+                    <div class="info-label">Richtung</div>
+                    <div class="info-value accent" id="dirText">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Grad</div>
+                    <div class="info-value" id="degText">—°</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Genauigkeit</div>
+                    <div class="info-value" id="accText">—</div>
+                </div>
+            </div>
+
+            <div class="status-bar" id="statusBar" role="status" aria-live="polite">
+                <span class="status-indicator" aria-hidden="true"></span>
+                <span class="status-text" id="statusText">Initialisiere Kompass…</span>
+            </div>
+        </main>
+
+        <footer>
+            <p>Datenquelle: DeviceOrientation API • <a href="https://github.com/bayerische-kartenspiele" target="_blank" rel="noopener">GitHub Repo</a></p>
+        </footer>
+    </div>
+
+    <!-- Calibration Overlay -->
+    <div class="calibration-overlay" id="calibrationOverlay" role="dialog" aria-modal="true" aria-labelledby="calTitle">
+        <div class="calibration-card">
+            <div class="calibration-icon" aria-hidden="true">🧭</div>
+            <h2 class="calibration-title" id="calTitle">Kompass kalibrieren</h2>
+            <p class="calibration-text">Bewege dein Gerät in einer <strong>Acht-Bewegung</strong> (∞), bis der Kompass bereit ist.</p>
+            <div class="calibration-steps">
+                <div class="cal-step"><span class="cal-step-number">1</span>Halte das Handy flach in der Hand</div>
+                <div class="cal-step"><span class="cal-step-number">2</span>Bewege es in einer liegenden Acht</div>
+                <div class="cal-step"><span class="cal-step-number">3</span>Warte bis "Bereit" erscheint</div>
+            </div>
+            <button class="btn btn-primary" id="calCloseBtn" aria-label="Kalierung schließen">Verstanden</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // DOM Elements
+            const compassCard = document.getElementById('compassCard');
+            const compassRose = document.getElementById('compassRose');
+            const needle = document.getElementById('needle');
+            const degreeMarks = document.getElementById('degreeMarks');
+            const directionLabels = document.getElementById('directionLabels');
+            const dirText = document.getElementById('dirText');
+            const degText = document.getElementById('degText');
+            const accText = document.getElementById('accText');
+            const statusBar = document.getElementById('statusBar');
+            const statusText = document.getElementById('statusText');
+            const calibrationOverlay = document.getElementById('calibrationOverlay');
+            const calCloseBtn = document.getElementById('calCloseBtn');
+
+            // State
+            let currentHeading = 0;
+            let targetHeading = 0;
+            let animationFrame = null;
+            let hasPermission = false;
+            let calibrationShown = false;
+            let lastAccuracy = null;
+
+            // Cardinal directions (German)
+            const cardinalDirections = [
+                { deg: 0, label: 'N', full: 'Norden' },
+                { deg: 22.5, label: 'NO', full: 'Nordost' },
+                { deg: 45, label: 'O', full: 'Osten' },
+                { deg: 67.5, label: 'SO', full: 'Südost' },
+                { deg: 90, label: 'S', full: 'Süden' },
+                { deg: 112.5, label: 'SW', full: 'Südwest' },
+                { deg: 135, label: 'W', full: 'Westen' },
+                { deg: 157.5, label: 'NW', full: 'Nordwest' },
+                { deg: 180, label: 'S', full: 'Süden' },
+                { deg: 202.5, label: 'SW', full: 'Südwest' },
+                { deg: 225, label: 'W', full: 'Westen' },
+                { deg: 247.5, label: 'NW', full: 'Nordwest' },
+                { deg: 270, label: 'N', full: 'Norden' },
+                { deg: 292.5, label: 'NO', full: 'Nordost' },
+                { deg: 315, label: 'O', full: 'Osten' },
+                { deg: 337.5, label: 'SO', full: 'Südost' },
+                { deg: 360, label: 'N', full: 'Norden' }
+            ];
+
+            // Initialize compass rose markings
+            function initCompassRose() {
+                // Degree marks (every 5 degrees, major every 15, cardinal every 45)
+                for (let i = 0; i < 360; i += 5) {
+                    const mark = document.createElement('div');
+                    mark.className = 'degree-mark';
+                    if (i % 45 === 0) mark.classList.add('cardinal');
+                    else if (i % 15 === 0) mark.classList.add('major');
+                    mark.style.transform = `rotate(${i}deg)`;
+                    degreeMarks.appendChild(mark);
+                }
+
+                // Direction labels (every 22.5 degrees)
+                const mainDirs = [
+                    { deg: 0, label: 'N', cardinal: true },
+                    { deg: 45, label: 'O', cardinal: true },
+                    { deg: 90, label: 'S', cardinal: true },
+                    { deg: 135, label: 'W', cardinal: true },
+                    { deg: 22.5, label: 'NO', cardinal: false },
+                    { deg: 67.5, label: 'SO', cardinal: false },
+                    { deg: 112.5, label: 'SW', cardinal: false },
+                    { deg: 157.5, label: 'NW', cardinal: false },
+                    { deg: 202.5, label: 'SW', cardinal: false },
+                    { deg: 247.5, label: 'NW', cardinal: false },
+                    { deg: 292.5, label: 'NO', cardinal: false },
+                    { deg: 337.5, label: 'SO', cardinal: false },
+                ];
+
+                mainDirs.forEach(dir => {
+                    const label = document.createElement('div');
+                    label.className = 'dir-label' + (dir.cardinal ? ' cardinal' : '');
+                    label.style.setProperty('--label-rot', `${dir.deg}deg`);
+                    label.textContent = dir.label;
+                    label.setAttribute('aria-hidden', 'true');
+                    directionLabels.appendChild(label);
+                });
+            }
+
+            // Get direction text from degrees
+            function getDirectionText(degrees) {
+                const normalized = ((degrees % 360) + 360) % 360;
+                const index = Math.round(normalized / 22.5) % 16;
+                const dirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW', 'N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+                return dirs[index];
+            }
+
+            // Get full German direction name
+            function getFullDirection(degrees) {
+                const normalized = ((degrees % 360) + 360) % 360;
+                const index = Math.round(normalized / 22.5) % 16;
+                const dirs = ['Norden', 'Nordost', 'Osten', 'Südost', 'Süden', 'Südwest', 'Westen', 'Nordwest',
+                             'Norden', 'Nordost', 'Osten', 'Südost', 'Süden', 'Südwest', 'Westen', 'Nordwest'];
+                return dirs[index];
+            }
+
+            // Smooth needle animation
+            function animateNeedle() {
+                const diff = ((targetHeading - currentHeading + 180) % 360) - 180;
+                if (Math.abs(diff) > 0.5) {
+                    currentHeading += diff * 0.15;
+                    if (currentHeading >= 360) currentHeading -= 360;
+                    if (currentHeading < 0) currentHeading += 360;
+                    needle.style.transform = `rotate(${currentHeading}deg)`;
+                } else {
+                    currentHeading = targetHeading;
+                    needle.style.transform = `rotate(${currentHeading}deg)`;
+                }
+                animationFrame = requestAnimationFrame(animateNeedle);
+            }
+
+            // Update UI with heading
+            function updateUI(heading, accuracy) {
+                targetHeading = heading;
+
+                const dir = getDirectionText(heading);
+                const fullDir = getFullDirection(heading);
+                const deg = Math.round(heading);
+
+                dirText.textContent = fullDir;
+                degText.textContent = `${deg}°`;
+
+                if (accuracy !== null && accuracy !== undefined) {
+                    if (accuracy < 0) {
+                        accText.textContent = 'Unkalibriert';
+                        accText.style.color = 'var(--danger)';
+                        statusBar.className = 'status-bar calibrating';
+                        statusText.textContent = 'Kalibrierung nötig — Acht-Bewegung machen';
+                        compassCard.classList.remove('active');
+
+                        if (!calibrationShown) {
+                            setTimeout(() => showCalibration(), 2000);
+                        }
+                    } else {
+                        accText.textContent = `±${Math.round(accuracy)}°`;
+                        accText.style.color = accuracy < 15 ? 'var(--success)' : accuracy < 30 ? 'var(--accent-gold)' : 'var(--danger)';
+
+                        if (accuracy < 15) {
+                            statusBar.className = 'status-bar ready';
+                            statusText.textContent = 'Kompass bereit • Genau';
+                            compassCard.classList.add('active');
+                        } else if (accuracy < 30) {
+                            statusBar.className = 'status-bar calibrating';
+                            statusText.textContent = 'Kompass aktiv • Mittlere Genauigkeit';
+                            compassCard.classList.add('active');
+                        } else {
+                            statusBar.className = 'status-bar calibrating';
+                            statusText.textContent = 'Schlechte Genauigkeit • Neukalibrieren';
+                            compassCard.classList.remove('active');
+                        }
+                    }
+                }
+            }
+
+            // Show calibration overlay
+            function showCalibration() {
+                calibrationShown = true;
+                calibrationOverlay.classList.add('show');
+            }
+
+            // Hide calibration overlay
+            function hideCalibration() {
+                calibrationOverlay.classList.remove('show');
+            }
+
+            // Handle DeviceOrientation event
+            function handleOrientation(event) {
+                let heading = null;
+                let accuracy = null;
+
+                // webkitCompassHeading (iOS)
+                if (event.webkitCompassHeading !== undefined) {
+                    heading = event.webkitCompassHeading;
+                    accuracy = event.webkitCompassAccuracy;
+                }
+                // Standard API (Android, others)
+                else if (event.alpha !== null) {
+                    // Alpha is 0-360, 0 = North, but device orientation matters
+                    // For portrait primary, alpha works directly
+                    heading = 360 - event.alpha;
+                    if (heading < 0) heading += 360;
+                    // Absolute property tells us if it's true north
+                    accuracy = event.absolute ? 10 : -1; // Approximate
+                }
+
+                if (heading !== null) {
+                    updateUI(heading, accuracy);
+                }
+            }
+
+            // Request permission (iOS 13+)
+            async function requestPermission() {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        if (permission === 'granted') {
+                            hasPermission = true;
+                            startListening();
+                        } else {
+                            showError('Berechtigung verweigert. Bitte in den Einstellungen aktivieren.');
+                        }
+                    } catch (e) {
+                        showError('Fehler bei Berechtigungsanfrage: ' + e.message);
+                    }
+                } else {
+                    // No permission needed (Android, older iOS)
+                    hasPermission = true;
+                    startListening();
+                }
+            }
+
+            // Start listening for orientation
+            function startListening() {
+                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                // Fallback for non-absolute
+                window.addEventListener('deviceorientation', handleOrientation, true);
+                statusBar.className = 'status-bar calibrating';
+                statusText.textContent = 'Warte auf Kompass-Daten…';
+            }
+
+            // Show error state
+            function showError(message) {
+                statusBar.className = 'status-bar error';
+                statusText.textContent = message;
+                dirText.textContent = '—';
+                degText.textContent = '—°';
+                accText.textContent = '—';
+                compassCard.classList.remove('active');
+            }
+
+            // Initialize
+            function init() {
+                initCompassRose();
+                animateNeedle();
+
+                // Check if API is supported
+                if (!('DeviceOrientationEvent' in window)) {
+                    showError('DeviceOrientation API nicht unterstützt');
+                    return;
+                }
+
+                // Request permission on user interaction
+                const startInteraction = () => {
+                    document.removeEventListener('click', startInteraction);
+                    document.removeEventListener('touchstart', startInteraction);
+                    requestPermission();
+                };
+
+                document.addEventListener('click', startInteraction, { once: true, passive: true });
+                document.addEventListener('touchstart', startInteraction, { once: true, passive: true });
+
+                // Also try auto-start (works on Android)
+                setTimeout(() => {
+                    if (!hasPermission) {
+                        requestPermission();
+                    }
+                }, 500);
+            }
+
+            // Calibration close button
+            calCloseBtn.addEventListener('click', hideCalibration);
+            calibrationOverlay.addEventListener('click', (e) => {
+                if (e.target === calibrationOverlay) hideCalibration();
+            });
+
+            // Handle visibility change (pause when hidden)
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    if (animationFrame) cancelAnimationFrame(animationFrame);
+                } else {
+                    animateNeedle();
+                }
+            });
+
+            // Start
+            init();
+        })();
+    </script>
+</body>
+</html>
