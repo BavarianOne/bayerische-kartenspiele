@@ -769,6 +769,9 @@
             let calibrationSamples = [];
             const CALIBRATION_DURATION = 8000; // 8 seconds
             const CALIBRATION_SAMPLE_COUNT = 50;
+            // Heading smoothing
+            let headingFilter = null;
+            const SMOOTHING_FACTOR = 0.15; // Lower = smoother, higher = more responsive
 
             // Cardinal directions (German)
             const cardinalDirections = [
@@ -869,11 +872,24 @@
 
             // Update UI with heading
             function updateUI(heading, accuracy) {
-                targetHeading = heading;
+                // Low-pass filter for smooth heading
+                if (headingFilter === null) {
+                    headingFilter = heading;
+                } else {
+                    // Handle 0/360 boundary
+                    let diff = heading - headingFilter;
+                    if (diff > 180) diff -= 360;
+                    if (diff < -180) diff += 360;
+                    headingFilter += diff * SMOOTHING_FACTOR;
+                    if (headingFilter >= 360) headingFilter -= 360;
+                    if (headingFilter < 0) headingFilter += 360;
+                }
+                
+                targetHeading = headingFilter;
 
-                const dir = getDirectionText(heading);
-                const fullDir = getFullDirection(heading);
-                const deg = Math.round(heading);
+                const dir = getDirectionText(headingFilter);
+                const fullDir = getFullDirection(headingFilter);
+                const deg = Math.round(headingFilter);
 
                 dirText.textContent = fullDir;
                 degText.textContent = `${deg}°`;
@@ -923,6 +939,8 @@
             // Hide calibration overlay
             function hideCalibration() {
                 calibrationOverlay.classList.remove('show');
+                // Reset heading filter after calibration
+                headingFilter = null;
             }
 
             // Update calibration progress UI
@@ -957,14 +975,17 @@
                         trackCalibrationProgress(event);
                     }
                 }
-                // Standard API (Android, others)
-                else if (event.alpha !== null) {
-                    // Alpha is 0-360, 0 = North, but device orientation matters
-                    // For portrait primary, alpha works directly
+                // Standard API with absolute orientation (Android Chrome, some browsers)
+                else if (event.absolute === true && event.alpha !== null) {
+                    // Absolute orientation: alpha is true compass heading (0° = North)
                     heading = 360 - event.alpha;
                     if (heading < 0) heading += 360;
-                    // Absolute property tells us if it's true north (calibrated)
-                    accuracy = event.absolute ? 10 : -1; // Approximate
+                    accuracy = 10; // Good accuracy when absolute
+                }
+                // Non-absolute orientation (fallback) - compute heading from rotation matrix
+                else if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
+                    heading = computeHeadingFromOrientation(event.alpha, event.beta, event.gamma);
+                    accuracy = event.absolute ? 10 : -1;
                     
                     // Track calibration progress on Android when not absolute
                     if (!event.absolute && calibrationShown && calibrationProgress < 100) {
@@ -975,6 +996,33 @@
                 if (heading !== null) {
                     updateUI(heading, accuracy);
                 }
+            }
+
+            // Compute compass heading from device orientation (alpha, beta, gamma)
+            // Using rotation matrix method - works at any tilt angle
+            function computeHeadingFromOrientation(alpha, beta, gamma) {
+                // Convert to radians
+                const alphaRad = alpha * Math.PI / 180;
+                const betaRad = beta * Math.PI / 180;
+                const gammaRad = gamma * Math.PI / 180;
+
+                // Rotation matrix components (Z-X-Y convention for device orientation)
+                const cA = Math.cos(alphaRad), sA = Math.sin(alphaRad);
+                const cB = Math.cos(betaRad), sB = Math.sin(betaRad);
+                const cG = Math.cos(gammaRad), sG = Math.sin(gammaRad);
+
+                // Earth frame Z-axis in device coordinates
+                // For compass heading, we need the projection of device's -Y axis (top of phone) onto horizontal plane
+                // Formula: heading = atan2(-cos(alpha)*sin(gamma) + sin(alpha)*sin(beta)*cos(gamma), cos(beta)*cos(gamma))
+                const x = -cA * sG + sA * sB * cG;
+                const y = cB * cG;
+                
+                let heading = Math.atan2(x, y) * 180 / Math.PI;
+                heading = 360 - heading; // Convert to 0°=North, clockwise
+                if (heading < 0) heading += 360;
+                if (heading >= 360) heading -= 360;
+                
+                return heading;
             }
 
             // Track calibration progress from device movement
