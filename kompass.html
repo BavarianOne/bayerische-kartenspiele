@@ -316,7 +316,6 @@
         .needle-svg {
             width: 80%;
             height: 80%;
-            transform: rotate(-90deg); /* Point north initially */
             transform-origin: center center;
         }
 
@@ -862,10 +861,11 @@
                     currentHeading += diff * 0.15;
                     if (currentHeading >= 360) currentHeading -= 360;
                     if (currentHeading < 0) currentHeading += 360;
-                    needle.style.transform = `translate(-50%, -50%) rotate(${currentHeading}deg)`;
+                    // Needle rotates OPPOSITE to heading to always point North
+                    needle.style.transform = `translate(-50%, -50%) rotate(${-currentHeading}deg)`;
                 } else {
                     currentHeading = targetHeading;
-                    needle.style.transform = `translate(-50%, -50%) rotate(${currentHeading}deg)`;
+                    needle.style.transform = `translate(-50%, -50%) rotate(${-currentHeading}deg)`;
                 }
                 animationFrame = requestAnimationFrame(animateNeedle);
             }
