@@ -245,7 +245,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) translateY(calc(-50% + 28px)) rotate(var(--label-rot));
+            transform: translate(-50%, -50%) rotate(var(--label-rot));
             font-size: 0.7rem;
             font-weight: 500;
             letter-spacing: 0.1em;
@@ -272,6 +272,33 @@
             height: 2px;
             background: var(--accent-gold);
             border-radius: 1px;
+        }
+
+        /* Calibration progress bar */
+        .calibration-progress {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-dark);
+            border-radius: 3px;
+            margin: 1rem 0;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .calibration-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-gold-dim), var(--accent-gold), var(--accent-gold-light));
+            border-radius: 3px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .calibration-progress-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 0.25rem;
+            font-family: 'Fira Sans', monospace;
         }
 
         /* Compass needle */
@@ -699,12 +726,16 @@
             <div class="calibration-icon" aria-hidden="true">🧭</div>
             <h2 class="calibration-title" id="calTitle">Kompass kalibrieren</h2>
             <p class="calibration-text">Bewege dein Gerät in einer <strong>Acht-Bewegung</strong> (∞), bis der Kompass bereit ist.</p>
+            <div class="calibration-progress" id="calProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Kalibrierungsfortschritt">
+                <div class="calibration-progress-bar" id="calProgressBar"></div>
+            </div>
+            <div class="calibration-progress-text" id="calProgressText">Bereit zur Kalibrierung…</div>
             <div class="calibration-steps">
                 <div class="cal-step"><span class="cal-step-number">1</span>Halte das Handy flach in der Hand</div>
-                <div class="cal-step"><span class="cal-step-number">2</span>Bewege es in einer liegenden Acht</div>
+                <div class="cal-step"><span class="cal-step-number">2</span>Bewege es in einer liegenden Acht (∞)</div>
                 <div class="cal-step"><span class="cal-step-number">3</span>Warte bis "Bereit" erscheint</div>
             </div>
-            <button class="btn btn-primary" id="calCloseBtn" aria-label="Kalierung schließen">Verstanden</button>
+            <button class="btn btn-primary" id="calCloseBtn" aria-label="Kalibrierung schließen">Verstanden</button>
         </div>
     </div>
 
@@ -733,6 +764,11 @@
             let hasPermission = false;
             let calibrationShown = false;
             let lastAccuracy = null;
+            let calibrationProgress = 0;
+            let calibrationStartTime = null;
+            let calibrationSamples = [];
+            const CALIBRATION_DURATION = 8000; // 8 seconds
+            const CALIBRATION_SAMPLE_COUNT = 50;
 
             // Cardinal directions (German)
             const cardinalDirections = [
@@ -757,6 +793,10 @@
 
             // Initialize compass rose markings
             function initCompassRose() {
+                // Get radius for label positioning (half of compass card width minus padding)
+                const compassRect = compassCard.getBoundingClientRect();
+                const radius = Math.min(compassRect.width, compassRect.height) * 0.42;
+
                 // Degree marks (every 5 degrees, major every 15, cardinal every 45)
                 for (let i = 0; i < 360; i += 5) {
                     const mark = document.createElement('div');
@@ -767,7 +807,7 @@
                     degreeMarks.appendChild(mark);
                 }
 
-                // Direction labels (every 22.5 degrees)
+                // Direction labels (every 22.5 degrees) - position at radius
                 const mainDirs = [
                     { deg: 0, label: 'N', cardinal: true },
                     { deg: 45, label: 'O', cardinal: true },
@@ -787,6 +827,8 @@
                     const label = document.createElement('div');
                     label.className = 'dir-label' + (dir.cardinal ? ' cardinal' : '');
                     label.style.setProperty('--label-rot', `${dir.deg}deg`);
+                    // Position label at radius from center
+                    label.style.transform = `translate(-50%, -50%) rotate(${dir.deg}deg) translateY(-${radius}px) rotate(${-dir.deg}deg)`;
                     label.textContent = dir.label;
                     label.setAttribute('aria-hidden', 'true');
                     directionLabels.appendChild(label);
@@ -871,6 +913,10 @@
             // Show calibration overlay
             function showCalibration() {
                 calibrationShown = true;
+                calibrationProgress = 0;
+                calibrationStartTime = Date.now();
+                calibrationSamples = [];
+                updateCalibrationProgress(0);
                 calibrationOverlay.classList.add('show');
             }
 
@@ -879,15 +925,37 @@
                 calibrationOverlay.classList.remove('show');
             }
 
+            // Update calibration progress UI
+            function updateCalibrationProgress(progress) {
+                calibrationProgress = Math.min(100, Math.max(0, progress));
+                const progressBar = document.getElementById('calProgressBar');
+                const progressText = document.getElementById('calProgressText');
+                const progressEl = document.getElementById('calProgress');
+                if (progressBar) progressBar.style.width = `${calibrationProgress}%`;
+                if (progressEl) progressEl.setAttribute('aria-valuenow', calibrationProgress);
+                if (progressText) {
+                    if (calibrationProgress < 100) {
+                        progressText.textContent = `Kalibrierung: ${Math.round(calibrationProgress)}% — Gerät in Acht bewegen`;
+                    } else {
+                        progressText.textContent = 'Kalibrierung abgeschlossen!';
+                        progressBar.style.background = 'linear-gradient(90deg, var(--success), var(--success))';
+                    }
+                }
+            }
+
             // Handle DeviceOrientation event
             function handleOrientation(event) {
                 let heading = null;
                 let accuracy = null;
 
-                // webkitCompassHeading (iOS)
+                // webkitCompassHeading (iOS) - already calibrated, true north
                 if (event.webkitCompassHeading !== undefined) {
                     heading = event.webkitCompassHeading;
                     accuracy = event.webkitCompassAccuracy;
+                    // Track calibration progress on iOS
+                    if (accuracy < 0 && calibrationShown && calibrationProgress < 100) {
+                        trackCalibrationProgress(event);
+                    }
                 }
                 // Standard API (Android, others)
                 else if (event.alpha !== null) {
@@ -895,12 +963,71 @@
                     // For portrait primary, alpha works directly
                     heading = 360 - event.alpha;
                     if (heading < 0) heading += 360;
-                    // Absolute property tells us if it's true north
+                    // Absolute property tells us if it's true north (calibrated)
                     accuracy = event.absolute ? 10 : -1; // Approximate
+                    
+                    // Track calibration progress on Android when not absolute
+                    if (!event.absolute && calibrationShown && calibrationProgress < 100) {
+                        trackCalibrationProgress(event);
+                    }
                 }
 
                 if (heading !== null) {
                     updateUI(heading, accuracy);
+                }
+            }
+
+            // Track calibration progress from device movement
+            function trackCalibrationProgress(event) {
+                const now = Date.now();
+                if (!calibrationStartTime) calibrationStartTime = now;
+                
+                // Collect motion samples (alpha, beta, gamma)
+                const sample = {
+                    alpha: event.alpha || 0,
+                    beta: event.beta || 0,
+                    gamma: event.gamma || 0,
+                    time: now
+                };
+                calibrationSamples.push(sample);
+                
+                // Keep only recent samples
+                if (calibrationSamples.length > CALIBRATION_SAMPLE_COUNT) {
+                    calibrationSamples.shift();
+                }
+                
+                // Calculate progress based on time and motion variety
+                const timeElapsed = now - calibrationStartTime;
+                const timeProgress = Math.min(100, (timeElapsed / CALIBRATION_DURATION) * 100);
+                
+                // Calculate motion variety (how much device has moved in different directions)
+                let motionVariety = 0;
+                if (calibrationSamples.length > 5) {
+                    const alphas = calibrationSamples.map(s => s.alpha);
+                    const betas = calibrationSamples.map(s => s.beta);
+                    const gammas = calibrationSamples.map(s => s.gamma);
+                    
+                    const alphaRange = Math.max(...alphas) - Math.min(...alphas);
+                    const betaRange = Math.max(...betas) - Math.min(...betas);
+                    const gammaRange = Math.max(...gammas) - Math.min(...gammas);
+                    
+                    // Normalize: full rotation = 360, tilt = 180, roll = 90
+                    motionVariety = Math.min(100, 
+                        (alphaRange / 360) * 40 + 
+                        (betaRange / 180) * 30 + 
+                        (gammaRange / 90) * 30
+                    );
+                }
+                
+                // Combined progress: time-based + motion-based
+                const combinedProgress = Math.min(100, timeProgress * 0.5 + motionVariety * 0.5);
+                updateCalibrationProgress(combinedProgress);
+                
+                // Auto-hide when complete
+                if (combinedProgress >= 100) {
+                    setTimeout(() => {
+                        if (calibrationShown) hideCalibration();
+                    }, 1000);
                 }
             }
 
@@ -948,6 +1075,18 @@
             function init() {
                 initCompassRose();
                 animateNeedle();
+
+                // Re-init compass rose on resize (for label positioning)
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        // Clear and re-create labels
+                        degreeMarks.innerHTML = '';
+                        directionLabels.innerHTML = '';
+                        initCompassRose();
+                    }, 150);
+                });
 
                 // Check if API is supported
                 if (!('DeviceOrientationEvent' in window)) {
