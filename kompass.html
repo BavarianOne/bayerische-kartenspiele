@@ -279,6 +279,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 10;
             pointer-events: none;
             transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -289,6 +290,7 @@
             width: 80%;
             height: 80%;
             transform: rotate(-90deg); /* Point north initially */
+            transform-origin: center center;
         }
 
         .needle-tip { fill: #e8c86d; filter: drop-shadow(0 0 4px rgba(232,200,109,0.8)); }
@@ -432,6 +434,36 @@
 
         .status-text {
             font-weight: 500;
+        }
+
+        /* Calibrate Button in Status Bar */
+        .btn-calibrate {
+            appearance: none;
+            border: none;
+            background: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            opacity: 0.6;
+        }
+
+        .btn-calibrate:hover,
+        .btn-calibrate:focus {
+            opacity: 1;
+            background: rgba(201,168,76,0.15);
+            transform: scale(1.1);
+        }
+
+        .btn-calibrate:active {
+            transform: scale(0.95);
+        }
+
+        .btn-calibrate:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 2px;
         }
 
         /* Calibration Modal */
@@ -652,6 +684,7 @@
             <div class="status-bar" id="statusBar" role="status" aria-live="polite">
                 <span class="status-indicator" aria-hidden="true"></span>
                 <span class="status-text" id="statusText">Initialisiere Kompass…</span>
+                <button class="btn-calibrate" id="btnCalibrate" aria-label="Kalibrierung starten" title="Kalibrierung starten">🧭</button>
             </div>
         </main>
 
@@ -784,10 +817,10 @@
                     currentHeading += diff * 0.15;
                     if (currentHeading >= 360) currentHeading -= 360;
                     if (currentHeading < 0) currentHeading += 360;
-                    needle.style.transform = `rotate(${currentHeading}deg)`;
+                    needle.style.transform = `translate(-50%, -50%) rotate(${currentHeading}deg)`;
                 } else {
                     currentHeading = targetHeading;
-                    needle.style.transform = `rotate(${currentHeading}deg)`;
+                    needle.style.transform = `translate(-50%, -50%) rotate(${currentHeading}deg)`;
                 }
                 animationFrame = requestAnimationFrame(animateNeedle);
             }
@@ -944,6 +977,16 @@
             calCloseBtn.addEventListener('click', hideCalibration);
             calibrationOverlay.addEventListener('click', (e) => {
                 if (e.target === calibrationOverlay) hideCalibration();
+            });
+
+            // Manual calibrate button
+            const btnCalibrate = document.getElementById('btnCalibrate');
+            btnCalibrate.addEventListener('click', () => {
+                showCalibration();
+                // Re-request permission on iOS if needed
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    requestPermission();
+                }
             });
 
             // Handle visibility change (pause when hidden)
