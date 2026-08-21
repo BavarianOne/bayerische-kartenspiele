@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-21T07:46:13.128245+00:00",
-  "workflowRunAt": "2026-08-21T07:46:13.128245+00:00",
+  "fetchedAt": "2026-08-21T08:44:07.530575+00:00",
+  "workflowRunAt": "2026-08-21T08:44:07.530575+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -129,6 +129,14 @@
         "address": null,
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
+        "price": 2.029
+      },
+      {
+        "lat": "48.558857",
+        "lon": "12.1654835",
+        "address": null,
+        "name": "Sprint",
+        "radius": "60",
         "price": 2.039
       },
       {
@@ -164,6 +172,14 @@
         "price": 2.049
       },
       {
+        "lat": "48.546207",
+        "lon": "12.181083",
+        "address": null,
+        "name": "ARAL",
+        "radius": "60",
+        "price": 2.049
+      },
+      {
         "lat": "48.547993",
         "lon": "12.13178",
         "address": null,
@@ -172,34 +188,26 @@
         "price": 2.049
       },
       {
-        "lat": "48.558857",
-        "lon": "12.1654835",
-        "address": null,
-        "name": "Sprint",
-        "radius": "60",
-        "price": 2.049
-      },
-      {
-        "lat": "48.546207",
-        "lon": "12.181083",
-        "address": null,
-        "name": "ARAL",
-        "radius": "60",
-        "price": 2.059
-      },
-      {
         "lat": "48.55888",
         "lon": "12.166602",
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.059
+        "price": 2.049
       },
       {
         "lat": "48.556646",
         "lon": "12.153395",
         "address": null,
         "name": "ESSO",
+        "radius": "60",
+        "price": 2.049
+      },
+      {
+        "lat": "48.54391202",
+        "lon": "12.15421289",
+        "address": null,
+        "name": "SIT",
         "radius": "60",
         "price": 2.059
       },
@@ -226,14 +234,6 @@
         "name": "Shell",
         "radius": "60",
         "price": 2.069
-      },
-      {
-        "lat": "48.54391202",
-        "lon": "12.15421289",
-        "address": null,
-        "name": "SIT",
-        "radius": "60",
-        "price": 2.069
       }
     ],
     "e5": [
@@ -243,13 +243,21 @@
         "address": null,
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
-        "price": 2.099
+        "price": 2.089
       },
       {
         "lat": "48.54391202",
         "lon": "12.15421289",
         "address": null,
         "name": "SIT",
+        "radius": "60",
+        "price": 2.089
+      },
+      {
+        "lat": "48.558857",
+        "lon": "12.1654835",
+        "address": null,
+        "name": "Sprint",
         "radius": "60",
         "price": 2.099
       },
@@ -286,6 +294,14 @@
         "price": 2.109
       },
       {
+        "lat": "48.546207",
+        "lon": "12.181083",
+        "address": null,
+        "name": "ARAL",
+        "radius": "60",
+        "price": 2.109
+      },
+      {
         "lat": "48.547993",
         "lon": "12.13178",
         "address": null,
@@ -294,28 +310,12 @@
         "price": 2.109
       },
       {
-        "lat": "48.558857",
-        "lon": "12.1654835",
-        "address": null,
-        "name": "Sprint",
-        "radius": "60",
-        "price": 2.109
-      },
-      {
-        "lat": "48.546207",
-        "lon": "12.181083",
-        "address": null,
-        "name": "ARAL",
-        "radius": "60",
-        "price": 2.119
-      },
-      {
         "lat": "48.55888",
         "lon": "12.166602",
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.119
+        "price": 2.109
       },
       {
         "lat": "48.556646",
@@ -323,7 +323,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.119
+        "price": 2.109
       },
       {
         "lat": "48.55575",
