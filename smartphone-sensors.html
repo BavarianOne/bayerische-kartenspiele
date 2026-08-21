@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a3a2e">
+  <meta name="description" content="Smartphone Sensoren - Kompass, Beschleunigung, Gyroskop">
+  <title>📱 Smartphone Sensoren</title>
+  <style>
+    :root {
+      --bg: #0d1b14;
+      --bg-card: #13291f;
+      --fg: #e8f5e9;
+      --fg-muted: #8fc996;
+      --accent: #4ade80;
+      --accent-dim: #22c55e;
+      --danger: #ef4444;
+      --warning: #fbbf24;
+      --card-border: #1f4632;
+      --needle: #f87171;
+      --needle-shadow: #991b1b;
+      --rose-mark: #3a6b4d;
+      --rose-label: #a7d8ad;
+      --overlay-bg: rgba(13, 27, 20, 0.95);
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --radius: 16px;
+      --radius-sm: 8px;
+      --transition: 0.15s ease-out;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f0f7f2;
+        --bg-card: #ffffff;
+        --fg: #1a3a2e;
+        --fg-muted: #3a6b4d;
+        --accent: #16a34a;
+        --accent-dim: #15803d;
+        --card-border: #d1e7d8;
+        --needle: #dc2626;
+        --needle-shadow: #991b1b;
+        --rose-mark: #8fc996;
+        --rose-label: #2d5a3d;
+        --overlay-bg: rgba(240, 247, 242, 0.98);
+        --shadow: 0 8px 32px rgba(0,0,0,0.15);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+      .needle { transition: transform 0.01s !important; }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+    }
+
+    .app-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 100%;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    header {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--card-border);
+      background: linear-gradient(180deg, var(--bg-card), transparent);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      margin-top: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-badge.calibrated { background: rgba(34, 197, 94, 0.2); color: var(--accent); }
+    .status-badge.uncalibrated { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+    .status-badge.denied { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .status-badge.pending { background: rgba(143, 201, 150, 0.2); color: var(--fg-muted); }
+
+    .status-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    main.compass-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      gap: 1.5rem;
+      min-height: 0;
+    }
+
+    .compass-card {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 1/1;
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      touch-action: none;
+      overflow: hidden;
+    }
+
+    .compass-rose {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .degree-marks {
+      position: absolute;
+      inset: 0;
+    }
+
+    .degree-mark {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 1px;
+      transform-origin: bottom center;
+      background: var(--rose-mark);
+      opacity: 0.6;
+    }
+
+    .degree-mark.major {
+      width: 2px;
+      height: 18px;
+      opacity: 1;
+    }
+
+    .degree-mark.mid {
+      height: 12px;
+      opacity: 0.8;
+    }
+
+    .degree-mark.minor {
+      height: 6px;
+      opacity: 0.4;
+    }
+
+    .direction-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .direction-label {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--rose-label);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .needle {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 4px;
+      height: 50%;
+      transform: translate(-50%, -50%) rotate(var(--heading, 0deg));
+      transform-origin: center bottom;
+      z-index: 5;
+      transition: transform var(--transition);
+      will-change: transform;
+    }
+
+    .needle::before,
+    .needle::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .needle::before {
+      top: 0;
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 28px solid var(--needle);
+      filter: drop-shadow(0 2px 4px var(--needle-shadow));
+    }
+
+    .needle::after {
+      bottom: 0;
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 20px solid var(--needle-shadow);
+    }
+
+    .pivot {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 14px; height: 14px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-dim));
+      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
+      z-index: 6;
+    }
+
+    .pivot::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, transparent 60%, rgba(0,0,0,0.2));
+    }
+
+    .info-panel {
+      width: 100%;
+      max-width: 320px;
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+
+    .info-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-muted);
+    }
+
+    .info-value {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--fg);
+    }
+
+    .info-value small { font-size: 0.7rem; color: var(--fg-muted); }
+
+    .status-bar {
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .btn-calibrate {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform 0.1s;
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .btn-calibrate:active { transform: scale(0.97); }
+    .btn-calibrate:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .btn-calibrate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .calibration-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 100;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .calibration-overlay.open { display: flex; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .calibration-modal {
+      width: 100%;
+      max-width: 320px;
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .calibration-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .calibration-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .calibration-text { color: var(--fg-muted); font-size: 0.875rem; margin-bottom: 1.5rem; line-height: 1.6; }
+
+    .progress-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-dim));
+      border-radius: 4px;
+      transition: width 0.3s ease-out;
+    }
+
+    .progress-text { font-size: 0.75rem; color: var(--fg-muted); }
+
+    .calibration-hint {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      text-align: left;
+    }
+
+    .calibration-hint li { display: flex; align-items: flex-start; gap: 0.5rem; }
+    .calibration-hint li::before { content: '•'; font-weight: bold; flex-shrink: 0; }
+
+    .btn-close {
+      margin-top: 1rem;
+      padding: 0.625rem 1.25rem;
+      border: 1px solid var(--card-border);
+      background: transparent;
+      color: var(--fg);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition);
+      min-height: 44px;
+    }
+    .btn-close:hover { background: var(--bg); }
+    .btn-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    footer {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      border-top: 1px solid var(--card-border);
+      background: linear-gradient(0deg, var(--bg-card), transparent);
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>📱 Smartphone Sensoren</h1>
+      <div id="statusBadge" class="status-badge pending" aria-live="polite" aria-atomic="true">
+        Initialisiere…
+      </div>
+    </header>
+
+    <main class="compass-wrapper">
+      <div class="compass-card" role="img" aria-label="Digitaler Kompass">
+        <div class="compass-rose">
+          <div class="degree-marks" id="degreeMarks" aria-hidden="true"></div>
+          <div class="direction-labels" id="directionLabels" aria-hidden="true"></div>
+          <div class="needle" id="needle" aria-hidden="true" style="--heading: 0deg;"></div>
+          <div class="pivot" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="info-panel" aria-label="Sensordaten">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Kompass (°)</span>
+            <span class="info-value" id="valHeading">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Neigung L/R (°)</span>
+            <span class="info-value" id="valGamma">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Neigung V/H (°)</span>
+            <span class="info-value" id="valBeta">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Genauigkeit (°)</span>
+            <span class="info-value" id="valAccuracy">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Beschl. X (m/s²)</span>
+            <span class="info-value" id="valAccX">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Beschl. Y (m/s²)</span>
+            <span class="info-value" id="valAccY">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Beschl. Z (m/s²)</span>
+            <span class="info-value" id="valAccZ">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Rot. α (°/s)</span>
+            <span class="info-value" id="valRotAlpha">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Rot. β (°/s)</span>
+            <span class="info-value" id="valRotBeta">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Rot. γ (°/s)</span>
+            <span class="info-value" id="valRotGamma">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <button class="btn-calibrate" id="btnCalibrate" aria-label="Kalibrierung starten" disabled>
+          🧭 Kalibrieren
+        </button>
+      </div>
+    </main>
+
+    <div class="calibration-overlay" id="calibrationOverlay" role="dialog" aria-modal="true" aria-labelledby="calTitle" aria-describedby="calDesc">
+      <div class="calibration-modal">
+        <div class="calibration-icon" aria-hidden="true">🧭</div>
+        <h2 id="calTitle" class="calibration-title">Kompass kalibrieren</h2>
+        <p id="calDesc" class="calibration-text">
+          Bewege das Gerät in einer liegenden 8-Bewegung, bis der Fortschritt 100% erreicht.
+        </p>
+        <div class="progress-container">
+          <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Kalibrierungsfortschritt">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <p class="progress-text" id="progressText">0% — Gerät bewegen…</p>
+        </div>
+        <ul class="calibration-hint">
+          <li>Halte das Gerät flach in der Hand</li>
+          <li>Zeichne eine liegende 8 (∞) in der Luft</li>
+          <li>Bewege alle Achsen gleichmäßig</li>
+          <li>Dauert ca. 8 Sekunden</li>
+        </ul>
+        <button class="btn-close" id="btnCloseCalibration" aria-label="Kalibrierung schließen">Später</button>
+      </div>
+    </div>
+
+    <footer>
+      <p>Benötigt HTTPS für iOS Sensor-Zugriff • <a href="https://developer.mozilla.org/docs/Web/API/DeviceOrientationEvent" target="_blank" rel="noopener">MDN Referenz</a></p>
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ============ STATE ============
+      const state = {
+        heading: 0,
+        targetHeading: 0,
+        beta: 0,
+        gamma: 0,
+        accuracy: null,
+        acceleration: { x: 0, y: 0, z: 0 },
+        rotationRate: { alpha: 0, beta: 0, gamma: 0 },
+        calibrated: false,
+        calibrationProgress: 0,
+        isIOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
+        permissionGranted: false,
+        permissionRequested: false,
+        samples: [],
+        calibrationStart: 0,
+        animating: false,
+        prefersReducedMotion: false
+      };
+
+      // ============ CONSTANTS ============
+      const CALIBRATION_DURATION = 8000;
+      const CALIBRATION_SAMPLE_COUNT = 50;
+      const DEBOUNCE_MS = 150;
+
+      // ============ DOM ELEMENTS ============
+      const els = {
+        statusBadge: document.getElementById('statusBadge'),
+        needle: document.getElementById('needle'),
+        degreeMarks: document.getElementById('degreeMarks'),
+        directionLabels: document.getElementById('directionLabels'),
+        btnCalibrate: document.getElementById('btnCalibrate'),
+        calibrationOverlay: document.getElementById('calibrationOverlay'),
+        progressFill: document.getElementById('progressFill'),
+        progressText: document.getElementById('progressText'),
+        btnCloseCalibration: document.getElementById('btnCloseCalibration'),
+        valHeading: document.getElementById('valHeading'),
+        valBeta: document.getElementById('valBeta'),
+        valGamma: document.getElementById('valGamma'),
+        valAccuracy: document.getElementById('valAccuracy'),
+        valAccX: document.getElementById('valAccX'),
+        valAccY: document.getElementById('valAccY'),
+        valAccZ: document.getElementById('valAccZ'),
+        valRotAlpha: document.getElementById('valRotAlpha'),
+        valRotBeta: document.getElementById('valRotBeta'),
+        valRotGamma: document.getElementById('valRotGamma'),
+      };
+
+      // ============ UTILITIES ============
+      const fmt = (n, d = 1) => n === null || n === undefined || isNaN(n) ? '—' : Number(n).toFixed(d);
+      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+      function shortestPathDiff(target, current) {
+        return ((target - current + 180) % 360) - 180;
+      }
+
+      function debounce(fn, ms) {
+        let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+      }
+
+      // ============ COMPASS ROSE ============
+      const DIRECTIONS = [
+        { deg: 0, label: 'N' }, { deg: 45, label: 'NO' }, { deg: 90, label: 'O' },
+        { deg: 135, label: 'SO' }, { deg: 180, label: 'S' }, { deg: 225, label: 'SW' },
+        { deg: 270, label: 'W' }, { deg: 315, label: 'NW' }
+      ];
+
+      function initCompassRose() {
+        const card = document.querySelector('.compass-card');
+        const rect = card.getBoundingClientRect();
+        const radius = Math.min(rect.width, rect.height) * 0.42;
+
+        // Degree marks
+        els.degreeMarks.innerHTML = '';
+        for (let i = 0; i < 360; i += 10) {
+          const mark = document.createElement('div');
+          mark.className = 'degree-mark';
+          if (i % 30 === 0) {
+            mark.classList.add('major');
+            mark.style.height = '18px';
+          } else if (i % 10 === 0) {
+            mark.classList.add('mid');
+            mark.style.height = '12px';
+          } else {
+            mark.classList.add('minor');
+            mark.style.height = '6px';
+          }
+          mark.style.transform = `translate(-50%, -100%) rotate(${i}deg)`;
+          els.degreeMarks.appendChild(mark);
+        }
+
+        // Direction labels
+        els.directionLabels.innerHTML = '';
+        DIRECTIONS.forEach(dir => {
+          const label = document.createElement('div');
+          label.className = 'direction-label';
+          label.textContent = dir.label;
+          label.style.transform = `translate(-50%, -50%) rotate(${dir.deg}deg) translateY(-${radius}px) rotate(${-dir.deg}deg)`;
+          els.directionLabels.appendChild(label);
+        });
+      }
+
+      // ============ UI UPDATES ============
+      function updateStatusBadge() {
+        const badge = els.statusBadge;
+        badge.className = 'status-badge';
+        if (!state.permissionGranted && state.isIOS) {
+          badge.classList.add('pending');
+          badge.textContent = 'iOS: Permission nötig';
+        } else if (state.calibrated) {
+          badge.classList.add('calibrated');
+          badge.textContent = 'Kalibriert';
+        } else {
+          badge.classList.add('uncalibrated');
+          badge.textContent = 'Nicht kalibriert';
+        }
+      }
+
+      function updateInfoPanel() {
+        els.valHeading.textContent = fmt(state.heading) + '°';
+        els.valBeta.textContent = fmt(state.beta) + '°';
+        els.valGamma.textContent = fmt(state.gamma) + '°';
+        els.valAccuracy.textContent = state.accuracy !== null ? fmt(state.accuracy) + '°' : '—';
+        els.valAccX.textContent = fmt(state.acceleration.x, 2);
+        els.valAccY.textContent = fmt(state.acceleration.y, 2);
+        els.valAccZ.textContent = fmt(state.acceleration.z, 2);
+        els.valRotAlpha.textContent = fmt(state.rotationRate.alpha, 2);
+        els.valRotBeta.textContent = fmt(state.rotationRate.beta, 2);
+        els.valRotGamma.textContent = fmt(state.rotationRate.gamma, 2);
+      }
+
+      function updateCalibrationUI(progress) {
+        state.calibrationProgress = progress;
+        els.progressFill.style.width = progress + '%';
+        els.progressFill.parentElement.setAttribute('aria-valuenow', Math.round(progress));
+        if (progress >= 100) {
+          els.progressText.textContent = '100% — Fertig!';
+        } else {
+          els.progressText.textContent = Math.round(progress) + '% — Gerät bewegen…';
+        }
+      }
+
+      // ============ ANIMATION LOOP ============
+      function animateNeedle() {
+        if (state.prefersReducedMotion) {
+          state.heading = state.targetHeading;
+          els.needle.style.setProperty('--heading', state.heading + 'deg');
+          return;
+        }
+
+        const diff = shortestPathDiff(state.targetHeading, state.heading);
+        if (Math.abs(diff) > 0.5) {
+          state.heading += diff * 0.15;
+          els.needle.style.setProperty('--heading', state.heading + 'deg');
+        } else {
+          state.heading = state.targetHeading;
+          els.needle.style.setProperty('--heading', state.heading + 'deg');
+        }
+        state.animating = true;
+        requestAnimationFrame(animateNeedle);
+      }
+
+      // ============ CALIBRATION LOGIC ============
+      function trackCalibrationProgress(event) {
+        if (state.calibrationProgress >= 100) return;
+
+        const sample = {
+          alpha: event.alpha,
+          beta: event.beta,
+          gamma: event.gamma,
+          time: Date.now()
+        };
+        state.samples.push(sample);
+        if (state.samples.length > CALIBRATION_SAMPLE_COUNT) state.samples.shift();
+
+        const elapsed = Date.now() - state.calibrationStart;
+        const timeProgress = Math.min(100, (elapsed / CALIBRATION_DURATION) * 100);
+
+        if (state.samples.length >= 5) {
+          const alphas = state.samples.map(s => s.alpha).filter(v => v !== null);
+          const betas = state.samples.map(s => s.beta).filter(v => v !== null);
+          const gammas = state.samples.map(s => s.gamma).filter(v => v !== null);
+
+          const alphaRange = alphas.length ? Math.max(...alphas) - Math.min(...alphas) : 0;
+          const betaRange = betas.length ? Math.max(...betas) - Math.min(...betas) : 0;
+          const gammaRange = gammas.length ? Math.max(...gammas) - Math.min(...gammas) : 0;
+
+          const motionVariety = Math.min(100,
+            (alphaRange / 360) * 40 +
+            (betaRange / 180) * 30 +
+            (gammaRange / 90) * 30
+          );
+
+          const progress = Math.min(100, timeProgress * 0.5 + motionVariety * 0.5);
+          updateCalibrationUI(progress);
+
+          if (progress >= 100) {
+            state.calibrated = true;
+            setTimeout(() => closeCalibration(), 800);
+          }
+        } else {
+          updateCalibrationUI(timeProgress * 0.3);
+        }
+      }
+
+      function openCalibration() {
+        state.calibrationStart = Date.now();
+        state.samples = [];
+        state.calibrationProgress = 0;
+        updateCalibrationUI(0);
+        els.calibrationOverlay.classList.add('open');
+        els.btnCalibrate.disabled = true;
+
+        if (state.isIOS && !state.permissionGranted) {
+          requestIOSPermission();
+        }
+      }
+
+      function closeCalibration() {
+        els.calibrationOverlay.classList.remove('open');
+        els.btnCalibrate.disabled = false;
+        updateStatusBadge();
+      }
+
+      // ============ iOS PERMISSION ============
+      async function requestIOSPermission() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          try {
+            const permission = await DeviceOrientationEvent.requestPermission();
+            if (permission === 'granted') {
+              state.permissionGranted = true;
+              startListening();
+              updateStatusBadge();
+            } else {
+              state.permissionGranted = false;
+              updateStatusBadge();
+              els.statusBadge.classList.add('denied');
+              els.statusBadge.textContent = 'Abgelehnt';
+            }
+          } catch (e) {
+            console.error('Permission error:', e);
+            state.permissionGranted = false;
+            updateStatusBadge();
+          }
+        }
+      }
+
+      // ============ SENSOR HANDLERS ============
+      function handleOrientation(event) {
+        // iOS webkitCompassHeading (true north, calibrated)
+        if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading >= 0) {
+          state.targetHeading = event.webkitCompassHeading;
+          state.accuracy = event.webkitCompassAccuracy;
+          state.calibrated = event.webkitCompassAccuracy >= 0 && event.webkitCompassAccuracy < 50;
+        }
+        // Android: event.absolute indicates fused sensor (true north)
+        else if (event.absolute && event.alpha !== null) {
+          state.targetHeading = (360 - event.alpha) % 360;
+          state.accuracy = null; // Android doesn't provide accuracy directly
+          state.calibrated = true; // Assume calibrated if absolute=true
+        }
+        // Fallback: raw alpha (magnetic north, uncalibrated)
+        else if (event.alpha !== null) {
+          state.targetHeading = (360 - event.alpha) % 360;
+          state.accuracy = null;
+          state.calibrated = false;
+        }
+
+        state.beta = event.beta ?? 0;
+        state.gamma = event.gamma ?? 0;
+
+        if (els.calibrationOverlay.classList.contains('open')) {
+          trackCalibrationProgress(event);
+        }
+
+        updateInfoPanel();
+        updateStatusBadge();
+      }
+
+      function handleMotion(event) {
+        if (event.acceleration) {
+          state.acceleration.x = event.acceleration.x ?? 0;
+          state.acceleration.y = event.acceleration.y ?? 0;
+          state.acceleration.z = event.acceleration.z ?? 0;
+        }
+        if (event.accelerationIncludingGravity) {
+          // Could use this for tilt compensation if needed
+        }
+        if (event.rotationRate) {
+          state.rotationRate.alpha = event.rotationRate.alpha ?? 0;
+          state.rotationRate.beta = event.rotationRate.beta ?? 0;
+          state.rotationRate.gamma = event.rotationRate.gamma ?? 0;
+        }
+        updateInfoPanel();
+      }
+
+      // ============ LISTENER MANAGEMENT ============
+      function startListening() {
+        window.addEventListener('deviceorientation', handleOrientation);
+        window.addEventListener('devicemotion', handleMotion);
+
+        if (!state.animating) {
+          animateNeedle();
+        }
+      }
+
+      function stopListening() {
+        window.removeEventListener('deviceorientation', handleOrientation);
+        window.removeEventListener('devicemotion', handleMotion);
+      }
+
+      // ============ EVENT BINDINGS ============
+      els.btnCalibrate.addEventListener('click', openCalibration);
+      els.btnCloseCalibration.addEventListener('click', closeCalibration);
+      els.calibrationOverlay.addEventListener('click', e => {
+        if (e.target === els.calibrationOverlay) closeCalibration();
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && els.calibrationOverlay.classList.contains('open')) {
+          closeCalibration();
+        }
+      });
+
+      // Resize handler for compass rose
+      const debouncedResize = debounce(initCompassRose, DEBOUNCE_MS);
+      window.addEventListener('resize', debouncedResize);
+      window.addEventListener('orientationchange', debouncedResize);
+
+      // Reduced motion detection
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      state.prefersReducedMotion = mq.matches;
+      mq.addEventListener('change', e => { state.prefersReducedMotion = e.matches; });
+
+      // ============ INITIALIZATION ============
+      function init() {
+        initCompassRose();
+        updateStatusBadge();
+        updateInfoPanel();
+
+        // iOS: Request permission on first user gesture
+        if (state.isIOS && typeof DeviceOrientationEvent.requestPermission === 'function') {
+          const gestureHandler = async () => {
+            if (state.permissionRequested) return;
+            state.permissionRequested = true;
+            document.removeEventListener('click', gestureHandler);
+            document.removeEventListener('touchstart', gestureHandler);
+            await requestIOSPermission();
+            if (state.permissionGranted) {
+              startListening();
+            }
+          };
+          document.addEventListener('click', gestureHandler, { once: true, passive: true });
+          document.addEventListener('touchstart', gestureHandler, { once: true, passive: true });
+        } else {
+          // Non-iOS or older iOS: start immediately
+          startListening();
+          state.permissionGranted = true;
+          updateStatusBadge();
+        }
+      }
+
+      // Start when DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+</html>
