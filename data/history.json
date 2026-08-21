@@ -15983,6 +15983,258 @@
       "station_key": "Shell|48.613932|12.219227",
       "fuel": "Super E5",
       "price": 2.129
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Supermarkt-Tankstelle|48.5519|12.1616",
+      "fuel": "Diesel",
+      "price": 2.179
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "SIT|48.54391202|12.15421289",
+      "fuel": "Diesel",
+      "price": 2.179
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Sprint|48.558857|12.1654835",
+      "fuel": "Diesel",
+      "price": 2.189
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ARAL|48.546207|12.181083",
+      "fuel": "Diesel",
+      "price": 2.199
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.55888|12.166602",
+      "fuel": "Diesel",
+      "price": 2.199
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Diesel",
+      "price": 2.199
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.55575|12.1376",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.546949|12.112422",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "AGIP ENI|48.542111332336|12.13959734008",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.613932|12.219227",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "TotalEnergies|48.547993|12.13178",
+      "fuel": "Diesel",
+      "price": 2.209
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Supermarkt-Tankstelle|48.5519|12.1616",
+      "fuel": "Super E10",
+      "price": 2.029
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Sprint|48.558857|12.1654835",
+      "fuel": "Super E10",
+      "price": 2.039
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.546949|12.112422",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "AGIP ENI|48.542111332336|12.13959734008",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ARAL|48.546207|12.181083",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "TotalEnergies|48.547993|12.13178",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.55888|12.166602",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Super E10",
+      "price": 2.049
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "SIT|48.54391202|12.15421289",
+      "fuel": "Super E10",
+      "price": 2.059
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.55575|12.1376",
+      "fuel": "Super E10",
+      "price": 2.069
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Super E10",
+      "price": 2.069
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.613932|12.219227",
+      "fuel": "Super E10",
+      "price": 2.069
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Supermarkt-Tankstelle|48.5519|12.1616",
+      "fuel": "Super E5",
+      "price": 2.089
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "SIT|48.54391202|12.15421289",
+      "fuel": "Super E5",
+      "price": 2.089
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Sprint|48.558857|12.1654835",
+      "fuel": "Super E5",
+      "price": 2.099
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.546949|12.112422",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "AGIP ENI|48.542111332336|12.13959734008",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ARAL|48.546207|12.181083",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "TotalEnergies|48.547993|12.13178",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.55888|12.166602",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Super E5",
+      "price": 2.109
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.55575|12.1376",
+      "fuel": "Super E5",
+      "price": 2.129
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Super E5",
+      "price": 2.129
+    },
+    {
+      "timestamp": "2026-08-21T09:39:53.732383+00:00",
+      "station_key": "Shell|48.613932|12.219227",
+      "fuel": "Super E5",
+      "price": 2.129
     }
   ]
 }
