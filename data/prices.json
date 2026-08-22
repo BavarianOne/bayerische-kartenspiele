@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-22T16:53:27.148561+00:00",
-  "workflowRunAt": "2026-08-22T16:53:27.148561+00:00",
+  "fetchedAt": "2026-08-22T17:23:44.941429+00:00",
+  "workflowRunAt": "2026-08-22T17:23:44.941429+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -132,6 +132,22 @@
         "price": 2.109
       },
       {
+        "lat": "48.586643",
+        "lon": "12.189711",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.119
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.119
+      },
+      {
         "lat": "48.558857",
         "lon": "12.1654835",
         "address": null,
@@ -152,22 +168,6 @@
         "lon": "12.166602",
         "address": null,
         "name": "ESSO",
-        "radius": "60",
-        "price": 2.129
-      },
-      {
-        "lat": "48.586643",
-        "lon": "12.189711",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.129
-      },
-      {
-        "lat": "48.613932",
-        "lon": "12.219227",
-        "address": null,
-        "name": "Shell",
         "radius": "60",
         "price": 2.129
       },
@@ -254,6 +254,22 @@
         "price": 2.169
       },
       {
+        "lat": "48.586643",
+        "lon": "12.189711",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.179
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.179
+      },
+      {
         "lat": "48.558857",
         "lon": "12.1654835",
         "address": null,
@@ -274,22 +290,6 @@
         "lon": "12.166602",
         "address": null,
         "name": "ESSO",
-        "radius": "60",
-        "price": 2.189
-      },
-      {
-        "lat": "48.586643",
-        "lon": "12.189711",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.189
-      },
-      {
-        "lat": "48.613932",
-        "lon": "12.219227",
-        "address": null,
-        "name": "Shell",
         "radius": "60",
         "price": 2.189
       },
