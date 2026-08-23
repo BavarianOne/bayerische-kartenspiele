@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-23T10:27:16.845750+00:00",
-  "workflowRunAt": "2026-08-23T10:27:16.845750+00:00",
+  "fetchedAt": "2026-08-23T10:52:51.103889+00:00",
+  "workflowRunAt": "2026-08-23T10:52:51.103889+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -16,6 +16,14 @@
         "name": "SIT",
         "radius": "60",
         "price": 2.179
+      },
+      {
+        "lat": "48.558857",
+        "lon": "12.1654835",
+        "address": null,
+        "name": "Sprint",
+        "radius": "60",
+        "price": 2.319
       },
       {
         "lat": "48.55575",
@@ -86,14 +94,6 @@
         "lon": "12.147233",
         "address": null,
         "name": "ESSO",
-        "radius": "60",
-        "price": 2.469
-      },
-      {
-        "lat": "48.558857",
-        "lon": "12.1654835",
-        "address": null,
-        "name": "Sprint",
         "radius": "60",
         "price": 2.469
       },
@@ -132,6 +132,22 @@
         "price": 2.139
       },
       {
+        "lat": "48.558857",
+        "lon": "12.1654835",
+        "address": null,
+        "name": "Sprint",
+        "radius": "60",
+        "price": 2.199
+      },
+      {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.319
+      },
+      {
         "lat": "48.542111332336",
         "lon": "12.13959734008",
         "address": null,
@@ -152,14 +168,6 @@
         "lon": "12.153395",
         "address": null,
         "name": "ESSO",
-        "radius": "60",
-        "price": 2.349
-      },
-      {
-        "lat": "48.547993",
-        "lon": "12.13178",
-        "address": null,
-        "name": "TotalEnergies",
         "radius": "60",
         "price": 2.349
       },
@@ -208,14 +216,6 @@
         "lon": "12.147233",
         "address": null,
         "name": "ESSO",
-        "radius": "60",
-        "price": 2.349
-      },
-      {
-        "lat": "48.558857",
-        "lon": "12.1654835",
-        "address": null,
-        "name": "Sprint",
         "radius": "60",
         "price": 2.349
       },
@@ -246,6 +246,22 @@
         "price": 2.169
       },
       {
+        "lat": "48.558857",
+        "lon": "12.1654835",
+        "address": null,
+        "name": "Sprint",
+        "radius": "60",
+        "price": 2.259
+      },
+      {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.379
+      },
+      {
         "lat": "48.542111332336",
         "lon": "12.13959734008",
         "address": null,
@@ -266,14 +282,6 @@
         "lon": "12.153395",
         "address": null,
         "name": "ESSO",
-        "radius": "60",
-        "price": 2.409
-      },
-      {
-        "lat": "48.547993",
-        "lon": "12.13178",
-        "address": null,
-        "name": "TotalEnergies",
         "radius": "60",
         "price": 2.409
       },
@@ -322,14 +330,6 @@
         "lon": "12.147233",
         "address": null,
         "name": "ESSO",
-        "radius": "60",
-        "price": 2.409
-      },
-      {
-        "lat": "48.558857",
-        "lon": "12.1654835",
-        "address": null,
-        "name": "Sprint",
         "radius": "60",
         "price": 2.409
       },
