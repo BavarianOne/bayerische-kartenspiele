@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-23T07:35:48.847840+00:00",
-  "workflowRunAt": "2026-08-23T07:35:48.847840+00:00",
+  "fetchedAt": "2026-08-23T08:33:47.901560+00:00",
+  "workflowRunAt": "2026-08-23T08:33:47.901560+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -34,18 +34,18 @@
         "price": 2.199
       },
       {
-        "lat": "48.55888",
-        "lon": "12.166602",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.199
-      },
-      {
         "lat": "48.546207",
         "lon": "12.181083",
         "address": null,
         "name": "ARAL",
+        "radius": "60",
+        "price": 2.199
+      },
+      {
+        "lat": "48.55888",
+        "lon": "12.166602",
+        "address": null,
+        "name": "ESSO",
         "radius": "60",
         "price": 2.199
       },
@@ -58,14 +58,6 @@
         "price": 2.209
       },
       {
-        "lat": "48.586643",
-        "lon": "12.189711",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.209
-      },
-      {
         "lat": "48.542111332336",
         "lon": "12.13959734008",
         "address": null,
@@ -74,10 +66,10 @@
         "price": 2.209
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
+        "lat": "48.540893",
+        "lon": "12.141405",
         "address": null,
-        "name": "Shell",
+        "name": "ESSO",
         "radius": "60",
         "price": 2.209
       },
@@ -90,16 +82,24 @@
         "price": 2.209
       },
       {
-        "lat": "48.548382",
-        "lon": "12.147233",
+        "lat": "48.613932",
+        "lon": "12.219227",
         "address": null,
-        "name": "ESSO",
+        "name": "Shell",
         "radius": "60",
         "price": 2.209
       },
       {
-        "lat": "48.540893",
-        "lon": "12.141405",
+        "lat": "48.586643",
+        "lon": "12.189711",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.209
+      },
+      {
+        "lat": "48.548382",
+        "lon": "12.147233",
         "address": null,
         "name": "ESSO",
         "radius": "60",
@@ -124,16 +124,16 @@
     ],
     "e10": [
       {
-        "lat": "48.586643",
-        "lon": "12.189711",
+        "lat": "48.613932",
+        "lon": "12.219227",
         "address": null,
         "name": "Shell",
         "radius": "60",
         "price": 2.119
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
+        "lat": "48.586643",
+        "lon": "12.189711",
         "address": null,
         "name": "Shell",
         "radius": "60",
@@ -164,6 +164,14 @@
         "price": 2.129
       },
       {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.139
+      },
+      {
         "lat": "48.547993",
         "lon": "12.13178",
         "address": null,
@@ -180,22 +188,6 @@
         "price": 2.139
       },
       {
-        "lat": "48.546949",
-        "lon": "12.112422",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.139
-      },
-      {
-        "lat": "48.548382",
-        "lon": "12.147233",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.139
-      },
-      {
         "lat": "48.540893",
         "lon": "12.141405",
         "address": null,
@@ -204,10 +196,10 @@
         "price": 2.139
       },
       {
-        "lat": "48.546207",
-        "lon": "12.181083",
+        "lat": "48.546949",
+        "lon": "12.112422",
         "address": null,
-        "name": "ARAL",
+        "name": "ESSO",
         "radius": "60",
         "price": 2.139
       },
@@ -220,10 +212,18 @@
         "price": 2.139
       },
       {
-        "lat": "48.55575",
-        "lon": "12.1376",
+        "lat": "48.546207",
+        "lon": "12.181083",
         "address": null,
-        "name": "Shell",
+        "name": "ARAL",
+        "radius": "60",
+        "price": 2.139
+      },
+      {
+        "lat": "48.548382",
+        "lon": "12.147233",
+        "address": null,
+        "name": "ESSO",
         "radius": "60",
         "price": 2.139
       },
@@ -246,16 +246,16 @@
         "price": 2.169
       },
       {
-        "lat": "48.586643",
-        "lon": "12.189711",
+        "lat": "48.613932",
+        "lon": "12.219227",
         "address": null,
         "name": "Shell",
         "radius": "60",
         "price": 2.179
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
+        "lat": "48.586643",
+        "lon": "12.189711",
         "address": null,
         "name": "Shell",
         "radius": "60",
@@ -286,6 +286,14 @@
         "price": 2.189
       },
       {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.199
+      },
+      {
         "lat": "48.547993",
         "lon": "12.13178",
         "address": null,
@@ -302,24 +310,16 @@
         "price": 2.199
       },
       {
-        "lat": "48.546949",
-        "lon": "12.112422",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.199
-      },
-      {
-        "lat": "48.548382",
-        "lon": "12.147233",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.199
-      },
-      {
         "lat": "48.540893",
         "lon": "12.141405",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.199
+      },
+      {
+        "lat": "48.546949",
+        "lon": "12.112422",
         "address": null,
         "name": "ESSO",
         "radius": "60",
@@ -334,10 +334,10 @@
         "price": 2.199
       },
       {
-        "lat": "48.55575",
-        "lon": "12.1376",
+        "lat": "48.548382",
+        "lon": "12.147233",
         "address": null,
-        "name": "Shell",
+        "name": "ESSO",
         "radius": "60",
         "price": 2.199
       },
