@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-23T16:55:55.017450+00:00",
-  "workflowRunAt": "2026-08-23T16:55:55.017450+00:00",
+  "fetchedAt": "2026-08-23T17:25:02.439130+00:00",
+  "workflowRunAt": "2026-08-23T17:25:02.439130+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -55,7 +55,7 @@
         "address": null,
         "name": "AGIP ENI",
         "radius": "60",
-        "price": 2.379
+        "price": 2.369
       },
       {
         "lat": "48.548382",
@@ -63,7 +63,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.379
+        "price": 2.369
       },
       {
         "lat": "48.540893",
@@ -71,15 +71,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.389
-      },
-      {
-        "lat": "48.547993",
-        "lon": "12.13178",
-        "address": null,
-        "name": "TotalEnergies",
-        "radius": "60",
-        "price": 2.389
+        "price": 2.369
       },
       {
         "lat": "48.546949",
@@ -87,7 +79,15 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.389
+        "price": 2.369
+      },
+      {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.379
       },
       {
         "lat": "48.613932",
@@ -169,7 +169,7 @@
         "address": null,
         "name": "AGIP ENI",
         "radius": "60",
-        "price": 2.229
+        "price": 2.219
       },
       {
         "lat": "48.548382",
@@ -177,7 +177,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.229
+        "price": 2.219
       },
       {
         "lat": "48.540893",
@@ -185,15 +185,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.239
-      },
-      {
-        "lat": "48.547993",
-        "lon": "12.13178",
-        "address": null,
-        "name": "TotalEnergies",
-        "radius": "60",
-        "price": 2.239
+        "price": 2.219
       },
       {
         "lat": "48.546949",
@@ -201,7 +193,15 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.239
+        "price": 2.219
+      },
+      {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.229
       },
       {
         "lat": "48.613932",
@@ -283,7 +283,7 @@
         "address": null,
         "name": "AGIP ENI",
         "radius": "60",
-        "price": 2.289
+        "price": 2.279
       },
       {
         "lat": "48.548382",
@@ -291,7 +291,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.289
+        "price": 2.279
       },
       {
         "lat": "48.540893",
@@ -299,15 +299,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.299
-      },
-      {
-        "lat": "48.547993",
-        "lon": "12.13178",
-        "address": null,
-        "name": "TotalEnergies",
-        "radius": "60",
-        "price": 2.299
+        "price": 2.279
       },
       {
         "lat": "48.546949",
@@ -315,7 +307,15 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.299
+        "price": 2.279
+      },
+      {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.289
       },
       {
         "lat": "48.613932",
