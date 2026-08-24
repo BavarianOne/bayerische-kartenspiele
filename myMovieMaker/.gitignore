@@ -1,0 +1,42 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+.venv-*/
+venv/
+ENV/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+*.analysis.json
+media_overview.jpg
+output/
+*.mp4
+*.mov
+*.avi
+
+# Demo project
+demo_project/
+
+# Test artifacts
+test_output.mp4

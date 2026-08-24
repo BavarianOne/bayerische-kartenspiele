@@ -1,0 +1,21 @@
+# Core
+numpy>=1.24.0
+opencv-python>=4.8.0
+ffmpeg-python>=0.2.0
+
+# Audio Analysis
+librosa>=0.10.0
+scipy>=1.11.0
+
+# Config & CLI
+pyyaml>=6.0
+click>=8.1.0
+tqdm>=4.65.0
+
+# Utils
+Pillow>=10.0.0
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
+
+# Optional: Advanced beat detection
+# essentia>=2.1 (requires system install, optional)
