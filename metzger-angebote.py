@@ -276,8 +276,7 @@ def fetch_wasner_offers() -> List[Dict]:
 
 
 def fetch_tristlhof_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeige 17.-22.08.2026)"""
-    # Woche 17.08.-22.08.2026 (nur aus Zeitungsanzeige, keine Angebote für nächste Woche verfügbar)
+    """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeige 17.-22.08.2026 und 24.-29.08.2026)"""
 
     return [
         # Woche 17.08.-22.08.2026 (aus Zeitungsanzeige Frontenhausen)
@@ -288,6 +287,12 @@ def fetch_tristlhof_offers() -> List[Dict]:
         # Aktionstage
         {"typ": "Gemischtes Hackfleisch (Schwein & Rind, 500g)", "preis": "4,98 €/500g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
         {"typ": "Schweinshaxe frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: Samstag ist Haxentag, frisch & kross, solange Vorrat reicht", "website": ""},
+        # Woche 24.08.-29.08.2026 (neue Zeitungsanzeige)
+        {"typ": "frische Koteletts natur oder gewürzt", "preis": "0,89 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: frisch, natürlich und hausgemacht", "website": ""},
+        {"typ": "Gelbwurst mit und ohne Grün (aus Stadler's Wurstküche)", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Frisch aus Stadler's Wurstküche", "website": ""},
+        {"typ": "Bratwürste oder Wollwürste immer frisch (aus Stadler's Wurstküche)", "preis": "1,19 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Frisch aus Stadler's Wurstküche", "website": ""},
+        {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Montag ist Hackfleischtag", "website": ""},
+        {"typ": "Samstag ist Haxentag frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Samstag ist Haxentag, frisch & kross, solange Vorrat reicht", "website": ""},
     ]
 
 
@@ -369,9 +374,9 @@ def main():
         print(f"  -> {len(angebote)} Angebote gefunden")
         alle_angebote[name] = angebote
 
-    # Wochen-Übersicht bauen (alle Produkte + Preise pro Woche)
-    # Exkludiere Metzger mit zu wenigen/nicht wöchentlichen Angeboten
+    # Wochen-Übersicht bauen (alle Produkte + Preise pro Woche) - NUR AKTUELLE/ZUKÜNFTIGE WOCHEN
     EXCLUDE_FROM_WOCHENUEBERSICHT = {"Metzgerei Hahn"}
+    heute = datetime.now().date()
 
     wochen_uebersicht = {}
     aktuelle_woche_datum = None
@@ -383,6 +388,15 @@ def main():
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         for angebot in angebote_list:
             gueltig = angebot.get('gueltig_bis', '')
+            if not gueltig:
+                continue
+            # Nur Wochen aufnehmen, die heute oder in der Zukunft liegen
+            try:
+                gueltig_date = datetime.strptime(gueltig, "%d.%m.%Y").date()
+                if gueltig_date < heute:
+                    continue  # Vergangene Woche überspringen
+            except:
+                pass
             if gueltig not in wochen_uebersicht:
                 wochen_uebersicht[gueltig] = {"name": "", "angebote": []}
             wochen_uebersicht[gueltig]["angebote"].append({
@@ -668,10 +682,76 @@ async function shareFullContent() {{
  </div>
  {f'<div class="angebot-desc">{beschreibung}</div>' if beschreibung else ''}
  </div>""")
-
                 html_parts.append("""
  </div>
  </div>""")
+
+            # Special case: Tristlhof - add Kontakt & Filialen and Mobiler Hofladen sections
+            if metzger_name == "Metzgerei Tristlhof":
+                # Kontakt & Filialen
+                html_parts.append(f"""
+        <div class="week-section" style="border-left: 5px solid #2196f3;">
+        <div class="week-header" style="background: #2196f3;">📞 Kontakt & Filialen</div>
+        <div class="week-content" style="background: #e3f2fd;">
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Kontakt</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">Tel./E-Mail</span>
+        </div>
+        <div class="angebot-desc">Telefon: 0871/97407272, 0152/53753881<br>E-Mail: service.gustav.weber@gmx.de</div>
+        </div>
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Filiale Frontenhausen</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Vilsbiburger Str. 22</span>
+        </div>
+        <div class="angebot-desc">Tel.: 08732/2886</div>
+        </div>
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Filiale Landshut (Theaterstr.)</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Theaterstr. 67</span>
+        </div>
+        <div class="angebot-desc">Tel.: 0871/2768764</div>
+        </div>
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Filiale Landshut (Straubinger Str.)</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Straubinger Str. 10</span>
+        </div>
+        <div class="angebot-desc">Tel.: 0871/96699952</div>
+        </div>
+
+        </div>
+        </div>
+
+        <div class="week-section" style="border-left: 5px solid #9c27b0;">
+        <div class="week-header" style="background: #9c27b0;">🚐 Mobiler Hofladen</div>
+        <div class="week-content" style="background: #f3e5f5;">
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Montag, Freitag & Samstag</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Tristl am Damm 1</span>
+        </div>
+        <div class="angebot-desc">Tel.: 08706/270</div>
+        </div>
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Donnerstag</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Landshuter Str. 67 b, Ergolding</span>
+        </div>
+        <div class="angebot-desc">bei Getränke Fleischmann</div>
+        </div>
+
+        </div>
+        </div>
+        """)
 
             # Close the metzger-card for this butcher
             html_parts.append("""
