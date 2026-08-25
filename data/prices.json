@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-25T17:34:39.160916+00:00",
-  "workflowRunAt": "2026-08-25T17:34:39.160916+00:00",
+  "fetchedAt": "2026-08-25T18:43:02.549351+00:00",
+  "workflowRunAt": "2026-08-25T18:43:02.549351+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -14,14 +14,6 @@
         "lon": "12.15421289",
         "address": null,
         "name": "SIT",
-        "radius": "60",
-        "price": 2.179
-      },
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": 2.179
       },
@@ -120,17 +112,17 @@
         "name": "ESSO",
         "radius": "60",
         "price": 2.209
-      }
-    ],
-    "e10": [
+      },
       {
         "lat": "48.5519",
         "lon": "12.1616",
         "address": null,
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
-        "price": 2.109
-      },
+        "price": null
+      }
+    ],
+    "e10": [
       {
         "lat": "48.558857",
         "lon": "12.1654835",
@@ -234,6 +226,14 @@
         "name": "ARAL",
         "radius": "60",
         "price": 2.139
+      },
+      {
+        "lat": "48.5519",
+        "lon": "12.1616",
+        "address": null,
+        "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
       }
     ],
     "e5": [
@@ -242,14 +242,6 @@
         "lon": "12.15421289",
         "address": null,
         "name": "SIT",
-        "radius": "60",
-        "price": 2.169
-      },
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": 2.169
       },
@@ -348,6 +340,14 @@
         "name": "ARAL",
         "radius": "60",
         "price": 2.199
+      },
+      {
+        "lat": "48.5519",
+        "lon": "12.1616",
+        "address": null,
+        "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
       }
     ]
   }
