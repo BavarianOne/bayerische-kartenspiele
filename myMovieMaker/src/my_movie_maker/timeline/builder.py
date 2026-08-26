@@ -140,8 +140,13 @@ class Timeline:
     # Audio
     audio_path: str = ""
     audio_start_offset: float = 0.0  # Start audio at this time
+    audio_loop: bool = False         # Loop audio to cover all clips
     # Style presets
     style: str = "dynamic"           # dynamic, cinematic, energetic, minimal
+    # Title card (optional)
+    title_card: Optional[Dict[str, Any]] = None  # {"title": "...", "subtitle": "...", "duration": 3.0, "font_size": 80, "font_color": (255,255,255), "bg_color": (0,0,0)}
+    # Override style min clip duration
+    min_clip_duration: Optional[float] = None
     
     def get_total_duration(self) -> float:
         if not self.clips:
@@ -153,7 +158,7 @@ class Timeline:
         self.clips.sort(key=lambda c: c.start_time)
     
     def to_dict(self) -> dict:
-        return {
+        data = {
             "clips": [c.to_dict() for c in self.clips],
             "target_fps": self.target_fps,
             "output_width": self.output_width,
@@ -161,8 +166,14 @@ class Timeline:
             "background_color": list(self.background_color),
             "audio_path": self.audio_path,
             "audio_start_offset": self.audio_start_offset,
+            "audio_loop": self.audio_loop,
             "style": self.style
         }
+        if self.title_card:
+            data["title_card"] = self.title_card
+        if self.min_clip_duration is not None:
+            data["min_clip_duration"] = self.min_clip_duration
+        return data
     
     @classmethod
     def from_dict(cls, data: dict) -> 'Timeline':
@@ -170,6 +181,8 @@ class Timeline:
         data['clips'] = [TimelineClip.from_dict(c) for c in data.get('clips', [])]
         if 'background_color' in data:
             data['background_color'] = tuple(data['background_color'])
+        if 'title_card' in data:
+            data['title_card'] = data['title_card']
         return cls(**data)
 
 
@@ -190,6 +203,7 @@ class TimelineBuilder:
                 "ken_burns_probability": 0.7,
                 "pulse_probability": 0.3,
                 "cut_on_downbeat": True,
+                "min_clip_duration": 3.0,
             },
             "cinematic": {
                 "clips_per_measure": 0.5,    # 1 clip per 2 measures
@@ -197,6 +211,7 @@ class TimelineBuilder:
                 "ken_burns_probability": 0.9,
                 "pulse_probability": 0.1,
                 "cut_on_downbeat": False,
+                "min_clip_duration": 5.0,
             },
             "energetic": {
                 "clips_per_measure": 2,      # 2 clips per measure (every 2 beats)
@@ -204,6 +219,7 @@ class TimelineBuilder:
                 "ken_burns_probability": 0.3,
                 "pulse_probability": 0.6,
                 "cut_on_downbeat": True,
+                "min_clip_duration": 0.5,
             },
             "minimal": {
                 "clips_per_measure": 0.25,   # 1 clip per 4 measures
@@ -211,6 +227,7 @@ class TimelineBuilder:
                 "ken_burns_probability": 0.5,
                 "pulse_probability": 0.0,
                 "cut_on_downbeat": False,
+                "min_clip_duration": 8.0,
             }
         }
     
@@ -227,57 +244,53 @@ class TimelineBuilder:
         avg_beat_interval = 60.0 / self.audio.tempo  # seconds per beat
         clip_duration = beats_per_clip * avg_beat_interval
         
-        # Limit clip duration
-        clip_duration = max(1.5, min(clip_duration, 8.0))
+        # Limit clip duration - use style-specific min or override
+        min_duration = getattr(self, 'min_clip_duration_override', None)
+        if min_duration is None:
+            min_duration = style_config.get("min_clip_duration", 3.0)
+        clip_duration = max(min_duration, min(clip_duration, 8.0))
         
         print(f"🎬 Building {self.style} timeline:")
         print(f"   Tempo: {self.audio.tempo:.1f} BPM, Beat interval: {avg_beat_interval:.3f}s")
         print(f"   Clip duration: {clip_duration:.2f}s ({beats_per_clip:.1f} beats)")
         
-        # Use downbeats as primary sync points
+        # Use downbeats as primary sync points for FIRST clip only, then sequential
         sync_points = [b.time for b in self.audio.downbeats] if self.audio.downbeats else [b.time for b in self.audio.beats]
         
-        # If not enough downbeats, use all beats
-        if len(sync_points) < len(self.media_items) * 2:
-            sync_points = [b.time for b in self.audio.beats]
+        # Start first clip at first downbeat (or 0)
+        first_sync = sync_points[0] if sync_points else 0.0
         
-        current_time = 0.0
+        current_time = first_sync
         media_idx = 0
         
-        for i, sync_time in enumerate(sync_points):
-            if media_idx >= len(self.media_items):
-                break
-            
+        # If audio_loop is enabled, don't limit to audio.duration
+        max_time = float('inf') if self.audio_loop else self.audio.duration
+        
+        while media_idx < len(self.media_items) and current_time < max_time:
             media = self.media_items[media_idx]
             
-            # Determine clip duration (for images, use calculated; for videos, use min of video duration or calculated)
+            # Determine clip duration
             if media.is_video:
-                actual_duration = min(media.duration, clip_duration * 2)  # Allow longer for videos
+                actual_duration = min(media.duration, clip_duration * 2)
             else:
                 actual_duration = clip_duration
             
-            # Ensure we don't go past audio duration
-            if current_time + actual_duration > self.audio.duration:
+            # Ensure we don't go past audio duration (unless looping)
+            if not self.audio_loop and current_time + actual_duration > self.audio.duration:
                 actual_duration = max(0.5, self.audio.duration - current_time)
                 if actual_duration < 0.5:
                     break
             
             # Choose effects based on media type and style
-            effects = self._choose_effects(media, style_config, i)
+            effects = self._choose_effects(media, style_config, len(self.clips))
             
             # Choose transitions
-            trans_in = TransitionType.CROSSFADE if style_config["prefer_crossfade"] and i > 0 else TransitionType.NONE
+            trans_in = TransitionType.CROSSFADE if style_config["prefer_crossfade"] and media_idx > 0 else TransitionType.NONE
             trans_out = TransitionType.CROSSFADE if style_config["prefer_crossfade"] else TransitionType.CUT
-            
-            # On downbeats, prefer cuts for energetic style
-            is_downbeat = any(abs(sync_time - db.time) < 0.05 for db in self.audio.downbeats)
-            if is_downbeat and style_config["cut_on_downbeat"] and self.style == "energetic":
-                trans_in = TransitionType.CUT
-                trans_out = TransitionType.CUT
             
             clip = TimelineClip(
                 media_index=media_idx,
-                start_time=sync_time,
+                start_time=current_time,
                 duration=actual_duration,
                 effects=effects,
                 transition_in=trans_in,
@@ -290,102 +303,80 @@ class TimelineBuilder:
             )
             
             self.clips.append(clip)
-            current_time = sync_time + actual_duration
-            media_idx += 1
-        
-        # If we have more media than sync points, loop or extend
-        while media_idx < len(self.media_items) and current_time < self.audio.duration:
-            media = self.media_items[media_idx]
-            actual_duration = clip_duration if media.is_image else min(media.duration, clip_duration * 2)
-            
-            if current_time + actual_duration > self.audio.duration:
-                actual_duration = max(0.5, self.audio.duration - current_time)
-            
-            effects = self._choose_effects(media, style_config, len(self.clips))
-            
-            clip = TimelineClip(
-                media_index=media_idx,
-                start_time=current_time,
-                duration=actual_duration,
-                effects=effects,
-                transition_in=TransitionType.CROSSFADE,
-                transition_in_duration=0.5,
-                transition_out=TransitionType.CROSSFADE,
-                transition_out_duration=0.5,
-            )
-            self.clips.append(clip)
             current_time += actual_duration
             media_idx += 1
         
         print(f"✅ Created {len(self.clips)} clips, total duration: {current_time:.2f}s")
         
         return Timeline(
-            clips=self.clips,
-            target_fps=30,
-            output_width=1920,
-            output_height=1080,
-            audio_path=getattr(self.audio, 'audio_path', ''),
-            style=self.style
-        )
+                    clips=self.clips,
+                    target_fps=30,
+                    output_width=1920,
+                    output_height=1080,
+                    audio_path=getattr(self.audio, 'audio_path', ''),
+                    audio_loop=getattr(self, 'audio_loop', False),
+                    style=self.style,
+                    min_clip_duration=getattr(self, 'min_clip_duration_override', None),
+                    title_card=getattr(self, 'title_card_override', None)
+                )
     
     def _choose_effects(self, media, style_config: dict, clip_index: int) -> List[EffectParams]:
-        """Choose effects for a clip based on media type and style."""
-        effects = []
-        rng = random.Random(clip_index * 12345)  # Deterministic per clip
+            """Choose effects for a clip based on media type and style."""
+            effects = []
+            rng = random.Random(clip_index * 12345)  # Deterministic per clip
         
-        if media.is_image:
-            # Images get Ken Burns or Zoom Pan
-            if rng.random() < style_config["ken_burns_probability"]:
-                effects.append(self._random_ken_burns(rng))
-            else:
-                effects.append(self._random_zoom_pan(rng))
+            if media.is_image:
+                # Images get Ken Burns only (preserves aspect ratio)
+                effects.append(self._random_ken_burns(rng, media))
             
-            # Maybe add pulse on beats
-            if rng.random() < style_config["pulse_probability"]:
-                effects.append(EffectParams(
-                    effect_type=EffectType.PULSE_ZOOM,
-                    pulse_strength=0.05 * rng.uniform(0.5, 1.5),
-                    pulse_frequency=1.0,
-                    intensity=0.5
-                ))
-        else:
-            # Videos: mostly cuts, maybe subtle ken burns on static scenes
-            if rng.random() < 0.2:
-                effects.append(self._random_ken_burns(rng, zoom_range=0.05))
+                # NO pulse zoom - causes aspect ratio issues
+            else:
+                # Videos: mostly cuts, maybe subtle ken burns on static scenes
+                if rng.random() < 0.2:
+                    effects.append(self._random_ken_burns(rng, media, zoom_range=0.05))
         
-        return effects
+            return effects
     
-    def _random_ken_burns(self, rng: random.Random, zoom_range: float = 0.3) -> EffectParams:
-        """Generate random Ken Burns parameters."""
-        # Random zoom direction (in or out)
-        zoom_in = rng.random() < 0.5
-        zoom_start = 1.0
-        zoom_end = 1.0 + zoom_range if zoom_in else 1.0 - zoom_range * 0.5
-        
-        # Random pan
-        pan_start_x = rng.uniform(0.2, 0.8)
-        pan_start_y = rng.uniform(0.2, 0.8)
-        pan_end_x = rng.uniform(0.2, 0.8)
-        pan_end_y = rng.uniform(0.2, 0.8)
-        
-        # Subtle rotation
-        rotation_start = rng.uniform(-2, 2)
-        rotation_end = rng.uniform(-2, 2)
-        
-        return EffectParams(
-            effect_type=EffectType.KEN_BURNS,
-            zoom_start=zoom_start,
-            zoom_end=zoom_end,
-            pan_start_x=pan_start_x,
-            pan_start_y=pan_start_y,
-            pan_end_x=pan_end_x,
-            pan_end_y=pan_end_y,
-            rotation_start=rotation_start,
-            rotation_end=rotation_end,
-            easing="ease_in_out",
-            intensity=1.0,
-            sync_to_beat=False  # Ken Burns is continuous
-        )
+    def _random_ken_burns(self, rng: random.Random, media, zoom_range: float = 0.3) -> EffectParams:
+    		"""Generate random Ken Burns parameters with proper fit zoom."""
+    		output_w, output_h = 1920, 1080
+	
+    		# Compute fit zoom: zoom level where entire image fits in output
+    		# zoom = output_dim / source_dim (1.0 = 1:1, <1 = zoom out to fit)
+    		fit_zoom_w = output_w / media.width
+    		fit_zoom_h = output_h / media.height
+    		fit_zoom = min(fit_zoom_w, fit_zoom_h)
+	
+    		# Ken Burns zoom is RELATIVE TO LETTERBOXED IMAGE (1.0 = whole image visible)
+    		# fit_zoom is already applied for letterboxing in renderer
+    		# Start at 1.0 (full letterboxed visible), end at 1.15 (gentle crop in)
+    		zoom_start = 1.0
+    		zoom_end = 1.15
+	
+    		# Random pan (normalized 0-1, centered on image)
+    		pan_start_x = rng.uniform(0.3, 0.7)
+    		pan_start_y = rng.uniform(0.3, 0.7)
+    		pan_end_x = rng.uniform(0.3, 0.7)
+    		pan_end_y = rng.uniform(0.3, 0.7)
+	
+    		# Subtle rotation
+    		rotation_start = rng.uniform(-2, 2)
+    		rotation_end = rng.uniform(-2, 2)
+	
+    		return EffectParams(
+    			effect_type=EffectType.KEN_BURNS,
+    			zoom_start=zoom_start,
+    			zoom_end=zoom_end,
+    			pan_start_x=pan_start_x,
+    			pan_start_y=pan_start_y,
+    			pan_end_x=pan_end_x,
+    			pan_end_y=pan_end_y,
+    			rotation_start=rotation_start,
+    			rotation_end=rotation_end,
+    			easing="ease_in_out",
+    		intensity=1.0,
+    		sync_to_beat=False  # Ken Burns is continuous
+    	)
     
     def _random_zoom_pan(self, rng: random.Random) -> EffectParams:
         """Generate random Zoom Pan (beat-synced) parameters."""
@@ -413,7 +404,7 @@ class TimelineBuilder:
             if current_time + duration > 60:  # Max 60s fallback
                 break
             
-            effects = [self._random_ken_burns(random.Random(i))] if media.is_image else []
+            effects = [self._random_ken_burns(random.Random(i), media)] if media.is_image else []
             
             clip = TimelineClip(
                 media_index=i,
@@ -439,7 +430,25 @@ def create_timeline_from_config(config: dict, media_items: List, audio_analysis)
     # Otherwise auto-build
     style = config.get("style", "dynamic")
     builder = TimelineBuilder(media_items, audio_analysis, style)
-    return builder.build()
+    
+    # Allow overriding clips_per_measure from config
+    if "clips_per_measure" in config:
+        builder.styles[style]["clips_per_measure"] = config["clips_per_measure"]
+    
+    # Allow overriding min_clip_duration from config
+        if "min_clip_duration" in config:
+            builder.min_clip_duration_override = config["min_clip_duration"]
+    
+        # Allow audio_loop from config
+        if "audio_loop" in config:
+            builder.audio_loop = config["audio_loop"]
+    
+        # Allow title_card from config
+            if "title_card" in config:
+                builder.title_card_override = config["title_card"]
+                print(f"📝 Title card config loaded: {config['title_card'].get('title', '')}")
+    
+            return builder.build()
 
 
 if __name__ == "__main__":

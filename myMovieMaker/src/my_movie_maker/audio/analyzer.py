@@ -38,7 +38,7 @@ def analyze_audio(audio_path: str,
                   hop_length: int = 512) -> AudioAnalysis:
     """
     Analyze audio file for beats, tempo, and energy curves.
-    
+
     Args:
         audio_path: Path to audio file
         target_sr: Target sample rate for analysis (lower = faster)
@@ -54,6 +54,11 @@ def analyze_audio(audio_path: str,
     print("🔍 Detecting tempo and beats...")
     # Tempo estimation
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, hop_length=hop_length)
+    # tempo can be array or scalar depending on librosa version
+    if isinstance(tempo, np.ndarray):
+        tempo = float(tempo.item()) if tempo.size == 1 else float(tempo[0])
+    else:
+        tempo = float(tempo)
     beat_times = librosa.frames_to_time(beat_frames, sr=sr, hop_length=hop_length)
     
     # Onset detection for beat strength

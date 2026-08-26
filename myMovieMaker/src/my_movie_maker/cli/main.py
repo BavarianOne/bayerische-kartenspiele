@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import Optional, List
 import sys
 
-from .audio.analyzer import analyze_audio, save_analysis, load_analysis, AudioAnalysis
-from .media.manager import MediaManager, MediaItem
-from .timeline.builder import Timeline, TimelineBuilder, create_timeline_from_config, TimelineClip, EffectParams, EffectType, TransitionType
-from .render.renderer import render_timeline, RenderConfig
+from ..audio.analyzer import analyze_audio, save_analysis, load_analysis, AudioAnalysis
+from ..media.manager import MediaManager, MediaItem
+from ..timeline.builder import Timeline, TimelineBuilder, create_timeline_from_config, TimelineClip, EffectParams, EffectType, TransitionType
+from ..render.renderer import render_timeline, RenderConfig
 
 
 @click.group()

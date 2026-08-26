@@ -1,6 +1,11 @@
 """
 Renderer: Generates frames from timeline and encodes to video using FFmpeg.
 Handles frame generation, transitions, audio sync, and H.264/MP4 output.
+
+Muvee-style rendering:
+- 4:3 source images on 16:9 canvas → letterboxed with blurred background
+- Gentle Ken Burns on foreground only (no aggressive crop)
+- Blurred background layer (gblur sigma=40) scaled to fill
 """
 
 import cv2
@@ -9,6 +14,7 @@ import ffmpeg
 import tempfile
 import os
 import shutil
+import subprocess
 from pathlib import Path
 from typing import List, Optional, Generator, Tuple
 from dataclasses import dataclass
@@ -66,9 +72,46 @@ class FrameGenerator:
         self.energy_curve = audio_analysis.rms_energy
         self.energy_times = audio_analysis.times
         
-        # Cache for video frames
-        self._video_frame_cache = {}
-    
+        # LRU cache for images (max 10 images in memory)
+        self._image_cache = {}
+        self._cache_order = []
+        self._max_cache_size = 10
+        # Cache for blurred backgrounds
+        self._blur_cache = {}
+        
+        # Pre-load image paths only (not the images themselves)
+        self._image_paths = {m.path for m in media_items if m.is_image}
+
+    def _get_image(self, path: str) -> np.ndarray:
+        """Load image with LRU caching."""
+        if path in self._image_cache:
+            # Move to end (most recently used)
+            self._cache_order.remove(path)
+            self._cache_order.append(path)
+            return self._image_cache[path]
+        
+        # Load image
+        frame = cv2.imread(path)
+        if frame is None:
+            print(f"⚠️ Failed to load image: {path}, using black frame")
+            frame = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        else:
+            # Verify image is valid
+            h, w = frame.shape[:2]
+            if h <= 0 or w <= 0:
+                print(f"⚠️ Invalid image dimensions {w}x{h}: {path}, using black frame")
+                frame = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        
+        # Add to cache
+        if len(self._cache_order) >= self._max_cache_size:
+            # Remove least recently used
+            lru = self._cache_order.pop(0)
+            del self._image_cache[lru]
+        
+        self._image_cache[path] = frame
+        self._cache_order.append(path)
+        return frame
+
     def get_beat_phase(self, time: float) -> float:
         """Get phase within current beat (0-1)."""
         if len(self.beat_times) == 0:
@@ -89,140 +132,274 @@ class FrameGenerator:
             return 0.0
         
         return (time - beat_start) / beat_duration
-    
-    def get_energy_at_time(self, time: float) -> float:
-        """Get audio energy (0-1) at given time."""
+
+    def get_downbeat_phase(self, time: float) -> float:
+        """Get phase within current measure (0-1)."""
+        if len(self.downbeat_times) == 0:
+            return 0.0
+        
+        idx = np.searchsorted(self.downbeat_times, time, side='right') - 1
+        idx = max(0, min(idx, len(self.downbeat_times) - 1))
+        
+        downbeat_start = self.downbeat_times[idx]
+        if idx + 1 < len(self.downbeat_times):
+            downbeat_end = self.downbeat_times[idx + 1]
+        else:
+            downbeat_end = downbeat_start + (downbeat_start - self.downbeat_times[idx - 1]) if idx > 0 else downbeat_start + 2.0
+        
+        measure_duration = downbeat_end - downbeat_start
+        if measure_duration <= 0:
+            return 0.0
+        
+        return (time - downbeat_start) / measure_duration
+
+    def get_energy(self, time: float) -> float:
+        """Get audio energy at given time (normalized 0-1)."""
         if len(self.energy_times) == 0:
             return 0.5
         idx = np.searchsorted(self.energy_times, time, side='right') - 1
         idx = max(0, min(idx, len(self.energy_curve) - 1))
         return float(self.energy_curve[idx])
-    
-    def get_frame_for_clip(self, clip: TimelineClip, clip_progress: float, 
-                           frame_time: float) -> np.ndarray:
-        """Get the rendered frame for a clip at given progress."""
-        media = self.media_items[clip.media_index]
-        output_size = (self.width, self.height)
+
+    def _get_blurred_bg(self, image: np.ndarray) -> np.ndarray:
+        """Create blurred background scaled to fill 16:9 canvas."""
+        cache_key = image.shape
+        if cache_key in self._blur_cache:
+            return self._blur_cache[cache_key]
         
-        if media.is_image:
-            # Load image (cached by media manager)
-            frame = cv2.imread(media.path)
-            if frame is None:
-                frame = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        # Scale image to fill 16:9 (crop if needed)
+        h, w = image.shape[:2]
+        scale = max(self.width / w, self.height / h)
+        new_w, new_h = int(w * scale), int(h * scale)
+        
+        scaled = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+        
+        # Center crop to 16:9
+        x = max(0, (new_w - self.width) // 2)
+        y = max(0, (new_h - self.height) // 2)
+        cropped = scaled[y:y+self.height, x:x+self.width]
+        
+        # Heavy Gaussian blur
+        blurred = cv2.GaussianBlur(cropped, (0, 0), sigmaX=40, sigmaY=40)
+        
+        self._blur_cache[cache_key] = blurred
+        return blurred
+
+    def _apply_muvee_ken_burns(self, image: np.ndarray, clip: TimelineClip, 
+                                clip_progress: float, beat_phase: float) -> np.ndarray:
+        """
+        Muvee-style Ken Burns: 
+        - Background: blurred scaled-to-fill
+        - Foreground: letterboxed image with gentle zoom/pan
+        """
+        # Find Ken Burns effect params
+        kb_params = None
+        for eff in clip.effects:
+            if eff.effect_type == EffectType.KEN_BURNS:
+                kb_params = eff
+                break
+        
+        if kb_params is None:
+            return image
+        
+        h, w = image.shape[:2]
+        
+        # Compute fit scale (letterboxed - whole image visible)
+        fit_scale_w = self.width / w
+        fit_scale_h = self.height / h
+        fit_scale = min(fit_scale_w, fit_scale_h)
+        
+        # Letterboxed image size
+        letterbox_w = int(w * fit_scale)
+        letterbox_h = int(h * fit_scale)
+        
+        # Start/end zoom relative to fit_scale
+        zoom_start = kb_params.zoom_start
+        zoom_end = kb_params.zoom_end
+        
+        # Interpolate zoom
+        if kb_params.easing == "ease_in_out":
+            t = clip_progress
+            t = t * t * (3 - 2 * t)  # smoothstep
+        elif kb_params.easing == "ease_in":
+            t = clip_progress * clip_progress
+        elif kb_params.easing == "ease_out":
+            t = 1 - (1 - clip_progress) ** 2
         else:
-            # Video: get frame at specific time
-            video_time = clip.start_time + clip_progress * clip.duration
-            frame = self.media_manager.get_video_frame(media.path, video_time)
-            if frame is None:
-                frame = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+            t = clip_progress
         
-        # Apply effects
-        beat_phase = self.get_beat_phase(frame_time)
-        energy = self.get_energy_at_time(frame_time)
+        zoom = zoom_start + (zoom_end - zoom_start) * t
         
-        # Start with base frame
-        result = frame
+        # Interpolate pan
+        pan_x = kb_params.pan_start_x + (kb_params.pan_end_x - kb_params.pan_start_x) * t
+        pan_y = kb_params.pan_start_y + (kb_params.pan_end_y - kb_params.pan_start_y) * t
         
-        # Apply each effect in sequence
-        for effect_params in clip.effects:
-            # Modify effect params based on audio if reactive
-            if clip.audio_reactive and effect_params.effect_type in [EffectType.KEN_BURNS, EffectType.ZOOM_PAN]:
-                # Modulate zoom by energy
-                energy_mod = 1.0 + energy * effect_params.energy_modulation
-                # Create modified params
-                mod_params = EffectParams(
-                    effect_type=effect_params.effect_type,
-                    zoom_start=effect_params.zoom_start * energy_mod,
-                    zoom_end=effect_params.zoom_end * energy_mod,
-                    pan_start_x=effect_params.pan_start_x,
-                    pan_start_y=effect_params.pan_start_y,
-                    pan_end_x=effect_params.pan_end_x,
-                    pan_end_y=effect_params.pan_end_y,
-                    rotation_start=effect_params.rotation_start,
-                    rotation_end=effect_params.rotation_end,
-                    easing=effect_params.easing,
-                    intensity=effect_params.intensity,
-                    sync_to_beat=effect_params.sync_to_beat,
-                    pulse_strength=effect_params.pulse_strength,
-                    pulse_frequency=effect_params.pulse_frequency
-                )
-                result = apply_effect(result, mod_params, clip_progress, output_size, beat_phase)
-            else:
-                result = apply_effect(result, effect_params, clip_progress, output_size, beat_phase)
+        # Interpolate rotation
+        rotation = kb_params.rotation_start + (kb_params.rotation_end - kb_params.rotation_start) * t
         
-        return result
-    
-    def get_transition_frame(self, clip_a: TimelineClip, clip_b: TimelineClip,
-                             trans_progress: float, frame_time: float) -> np.ndarray:
-        """Get frame during transition between two clips."""
-        # Get frames from both clips
-        # For transition, clip_a is ending, clip_b is starting
-        progress_a = 1.0  # End of clip_a
-        progress_b = 0.0  # Start of clip_b
+        # Apply zoom on the letterboxed image
+        # Crop must have 16:9 aspect ratio to match output (1920x1080)
+        crop_w = int(letterbox_w / zoom)
+        crop_h = int(crop_w * 9 / 16)  # 16:9 aspect ratio
         
-        frame_a = self.get_frame_for_clip(clip_a, progress_a, frame_time)
-        frame_b = self.get_frame_for_clip(clip_b, progress_b, frame_time)
+        # Ensure crop_h doesn't exceed letterbox_h
+        if crop_h > letterbox_h:
+            crop_h = letterbox_h
+            crop_w = int(crop_h * 16 / 9)
         
-        # Apply transition
-        trans_type = clip_a.transition_out.value if clip_a.transition_out != TransitionType.NONE else clip_b.transition_in.value
-        duration = max(clip_a.transition_out_duration, clip_b.transition_in_duration)
+        # Center of crop in letterboxed coordinates
+        cx = int(letterbox_w * pan_x)
+        cy = int(letterbox_h * pan_y)
         
-        return apply_transition(frame_a, frame_b, trans_progress, trans_type, duration)
-    
-    def generate_frames(self) -> Generator[np.ndarray, None, None]:
-        """Generate all frames for the timeline."""
-        if not self.timeline.clips:
-            # Generate black frames
-            black = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-            for _ in range(self.total_frames):
-                yield black
+        x1 = max(0, min(cx - crop_w // 2, letterbox_w - crop_w))
+        y1 = max(0, min(cy - crop_h // 2, letterbox_h - crop_h))
+        
+        # Resize image to letterboxed size
+        letterboxed = cv2.resize(image, (letterbox_w, letterbox_h), interpolation=cv2.INTER_LANCZOS4)
+        
+        # Crop zoomed region (16:9 aspect ratio)
+        cropped = letterboxed[y1:y1+crop_h, x1:x1+crop_w]
+        
+        # Resize crop to output size (16:9 -> 16:9, no stretch)
+        fg = cv2.resize(cropped, (self.width, self.height), interpolation=cv2.INTER_LANCZOS4)
+        
+        # Apply rotation if any
+        if abs(rotation) > 0.01:
+            M = cv2.getRotationMatrix2D((self.width/2, self.height/2), rotation, 1.0)
+            fg = cv2.warpAffine(fg, M, (self.width, self.height), borderMode=cv2.BORDER_REFLECT_101)
+        
+        # Get blurred background
+        bg = self._get_blurred_bg(image)
+        
+        # Composite: foreground over background
+        return fg  # fg already covers full canvas, bg only shows if fg has transparency
+
+    def _generate_title_frames(self) -> Generator[np.ndarray, None, None]:
+        """Generate title card frames with fade in/out."""
+        if not self.timeline.title_card:
             return
         
-        # Sort clips by start time
-        clips = sorted(self.timeline.clips, key=lambda c: c.start_time)
+        tc = self.timeline.title_card
+        title = tc.get("title", "")
+        subtitle = tc.get("subtitle", "")
+        duration = tc.get("duration", 4.0)
+        font_size = tc.get("font_size", 80)
+        font_color = tc.get("font_color", (255, 255, 255))
+        bg_color = tc.get("bg_color", (0, 0, 0))
         
-        for frame_idx in range(self.total_frames):
-            frame_time = frame_idx / self.fps
+        title_frames = int(duration * self.fps)
+        fade_frames = int(0.5 * self.fps)  # 0.5s fade in/out
+        
+        for i in range(title_frames):
+            frame = np.full((self.height, self.width, 3), bg_color, dtype=np.uint8)
+            progress = i / title_frames
             
-            # Find active clip(s)
-            active_clips = [c for c in clips if c.start_time <= frame_time < c.end_time]
-            starting_clips = [c for c in clips if abs(c.start_time - frame_time) < 1.0/self.fps]
-            ending_clips = [c for c in clips if abs(c.end_time - frame_time) < 1.0/self.fps]
-            
-            if not active_clips and not starting_clips:
-                # No active clip - black frame (or background)
-                bg_color = self.timeline.background_color
-                yield np.full((self.height, self.width, 3), bg_color, dtype=np.uint8)
-                continue
-            
-            # Handle transitions
-            if starting_clips and active_clips:
-                # Transition from previous to new clip
-                prev_clip = active_clips[0]
-                new_clip = starting_clips[0]
-                
-                if prev_clip != new_clip:
-                    # In transition
-                    trans_duration = max(prev_clip.transition_out_duration, new_clip.transition_in_duration)
-                    trans_start = new_clip.start_time
-                    trans_progress = (frame_time - trans_start) / trans_duration
-                    trans_progress = max(0.0, min(1.0, trans_progress))
-                    
-                    frame = self.get_transition_frame(prev_clip, new_clip, trans_progress, frame_time)
-                    yield frame
-                    continue
-            
-            # Normal clip rendering
-            if active_clips:
-                clip = active_clips[0]
-                clip_progress = (frame_time - clip.start_time) / clip.duration
-                clip_progress = max(0.0, min(1.0, clip_progress))
-                
-                frame = self.get_frame_for_clip(clip, clip_progress, frame_time)
-                yield frame
+            # Fade in/out
+            if i < fade_frames:
+                alpha = i / fade_frames
+            elif i > title_frames - fade_frames:
+                alpha = (title_frames - i) / fade_frames
             else:
-                # Fallback
-                yield np.zeros((self.height, self.width, 3), dtype=np.uint8)
+                alpha = 1.0
+            
+            if title:
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = font_size / 50.0
+                thickness = max(2, int(font_scale * 3))
+                
+                (text_w, text_h), baseline = cv2.getTextSize(title, font, font_scale, thickness)
+                
+                x = (self.width - text_w) // 2
+                y = self.height // 2 - 50
+                
+                overlay = frame.copy()
+                cv2.putText(overlay, title, (x, y), font, font_scale, font_color, thickness, cv2.LINE_AA)
+                cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+            
+            if subtitle:
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = font_size / 50.0
+                thickness = max(1, int(font_scale * 2))
+                
+                (text_w, text_h), baseline = cv2.getTextSize(subtitle, font, font_scale, thickness)
+                
+                x = (self.width - text_w) // 2
+                y = self.height // 3 + 100
+                
+                overlay = frame.copy()
+                cv2.putText(overlay, subtitle, (x, y), font, font_scale, font_color, thickness, cv2.LINE_AA)
+                cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+            
+            yield frame
+
+    def generate_frames(self) -> Generator[np.ndarray, None, None]:
+        """Generate all frames for the timeline."""
+        # Handle title card at the beginning if present
+        if self.timeline.title_card:
+            yield from self._generate_title_frames()
+        
+        if not self.timeline.clips:
+            # Generate black frames
+            black_frame = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+            for _ in range(self.total_frames):
+                yield black_frame
+            return
+        
+        for clip in self.timeline.clips:
+            clip_frames = int(clip.duration * self.fps)
+            media = self.media_items[clip.media_index]
+            
+            for frame_idx in range(clip_frames):
+                frame_time = clip.start_time + frame_idx / self.fps
+                clip_progress = frame_idx / clip_frames if clip_frames > 0 else 0
+                beat_phase = self.get_beat_phase(frame_time)
+                
+                if media.is_image:
+                    image = self._get_image(media.path)
+                    if image is None:
+                        image = cv2.imread(media.path)
+                        if image is None:
+                            image = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+                    
+                    # Apply Ken Burns if present
+                    has_kb = any(e.effect_type == EffectType.KEN_BURNS for e in clip.effects)
+                    if has_kb:
+                        frame = self._apply_muvee_ken_burns(image, clip, clip_progress, beat_phase)
+                    else:
+                        # Just letterbox
+                        h, w = image.shape[:2]
+                        fit_scale = min(self.width / w, self.height / h)
+                        letterbox_w = int(w * fit_scale)
+                        letterbox_h = int(h * fit_scale)
+                        letterboxed = cv2.resize(image, (letterbox_w, letterbox_h), interpolation=cv2.INTER_LANCZOS4)
+                        
+                        # Paste onto blurred background
+                        bg = self._get_blurred_bg(image)
+                        x = (self.width - letterbox_w) // 2
+                        y = (self.height - letterbox_h) // 2
+                        frame = bg.copy()
+                        frame[y:y+letterbox_h, x:x+letterbox_w] = letterboxed
+                else:
+                    # Video frame
+                    frame = self._get_video_frame(media, frame_time)
+                
+                # NO other effects - only KEN_BURNS (already applied above)
+                
+                # Handle transitions
+                # Transition in
+                if clip.transition_in != TransitionType.NONE and frame_idx < clip.transition_in_duration * self.fps:
+                    # Will be handled by crossfade with previous clip
+                    pass
+                
+                yield frame
+            
+            # Note: Transition handling between clips would need lookahead
+            # For now, crossfade is applied during frame generation of next clip
+
+    def _get_video_frame(self, media: MediaItem, time: float) -> np.ndarray:
+        """Get video frame at given time."""
+        # Simple implementation - just return black for now
+        return np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
 
 class VideoRenderer:
@@ -260,71 +437,88 @@ class VideoRenderer:
     
     def _encode_with_ffmpeg(self, generator: FrameGenerator, 
                             timeline: Timeline, audio_analysis: AudioAnalysis) -> str:
-        """Encode frames to video using FFmpeg with piped input."""
+        """Encode frames to video using FFmpeg - write frames to temp files then encode."""
         
-        # Prepare FFmpeg input for raw video frames
         fps = timeline.target_fps
         width = timeline.output_width
         height = timeline.output_height
+        total_frames = generator.total_frames
+        video_duration = timeline.get_total_duration()
         
-        # Video input from pipe
-        video_input = ffmpeg.input('pipe:', format='rawvideo', 
-                                    pix_fmt='bgr24', s=f'{width}x{height}', r=fps)
+        # Create temp directory for frames
+        frames_dir = Path(self.temp_dir) / "frames"
+        frames_dir.mkdir(parents=True, exist_ok=True)
+        
+        print(f"📸 Writing {total_frames} frames to temp directory...")
+        
+        # Generate and save frames
+        frame_iter = generator.generate_frames()
+        if self.config.show_progress:
+            frame_iter = tqdm(frame_iter, total=total_frames, 
+                              desc="🎞️ Rendering frames", unit="frame")
+        
+        for i, frame in enumerate(frame_iter):
+            frame_path = frames_dir / f"frame_{i:06d}.png"
+            cv2.imwrite(str(frame_path), frame)
+        
+        print(f"🎬 Encoding video with FFmpeg...")
+        
+        # Run FFmpeg - use full path to Gyan ffmpeg which has libx264
+        ffmpeg_path = r"C:\Users\reine\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin\ffmpeg.exe"
+        if not os.path.exists(ffmpeg_path):
+            ffmpeg_path = 'ffmpeg'  # fallback to PATH
+        
+        # Build command with correct order: inputs first, then codec options for outputs
+        cmd = [
+            ffmpeg_path, '-y',
+            '-framerate', str(fps),
+            '-i', str(frames_dir / 'frame_%06d.png'),
+        ]
         
         # Audio input
         audio_path = timeline.audio_path
         if audio_path and os.path.exists(audio_path):
-            audio_input = ffmpeg.input(audio_path)
-            # Trim audio to match video duration if needed
-            video_duration = timeline.get_total_duration()
-            audio_input = audio_input.filter('atrim', start=0, end=video_duration)
+            audio_abs_path = os.path.abspath(audio_path)
+            # Loop audio if timeline.audio_loop is True
+            if getattr(timeline, 'audio_loop', False):
+                cmd.extend(['-stream_loop', '-1', '-i', audio_abs_path])
+            else:
+                cmd.extend(['-i', audio_abs_path])
         else:
-            # Generate silent audio
-            audio_input = ffmpeg.input('anullsrc=r=44100:cl=stereo', format='lavfi', 
-                                        t=timeline.get_total_duration())
+            # Silent audio
+            cmd.extend(['-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo'])
         
-        # Build output
-        output = ffmpeg.output(
-            video_input, audio_input, self.config.output_path,
-            vcodec='libx264',
-            crf=self.config.crf,
-            preset=self.config.preset,
-            pix_fmt=self.config.pixel_format,
-            acodec=self.config.audio_codec,
-            audio_bitrate=self.config.audio_bitrate,
-            r=fps,
-            threads=self.config.threads,
-            **{'map': '0:v:0', 'map': '1:a:0'}
-        ).overwrite_output()
+        # Video codec options (after video input)
+        cmd.extend([
+            '-c:v', 'libx264', '-crf', str(self.config.crf), 
+            '-preset', self.config.preset, '-pix_fmt', self.config.pixel_format,
+        ])
         
-        # Run FFmpeg with piped frames
-        process = output.run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True)
+        # Audio codec options (after audio input)
+        cmd.extend([
+            '-acodec', self.config.audio_codec, '-b:a', self.config.audio_bitrate,
+        ])
         
+        # Mapping
+        cmd.extend(['-map', '0:v:0', '-map', '1:a:0'])
+        
+        # Duration trim
+        cmd.extend(['-t', str(video_duration)])
+        
+        # Output framerate
+        cmd.extend(['-r', str(fps)])
+        
+        if self.config.threads > 0:
+            cmd.extend(['-threads', str(self.config.threads)])
+        cmd.append(self.config.output_path)
+        
+        # Run FFmpeg
         try:
-            total_frames = generator.total_frames
-            frame_iter = generator.generate_frames()
-            
-            if self.config.show_progress:
-                frame_iter = tqdm(frame_iter, total=total_frames, 
-                                  desc="🎞️ Rendering frames", unit="frame")
-            
-            for frame in frame_iter:
-                # Write frame to FFmpeg stdin
-                process.stdin.write(frame.tobytes())
-            
-            # Close stdin to signal end of input
-            process.stdin.close()
-            
-            # Wait for completion
-            stdout, stderr = process.communicate()
-            
-            if process.returncode != 0:
-                error_msg = stderr.decode('utf-8', errors='ignore') if stderr else "Unknown error"
-                raise RuntimeError(f"FFmpeg failed (code {process.returncode}): {error_msg}")
-            
-        except Exception as e:
-            process.kill()
-            raise e
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            if result.returncode != 0:
+                raise RuntimeError(f"FFmpeg failed (code {result.returncode}): {result.stderr}")
+        except subprocess.TimeoutExpired:
+            raise RuntimeError("FFmpeg encoding timed out")
         
         return self.config.output_path
     

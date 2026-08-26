@@ -64,3 +64,16 @@ test_*.py
 dist/
 build/
 *.egg-info/
+
+# myMovieMaker media and output (keep only code)
+myMovieMaker/demo_project/media/*
+myMovieMaker/demo_project/*.mp4
+myMovieMaker/demo_project/*.mp3
+myMovieMaker/demo_project/*.mov
+myMovieMaker/demo_project/*.MOV
+myMovieMaker/demo_project/*.JPG
+myMovieMaker/demo_project/*.jpg
+myMovieMaker/demo_project/*.png
+myMovieMaker/demo_project/*.wav
+myMovieMaker/urlaub_backup/
+myMovieMaker/*.analysis.json

@@ -6,6 +6,7 @@
 
 const puppeteer = require('puppeteer-core');
 const path = require('path');
+const fs = require('fs');
 
 const GAMES = [
   { file: 'flappy-bird.html', name: 'Flappy Bird', checks: ['canvas', 'score', 'gameOver'] },
@@ -287,11 +288,30 @@ async function testHubPage(browser, hub, baseUrl) {
 
 async function main() {
   console.log('🚀 Starting Puppeteer tests with system Chromium...');
-  console.log(`   Executable: /usr/bin/chromium`);
+  
+  // Auto-detect Chrome/Chromium on Windows
+  let executablePath = '/usr/bin/chromium';
+  if (process.platform === 'win32') {
+    // Try common Windows Chrome locations
+    const windowsPaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files\\Chromium\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Chromium\\Application\\chrome.exe',
+    ];
+    for (const p of windowsPaths) {
+      if (fs.existsSync(p)) {
+        executablePath = p;
+        break;
+      }
+    }
+  }
+  console.log(`   Executable: ${executablePath}`);
   console.log(`   Args: ${LAUNCH_ARGS.join(' ')}`);
   
   const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/chromium',
+    executablePath: executablePath,
     args: LAUNCH_ARGS,
     headless: 'new',
   });

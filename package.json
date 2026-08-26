@@ -23,6 +23,6 @@
     "@capacitor/android": "^8.5.0",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
-    "puppeteer-core": "^25.4.0"
+    "puppeteer-core": "^25.8.0"
   }
 }
