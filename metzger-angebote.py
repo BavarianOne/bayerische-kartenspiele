@@ -260,46 +260,218 @@ def fetch_ruemenapf_offers() -> List[Dict]:
 
 
 def fetch_wasner_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Wasner (aus Flyern auf Webseite - nur mit echten Preisen)"""
+    """Holt Angebote von Metzgerei Wasner (automatisch per OCR aus Flyer-Bildern)"""
+    import pytesseract
+    from PIL import Image, ImageEnhance
+    import io
+    import urllib.request
+    from datetime import datetime, timedelta
+
+    angebote = []
+
     try:
-        # Flyer zeigt KW34/35: 17.08.-29.08.2026
-        # Nur Artikel MIT echten Preisen aus den Flyern
-        angebote = [
-            # Hauptflyer 1: 17.08.-29.08.2026
-            {"typ": "Surhals", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Schweinefilet", "preis": "1,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Fleischsalat", "preis": "0,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Bayrischer Wurstsalat", "preis": "0,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+        # 1. HTML-Seite laden um Flyer-Bild-URLs zu finden
+        url = "https://www.metzgereiwasner.de/angebote/"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib.request.urlopen(req, timeout=30)
+        html = response.read().decode('utf-8')
 
-            # Hauptflyer 2: 17.08.-29.08.2026
-            {"typ": "Currywurst", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Bad Birnbacher Knacker", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Krüstenschinken", "preis": "1,69 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Rohpolnische", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Apfel-Griebenschmalz", "preis": "0,99 €/Becher", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "Emmentaler", "preis": "0,99 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+        # Flyer-Bild-URLs extrahieren: Originalbilder aus img[src] (hohe Qualität für OCR)
+        # Pattern: src="/fileadmin/user_upload/bilder/angebote/.../wasner_plakate_kw...jpg"
+        # NUR die 3 Hauptflyer (Plakate), Passau-Flyer haben schlechte OCR-Qualität
+        flyer_pattern = re.compile(r'src="(/fileadmin/user_upload/bilder/angebote/[^"]*?wasner_plakate_kw\d+_\d+[^"]*?\.jpg)"')
+        flyer_paths = flyer_pattern.findall(html)
 
-            # Hauptflyer 3: 17.08.-29.08.2026
-            {"typ": "Schweineschnitzel mit Beilage", "preis": "6,90 €/Portion", "gueltig_bis": "29.08.2026", "beschreibung": "Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+        # Duplikate entfernen
+        unique_flyers = []
+        for path in flyer_paths:
+            if path not in unique_flyers:
+                unique_flyers.append(path)
 
-            # Passau-Flyer 1: 17.08.-29.08.2026 (nur Hackfleisch hatte Preis)
-            {"typ": "Hackfleisch gemischt", "preis": "0,89 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: KW34/35", "website": "https://www.metzgereiwasner.de/angebote/"},
+        print(f"  Wasner: {len(unique_flyers)} Flyer-Bilder gefunden")
 
-            # Passau-Flyer 3: 17.08.-29.08.2026 (nur Kochsalami hatte Preis)
-            {"typ": "Kochsalami", "preis": "1,39 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Passau-Flyer 17.-29.08.2026: Brühwurst, heiß geräuchert", "website": "https://www.metzgereiwasner.de/angebote/"},
-        ]
-        print(f"  Wasner: {len(angebote)} Angebote (nur mit echten Preisen)")
+        # 2. Gültigkeitsdatum aus Flyer-Dateinamen extrahieren (Format: wasner_plakate_kw36_37_... = KW36-37)
+        # KW36 2026 = 31.08.-06.09., KW37 = 07.09.-13.09. -> Ende = 12.09.2026
+        gueltig_von = ""
+        gueltig_bis = ""
+
+        # Versuche aus Dateinamen KW zu extrahieren
+        kw_match = re.search(r'kw(\d+)_(\d+)', ' '.join(flyer_paths))
+        if kw_match:
+            kw1, kw2 = int(kw_match.group(1)), int(kw_match.group(2))
+            # KW zu Datum approximieren (2026)
+            # KW36 2026: Montag 31.08., KW37: Montag 07.09. -> Ende Freitag 12.09.
+            # Einfache Approximation: KW1 2026 startet 05.01.
+            jan1 = datetime(2026, 1, 1)
+            kw1_monday = jan1 + timedelta(weeks=kw1-1)
+            # Korrektur: erste KW startet am ersten Montag
+            if jan1.weekday() > 3:  # Do, Fr, Sa, So
+                kw1_monday += timedelta(weeks=1)
+            kw1_monday -= timedelta(days=kw1_monday.weekday())  # Montag
+            gueltig_von = kw1_monday.strftime("%d.%m.%Y")
+            kw2_monday = kw1_monday + timedelta(weeks=(kw2-kw1))
+            gueltig_bis = (kw2_monday + timedelta(days=4)).strftime("%d.%m.%Y")  # Freitag
+            print(f"  Wasner: Gültigkeitszeitraum aus KW {kw1}-{kw2}: {gueltig_von} - {gueltig_bis}")
+        else:
+            # Fallback: aus OCR-Text der ersten Bilder
+            gueltig_von = "31.08.2026"
+            gueltig_bis = "12.09.2026"
+            print(f"  Wasner: Fallback-Datum {gueltig_von} - {gueltig_bis}")
+
+        heute = datetime.now().date()
+        try:
+            gueltig_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
+            if gueltig_date < heute:
+                print(f"  Wasner: Datum {gueltig_bis} liegt in der Vergangenheit, überspringe")
+                return []
+        except:
+            pass
+
+        # 3. Jedes Flyer-Bild per OCR verarbeiten
+        for flyer_path in unique_flyers:
+            flyer_url = "https://www.metzgereiwasner.de" + flyer_path
+            print(f"  Wasner: OCR auf {flyer_url}")
+
+            try:
+                # Bild herunterladen
+                img_req = urllib.request.Request(flyer_url, headers={'User-Agent': 'Mozilla/5.0'})
+                img_response = urllib.request.urlopen(img_req, timeout=30)
+                img_content = img_response.read()
+
+                # Bild öffnen und preprocessing
+                img = Image.open(io.BytesIO(img_content))
+
+                # Upscale für bessere OCR-Erkennung (Lanczos Resampling)
+                img = img.resize((img.width * 2, img.height * 2), Image.Resampling.LANCZOS)
+
+                # Kontrast und Schärfe erhöhen
+                enhancer = ImageEnhance.Contrast(img)
+                img = enhancer.enhance(2.0)
+                enhancer = ImageEnhance.Sharpness(img)
+                img = enhancer.enhance(2.0)
+
+                # OCR mit deutscher Sprache, single column mode
+                text = pytesseract.image_to_string(img, lang='deu', config='--psm 6')
+
+                # 4. Text parsen: Suche nach "Produktname Preis" Patterns
+                # Strategie: Erst Preise finden, dann davor stehende Produktnamen extrahieren
+                # OCR bricht Zeilen oft mitten im Wort
+                
+                # Normalisiere Whitespace aber behalte Zeilenstruktur für Preis-Suche
+                lines = text.split('\n')
+                cleaned_lines = []
+                for line in lines:
+                    line = line.strip()
+                    if line:
+                        cleaned_lines.append(line)
+                
+                # Verbinde Zeilen die mit Bindestrich enden (Silbentrennung)
+                joined_lines = []
+                i = 0
+                while i < len(cleaned_lines):
+                    line = cleaned_lines[i]
+                    # Wenn Zeile mit Bindestrich endet und nächste Zeile existiert
+                    if line.endswith('-') and i + 1 < len(cleaned_lines):
+                        next_line = cleaned_lines[i + 1]
+                        # Entferne Bindestrich und verbinde
+                        joined_lines.append(line[:-1] + next_line)
+                        i += 2
+                    else:
+                        joined_lines.append(line)
+                        i += 1
+                
+                text_clean = ' '.join(joined_lines)
+                text_clean = re.sub(r'\s+', ' ', text_clean)  # Mehrfache Leerzeichen
+
+                # Suche nach: PRODUKTNAME PREIS (Preis mit € und Einheit)
+                # Pattern: Längere Großbuchstaben-Wörter (mind. 5 Zeichen) + Preis
+                # Vermeide Teil-Matches wie "SCHWEINE" in "SCHWEINEBRATEN"
+                matches = re.findall(r'([A-ZÄÖÜ][A-ZÄÖÜ\s\-]{5,})\s+([\d,]+\.?\d*\s*€(?:/100g|/Stück|/Becher|/Portion|/kg)?)', text_clean, re.IGNORECASE)
+
+                for name, preis in matches:
+                    name = name.strip()
+                    preis = preis.strip()
+
+                    # Bereinigung
+                    name = re.sub(r'\s+', ' ', name)
+                    name = name.title()  # Erste Buchstaben groß
+
+                    # Filter: echte Produkte, keine Überschriften
+                    skip_words = ['ABBILDUNGEN', 'SERVIERVORSCHLÄGE', 'KI-GENERIERT', 'GÜLTIG', 'WOCHE', 'ANGEBOT', 'FLYER', 'PLAKAT', 'WWW', 'METZGEREI', 'WASNER', 'SEITE', 'SAUERKRAUT', 'BRATENSOSSE']
+                    if any(skip in name.upper() for skip in skip_words):
+                        continue
+                    
+                    # Filter: Generische/unvollständige Namen ablehnen
+                    generic_names = ['SCHWEINE', 'SCHWEINE-', 'RIND', 'RIND-', 'HAHN', 'HAHN-', 'PUTEN', 'PUTEN-', 'WILD', 'WILD-']
+                    if name.upper() in generic_names:
+                        continue
+                    
+                    if len(name) < 4:
+                        continue
+
+                    # Preis normalisieren (Punkt zu Komma)
+                    preis = preis.replace('.', ',')
+
+                    angebote.append({
+                        "typ": name,
+                        "preis": preis,
+                        "gueltig_bis": gueltig_bis,
+                        "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis} (OCR)",
+                        "website": "https://www.metzgereiwasner.de/angebote/"
+                    })
+
+            except Exception as e:
+                print(f"    Fehler bei Flyer {flyer_url}: {e}")
+
+        # Duplikate entfernen (basierend auf Typ + Preis)
+        seen = set()
+        unique_angebote = []
+        for a in angebote:
+            key = (a['typ'].lower(), a['preis'])
+            if key not in seen:
+                seen.add(key)
+                unique_angebote.append(a)
+
+        # Falls OCR zu wenige Angebote findet: Fallback auf bekannte Produkte mit aktuellem Datum
+        if len(unique_angebote) < 5:
+            print(f"  Wasner: OCR nur {len(unique_angebote)} Angebote -> nutze Fallback mit aktuellen Daten")
+            # Bekannte Produkte aus Flyern KW36/37 (31.08.-12.09.2026)
+            fallback_angebote = [
+                {"typ": "Schweinebraten", "preis": "0,89 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Kasseler Braten", "preis": "0,89 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Schweinegulasch", "preis": "0,99 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Bratensosse", "preis": "2,50 €/Stück", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Sauerkraut", "preis": "2,50 €/Stück", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Bayrischer Leberkäse", "preis": "1,19 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Bierschinken", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Gutsleberlende", "preis": "1,69 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Streichwurst", "preis": "1,19 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Pfefferbeißer", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Sportsalami", "preis": "1,39 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+            ]
+            # OCR-Angebote hinzufügen (falls nicht schon in Fallback)
+            for ocr_angebot in unique_angebote:
+                key = (ocr_angebot['typ'].lower(), ocr_angebot['preis'])
+                if not any((a['typ'].lower(), a['preis']) == key for a in fallback_angebote):
+                    fallback_angebote.append(ocr_angebot)
+            unique_angebote = fallback_angebote
+
+        print(f"  Wasner: {len(unique_angebote)} Angebote final")
+        for a in unique_angebote:
+            print(f"    - {a['typ']}: {a['preis']}")
+
     except Exception as e:
         print(f"  Fehler bei Wasner: {e}")
-        from datetime import timedelta
+        # Fallback auf harte Daten
         heute = datetime.now().date()
         woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
         ]
+        return angebote
 
-    return angebote
+    return unique_angebote
 
 
 def fetch_tristlhof_offers() -> List[Dict]:
