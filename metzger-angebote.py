@@ -54,7 +54,12 @@ METZGERIEN = [
 
 
 def fetch_brandl_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Brandl (PDF-Links von /speisekarten-angebote)"""
+    """Holt Angebote von Metzgerei Brandl (PDF-Links von /speisekarten-angebote) und parst die PDFs"""
+    import pdfplumber
+    import io
+    import urllib.request
+    from datetime import datetime, timedelta
+
     angebote = []
 
     try:
@@ -76,21 +81,13 @@ def fetch_brandl_offers() -> List[Dict]:
 
         print(f"  Brandl: {len(unique_pdfs)} Angebot-PDFs gefunden")
 
-        from datetime import datetime
-        heute = datetime.now().date()
-
-        for pdf_url in unique_pdfs:
-            # Vollständige URL bauen
-            if pdf_url.startswith('/'):
-                pdf_url = "https://www.metzgerei-brandl.de" + pdf_url
-
-            # Versuche Datum aus HTML-Seiten-Text zu extrahieren (besser als PDF-Dateinamen)
         # Suche nach allen "Angebot vom ... bis ..." im HTML und mapp sie auf PDF-URLs
         angebot_dates = re.findall(r'Angebot vom \d{2}\.\d{2}\.\d{4}\s*bis\s*(\d{2}\.\d{2}\.\d{4})', html)
         print(f"  Brandl: Gefundene End-Daten im HTML: {angebot_dates}")
 
-        # Für jeden PDF-Link den passenden End-Datum finden
-        # Die Reihenfolge im HTML stimmt mit der Reihenfolge der PDFs überein
+        heute = datetime.now().date()
+
+        # Für jeden PDF-Link den passenden End-Datum finden und PDF parsen
         for i, pdf_url in enumerate(unique_pdfs):
             # Vollständige URL bauen
             if pdf_url.startswith('/'):
@@ -109,56 +106,83 @@ def fetch_brandl_offers() -> List[Dict]:
                     except:
                         pass
 
+            # Wenn HTML-Datum in der Vergangenheit liegt, aber PDF-Dateinamen ein zukünftiges Datum hat -> PDF-Datum nutzen
             if gueltig_bis:
                 try:
                     gueltig_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
                     if gueltig_date < heute:
-                        print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis})")
-                        continue
+                        # Versuche Datum aus PDF-Dateinamen zu extrahieren (Format: angebot-vom-DD-MM-DD-MM-YY.pdf)
+                        # Nimm die letzten 3 Teile vor .pdf als End-Datum: DD-MM-YY
+                        filename = pdf_url.split('/')[-1].replace('.pdf', '')
+                        parts = filename.split('-')
+                        if len(parts) >= 5:
+                            # Format: angebot-vom-DD-MM-DD-MM-YY -> letzte 3: DD, MM, YY
+                            tag, monat, jahr = parts[-3:]
+                            try:
+                                pdf_date = datetime(2000 + int(jahr), int(monat), int(tag)).date()
+                                if pdf_date >= heute:
+                                    gueltig_bis = pdf_date.strftime("%d.%m.%Y")
+                                    print(f"  -> HTML-Datum war vergangen, nutze PDF-Dateinamen-Datum: {gueltig_bis}")
+                            except:
+                                pass
                 except:
                     pass
-                print(f"  -> Nimm Woche (bis {gueltig_bis})")
-            else:
+
+            if not gueltig_bis:
                 print(f"  -> Kein Datum erkannt: {pdf_url}")
+                continue
 
-            if gueltig_bis:
-                try:
-                    gueltig_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
-                    if gueltig_date < heute:
-                        print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis})")
-                        continue
-                except:
-                    pass
-                print(f"  -> Nimm Woche (bis {gueltig_bis})")
-            else:
-                print(f"  -> Kein Datum erkannt: {pdf_url}")
+            # Prüfen ob Woche in der Vergangenheit liegt
+            try:
+                gueltig_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
+                if gueltig_date < heute:
+                    print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis})")
+                    continue
+            except:
+                pass
 
-            # Fallback: PDF nicht parsen, verwende statische Daten basierend auf Datum
-            if "17-08" in pdf_url or "22-08" in pdf_url:
-                gueltig_bis = "22.08.2026"
-                angebote.extend([
-                    {"typ": "Schweine-Schnitzel", "preis": "1,49 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Hals gewürzt", "preis": "1,49 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Geräuchertes gekocht", "preis": "1,85 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Käswürstl", "preis": "1,59 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Kalbskäs", "preis": "1,49 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                ])
-            elif "24-08" in pdf_url or "29-08" in pdf_url:
-                gueltig_bis = "29.08.2026"
-                angebote.extend([
-                    {"typ": "Hackfleisch gemischt", "preis": "1,59 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Wammerlscheiben gewürzt", "preis": "1,39 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Burgschinken", "preis": "1,85 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Wollwürstl", "preis": "1,25 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                    {"typ": "Leberkäs", "preis": "1,29 €", "gueltig_bis": gueltig_bis, "beschreibung": f"Angebot v. {gueltig_bis} - Landshut", "website": "https://www.metzgerei-brandl.de"},
-                ])
+            print(f"  -> Parse PDF für Woche bis {gueltig_bis}: {pdf_url}")
 
-        print(f"  Brandl: {len(angebote)} Angebote gefunden")
+            # PDF herunterladen und parsen
+            try:
+                pdf_req = urllib.request.Request(pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
+                pdf_response = urllib.request.urlopen(pdf_req, timeout=30)
+                pdf_content = pdf_response.read()
+
+                pdf = pdfplumber.open(io.BytesIO(pdf_content))
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        # Parse Zeilen wie "Hackfleisch gemischt 100 g 1,59 €"
+                        lines = text.split('\n')
+                        for line in lines:
+                            line = line.strip()
+                            # Match: Produktname + Gewicht + Preis
+                            match = re.match(r'^(.+?)\s+(\d+\s*g)\s+([\d,]+\s*€)', line)
+                            if match:
+                                name = match.group(1).strip()
+                                gewicht = match.group(2).strip()
+                                preis = match.group(3).strip()
+                                # Bereinigen
+                                name = re.sub(r'\s+', ' ', name)
+                                if name and len(name) > 2:
+                                    angebote.append({
+                                        "typ": f"{name} ({gewicht})",
+                                        "preis": preis,
+                                        "gueltig_bis": gueltig_bis,
+                                        "beschreibung": f"Angebot v. {gueltig_bis} - Landshut/Ergolding",
+                                        "website": "https://www.metzgerei-brandl.de"
+                                    })
+                pdf.close()
+
+            except Exception as e:
+                print(f"    Fehler beim Parsen von {pdf_url}: {e}")
+
+        print(f"  Brandl: {len(angebote)} Angebote aus PDFs extrahiert")
 
     except Exception as e:
         print(f"  Fehler bei Brandl: {e}")
-        # Fallback
-        from datetime import datetime, timedelta
+        # Fallback auf statische Daten
         heute = datetime.now().date()
         woche1 = heute + timedelta(days=(7 - heute.weekday()))
         woche2 = woche1 + timedelta(days=7)
@@ -210,7 +234,10 @@ def fetch_ruemenapf_offers() -> List[Dict]:
             for name, gewicht, preis in rows:
                 name = name.strip()
                 gewicht = gewicht.strip()
-                preis = preis.strip() + " €"
+                preis = preis.strip()
+                # Nur " €" hinzufügen wenn nicht schon vorhanden
+                if not preis.endswith("€"):
+                    preis = preis + " €"
                 if name and len(name) > 2 and not re.match(r'^\d', name):
                     angebote.append({
                         "typ": f"{name} ({gewicht})",
@@ -276,7 +303,7 @@ def fetch_wasner_offers() -> List[Dict]:
 
 
 def fetch_tristlhof_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeige 17.-22.08.2026 und 24.-29.08.2026)"""
+    """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeigen)"""
 
     return [
         # Woche 17.08.-22.08.2026 (aus Zeitungsanzeige Frontenhausen)
@@ -293,6 +320,11 @@ def fetch_tristlhof_offers() -> List[Dict]:
         {"typ": "Bratwürste oder Wollwürste immer frisch (aus Stadler's Wurstküche)", "preis": "1,19 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Frisch aus Stadler's Wurstküche", "website": ""},
         {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Montag ist Hackfleischtag", "website": ""},
         {"typ": "Samstag ist Haxentag frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Samstag ist Haxentag, frisch & kross, solange Vorrat reicht", "website": ""},
+        # Woche 31.08.-05.09.2026 (neue Zeitungsanzeige)
+        {"typ": "Pfannengerichte vom Schwein (versch. Sorten)", "preis": "1,29 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: für die schnelle Küche", "website": ""},
+        {"typ": "Tristlhof Schweineschnitzel zart und mager", "preis": "1,09 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026", "website": ""},
+        {"typ": "Currywurst oder Käsegriller (frisch aus Buchenrauch)", "preis": "1,09 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: Frisch aus Stadler's Wurstküche", "website": ""},
+        {"typ": "Schinken-Aufschnitt hausgemacht (saftig, pikant)", "preis": "1,89 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: Frisch aus Stadler's Wurstküche, solange Vorrat reicht", "website": ""},
     ]
 
 
