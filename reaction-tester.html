@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reaction Tester</title>
+  <style>
+    :root {
+      --bg: #1a1a2e;
+      --fg: #eaeaea;
+      --accent: #00d4aa;
+      --danger: #ff3366;
+      --warn: #ffcc00;
+      --card: #16213e;
+      --muted: #8892a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    h1 { font-size: clamp(1.5rem, 5vw, 2.5rem); margin-bottom: 0.5rem; font-weight: 700; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 1rem; }
+    
+    .stats { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center; }
+    .stat { background: var(--card); padding: 0.75rem 1.25rem; border-radius: 12px; min-width: 100px; text-align: center; }
+    .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .stat-value.best { color: var(--accent); }
+    .stat-value.avg { color: var(--warn); }
+    
+    .target-wrap { position: relative; width: 100%; max-width: 400px; aspect-ratio: 1; }
+    .target {
+      width: 100%; height: 100%; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #2a2a4a 0%, var(--card) 70%);
+      border: 4px solid transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s ease;
+      box-shadow: 
+        0 0 0 2px rgba(255,255,255,0.05),
+        0 20px 40px rgba(0,0,0,0.4),
+        inset 0 2px 4px rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .target::before {
+      content: ''; position: absolute; inset: -2px; border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--accent), transparent 60%);
+      opacity: 0; transition: opacity 0.3s;
+      filter: blur(8px);
+    }
+    .target.waiting { background: radial-gradient(circle at 30% 30%, #2a1a1a 0%, var(--card) 70%); border-color: var(--danger); }
+    .target.waiting::before { background: conic-gradient(from 0deg, var(--danger), transparent 60%); opacity: 0.6; }
+    .target.ready { background: radial-gradient(circle at 30% 30%, #1a2a1a 0%, var(--card) 70%); border-color: var(--accent); }
+    .target.ready::before { background: conic-gradient(from 0deg, var(--accent), transparent 60%); opacity: 0.8; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 0.4; } }
+    .target.clicked { transform: scale(0.96); }
+    .target-text { font-size: clamp(1rem, 4vw, 1.5rem); font-weight: 600; z-index: 1; transition: all 0.2s; }
+    .target.ready .target-text { color: var(--accent); text-shadow: 0 0 20px var(--accent); }
+    .target.waiting .target-text { color: var(--danger); }
+    
+    .round-info { margin-top: 1.5rem; font-size: 1.1rem; color: var(--muted); min-height: 1.5em; }
+    .result { margin-top: 1rem; font-size: clamp(1.5rem, 6vw, 3rem); font-weight: 700; font-variant-numeric: tabular-nums; min-height: 1.5em; }
+    .result.good { color: var(--accent); }
+    .result.bad { color: var(--danger); }
+    .result.cheat { color: var(--warn); }
+    
+    .btn {
+      margin-top: 2rem; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600;
+      background: var(--accent); color: var(--bg); border: none; border-radius: 100px;
+      cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 20px rgba(0,212,170,0.3);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(0,212,170,0.4); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn.secondary { background: transparent; color: var(--accent); border: 2px solid var(--accent); box-shadow: none; }
+    .btn.secondary:hover { background: rgba(0,212,170,0.1); }
+    
+    .history { margin-top: 2rem; width: 100%; max-width: 400px; }
+    .history h3 { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .history-list { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+    .history-item { 
+      background: var(--card); padding: 0.5rem 0.85rem; border-radius: 8px; 
+      font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.9rem;
+      animation: slideIn 0.3s ease;
+    }
+    .history-item.best { background: rgba(0,212,170,0.2); border: 1px solid var(--accent); color: var(--accent); }
+    .history-item.cheat { background: rgba(255,204,0,0.15); border: 1px solid var(--warn); color: var(--warn); }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .instruction { margin-top: 2rem; color: var(--muted); font-size: 0.9rem; line-height: 1.6; max-width: 400px; text-align: center; }
+    .instruction kbd { background: var(--card); padding: 0.15rem 0.4rem; border-radius: 4px; font-family: inherit; font-size: 0.85em; border: 1px solid rgba(255,255,255,0.1); }
+    
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ Reaction Tester</h1>
+  <p class="subtitle">Klicke sobald der Kreis <strong style="color:var(--accent)">grün</strong> wird</p>
+  
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Runde</div><div class="stat-value" id="roundStat">1 / 5</div></div>
+    <div class="stat"><div class="stat-label">Best</div><div class="stat-value best" id="bestStat">—</div></div>
+    <div class="stat"><div class="stat-label">Ø Avg</div><div class="stat-value avg" id="avgStat">—</div></div>
+  </div>
+  
+  <div class="target-wrap">
+    <div class="target waiting" id="target" role="button" tabindex="0" aria-label="Wartebereich">
+      <span class="target-text" id="targetText">Warte...</span>
+    </div>
+  </div>
+  
+  <div class="round-info" id="roundInfo" aria-live="polite">Drücke Start</div>
+  <div class="result" id="result" aria-live="assertive"></div>
+  
+  <button class="btn" id="startBtn" onclick="startGame()">Start</button>
+  <button class="btn secondary" id="resetBtn" onclick="resetGame()" style="display:none; margin-top:0.75rem;">Zurücksetzen</button>
+  
+  <div class="history" id="history" hidden>
+    <h3>Verlauf</h3>
+    <div class="history-list" id="historyList"></div>
+  </div>
+  
+  <p class="instruction">
+    <kbd>Space</kbd> oder <kbd>Enter</kbd> funktionieren auch • 
+    5 Runden • Rot klicken = Strafzeit +500ms
+  </p>
+
+<script>
+const ROUNDS = 5;
+const MIN_WAIT = 1500;
+const MAX_WAIT = 4000;
+const CHEAT_PENALTY = 500;
+
+const target = document.getElementById('target');
+const targetText = document.getElementById('targetText');
+const roundInfo = document.getElementById('roundInfo');
+const resultEl = document.getElementById('result');
+const roundStat = document.getElementById('roundStat');
+const bestStat = document.getElementById('bestStat');
+const avgStat = document.getElementById('avgStat');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const historyEl = document.getElementById('history');
+const historyList = document.getElementById('historyList');
+
+let round = 0;
+let times = [];
+let timeouts = [];
+let startTime = 0;
+let waitingForClick = false;
+let gameActive = false;
+
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+function setTargetState(state) {
+  target.className = 'target ' + state;
+}
+
+function updateRoundInfo(text) { roundInfo.textContent = text; }
+function showResult(text, cls) { resultEl.textContent = text; resultEl.className = 'result ' + (cls || ''); }
+
+function addToHistory(ms, isBest, isCheat) {
+  historyEl.hidden = false;
+  const div = document.createElement('div');
+  div.className = 'history-item' + (isBest ? ' best' : '') + (isCheat ? ' cheat' : '');
+  div.textContent = isCheat ? `Runde ${round}: ${ms}ms ⚠` : `Runde ${round}: ${ms}ms`;
+  historyList.prepend(div);
+}
+
+function updateStats() {
+  roundStat.textContent = `${round} / ${ROUNDS}`;
+  if (times.length) {
+    const valid = times.filter(t => t > 0);
+    const best = Math.min(...valid);
+    const avg = Math.round(valid.reduce((a,b)=>a+b,0) / valid.length);
+    bestStat.textContent = best + 'ms';
+    avgStat.textContent = avg + 'ms';
+  }
+}
+
+function scheduleNextRound() {
+  const delay = rand(MIN_WAIT, MAX_WAIT);
+  timeouts.push(setTimeout(() => {
+    if (!gameActive) return;
+    waitingForClick = true;
+    startTime = performance.now();
+    setTargetState('ready');
+    targetText.textContent = 'JETZT!';
+    updateRoundInfo(`Runde ${round} — KLICK!`);
+  }, delay));
+}
+
+function handleClick() {
+  if (!gameActive) return;
+  
+  if (!waitingForClick) {
+    // Cheat / zu früh geklickt
+    clearTimeouts();
+    waitingForClick = true; // prevent double penalty
+    const penaltyTime = CHEAT_PENALTY;
+    times.push(penaltyTime);
+    showResult(`Zu früh! +${CHEAT_PENALTY}ms Strafe`, 'cheat');
+    addToHistory(penaltyTime, false, true);
+    updateStats();
+    targetText.textContent = '⚠ Strafe';
+    setTargetState('waiting');
+    setTimeout(nextRound, 1200);
+    return;
+  }
+  
+  // Valid click
+  waitingForClick = false;
+  const elapsed = Math.round(performance.now() - startTime);
+  times.push(elapsed);
+  
+  const isBest = elapsed === Math.min(...times.filter(t => t > 0));
+  showResult(`${elapsed}ms`, elapsed < 200 ? 'good' : '');
+  addToHistory(elapsed, isBest, false);
+  updateStats();
+  
+  targetText.textContent = `${elapsed}ms`;
+  setTargetState('waiting');
+  
+  setTimeout(nextRound, 1000);
+}
+
+function nextRound() {
+  round++;
+  if (round > ROUNDS) return endGame();
+  
+  clearTimeouts();
+  waitingForClick = false;
+  roundInfo.textContent = `Runde ${round} — Warte auf Grün...`;
+  resultEl.textContent = '';
+  setTargetState('waiting');
+  targetText.textContent = 'Warte...';
+  updateStats();
+  scheduleNextRound();
+}
+
+function startGame() {
+  if (gameActive) return;
+  gameActive = true;
+  round = 0;
+  times = [];
+  historyList.innerHTML = '';
+  historyEl.hidden = true;
+  startBtn.style.display = 'none';
+  resetBtn.style.display = 'inline-block';
+  nextRound();
+}
+
+function endGame() {
+  gameActive = false;
+  clearTimeouts();
+  
+  const valid = times.filter(t => t > 0 && t < CHEAT_PENALTY);
+  const best = valid.length ? Math.min(...valid) : null;
+  const avg = valid.length ? Math.round(valid.reduce((a,b)=>a+b,0)/valid.length) : null;
+  const cheats = times.filter(t => t >= CHEAT_PENALTY).length;
+  
+  setTargetState('waiting');
+  targetText.textContent = 'Fertig!';
+  updateRoundInfo('Test abgeschlossen');
+  
+  let msg = `Best: ${best}ms | Ø: ${avg}ms`;
+  if (cheats) msg += ` | ${cheats} Strafe${cheats>1?'n':''}`;
+  showResult(msg, 'good');
+  
+  startBtn.style.display = 'inline-block';
+  startBtn.textContent = 'Neu starten';
+  resetBtn.style.display = 'none';
+}
+
+function resetGame() {
+  clearTimeouts();
+  gameActive = false;
+  round = 0;
+  times = [];
+  historyList.innerHTML = '';
+  historyEl.hidden = true;
+  updateStats();
+  showResult('');
+  updateRoundInfo('Drücke Start');
+  setTargetState('waiting');
+  targetText.textContent = 'Warte...';
+  startBtn.style.display = 'inline-block';
+  startBtn.textContent = 'Start';
+  resetBtn.style.display = 'none';
+}
+
+function clearTimeouts() {
+  timeouts.forEach(clearTimeout);
+  timeouts = [];
+}
+
+// Event listeners
+target.addEventListener('click', handleClick);
+target.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    handleClick();
+  }
+});
+
+// Prevent context menu on target
+target.addEventListener('contextmenu', e => e.preventDefault());
+
+// Keyboard start
+document.addEventListener('keydown', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && !gameActive && startBtn.style.display !== 'none') {
+    startGame();
+  }
+});
+</script>
+</body>
+</html>
