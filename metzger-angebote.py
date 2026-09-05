@@ -497,6 +497,14 @@ def fetch_tristlhof_offers() -> List[Dict]:
         {"typ": "Tristlhof Schweineschnitzel zart und mager", "preis": "1,09 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026", "website": ""},
         {"typ": "Currywurst oder Käsegriller (frisch aus Buchenrauch)", "preis": "1,09 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: Frisch aus Stadler's Wurstküche", "website": ""},
         {"typ": "Schinken-Aufschnitt hausgemacht (saftig, pikant)", "preis": "1,89 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: Frisch aus Stadler's Wurstküche, solange Vorrat reicht", "website": ""},
+        # Woche 07.09.-12.09.2026 (neue Zeitungsanzeige - "Unsere Empfehlungen vom 07.09.26-12.09.26")
+        {"typ": "Schweine-Lendchen zart und mager (Top Preis)", "preis": "0,88 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: zart und mager, Top Preis (UVP 1,09 €/100g)", "website": ""},
+        {"typ": "Krustenbraten magere Stücke", "preis": "1,29 €/100g (500g 4,98 €)", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: magere Stücke", "website": ""},
+        # Frisch aus Stadler's Wurstküche
+        {"typ": "Weißwürste frisch gemacht", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Frisch aus Stadler's Wurstküche, frisch gemacht", "website": ""},
+        {"typ": "Wiener knackig und frisch", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Frisch aus Stadler's Wurstküche, knackig und frisch, echt lecker", "website": ""},
+        {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind", "preis": "4,98 €/500g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
+        {"typ": "Samstag ist Haxentag frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Samstag ist Haxentag, frisch und kross, solange Vorrat reicht", "website": ""},
     ]
 
 
