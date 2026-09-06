@@ -695,9 +695,14 @@ def fetch_brunner_offers() -> List[Dict]:
     return angebote
 
 
+# Hard cutoff: Nur Angebote ab diesem Datum anzeigen (07.09.2026)
+CUTOFF_DATE = datetime(2026, 9, 7).date()
+
+
 def main():
     print("=== Metzger-Angebote Sammler ===")
     print(f"Start: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Cutoff: Nur Angebote ab {CUTOFF_DATE.strftime('%d.%m.%Y')}")
 
     alle_angebote = {}
 
@@ -723,7 +728,7 @@ def main():
         print(f"  -> {len(angebote)} Angebote gefunden")
         alle_angebote[name] = angebote
 
-    # Wochen-Übersicht bauen (alle Produkte + Preise pro Woche) - NUR AKTUELLE/ZUKÜNFTIGE WOCHEN
+    # Wochen-Übersicht bauen (alle Produkte + Preise pro Woche) - NUR AKTUELLE/ZUKÜNFTIGE WOCHEN AB CUTOFF
     EXCLUDE_FROM_WOCHENUEBERSICHT = {"Metzgerei Hahn"}
     heute = datetime.now().date()
 
@@ -739,11 +744,13 @@ def main():
             gueltig = angebot.get('gueltig_bis', '')
             if not gueltig:
                 continue
-            # Nur Wochen aufnehmen, die heute oder in der Zukunft liegen
+            # Nur Wochen aufnehmen, die heute oder in der Zukunft liegen UND ab CUTOFF_DATE
             try:
                 gueltig_date = datetime.strptime(gueltig, "%d.%m.%Y").date()
                 if gueltig_date < heute:
                     continue  # Vergangene Woche überspringen
+                if gueltig_date < CUTOFF_DATE:
+                    continue  # Vor Cutoff-Datum überspringen
             except:
                 pass
             if gueltig not in wochen_uebersicht:
@@ -959,6 +966,26 @@ async function shareFullContent() {{
         # Skip butchers with no offers
         if not angebote_list:
             continue
+            
+        # Filter: Nur Angebote ab CUTOFF_DATE
+        gefilterte_angebote = []
+        for angebot in angebote_list:
+            gueltig = angebot.get('gueltig_bis', '')
+            if gueltig:
+                try:
+                    gueltig_date = datetime.strptime(gueltig, "%d.%m.%Y").date()
+                    if gueltig_date >= CUTOFF_DATE:
+                        gefilterte_angebote.append(angebot)
+                except:
+                    pass
+            else:
+                # Kein Datum -> behalten (zur Sicherheit)
+                gefilterte_angebote.append(angebot)
+        
+        if not gefilterte_angebote:
+            continue  # Metzger überspringen wenn alle Angebote vor Cutoff
+            
+        angebote_list = gefilterte_angebote
             
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         metzger_website = next((m.get("website", "") for m in METZGERIEN if m["name"] == metzger_name), "")
