@@ -1,0 +1,39 @@
+{
+  "name": "Metzger-Angebote Bayern",
+  "short_name": "Metzger",
+  "description": "Automatisch aktualisierte Wochenangebote von regionalen Metzgereien in Bayern",
+  "start_url": "metzger-angebote.html",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#8b4513",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "de",
+  "categories": ["food", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥩</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Wochen-Übersicht",
+      "short_name": "Übersicht",
+      "description": "Alle aktuellen Angebote im Überblick",
+      "url": "metzger-angebote.html#wochen-uebersicht",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>", "sizes": "96x96" }]
+    },
+    {
+      "name": "Metzgereien",
+      "short_name": "Metzgereien",
+      "description": "Angebote nach Metzgerei gefiltert",
+      "url": "metzger-angebote.html#angebote-inhalt",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏪</text></svg>", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}
