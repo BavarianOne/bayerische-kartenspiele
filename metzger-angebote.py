@@ -310,7 +310,7 @@ def fetch_wasner_offers() -> List[Dict]:
             kw1_monday -= timedelta(days=kw1_monday.weekday())  # Montag
             gueltig_von = kw1_monday.strftime("%d.%m.%Y")
             kw2_monday = kw1_monday + timedelta(weeks=(kw2-kw1))
-            gueltig_bis = (kw2_monday + timedelta(days=4)).strftime("%d.%m.%Y")  # Freitag
+            gueltig_bis = (kw2_monday + timedelta(days=5)).strftime("%d.%m.%Y")  # Samstag (Wochenende)
             print(f"  Wasner: Gültigkeitszeitraum aus KW {kw1}-{kw2}: {gueltig_von} - {gueltig_bis}")
         else:
             # Fallback: aus OCR-Text der ersten Bilder
@@ -753,9 +753,18 @@ def main():
                     continue  # Vor Cutoff-Datum überspringen
             except:
                 pass
-            if gueltig not in wochen_uebersicht:
-                wochen_uebersicht[gueltig] = {"name": "", "angebote": []}
-            wochen_uebersicht[gueltig]["angebote"].append({
+            # Gruppiere nach Kalenderwoche (Montag als Key)
+            try:
+                start_date = gueltig_date - timedelta(days=gueltig_date.weekday())  # Montag
+                woche_key = start_date.strftime("%d.%m.%Y")
+            except:
+                woche_key = gueltig
+            if woche_key not in wochen_uebersicht:
+                wochen_uebersicht[woche_key] = {"name": "", "ende": gueltig, "angebote": []}
+            # Behalte das späteste End-Datum für die Anzeige
+            if gueltig_date > datetime.strptime(wochen_uebersicht[woche_key]["ende"], "%d.%m.%Y").date():
+                wochen_uebersicht[woche_key]["ende"] = gueltig
+            wochen_uebersicht[woche_key]["angebote"].append({
                 "metzger": metzger_name,
                 "stadt": stadt,
                 "typ": angebot.get('typ', ''),
@@ -772,16 +781,15 @@ def main():
 
     # Wochen-Übersicht sortieren
     if wochen_uebersicht:
-        for gueltig, wochen_data in wochen_uebersicht.items():
+        for woche_key, wochen_data in wochen_uebersicht.items():
             if wochen_data["angebote"]:
-                # Berechne Start-Datum (Montag vor gueltig_bis)
+                # Start-Datum aus Key, End-Datum aus gespeichertem spätestem Datum
                 try:
-                    from datetime import timedelta
-                    end_date = datetime.strptime(gueltig, "%d.%m.%Y").date()
-                    start_date = end_date - timedelta(days=end_date.weekday())  # Montag
-                    wochen_data["name"] = f"Woche {start_date.strftime('%d.%m.')} - {gueltig}"
+                    start_date = datetime.strptime(woche_key, "%d.%m.%Y").date()
+                    end_date = datetime.strptime(wochen_data["ende"], "%d.%m.%Y").date()
+                    wochen_data["name"] = f"Woche {start_date.strftime('%d.%m.')} - {wochen_data['ende']}"
                 except:
-                    wochen_data["name"] = f"Woche bis {gueltig}"
+                    wochen_data["name"] = f"Woche bis {wochen_data['ende']}"
             else:
                 wochen_data["name"] = "Keine Angebote"
 
