@@ -39,12 +39,6 @@ METZGERIEN = [
         "url": ""
     },
     {
-        "name": "Metzgerei Hahn",
-        "city": "Eggenfelden",
-        "website": "https://metzgerei-hahn.de/Lauterbachstrasse",
-        "url": "https://metzgerei-hahn.de/Lauterbachstrasse"
-    },
-    {
         "name": "Brunner Metzgerei",
         "city": "Landshut",
         "website": "https://www.brunner-metzgerei.de/angebot-der-woche",
@@ -508,116 +502,6 @@ def fetch_tristlhof_offers() -> List[Dict]:
     ]
 
 
-def fetch_hahn_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Hahn (automatisch per OCR aus Angebote-Bild)"""
-    import pytesseract
-    from PIL import Image, ImageEnhance
-    import io
-    import urllib.request
-    from datetime import datetime, timedelta
-
-    angebote = []
-
-    try:
-        # OCR-Bild URL
-        img_url = "https://metzgerei-hahn.de/media/upload/ANGEBOTE.png"
-        print(f"  Hahn: OCR auf {img_url}")
-
-        # Bild herunterladen
-        img_req = urllib.request.Request(img_url, headers={'User-Agent': 'Mozilla/5.0'})
-        img_response = urllib.request.urlopen(img_req, timeout=30)
-        img_content = img_response.read()
-
-        # Bild öffnen und preprocessing
-        img = Image.open(io.BytesIO(img_content))
-
-        # Upscale für bessere OCR-Erkennung
-        img = img.resize((img.width * 3, img.height * 3), Image.Resampling.LANCZOS)
-
-        # Kontrast und Schärfe erhöhen
-        enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(2.5)
-        enhancer = ImageEnhance.Sharpness(img)
-        img = enhancer.enhance(2.5)
-
-        # OCR mit deutscher Sprache
-        text = pytesseract.image_to_string(img, lang='deu', config='--psm 6')
-        print(f"  Hahn OCR-Text: {text[:200]}...")
-
-        # Text parsen
-        # Erwartete Format: "Produkt MENGE PREIS"
-        lines = text.split('\n')
-        for line in lines:
-            line = line.strip()
-            if not line or len(line) < 5:
-                continue
-
-            # Pattern: NAME MENGE PREIS (z.B. "Weide-Ochsenfleisch 1kg 15,99 €")
-            match = re.search(r'([A-Za-zÄÖÜäöüß\s\-]{4,})\s+(\d+[,.]?\d*\s*(?:kg|g|St\.?))\s+([\d,]+\.?\d*\s*€)', line, re.IGNORECASE)
-            if not match:
-                # Alternative: NAME PREIS
-                match = re.search(r'([A-Za-zÄÖÜäöüß\s\-]{4,})\s+([\d,]+\.?\d*\s*€(?:/kg|/g|/St\.?)?)', line, re.IGNORECASE)
-
-            if match:
-                name = match.group(1).strip()
-                menge = match.group(2).strip() if len(match.groups()) >= 2 else ""
-                preis = match.group(3).strip() if len(match.groups()) >= 3 else match.group(2).strip()
-
-                # Bereinigung
-                name = re.sub(r'\s+', ' ', name).title()
-                if menge:
-                    preis = f"{menge} {preis}"
-
-                # Filter
-                skip_words = ['ANGEBOT', 'SEPTEMBER', 'MONTAG', 'FREITAG', 'ERÖFFNUNG', 'SAISON', 'BAUER', 'KLUGE', 'TANN', 'GMBH', 'HAHN', 'LAUTERBACH', 'EGGENFELDEN', 'TEL', 'FAX', 'JAHRE']
-                if any(skip in name.upper() for skip in skip_words):
-                    continue
-                if len(name) < 4:
-                    continue
-
-                # Gültigkeit: September 2026 (aus OCR "Angebot September 2026")
-                gueltig_bis = "30.09.2026"  # Ende September
-
-                angebote.append({
-                    "typ": name,
-                    "preis": preis.replace('.', ','),
-                    "gueltig_bis": gueltig_bis,
-                    "beschreibung": f"Angebot September 2026 (OCR): {name}",
-                    "website": "https://metzgerei-hahn.de/Lauterbachstrasse"
-                })
-
-        # Duplikate entfernen
-        seen = set()
-        unique_angebote = []
-        for a in angebote:
-            key = (a['typ'].lower(), a['preis'])
-            if key not in seen:
-                seen.add(key)
-                unique_angebote.append(a)
-
-        print(f"  Hahn: {len(unique_angebote)} Angebote per OCR extrahiert")
-
-    except Exception as e:
-        print(f"  Fehler bei Hahn OCR: {e}")
-        # Fallback: alte statische Daten mit aktualisiertem Datum
-        from datetime import datetime, timedelta
-        heute = datetime.now().date()
-        woche1 = heute + timedelta(days=(7 - heute.weekday()))
-        woche2 = woche1 + timedelta(days=7)
-        angebote = [
-            {"typ": "Färsen-Hackfleisch (1 kg = 12,00 €)", "preis": "12,00 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"OCR-Fallback: Färsen-Hackfleisch (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-            {"typ": "Frischwurst-Aufschnitt (500g = 6,00 €)", "preis": "6,00 €/500g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"OCR-Fallback: Frischwurst-Aufschnitt (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-            {"typ": "Gyros-Pfanne (1 kg = 10,99 €)", "preis": "10,99 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"OCR-Fallback: Gyros-Pfanne (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-            {"typ": "Lyoner-Stange (500g = 3,99 €)", "preis": "3,99 €/500g", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"OCR-Fallback: Lyoner-Stange (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-            {"typ": "Schweinelendchen im Ganzen (1 kg = 6,99 €)", "preis": "6,99 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"OCR-Fallback: Schweinelendchen im Ganzen (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-            {"typ": "Rauchfrische Wiener (1 kg = 10,49 €)", "preis": "10,49 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"OCR-Fallback: Rauchfrische Wiener (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-            {"typ": "Unsere Scharfen (1 kg = 9,99 €)", "preis": "9,99 €/kg", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"OCR-Fallback: Unsere Scharfen (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://metzgerei-hahn.de/Lauterbachstrasse"},
-        ]
-        return angebote
-
-    return unique_angebote
-
-
 def fetch_brunner_offers() -> List[Dict]:
     """Holt Angebote von Brunner Metzgerei (aus Flyer-Bild auf Webseite - OCR mit Fallback auf aktuelle Daten)"""
     import pytesseract
@@ -718,8 +602,6 @@ def main():
             angebote = fetch_wasner_offers()
         elif "Tristlhof" in name:
             angebote = fetch_tristlhof_offers()
-        elif "Hahn" in name:
-            angebote = fetch_hahn_offers()
         elif "Brunner" in name:
             angebote = fetch_brunner_offers()
         else:
@@ -729,16 +611,12 @@ def main():
         alle_angebote[name] = angebote
 
     # Wochen-Übersicht bauen (alle Produkte + Preise pro Woche) - NUR AKTUELLE/ZUKÜNFTIGE WOCHEN AB CUTOFF
-    EXCLUDE_FROM_WOCHENUEBERSICHT = {"Metzgerei Hahn"}
     heute = datetime.now().date()
 
     wochen_uebersicht = {}
     aktuelle_woche_datum = None
 
     for metzger_name, angebote_list in alle_angebote.items():
-        # Skip in Wochen-Übersicht
-        if metzger_name in EXCLUDE_FROM_WOCHENUEBERSICHT:
-            continue
         stadt = next((m.get("city", "") for m in METZGERIEN if m["name"] == metzger_name), "")
         for angebot in angebote_list:
             gueltig = angebot.get('gueltig_bis', '')
