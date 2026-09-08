@@ -1,1331 +1,862 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metzger-Angebote Bayern | Bavarian Card Games</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#8b4513">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Metzger-Angebote">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥩</text></svg>">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 12px;
-            background-color: #f5f5f5;
-            font-size: 14px;
-        }
-        h1 {
-            color: #8b4513;
-            text-align: center;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 8px;
-            font-size: 1.5em;
-            margin: 10px 0 15px;
-        }
-        .week-card {
-            background: white;
-            border-radius: 6px;
-            padding: 12px;
-            margin: 10px 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-        .week-header {
-            color: white;
-            font-weight: bold;
-            font-size: 1em;
-            padding: 10px 14px;
-            margin: -12px -12px 10px -12px;
-            border-radius: 6px 6px 0 0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
-        .metzger-section {
-            margin: 12px 0;
-            padding: 10px;
-            background: #fafafa;
-            border-radius: 4px;
-            border-left: 3px solid #d4af37;
-        }
-        .metzger-name {
-            color: #8b4513;
-            font-size: 1.05em;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-        .metzger-name a { color: inherit; text-decoration: none; }
-        .metzger-name a:hover { text-decoration: underline; }
-        .city {
-            color: #666;
-            font-style: italic;
-            font-size: 0.8em;
-            margin-bottom: 8px;
-        }
-        .gueltig {
-            color: #8b4513;
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .angebot {
-            background: #fff8dc;
-            border-left: 3px solid #d4af37;
-            padding: 6px 8px;
-            margin: 4px 0;
-            border-radius: 0 4px 4px 0;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .angebot:hover {
-            transform: translateX(2px);
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.06);
-        }
-        .angebot-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 2px;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        .angebot-name {
-            font-weight: bold;
-            color: #8b4513;
-            font-size: 0.9em;
-            line-height: 1.3;
-        }
-        .angebot-preis {
-            font-weight: bold;
-            font-size: 0.85em;
-            background: #8b4513;
-            color: white;
-            padding: 1px 6px;
-            border-radius: 3px;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .angebot-desc {
-            font-size: 0.75em;
-            color: #666;
-            margin-top: 2px;
-            line-height: 1.2;
-        }
-        .angebot-link {
-            display: inline-block;
-            margin-top: 4px;
-            padding: 2px 8px;
-            background: #8b4513;
-            color: white;
-            text-decoration: none;
-            border-radius: 3px;
-            font-size: 0.75em;
-            transition: background 0.2s;
-        }
-        .angebot-link:hover {
-            background: #a0522d;
-        }
-        .last-update {
-            text-align: center;
-            color: #666;
-            font-size: 0.8em;
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-        }
-        .empty-week {
-            text-align: center;
-            color: #999;
-            font-style: italic;
-            font-size: 0.85em;
-            padding: 15px;
-        }
-
-        /* Mobile-First Responsive: ab 480px etwas größer */
-        @media (min-width: 480px) {
-            body { font-size: 15px; padding: 16px; }
-            h1 { font-size: 1.7em; }
-            .week-card { padding: 16px; margin: 12px 0; }
-            .week-header { padding: 12px 16px; font-size: 1.1em; margin: -16px -16px 12px -16px; }
-            .metzger-section { padding: 12px; margin: 14px 0; }
-            .metzger-name { font-size: 1.15em; }
-            .city { font-size: 0.85em; margin-bottom: 10px; }
-            .angebot { padding: 8px 10px; margin: 6px 0; }
-            .angebot-name { font-size: 0.95em; }
-            .angebot-preis { font-size: 0.9em; padding: 2px 8px; }
-            .angebot-desc { font-size: 0.78em; }
-            .angebot-link { font-size: 0.78em; padding: 3px 10px; }
-            .last-update { font-size: 0.85em; }
-        }
-
-        /* Tablet/Desktop: ab 768px */
-        @media (min-width: 768px) {
-            body { font-size: 16px; padding: 20px; }
-            h1 { font-size: 2em; }
-            .week-card { padding: 20px; margin: 15px 0; }
-            .week-header { padding: 15px 20px; font-size: 1.2em; margin: -20px -20px 15px -20px; }
-            .metzger-section { padding: 15px; margin: 18px 0; }
-            .metzger-name { font-size: 1.25em; }
-            .city { font-size: 0.9em; margin-bottom: 12px; }
-            .angebot { padding: 10px 12px; margin: 8px 0; }
-            .angebot-name { font-size: 1em; }
-            .angebot-preis { font-size: 1em; padding: 2px 8px; }
-            .angebot-desc { font-size: 0.82em; }
-            .angebot-link { font-size: 0.82em; }
-            .last-update { font-size: 0.9em; }
-        }
-
-        /* WhatsApp Share Banner responsive */
-        .top-share-banner {
-            flex-direction: column;
-            gap: 8px;
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: #f0f2f5;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: center;
-        }
-        .top-share-banner button {
-            width: 100%;
-            justify-content: center;
-            font-size: 13px;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .top-share-banner button:first-child {
-            background-color: #25D366;
-            color: white;
-        }
-        .top-share-banner button:last-child {
-            background-color: #128C7E;
-            color: white;
-        }
-        .top-share-banner button:hover {
-            opacity: 0.9;
-        }
-        @media (min-width: 480px) {
-            .top-share-banner {
-                flex-direction: row;
-                padding: 12px;
-            }
-            .top-share-banner button {
-                width: auto;
-                font-size: 13px;
-            }
-        }
-
-        /* Print: fürs Ausdrucken alle Wochen anzeigen */
-        @media print {
-            body { background: white; padding: 0; font-size: 12px; }
-            .top-share-banner { display: none; }
-            .week-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
-            .metzger-section { break-inside: avoid; }
-            .angebot { break-inside: avoid; }
-        }
-
-        /* Week colors */
-        .week-orange .week-header { background: #ff9800; }
-        .week-green .week-header { background: #4caf50; }
-        .week-blue .week-header { background: #2196f3; }
-        .week-purple .week-header { background: #9c27b0; }
-        .week-teal .week-header { background: #00bcd4; }
-        .week-pink .week-header { background: #e91e63; }
-        .week-red .week-header { background: #f44336; }
-        .week-amber .week-header { background: #ffc107; color: #333; }
-        .week-indigo .week-header { background: #3f51b5; }
-        .week-deep-orange .week-header { background: #ff5722; }
-        .week-cyan .week-header { background: #00bcd4; }
-        .week-lime .week-header { background: #cddc39; color: #333; }
-        .week-light-blue .week-header { background: #03a9f4; }
-    </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Metzger-Angebote Bayern | Bavarian Card Games</title>
+ <style>
+ body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
+ h1 { color: #8b4513; text-align: center; border-bottom: 3px solid #d4af37; padding-bottom: 10px; }
+ h2 { color: #8b4513; }
+ h3 { color: #8b4513; margin-top: 0; }
+ .metzger-card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+ .metzger-name { color: #8b4513; font-size: 1.4em; font-weight: bold; margin-bottom: 10px; }
+ .city { color: #666; font-style: italic; margin-bottom: 15px; }
+ .wochen-tabelle { margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; }
+ .wochen-header { padding: 12px 16px; font-weight: bold; font-size: 1.05em; color: #8b4513; background: #fff8dc; border-bottom: 2px solid #d4af37; }
+ .uebersicht-table { width: 100%; border-collapse: collapse; margin: 0; font-size: 0.9em; }
+ .uebersicht-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+ .uebersicht-table tr:last-child td { border-bottom: none; }
+ .uebersicht-produkt { font-weight: 500; color: #333; }
+ .uebersicht-preis { color: #d4af37; font-weight: bold; background: #8b4513; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; }
+ .uebersicht-metzger { color: #666; font-size: 0.8em; line-height: 1.3; }
+ .uebersicht-metzger br { display: inline; }
+ .uebersicht-metzger strong { display: inline-block; margin-right: 6px; }
+ .angebot { background: #fff8dc; border-left: 4px solid #d4af37; padding: 12px 15px; margin: 10px 0; border-radius: 0 8px 8px 0; transition: transform 0.2s, box-shadow 0.2s; }
+ .angebot:hover { transform: translateX(5px); box-shadow: 2px 2px 8px rgba(0,0,0,0.1); }
+ .angebot-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+ .angebot-name { font-weight: bold; color: #8b4513; font-size: 1.05em; }
+ .angebot-preis { font-weight: bold; color: #d4af37; font-size: 1.1em; background: #8b4513; color: white; padding: 2px 8px; border-radius: 4px; }
+ .angebot-desc { font-size: 0.85em; color: #666; margin-top: 4px; }
+ .week-section { margin: 15px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+ .week-header { padding: 12px 16px; font-weight: bold; font-size: 1em; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+ .week-content { padding: 12px 16px; }
+ @media (max-width: 600px) {
+  .uebersicht-table thead { display: none; }
+  .uebersicht-table tbody { display: block; }
+  .uebersicht-table tr { display: block; background: white; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .uebersicht-table td { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
+  .uebersicht-table td:last-child { border-bottom: none; }
+  .uebersicht-produkt { min-width: auto; font-size: 1em; text-align: right; padding-right: 12px; }
+  .uebersicht-preis { min-width: auto; font-size: 1em; padding: 4px 10px; }
+  .uebersicht-metzger { font-size: 0.85em; text-align: right; line-height: 1.4; }
+  .uebersicht-metzger br { display: none; }
+  .uebersicht-metzger strong { display: inline-block; margin-right: 8px; }
+  .wochen-header { font-size: 1em; padding: 10px 12px; }
+ }
+ .last-update { text-align: center; color: #666; font-size: 0.9em; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; }
+ .search-container { margin: 20px 0; }
+ .search-input { width: 100%; padding: 12px; font-size: 1em; border: 2px solid #d4af37; border-radius: 8px; box-sizing: border-box; }
+ </style>
+ <script>
+   function filterAngebote() {
+    var query = document.getElementById('searchInput').value.toLowerCase().trim();
+    document.querySelectorAll('.angebot').forEach(function(el) {
+     var text = (el.textContent || '').toLowerCase();
+     el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
+    });
+   }
+  </script>
 </head>
 <body>
-    <!-- WhatsApp Teilen Buttons - ganz oben -->
-    <div class="top-share-banner">
- 
-    <!-- Button 1: Nur Link -->
-    <button onclick="shareLinkOnly()">🔗 Nur Link teilen</button>
+<header style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #d4af37;">
+ <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+ <h1 style="margin:0; font-size:1.5rem; color:#8b4513; white-space:nowrap;">🥩 Metzger-Angebote aus Bayern</h1>
+ <p style="margin:0; font-size:0.85rem; color:#666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
+ </div>
+ <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+ <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
+ <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 08.09.2026 12:19</span>
+ </div>
+</header>
 
-    <!-- Button 2: Inhalt teilen -->
-    <button onclick="shareFullContent()">📱 Inhalt & Angebote teilen</button>
-
+<div class="search-container">
+ <input type="text" id="searchInput" class="search-input" placeholder="🔍 Produkte suchen..." oninput="filterAngebote()">
 </div>
 
 <script>
-// Funktion 1: Nur Link teilen
 async function shareLinkOnly() {
-  const shareData = {
-    title: document.title,
-    text: 'Schau dir diese Seite an:',
-    url: window.location.href
-  };
-
-  if (navigator.share) {
-    try {
-      await navigator.share(shareData);
-    } catch (err) {
-      console.log('Teilen abgebrochen:', err);
-    }
-  } else {
-    const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(shareData.text + ' ' + shareData.url)}`;
-    window.open(fallbackUrl, '_blank');
-  }
+ const shareData = {
+ title: document.title,
+ text: 'Schau dir diese Seite an:',
+ url: window.location.href
+ };
+ if (navigator.share) {
+  try { await navigator.share(shareData); } catch (err) { console.log('Teilen abgebrochen:', err); }
+ } else {
+  const fallbackUrl = 'https://wa.me/?text=' + encodeURIComponent(shareData.text + ' ' + shareData.url);
+  window.open(fallbackUrl, '_blank');
+ }
 }
 
-// Funktion 2: Inhalt + Link teilen
 async function shareFullContent() {
-  const contentElement = document.getElementById('angebote-inhalt');
-  let bodyText = "";
-  
-  if (contentElement) {
-    bodyText = contentElement.innerText.trim();
-  } else {
-    bodyText = "Schau dir diese aktuellen Angebote an!";
-  }
-
-  const fullMessage = `${bodyText}\n\n👉 Hier online ansehen:\n${window.location.href}`;
-
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: document.title,
-        text: fullMessage
-      });
-    } catch (err) {
-      console.log('Teilen abgebrochen:', err);
-    }
-  } else {
-    const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
-    window.open(fallbackUrl, '_blank');
-  }
-}
-
-// Funktion 3: Metzger-Daten von GitHub laden und rendern
-async function loadMetzgerData() {
-  const container = document.getElementById('angebote-inhalt');
-  const updateEl = document.querySelector('.last-update');
-  
-  try {
-    const response = await fetch('https://raw.githubusercontent.com/BavarianOne/bayerische-kartenspiele/master/data/metzger/all.json');
-    if (!response.ok) throw new Error('Netzwerk-Fehler');
-    const data = await response.json();
-    
-    // Update timestamp
-    if (updateEl && data.scraped_at) {
-      const date = new Date(data.scraped_at);
-      updateEl.textContent = `Letzte Aktualisierung: ${date.toLocaleString('de-DE')} (live von GitHub)`;
-    }
-    
-    // Render metzgereien grouped by week (simplified: just render all)
-    if (data.metzgereien) {
-      container.innerHTML = '';
-      
-      // Group by validity week
-      const weeksMap = new Map();
-      
-      data.metzgereien.forEach(metzger => {
-        metzger.angebote.forEach(angebot => {
-          const key = angebot.gueltig || 'Unbekannt';
-          if (!weeksMap.has(key)) weeksMap.set(key, []);
-          weeksMap.get(key).push({ metzger, angebot });
-        });
-      });
-      
-      const weekColors = ['week-orange', 'week-green', 'week-blue', 'week-purple', 'week-teal', 'week-pink'];
-      let colorIdx = 0;
-      
-      weeksMap.forEach((entries, weekKey) => {
-        const weekCard = document.createElement('div');
-        weekCard.className = `week-card ${weekColors[colorIdx % weekColors.length]}`;
-        colorIdx++;
-        
-        const header = document.createElement('div');
-        header.className = 'week-header';
-        header.textContent = weekKey;
-        weekCard.appendChild(header);
-        
-        // Group by metzger
-        const metzgerMap = new Map();
-        entries.forEach(e => {
-          if (!metzgerMap.has(e.metzger.id)) metzgerMap.set(e.metzger.id, { metzger: e.metzger, angebote: [] });
-          metzgerMap.get(e.metzger.id).angebote.push(e.angebot);
-        });
-        
-        metzgerMap.forEach(m => {
-          const section = document.createElement('div');
-          section.className = 'metzger-section';
-          
-          const nameDiv = document.createElement('div');
-          nameDiv.className = 'metzger-name';
-          if (m.metzger.website) {
-            const a = document.createElement('a');
-            a.href = m.metzger.website;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            a.textContent = m.metzger.name;
-            nameDiv.appendChild(a);
-          } else {
-            nameDiv.textContent = m.metzger.name;
-          }
-          section.appendChild(nameDiv);
-          
-          if (m.metzger.standort) {
-            const cityDiv = document.createElement('div');
-            cityDiv.className = 'city';
-            cityDiv.textContent = `📍 ${m.metzger.standort}`;
-            section.appendChild(cityDiv);
-          }
-          
-          m.angebote.forEach(angebot => {
-            angebot.produkte.forEach(prod => {
-              const angebotDiv = document.createElement('div');
-              angebotDiv.className = 'angebot';
-              
-              const headerDiv = document.createElement('div');
-              headerDiv.className = 'angebot-header';
-              
-              const nameSpan = document.createElement('span');
-              nameSpan.className = 'angebot-name';
-              nameSpan.textContent = prod.name;
-              headerDiv.appendChild(nameSpan);
-              
-              const preisSpan = document.createElement('span');
-              preisSpan.className = 'angebot-preis';
-              preisSpan.textContent = prod.preis;
-              headerDiv.appendChild(preisSpan);
-              
-              angebotDiv.appendChild(headerDiv);
-              section.appendChild(angebotDiv);
-            });
-          });
-          
-          weekCard.appendChild(section);
-        });
-        
-        container.appendChild(weekCard);
-      });
-    }
-  } catch (err) {
-    console.error('Fehler beim Laden der Metzger-Daten:', err);
-    if (updateEl) {
-      updateEl.textContent = 'Fehler beim Laden der Live-Daten. Zeige Offline-Version.';
-      updateEl.style.color = '#f44336';
-    }
-    // Static HTML remains as fallback
-  }
-}
-
-// Beim Laden der Seite Daten holen
-document.addEventListener('DOMContentLoaded', loadMetzgerData);
-
-// Push Notification Setup
-async function setupPushNotifications() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.log('Push notifications not supported');
-    return;
-  }
-  
-  try {
-    const registration = await navigator.serviceWorker.ready;
-    
-    // Check existing subscription
-    let subscription = await registration.pushManager.getSubscription();
-    
-    if (!subscription) {
-      // Request permission and subscribe
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        console.log('Notification permission denied');
-        return;
-      }
-      
-      // VAPID public key (you need to generate this for production)
-      // For now, we'll skip actual subscription and just register periodic sync
-      console.log('Push permission granted, but VAPID key needed for full subscription');
-    }
-    
-    // Register periodic background sync (checks for new offers daily)
-    if ('periodicSync' in registration) {
-      try {
-        await registration.periodicSync.register('check-offers-periodic', {
-          minInterval: 24 * 60 * 60 * 1000 // 24 hours
-        });
-        console.log('Periodic sync registered');
-      } catch (err) {
-        console.log('Periodic sync registration failed:', err);
-      }
-    }
-    
-    // Listen for messages from SW
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data?.type === 'new-offers') {
-        showNewOffersNotification(event.data.scraped_at);
-      }
-    });
-    
-  } catch (err) {
-    console.error('Push setup error:', err);
-  }
-}
-
-function showNewOffersNotification(scrapedAt) {
-  if (Notification.permission === 'granted') {
-    new Notification('🥩 Neue Metzger-Angebote!', {
-      body: `Aktualisiert am ${new Date(scrapedAt).toLocaleString('de-DE')}`,
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🥩</text></svg>',
-      tag: 'metzger-angebote-new',
-      renotify: true
-    });
-  }
-}
-
-// Register Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => {
-        console.log('Service Worker registered:', reg.scope);
-        setupPushNotifications();
-      })
-      .catch(err => console.error('SW registration failed:', err));
-  });
+ const contentElement = document.getElementById('angebote-inhalt');
+ let bodyText = "";
+ if (contentElement) {
+  bodyText = contentElement.innerText.trim();
+ } else {
+  bodyText = "Schau dir diese aktuellen Angebote an!";
+ }
+ const fullMessage = bodyText + '\n\n👉 Hier online ansehen:\n' + window.location.href;
+ if (navigator.share) {
+  try { await navigator.share({title: document.title, text: fullMessage}); } catch (err) { console.log('Teilen abgebrochen:', err); }
+ } else {
+  const fallbackUrl = 'https://wa.me/?text=' + encodeURIComponent(fullMessage);
+  window.open(fallbackUrl, '_blank');
+ }
 }
 </script>
+<div class="wochen-uebersicht">
+ <h2>📋 Wochen-Übersicht</h2>
 
-    <h1>🥩 Metzger-Angebote aus Bayern</h1>
-    <p style="text-align: center; color: #666;">Automatisch aktualisierte Angebote von regionalen Metzgerien</p>
-    
-    <div class="last-update">
-        Letzte Aktualisierung: 03.08.2026 11:30 Uhr (Wasner via OCR aktualisiert)
-    </div>
+ <div class="wochen-tabelle">
+ <h3 class="wochen-header">Woche 07.09. - 12.09.2026</h3>
+ <table class="uebersicht-table">
+ <tbody>
 
-    <!-- Container für alle Angebote (für WhatsApp Teilen) -->
-    <div id="angebote-inhalt">
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bayrischer Leberkäse – <span class="uebersicht-preis">1,19 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
 
-    <div class="week-card week-orange">
-        <div class="week-header">Woche bis 01.08.2026</div>
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bierschinken – <span class="uebersicht-preis">1,49 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Metzgerei Brandl</a></div>
-            <div class="city">📍 Landshut</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Hackfleisch gemischt</span>
-                    <span class="angebot-preis">1,59 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Farmerschinken</span>
-                    <span class="angebot-preis">1,89 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Dicke</span>
-                    <span class="angebot-preis">1,39 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Polnische</span>
-                    <span class="angebot-preis">1,59 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Kochsalami</span>
-                    <span class="angebot-preis">1,59 €</span>
-                </div>
-            </div>
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bratensosse – <span class="uebersicht-preis">2,50 €/Stück</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Cheddarpenos (100 g) – <span class="uebersicht-preis">1,49 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Eierpastete (100 g) – <span class="uebersicht-preis">1,49 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Eiersalat (100 g) – <span class="uebersicht-preis">1,29 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Gulasch gemischt (100 g) – <span class="uebersicht-preis">1,65 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Gutsleberlende – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hähnchenbrustfilet – <span class="uebersicht-preis">1,59 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Kasseler Braten – <span class="uebersicht-preis">0,89 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Krustenbraten magere Stücke – <span class="uebersicht-preis">1,29 €/100g (500g 4,98 €)</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Montag ist Hackfleischtag - mageres Schwein & Rind – <span class="uebersicht-preis">4,98 €/500g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Obazda – <span class="uebersicht-preis">1,65 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Paprikafleischwurst (100 g) – <span class="uebersicht-preis">1,59 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Pfefferbeißer – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Rinderbraten (100 g) – <span class="uebersicht-preis">1,89 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Rinderrouladen (100 g) – <span class="uebersicht-preis">2,49 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Samstag ist Haxentag frisch & kross – <span class="uebersicht-preis">0,79 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Sauerkraut – <span class="uebersicht-preis">2,50 €/Stück</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweine-Lendchen zart und mager (Top Preis) – <span class="uebersicht-preis">0,88 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten – <span class="uebersicht-preis">0,89 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten – <span class="uebersicht-preis">1,09 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinegulasch – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schäufele (100 g) – <span class="uebersicht-preis">0,99 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Sportsalami – <span class="uebersicht-preis">1,39 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Streichwurst – <span class="uebersicht-preis">1,19 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Streichwurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Stuttgarter – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Vespermett (100 g) – <span class="uebersicht-preis">1,49 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Wammerl gekocht (100 g) – <span class="uebersicht-preis">1,49 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Weißwurst (100 g) – <span class="uebersicht-preis">1,59 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Weißwürste frisch gemacht – <span class="uebersicht-preis">0,79 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Wiener – <span class="uebersicht-preis">1,49 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Wiener knackig und frisch – <span class="uebersicht-preis">0,79 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ </tbody>
+ </table>
+ </div>
+
+ <div class="wochen-tabelle">
+ <h3 class="wochen-header">Woche 14.09. - 19.09.2026</h3>
+ <table class="uebersicht-table">
+ <tbody>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Debreziner (100 g) – <span class="uebersicht-preis">1,69 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Fleischsalat – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Haussalami – <span class="uebersicht-preis">1,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Mettwurst fein (100 g) – <span class="uebersicht-preis">1,39 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Pfannengyros – <span class="uebersicht-preis">1,59 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Polnische – <span class="uebersicht-preis">1,49 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Putenschnitzel – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schwarzgeräuchertes (100 g) – <span class="uebersicht-preis">1,89 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweine-Filet (100 g) – <span class="uebersicht-preis">1,69 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten (100 g) – <span class="uebersicht-preis">1,39 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ </tbody>
+ </table>
+ </div>
+
+</div>
+<div id="angebote-inhalt">
+<div class="metzger-card">
+ <div class="metzger-name"><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">Metzgerei Brandl</a></div>
+ <div class="city">📍 Landshut</div>
+
+ <div class="week-section" style="border-left: 5px solid #ff9800;">
+ <div class="week-header" style="background: #ff9800;">Woche bis 12.09.2026</div>
+ <div class="week-content" style="background: #fff3e0;">
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Rinderbraten (100 g)</span>
+ <span class="angebot-preis">1,89 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Gulasch gemischt (100 g)</span>
+ <span class="angebot-preis">1,65 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Wammerl gekocht (100 g)</span>
+ <span class="angebot-preis">1,49 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Weißwurst (100 g)</span>
+ <span class="angebot-preis">1,59 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Paprikafleischwurst (100 g)</span>
+ <span class="angebot-preis">1,59 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ </div>
+ </div>
+
+ <div class="week-section" style="border-left: 5px solid #4caf50;">
+ <div class="week-header" style="background: #4caf50;">Woche bis 19.09.2026</div>
+ <div class="week-content" style="background: #e8f5e9;">
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweine-Filet (100 g)</span>
+ <span class="angebot-preis">1,69 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 19.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweinebraten (100 g)</span>
+ <span class="angebot-preis">1,39 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 19.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schwarzgeräuchertes (100 g)</span>
+ <span class="angebot-preis">1,89 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 19.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Debreziner (100 g)</span>
+ <span class="angebot-preis">1,69 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 19.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Mettwurst fein (100 g)</span>
+ <span class="angebot-preis">1,39 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 19.09.2026 - Landshut/Ergolding</div>
+ </div>
+
+ </div>
+ </div>
+
+</div>
+<div class="metzger-card">
+ <div class="metzger-name"><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">Metzgerei Rümenapf</a></div>
+ <div class="city">📍 Ergolding</div>
+
+ <div class="week-section" style="border-left: 5px solid #ff9800;">
+ <div class="week-header" style="background: #ff9800;">Woche bis 12.09.2026</div>
+ <div class="week-content" style="background: #fff3e0;">
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schäufele (100 g)</span>
+ <span class="angebot-preis">0,99 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Rinderrouladen (100 g)</span>
+ <span class="angebot-preis">2,49 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Vespermett (100 g)</span>
+ <span class="angebot-preis">1,49 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Eierpastete (100 g)</span>
+ <span class="angebot-preis">1,49 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Cheddarpenos (100 g)</span>
+ <span class="angebot-preis">1,49 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Eiersalat (100 g)</span>
+ <span class="angebot-preis">1,29 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 12.09.2026 - Ergolding</div>
+ </div>
+
+ </div>
+ </div>
+
+</div>
+<div class="metzger-card">
+ <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">Metzgerei Wasner</a></div>
+ <div class="city">📍 Landshut</div>
+
+ <div class="week-section" style="border-left: 5px solid #ff9800;">
+ <div class="week-header" style="background: #ff9800;">Woche bis 12.09.2026</div>
+ <div class="week-content" style="background: #fff3e0;">
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweinebraten</span>
+ <span class="angebot-preis">0,89 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Kasseler Braten</span>
+ <span class="angebot-preis">0,89 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweinegulasch</span>
+ <span class="angebot-preis">0,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bratensosse</span>
+ <span class="angebot-preis">2,50 €/Stück</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Sauerkraut</span>
+ <span class="angebot-preis">2,50 €/Stück</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bayrischer Leberkäse</span>
+ <span class="angebot-preis">1,19 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bierschinken</span>
+ <span class="angebot-preis">1,49 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Gutsleberlende</span>
+ <span class="angebot-preis">1,69 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Streichwurst</span>
+ <span class="angebot-preis">1,19 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Pfefferbeißer</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Sportsalami</span>
+ <span class="angebot-preis">1,39 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 31.08.2026-12.09.2026: Hauptflyer 2</div>
+ </div>
+
+ </div>
+ </div>
+
+</div>
+<div class="metzger-card">
+ <div class="metzger-name">Metzgerei Tristlhof</div>
+ <div class="city">📍 Landshut</div>
+
+ <div class="week-section" style="border-left: 5px solid #ff9800;">
+ <div class="week-header" style="background: #ff9800;">Woche bis 12.09.2026</div>
+ <div class="week-content" style="background: #fff3e0;">
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweine-Lendchen zart und mager (Top Preis)</span>
+ <span class="angebot-preis">0,88 €/100g</span>
+ </div>
+ <div class="angebot-desc">Zeitungsanzeige 07.-12.09.2026: zart und mager, Top Preis (UVP 1,09 €/100g)</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Krustenbraten magere Stücke</span>
+ <span class="angebot-preis">1,29 €/100g (500g 4,98 €)</span>
+ </div>
+ <div class="angebot-desc">Zeitungsanzeige 07.-12.09.2026: magere Stücke</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Weißwürste frisch gemacht</span>
+ <span class="angebot-preis">0,79 €/100g</span>
+ </div>
+ <div class="angebot-desc">Zeitungsanzeige 07.-12.09.2026: Frisch aus Stadler's Wurstküche, frisch gemacht</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Wiener knackig und frisch</span>
+ <span class="angebot-preis">0,79 €/100g</span>
+ </div>
+ <div class="angebot-desc">Zeitungsanzeige 07.-12.09.2026: Frisch aus Stadler's Wurstküche, knackig und frisch, echt lecker</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Montag ist Hackfleischtag - mageres Schwein & Rind</span>
+ <span class="angebot-preis">4,98 €/500g</span>
+ </div>
+ <div class="angebot-desc">Zeitungsanzeige 07.-12.09.2026: Montag ist Hackfleischtag, mageres Schwein und Rind</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Samstag ist Haxentag frisch & kross</span>
+ <span class="angebot-preis">0,79 €/100g</span>
+ </div>
+ <div class="angebot-desc">Zeitungsanzeige 07.-12.09.2026: Samstag ist Haxentag, frisch und kross, solange Vorrat reicht</div>
+ </div>
+
+ </div>
+ </div>
+
+        <div class="week-section" style="border-left: 5px solid #2196f3;">
+        <div class="week-header" style="background: #2196f3;">📞 Kontakt & Filialen</div>
+        <div class="week-content" style="background: #e3f2fd;">
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Kontakt</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">Tel./E-Mail</span>
         </div>
-    </div>
-
-    <div class="week-card week-green">
-        <div class="week-header">Woche bis 03.08.2026</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.brunner-metzgerei.de/angebot-der-woche" target="_blank" rel="noopener">Brunner Metzgerei</a></div>
-            <div class="city">📍 Landshut</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Wammerl mariniert (100g)</span>
-                    <span class="angebot-preis">1,39 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Schweineschnitzel (100g)</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Regensburger (100g)</span>
-                    <span class="angebot-preis">1,39 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Leberkäse (100g)</span>
-                    <span class="angebot-preis">1,19 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Streichwurst (100g)</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Cabanossi (100g)</span>
-                    <span class="angebot-preis">1,69 €</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="week-card week-orange">
-        <div class="week-header">Woche bis 08.08.2026</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Metzgerei Brandl</a></div>
-            <div class="city">📍 Landshut</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Hochrippe</span>
-                    <span class="angebot-preis">1,75 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Geräuchertes gekocht</span>
-                    <span class="angebot-preis">1,85 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Dultwürstl</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Regensburger</span>
-                    <span class="angebot-preis">1,49 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Presssack gemischt</span>
-                    <span class="angebot-preis">1,25 €</span>
-                </div>
-            </div>
+        <div class="angebot-desc">Telefon: 0871/97407272, 0152/53753881<br>E-Mail: service.gustav.weber@gmx.de</div>
         </div>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Metzgerei Rümenapf</a></div>
-            <div class="city">📍 Ergolding</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Wammerl mariniert (100 g)</span>
-                    <span class="angebot-preis">1,39 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Schweineschnitzel (100 g)</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Stadtwurst (100 g)</span>
-                    <span class="angebot-preis">1,39 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Leberkäs fein (100 g)</span>
-                    <span class="angebot-preis">1,19 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Leberwurst i. Golddarm (100 g)</span>
-                    <span class="angebot-preis">1,25 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Kabanossi (100 g)</span>
-                    <span class="angebot-preis">1,69 €</span>
-                </div>
-            </div>
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Filiale Frontenhausen</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Vilsbiburger Str. 22</span>
+        </div>
+        <div class="angebot-desc">Tel.: 08732/2886</div>
         </div>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://metzgerei-hahn.de/Lauterbachstrasse" target="_blank" rel="noopener">Metzgerei Hahn</a></div>
-            <div class="city">📍 Eggenfelden</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Färsen-Hackfleisch</span>
-                    <span class="angebot-preis">12,00 € / kg (500g = 6,00 €)</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Frischwurst-Aufschnitt</span>
-                    <span class="angebot-preis">9,90 € / kg (500g = 4,95 €)</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Gyros-Pfanne</span>
-                    <span class="angebot-preis">10,99 €</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Lyoner-Stange</span>
-                    <span class="angebot-preis">3,99 €</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Schweinelendchen im Ganzen</span>
-                    <span class="angebot-preis">6,99 €</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Rauchfrische Wiener</span>
-                    <span class="angebot-preis">10,49 €</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Unsere Scharfen</span>
-                    <span class="angebot-preis">9,99 €</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Grillfleisch</span>
-                    <span class="angebot-preis">Preis auf Anfrage</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Ententeile gefroren</span>
-                    <span class="angebot-preis">Preis auf Anfrage</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Fisch gefroren</span>
-                    <span class="angebot-preis">Preis auf Anfrage</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Sauerkonserven</span>
-                    <span class="angebot-preis">Preis auf Anfrage</span>
-                </div>
-                <div class="angebot-desc">Kilo- und Regionalmarkt Lauterbachstraße - Eggenfelden</div>
-            </div>
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Filiale Landshut (Theaterstr.)</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Theaterstr. 67</span>
         </div>
-    </div>
-
-    <div class="week-card week-purple">
-        <div class="week-header">Wochenmenüplan (Mittagstisch) | Woche 32 | 03.08. bis 08.08.2026</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Montag: Cordon bleu mit Pommes</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Montag: Spaghetti Carbonara</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Dienstag: Spanferkelbraten mit Knödel und Kraut</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Dienstag: Nudelauflauf mit Tomatensoße</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Mittwoch: Rinderroulade mit Blaukraut und Knödel</span>
-                    <span class="angebot-preis">10,00 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Mittwoch: Putensteak mit Ratatouille und Reis</span>
-                    <span class="angebot-preis">10,00 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Donnerstag: Gebratene Leber in Zwiebelsoße mit Kartoffelpüree</span>
-                    <span class="angebot-preis">4,90 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Donnerstag: Hähnchenkeule mit Pommes</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Freitag: Lachsfilet mit Blattspinat und Bandnudeln in Zitronenbuttersoße</span>
-                    <span class="angebot-preis">12,90 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Freitag: Schweinerückensteaks mit Spätzle und Buttergemüse</span>
-                    <span class="angebot-preis">10,30 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Samstag: Haxenfleisch mit Zwiebelsoße und Beilage</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Samstag: Filettöpfle mit Eierknöpfle und kleinem grünem Salat</span>
-                    <span class="angebot-preis">10,80 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-desc">Alle Speisen auch zum Mitnehmen. Catering für Familienfeiern verfügbar.</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="week-card week-green">
-        <div class="week-header">Woche bis 15.08.2026</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgerei-brandl.de" target="_blank" rel="noopener">Metzgerei Brandl</a></div>
-            <div class="city">📍 Landshut</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Schweine-Filet</span>
-                    <span class="angebot-preis">1,69 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Lachsschinken</span>
-                    <span class="angebot-preis">1,95 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Schweinswürstl</span>
-                    <span class="angebot-preis">1,39 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Gelbwurst</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Emmentaler</span>
-                    <span class="angebot-preis">1,49 €</span>
-                </div>
-            </div>
+        <div class="angebot-desc">Tel.: 0871/2768764</div>
         </div>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Metzgerei Rümenapf</a></div>
-            <div class="city">📍 Ergolding</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Ochsenfetz'n (100 g)</span>
-                    <span class="angebot-preis">1,99 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Hackfleisch gem. (100 g)</span>
-                    <span class="angebot-preis">1,49 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Backschinken (100 g)</span>
-                    <span class="angebot-preis">1,79 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Kochsalami (100 g)</span>
-                    <span class="angebot-preis">1,49 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Weißwürste (100 g)</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Sommerduett Käse Tomate - Basilikum (100 g)</span>
-                    <span class="angebot-preis">2,59 €</span>
-                </div>
-            </div>
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Filiale Landshut (Straubinger Str.)</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Straubinger Str. 10</span>
+        </div>
+        <div class="angebot-desc">Tel.: 0871/96699952</div>
         </div>
 
-        <div class="metzger-section">
-            <div class="metzger-name">Metzgerei Tristlhof</div>
-            <div class="city">📍 Landshut</div>
-            <div class="gueltig">📅 Gültig: 10.08.–15.08.2026</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Schweinelendchen (für den leichten Genuss)</span>
-                    <span class="angebot-preis">1,09 € / 100 g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Wammerl (frisch vom Tristlhof)</span>
-                    <span class="angebot-preis">0,99 € / 100 g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">🥩 Hackfleischtag (Mo): Mageres Schwein & Rind</span>
-                    <span class="angebot-preis">4,98 € / 500 g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">🥩 Haxentag (Sa): Frisch & kross</span>
-                    <span class="angebot-preis">0,79 € / 100 g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Delikatess Leberwurst (im Golddarm, extra cremig)</span>
-                    <span class="angebot-preis">1,18 € / 100 g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Currywurst (frisch vom Rauch, schön knackig)</span>
-                    <span class="angebot-preis">1,19 € / 100 g</span>
-                </div>
-            </div>
+        </div>
         </div>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.brunner-metzgerei.de/angebot-der-woche" target="_blank" rel="noopener">Brunner Metzgerei</a></div>
-            <div class="city">📍 Landshut</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Rinderfetzen (100g)</span>
-                    <span class="angebot-preis">1,99 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Hackfleisch gemischt (100g)</span>
-                    <span class="angebot-preis">1,49 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Backschinken (100g)</span>
-                    <span class="angebot-preis">1,79 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Kochsalami (100g)</span>
-                    <span class="angebot-preis">1,49 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Weißwürste (100g)</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Sommerduett Käse (100g)</span>
-                    <span class="angebot-preis">2,99 €</span>
-                </div>
-            </div>
+        <div class="week-section" style="border-left: 5px solid #9c27b0;">
+        <div class="week-header" style="background: #9c27b0;">🚐 Mobiler Hofladen</div>
+        <div class="week-content" style="background: #f3e5f5;">
+
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Montag, Freitag & Samstag</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Tristl am Damm 1</span>
         </div>
-    </div>
-
-    <div class="week-card week-orange">
-        <div class="week-header">Wochenangebote (Plakat KW 32/33) | 03.08.-15.08.2026</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">OKTOBERFEST-KRUSTENBRATEN</span>
-                    <span class="angebot-preis">0,89 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">HAXE</span>
-                    <span class="angebot-preis">8,90 €/Stück</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">PUTENSCHNITZEL</span>
-                    <span class="angebot-preis">1,39 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">PIZZALEBERKÄSE</span>
-                    <span class="angebot-preis">1,19 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">NUDELSALAT</span>
-                    <span class="angebot-preis">0,99 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">OBAZDA</span>
-                    <span class="angebot-preis">0,99 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <a class="angebot-link" href="https://www.metzgereiwasner.de/fileadmin/user_upload/bilder/angebote/2026/juli/wasner_plakate_kw32_33_a1_v01_cc_260708.jpg" target="_blank" rel="noopener">📸 Original-Flyer ansehen</a>
-            </div>
+        <div class="angebot-desc">Tel.: 08706/270</div>
         </div>
-    </div>
 
-    <div class="week-card week-orange">
-        <div class="week-header">Wochenangebote (Plakat KW 32/33 - Seite 2) | 03.08.-15.08.2026</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">REGENSBURGER</span>
-                    <span class="angebot-preis">0,99 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">GESCHWOLLENE HÜTTENSPECK</span>
-                    <span class="angebot-preis">1,19 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">BIERKUGEL</span>
-                    <span class="angebot-preis">1,29 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">FEUERTEUFEL</span>
-                    <span class="angebot-preis">1,69 €/100g</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <a class="angebot-link" href="https://www.metzgereiwasner.de/fileadmin/user_upload/bilder/angebote/2026/juli/wasner_plakate_kw32_33_a1_v01_cc_2607082.jpg" target="_blank" rel="noopener">📸 Original-Flyer ansehen</a>
-            </div>
+        <div class="angebot">
+        <div class="angebot-header">
+        <span class="angebot-name">Donnerstag</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Landshuter Str. 67 b, Ergolding</span>
         </div>
-    </div>
-
-    <div class="week-card week-green">
-        <div class="week-header">Grillhaxe Angebot | 03.08.-15.08.2026</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">GRILLHAXE mit Beilage</span>
-                    <span class="angebot-preis">€/Portion (genauer Preis OCR-unscharf)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <a class="angebot-link" href="https://www.metzgereiwasner.de/fileadmin/user_upload/bilder/angebote/2026/juli/wasner_plakate_kw32_33_a1_v01_cc_2607083.jpg" target="_blank" rel="noopener">📸 Original-Flyer ansehen</a>
-            </div>
+        <div class="angebot-desc">bei Getränke Fleischmann</div>
         </div>
-    </div>
 
-    <div class="week-card week-green">
-        <div class="week-header">Brotzeit & Wurstplatte (Passau Flyer) | KW 32/33</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">BROTZEITPLATTN</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">WÜRSTLPARADE</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">SCHWEINESCHNITZEL</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <a class="angebot-link" href="https://www.metzgereiwasner.de/fileadmin/user_upload/bilder/angebote/2026/juli/wasner_passau_flyer_kw32_33_a4_v01_cc_2607022.jpg" target="_blank" rel="noopener">📸 Original-Flyer ansehen</a>
-            </div>
         </div>
-    </div>
-
-    <div class="week-card week-pink">
-        <div class="week-header">Wasners Bayrische Wurstspezialitäten | KW 32/33</div>
-
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">KÄSEKRAINER</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">FEUERWEHRGRILLER (scharf)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">SCHWEINSBRATWÜRSTL</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <a class="angebot-link" href="https://www.metzgereiwasner.de/fileadmin/user_upload/bilder/angebote/2026/juli/wasner_passau_flyer_kw32_33_a4_v01_cc_2607023.jpg" target="_blank" rel="noopener">📸 Original-Flyer ansehen</a>
-            </div>
         </div>
-    </div>
+        
 
-    <div class="week-card week-pink">
-        <div class="week-header">Sortiment: Fleisch & Wurstwaren | KW 32/33</div>
+</div>
+<div class="metzger-card">
+ <div class="metzger-name"><a href="https://www.brunner-metzgerei.de/angebot-der-woche" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">Brunner Metzgerei</a></div>
+ <div class="city">📍 Landshut</div>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">PUTENSCHNITZEL (zart geschnitten)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">SCHWEINEKOTELETT</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">SCHWEINEKRUSTENBRATEN (aus der Schutter)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">SCHWEINELENDENSTEAKS (Colorado oder Kräuterbutter)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">GRILLBAUCHSCHEIBEN</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">BAYR. LEBERKÄSE (fein, ofengebacken)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">HAUSSALAMI</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">PRESSSACK (weiß und rot)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">BIERSCHINKEN</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">BROTZEITPLATTN</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <a class="angebot-link" href="https://www.metzgereiwasner.de/fileadmin/user_upload/bilder/angebote/2026/juli/wasner_passau_flyer_kw32_33_a4_v01_cc_2607024.jpg" target="_blank" rel="noopener">📸 Original-Flyer ansehen</a>
-            </div>
-        </div>
-    </div>
+ <div class="week-section" style="border-left: 5px solid #ff9800;">
+ <div class="week-header" style="background: #ff9800;">Woche bis 12.09.2026</div>
+ <div class="week-content" style="background: #fff3e0;">
 
-    <div class="week-card week-teal">
-        <div class="week-header">Tagesangebote / Wochenaktion | Montag bis Samstag</div>
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Schweinebraten</span>
+ <span class="angebot-preis">1,09 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ </div>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgereiwasner.de/angebote/" target="_blank" rel="noopener">Metzgerei Wasner</a></div>
-            <div class="city">📍 Landshut (Am alten Viehmarkt 5, 84028 Landshut) + viele Filialen</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">1/2 HENDL</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">KRUSTENBRATEN</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">HAXE</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">BAYRISCHER OBAZDA</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">APFEL-GRIEBEN-WURSTSALAT</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">SCHMALZ (1909-Becher)</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Volksfestpaket</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <a class="angebot-link" href="https://www.metzgereiwasner.de/fileadmin/user_upload/bilder/angebote/2026/juli/wasner_passau_flyer_kw32_33_a4_v01_cc_260702.jpg" target="_blank" rel="noopener">📸 Original-Flyer ansehen</a>
-            </div>
-        </div>
-    </div>
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Hähnchenbrustfilet</span>
+ <span class="angebot-preis">1,59 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ </div>
 
-    <div class="week-card week-blue">
-        <div class="week-header">Woche bis 22.08.2026</div>
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Wiener</span>
+ <span class="angebot-preis">1,49 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ </div>
 
-        <div class="metzger-section">
-            <div class="metzger-name"><a href="https://www.metzgerei-ruemenapf.de" target="_blank" rel="noopener">Metzgerei Rümenapf</a></div>
-            <div class="city">📍 Ergolding</div>
-            
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Schweinekrustenbraten (100 g)</span>
-                    <span class="angebot-preis">1,09 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Hähnchenbrustfilet (100 g)</span>
-                    <span class="angebot-preis">1,59 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Wiener (100 g)</span>
-                    <span class="angebot-preis">1,49 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Stuttgarter Leberkäs (100 g)</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Streichwurst grob (100 g)</span>
-                    <span class="angebot-preis">1,29 €</span>
-                </div>
-            </div>
-            <div class="angebot">
-                <div class="angebot-header">
-                    <span class="angebot-name">Bayer. Käseaufstrich (100 g)</span>
-                    <span class="angebot-preis">1,65 €</span>
-                </div>
-            </div>
-        </div>
-    </div>
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Stuttgarter</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Streichwurst</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Obazda</span>
+ <span class="angebot-preis">1,65 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ </div>
+
+ </div>
+ </div>
+
+ <div class="week-section" style="border-left: 5px solid #4caf50;">
+ <div class="week-header" style="background: #4caf50;">Woche bis 19.09.2026</div>
+ <div class="week-content" style="background: #e8f5e9;">
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Putenschnitzel</span>
+ <span class="angebot-preis">1,69 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Pfannengyros</span>
+ <span class="angebot-preis">1,59 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Currywurst</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Polnische</span>
+ <span class="angebot-preis">1,49 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Haussalami</span>
+ <span class="angebot-preis">1,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Fleischsalat</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ </div>
+
+ </div>
+ </div>
 
 </div>
 
+</div>
+
+<div class="last-update">
+ Letzte Aktualisierung: 08.09.2026 12:19 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+</div>
 </body>
 </html>
