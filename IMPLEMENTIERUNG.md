@@ -3,7 +3,7 @@
 ## Überblick
 Zwei separate statische HTML-Seiten, die automatisch via GitHub Actions / Cron aktualisiert werden:
 1. **landshut-spritpreise.html** - Kraftstoffpreise Landshut (Diesel, E10, E5)
-2. **metzger-angebote.html** - Wochenangebote von 6 Metzgereien
+2. **metzger-angebote.html** - Wochenangebote von 5 Metzgereien
 
 Beide deployen auf GitHub Pages: `https://bavarianone.github.io/bayerische-kartenspiele/`
 
@@ -66,7 +66,6 @@ Cron Job: metzger-angebote-daily-update  # Täglich 06:00 via Hermes cron
 | Metzgerei Rümenapf | Ergolding | Joomla-Tabs auf Website | HTML-Tabellen-Parsing (alle 3 Wochen) |
 | Metzgerei Wasner | Landshut | Flyer-Bilder auf `/angebote/` | OCR (pytesseract) + manuelle Preise |
 | Metzgerei Tristlhof | Landshut | Zeitungsanzeige (manuell) | Statisch hardcoded |
-| Metzgerei Hahn | Eggenfelden | OCR aus `ANGEBOTE.png` | OCR (pytesseract) |
 | Brunner Metzgerei | Landshut | Flyer-Bilder auf Website | OCR + manuelle Preise |
 
 ### Features in HTML
@@ -76,16 +75,14 @@ Cron Job: metzger-angebote-daily-update  # Täglich 06:00 via Hermes cron
 - **Nur echte Preise**: "Angebotspreis" Platzhalter werden entfernt
 - **Suche**: Client-seitiges Filtern via JS
 - **Teilen**: Web Share API + WhatsApp Fallback
-- **Hahn aus Wochen-Übersicht**: Nur in eigener Card (wenig/unkregelmäßige Angebote)
 
 ### Wichtige Fixes
 1. **Brandl URL**: Scraping von `/speisekarten-angebote`, User-Link ist `/aktuelle-angebote/`
 2. **Brandl Datums-Parsing**: Aus Link-Text "Angebot vom DD.MM.YYYY bis DD.MM.YYYY" im HTML
 3. **Rümenapf**: Parsed alle 3 Joomla-Tabs, nimmt nur zukünftige Wochen
 4. **Wasner**: OCR von 3 Hauptflyern + 4 Passau-Flyern, nur Items mit echten Preisen
-5. **Hahn**: OCR aus `https://metzgerei-hahn.de/media/upload/ANGEBOTE.png` (10 Produkte!)
-6. **Tristlhof**: Nur Zeitungsanzeige 17.-22.08.2026, keine Platzhalter für nächste Woche
-7. **Logo-Bilder entfernt**: Nur Hahn hatte OCR-Bild, andere Logos entfernt (gingen nicht)
+5. **Tristlhof**: Nur Zeitungsanzeige 17.-22.08.2026, keine Platzhalter für nächste Woche
+6. **Logo-Bilder entfernt**: Keine Logo-Bilder in den Cards
 
 ### Cron Job
 ```bash
@@ -148,7 +145,6 @@ Auto-commit & push to GitHub
 | Brandl 404 | URL korrigiert zu `/speisekarten-angebote` |
 | Rümenapf nur 0 Angebote | Alle Joomla-Tabs parsen, nicht nur ersten |
 | Wasner "Angebotspreis" | Nur Items mit echten Preisen behalten |
-| Hahn keine Angebote | OCR von ANGEBOTE.png Bild |
 | Tristlhof falsche Woche | Nur Zeitungsanzeige, keine Platzhalter |
 | Pages deploy verzögert | Expliziter Trigger + Wartezeit ~1-2 Min |
 

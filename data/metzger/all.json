@@ -2549,50 +2549,6 @@
       ]
     },
     {
-      "id": "hahn",
-      "name": "Metzgerei Hahn",
-      "standort": "Eggenfelden (Lauterbachstr. 22, 84307 Eggenfelden)",
-      "website": "https://metzgerei-hahn.de/Lauterbachstrasse",
-      "logo": null,
-      "angebote": [
-        {
-          "typ": "Aktuelle Angebote (aus Bild ANGEBOTE.png)",
-          "gueltig": "Aktuelle Woche",
-          "quelle_bild": "https://metzgerei-hahn.de/media/upload/ANGEBOTE.png",
-          "produkte": [
-            {
-              "name": "Färsen-Hackfleisch",
-              "preis": "12,00 €/kg"
-            },
-            {
-              "name": "Frischwurst-Aufschnitt",
-              "preis": "9,90 €/kg"
-            },
-            {
-              "name": "Gyros-Pfanne",
-              "preis": "10,99 €/kg"
-            },
-            {
-              "name": "Lyoner-Stange",
-              "preis": "3,99 €/Stk"
-            },
-            {
-              "name": "Schweinelendchen im Ganzen",
-              "preis": "6,99 €/Stk"
-            },
-            {
-              "name": "Rauchfrische Wiener",
-              "preis": "10,49 €/kg"
-            },
-            {
-              "name": "Unsere Scharfen",
-              "preis": "9,99 €/kg"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "tristlhof",
       "name": "Metzgerei Tristlhof",
       "standort": "Landshut",

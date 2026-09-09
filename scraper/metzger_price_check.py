@@ -22,7 +22,6 @@ METZGER_URLS = {
     'brunner': 'https://www.brunner-metzgerei.de/angebot-der-woche',
     'ruemenapf': 'https://www.metzgerei-ruemenapf.de/',
     'tristlhof': 'https://www.metzgerei-tristlhof.de/',
-    'hahn': 'https://metzgerei-hahn.de/',
 }
 
 HEADERS = {
@@ -120,7 +119,7 @@ def check_and_update():
                 break
     
     # Für andere Metzger: manuelle Prüfung nötig
-    print("\n⚠️  Andere Metzger (Brandl, Brunner, Hahn, Tristlhof):")
+    print("\n⚠️  Andere Metzger (Brandl, Brunner, Tristlhof):")
     print("  - Websites sind JavaScript-lastig oder haben keine strukturierten Angebote")
     print("  - Empfehlung: Manuelle Prüfung oder OCR für Flyer-Bilder")
     

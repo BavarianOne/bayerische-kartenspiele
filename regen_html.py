@@ -52,7 +52,7 @@ def build_wo(metzger_data):
     return "<div class="wochen-uebersicht"><h2>Wochen-Uebersicht (17.08.2026 - 22.08.2026)</h2><table class="uebersicht-table"><tbody>" + "".join(wo_rows) + "</tbody></table></div>"
 
 def build_cards(metzger_data):
-    correct_order = ["Metzgerei Wasner", "Metzgerei Brandl", "Brunner Metzgerei", "Metzgerei R\u00fcmenapf", "Metzgerei Hahn", "Metzgerei Tristlhof"]
+    correct_order = ["Metzgerei Wasner", "Metzgerei Brandl", "Brunner Metzgerei", "Metzgerei R\u00fcmenapf", "Metzgerei Tristlhof"]
     cards = []
     for name in correct_order:
         if name not in metzger_data:

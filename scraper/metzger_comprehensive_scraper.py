@@ -1,13 +1,12 @@
 
 #!/usr/bin/env python3
 """
-Umfassender Metzger-Scraper für alle 6 Metzger - KOMPLETTE VERSION
+Umfassender Metzger-Scraper für alle 5 Metzger - KOMPLETTE VERSION
 Strategien:
 - Wasner: OCR-Pipeline (Flyer-Bilder) - FUNKTIONIERT
 - Rümenapf: HTML-Table-Parsing - FUNKTIONIERT (Encoding fix)
 - Brandl: PDF-Parsing (pdfplumber) - FUNKTIONIERT
 - Brunner: HTML-Parsing (Fallback ohne Playwright) - NEU
-- Hahn: OCR für Flyer-Bilder - VORBEREITET
 - Tristlhof: Manuelle Daten - FUNKTIONIERT
 """
 
@@ -91,13 +90,6 @@ METZGER_CONFIG = {
         'city': 'Landshut',
         'url': 'https://www.brunner-metzgerei.de/angebot-der-woche',
         'strategy': 'html_fallback',  # Ohne Playwright
-    },
-    'hahn': {
-        'name': 'Metzgerei Hahn',
-        'city': 'Eggenfelden',
-        'url': 'https://metzgerei-hahn.de/Lauterbachstrasse',
-        'strategy': 'ocr',
-        'flyer_dir': DATA_DIR / 'hahn_raw',
     },
     'tristlhof': {
         'name': 'Metzgerei Tristlhof',
@@ -361,43 +353,6 @@ class BrunnerScraper(BaseScraper):
         return angebote
 
 
-class HahnScraper(BaseScraper):
-    """Hahn: OCR für Flyer-Bilder"""
-    
-    def run(self) -> List[Dict]:
-        flyer_dir = self.config.get('flyer_dir')
-        if not flyer_dir or not flyer_dir.exists():
-            logger.warning(f"[{self.name}] Kein Flyer-Verzeichnis: {flyer_dir}")
-            return []
-        
-        angebote = []
-        
-        if not HAS_TESSERACT:
-            logger.warning(f"[{self.name}] Tesseract nicht verfügbar")
-            return angebote
-        
-        image_extensions = {'.jpg', '.jpeg', '.png', '.svg', '.webp'}
-        for img_file in sorted(flyer_dir.iterdir()):
-            if img_file.suffix.lower() in image_extensions:
-                try:
-                    img = Image.open(img_file)
-                    text = pytesseract.image_to_string(img, lang='deu')
-                    
-                    lines = text.split('\n')
-                    for line in lines:
-                        price_match = re.search(r'(.+?)\s+(\d+[,.]\d{2}\s*€)', line)
-                        if price_match:
-                            angebote.append({
-                                'name': price_match.group(1).strip(),
-                                'preis': price_match.group(2).strip(),
-                                'source_image': img_file.name,
-                            })
-                except Exception as e:
-                    logger.warning(f"[{self.name}] OCR-Fehler bei {img_file}: {e}")
-        
-        return angebote
-
-
 class TristlhofScraper(BaseScraper):
     """Tristlhof: Manuelle Daten"""
     
@@ -414,7 +369,6 @@ SCRAPER_CLASSES = {
     'ruemenapf': RuemenapfScraper,
     'brandl': BrandlScraper,
     'brunner': BrunnerScraper,
-    'hahn': HahnScraper,
     'tristlhof': TristlhofScraper,
 }
 

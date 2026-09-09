@@ -4,14 +4,6 @@
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Metzger-Angebote Bayern | Bavarian Card Games</title>
- <!-- PWA / Add to Home Screen -->
- <link rel="manifest" href="metzger-manifest.json">
- <meta name="theme-color" content="#8b4513">
- <meta name="apple-mobile-web-app-capable" content="yes">
- <meta name="apple-mobile-web-app-status-bar-style" content="default">
- <meta name="apple-mobile-web-app-title" content="Metzger">
- <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥩</text></svg>">
- <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥩</text></svg>">
  <style>
  body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
  h1 { color: #8b4513; text-align: center; border-bottom: 3px solid #d4af37; padding-bottom: 10px; }
@@ -75,7 +67,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 06.09.2026 04:35</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 09.09.2026 10:43</span>
  </div>
 </header>
 
@@ -115,7 +107,7 @@ async function shareFullContent() {
  }
 }
 </script>
-<div class="wochen-uebersicht" id="wochen-uebersicht">
+<div class="wochen-uebersicht">
  <h2>📋 Wochen-Übersicht</h2>
 
  <div class="wochen-tabelle">
@@ -164,11 +156,6 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Hähnchenbrustfilet – <span class="uebersicht-preis">1,59 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Kasseler Braten – <span class="uebersicht-preis">0,89 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
@@ -181,11 +168,6 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Montag ist Hackfleischtag - mageres Schwein & Rind – <span class="uebersicht-preis">4,98 €/500g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Obazda – <span class="uebersicht-preis">1,65 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -229,11 +211,6 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten – <span class="uebersicht-preis">1,09 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Schweinegulasch – <span class="uebersicht-preis">0,99 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
@@ -251,16 +228,6 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Streichwurst – <span class="uebersicht-preis">1,19 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Streichwurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Stuttgarter – <span class="uebersicht-preis">1,29 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -284,11 +251,6 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Wiener – <span class="uebersicht-preis">1,49 €/100g</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Wiener knackig und frisch – <span class="uebersicht-preis">0,79 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
@@ -303,13 +265,72 @@ async function shareFullContent() {
  <tbody>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-produkt" data-label="Produkt">Debreziner (100 g) – <span class="uebersicht-preis">1,69 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hähnchenbrustfilet – <span class="uebersicht-preis">1,59 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Debreziner (100 g) – <span class="uebersicht-preis">1,69 €</span></td>
+ <td class="uebersicht-produkt" data-label="Produkt">Mettwurst fein (100 g) – <span class="uebersicht-preis">1,39 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Obazda – <span class="uebersicht-preis">1,65 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schwarzgeräuchertes (100 g) – <span class="uebersicht-preis">1,89 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweine-Filet (100 g) – <span class="uebersicht-preis">1,69 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten – <span class="uebersicht-preis">1,09 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten (100 g) – <span class="uebersicht-preis">1,39 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Streichwurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Stuttgarter – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Wiener – <span class="uebersicht-preis">1,49 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ </tbody>
+ </table>
+ </div>
+
+ <div class="wochen-tabelle">
+ <h3 class="wochen-header">Woche 21.09. - 26.09.2026</h3>
+ <table class="uebersicht-table">
+ <tbody>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -320,11 +341,6 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Haussalami – <span class="uebersicht-preis">1,99 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Mettwurst fein (100 g) – <span class="uebersicht-preis">1,39 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -340,21 +356,6 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Putenschnitzel – <span class="uebersicht-preis">1,69 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schwarzgeräuchertes (100 g) – <span class="uebersicht-preis">1,89 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schweine-Filet (100 g) – <span class="uebersicht-preis">1,69 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
- </tr>
-
- <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schweinebraten (100 g) – <span class="uebersicht-preis">1,39 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
 
  </tbody>
@@ -746,39 +747,11 @@ async function shareFullContent() {
 
 </div>
 <div class="metzger-card">
- <div class="metzger-name"><a href="https://metzgerei-hahn.de/Lauterbachstrasse" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">Metzgerei Hahn</a></div>
- <div class="city">📍 Eggenfelden</div>
-
- <div class="week-section" style="border-left: 5px solid #ff9800;">
- <div class="week-header" style="background: #ff9800;">Woche bis 30.09.2026</div>
- <div class="week-content" style="background: #fff3e0;">
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">I Kg</span>
- <span class="angebot-preis">10,99 € 10,99 €</span>
- </div>
- <div class="angebot-desc">Angebot September 2026 (OCR): I Kg</div>
- </div>
-
- <div class="angebot">
- <div class="angebot-header">
- <span class="angebot-name">Im Ganzen</span>
- <span class="angebot-preis">1kg 6,99 €</span>
- </div>
- <div class="angebot-desc">Angebot September 2026 (OCR): Im Ganzen</div>
- </div>
-
- </div>
- </div>
-
-</div>
-<div class="metzger-card">
  <div class="metzger-name"><a href="https://www.brunner-metzgerei.de/angebot-der-woche" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">Brunner Metzgerei</a></div>
  <div class="city">📍 Landshut</div>
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
- <div class="week-header" style="background: #ff9800;">Woche bis 12.09.2026</div>
+ <div class="week-header" style="background: #ff9800;">Woche bis 19.09.2026</div>
  <div class="week-content" style="background: #fff3e0;">
 
  <div class="angebot">
@@ -786,7 +759,7 @@ async function shareFullContent() {
  <span class="angebot-name">Schweinebraten</span>
  <span class="angebot-preis">1,09 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -794,7 +767,7 @@ async function shareFullContent() {
  <span class="angebot-name">Hähnchenbrustfilet</span>
  <span class="angebot-preis">1,59 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -802,7 +775,7 @@ async function shareFullContent() {
  <span class="angebot-name">Wiener</span>
  <span class="angebot-preis">1,49 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -810,7 +783,7 @@ async function shareFullContent() {
  <span class="angebot-name">Stuttgarter</span>
  <span class="angebot-preis">1,29 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -818,7 +791,7 @@ async function shareFullContent() {
  <span class="angebot-name">Streichwurst</span>
  <span class="angebot-preis">1,29 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -826,14 +799,14 @@ async function shareFullContent() {
  <span class="angebot-name">Obazda</span>
  <span class="angebot-preis">1,65 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 09.09. bis Sa. 12.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
  </div>
 
  </div>
  </div>
 
  <div class="week-section" style="border-left: 5px solid #4caf50;">
- <div class="week-header" style="background: #4caf50;">Woche bis 19.09.2026</div>
+ <div class="week-header" style="background: #4caf50;">Woche bis 26.09.2026</div>
  <div class="week-content" style="background: #e8f5e9;">
 
  <div class="angebot">
@@ -841,7 +814,7 @@ async function shareFullContent() {
  <span class="angebot-name">Putenschnitzel</span>
  <span class="angebot-preis">1,69 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.09. bis Sa. 26.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -849,7 +822,7 @@ async function shareFullContent() {
  <span class="angebot-name">Pfannengyros</span>
  <span class="angebot-preis">1,59 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.09. bis Sa. 26.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -857,7 +830,7 @@ async function shareFullContent() {
  <span class="angebot-name">Currywurst</span>
  <span class="angebot-preis">1,29 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.09. bis Sa. 26.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -865,7 +838,7 @@ async function shareFullContent() {
  <span class="angebot-name">Polnische</span>
  <span class="angebot-preis">1,49 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.09. bis Sa. 26.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -873,7 +846,7 @@ async function shareFullContent() {
  <span class="angebot-name">Haussalami</span>
  <span class="angebot-preis">1,99 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.09. bis Sa. 26.09.2026</div>
  </div>
 
  <div class="angebot">
@@ -881,7 +854,7 @@ async function shareFullContent() {
  <span class="angebot-name">Fleischsalat</span>
  <span class="angebot-preis">1,29 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 16.09. bis Sa. 19.09.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.09. bis Sa. 26.09.2026</div>
  </div>
 
  </div>
@@ -892,7 +865,7 @@ async function shareFullContent() {
 </div>
 
 <div class="last-update">
- Letzte Aktualisierung: 06.09.2026 04:35 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+ Letzte Aktualisierung: 09.09.2026 10:43 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
 </div>
 </body>
 </html>
