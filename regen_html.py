@@ -2,9 +2,12 @@
 """
 Regeneriert metzger-angebote.html aus data/metzger/all.json
 Mit PWA-Support (Manifest + Service Worker)
+Behandelt verschachtelte Datenstrukturen (Wasner) und filtert korrekt nach Preisen
+Bereinigt Encoding-Probleme (Mojibake) und dedupliziert Produkte
 """
 
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -17,6 +20,71 @@ def load_data():
         return json.load(f)
 
 
+def fix_mojibake(text: str) -> str:
+    """Bereinigt übliche UTF-8 Mojibake-Probleme (inkl. rohe Bytes aus JSON)"""
+    if not text:
+        return text
+    # Häufige Mojibake-Muster (bereits dekodierte Unicode-Strings)
+    replacements = {
+        'â¬': '€',
+        'â\x82¬': '€',      # € als rohe Bytes: \xe2\x82\xac
+        'â\x80\x9e': '"',   # „
+        'â\x80\x9c': '"',   # "
+        'â\x80\x93': '–',   # –
+        'â\x80\x94': '—',   # —
+        'â\x80\x99': "'",   # '
+        'â\x80\x98': "'",   # '
+        'â\x80\xa6': '…',   # …
+        'Ã¤': 'ä', 'Ã¶': 'ö', 'Ã¼': 'ü', 'ÃŸ': 'ß',
+        'Ã\x9f': 'ß',       # ß als \xc3\x9f
+        'Ã„': 'Ä', 'Ã–': 'Ö', 'Ãœ': 'Ü',
+        'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú',
+        'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú',
+        'â€œ': '"', 'â€': '"', 'â€': "'",
+        'â€¢': '•', 'â€"': '—', 'â€"': '–',
+        'Â': '',
+        'â€': '€',
+    }
+    for bad, good in replacements.items():
+        text = text.replace(bad, good)
+    # Zusätzliche Bereinigung: entferne einzelne Steuerzeichen
+    text = text.replace('\x82', '').replace('\x80', '').replace('\x9e', '').replace('\x9c', '').replace('\x93', '').replace('\x94', '').replace('\x99', '').replace('\x98', '').replace('\xa6', '')
+    return text
+
+
+def is_valid_price(price: str) -> bool:
+    """Prüft ob ein String ein gültiger Preis ist"""
+    if not price:
+        return False
+    price = price.strip().lower()
+    if price in ('k.a.', 'k.a', '–', '-', ''):
+        return False
+    # Muss eine Zahl mit Komma/Punkt und € enthalten
+    if not re.search(r'\d+[.,]\d{2}', price):
+        return False
+    # Darf nicht nur "100 g" oder ähnlich sein
+    if re.match(r'^\d+\s*g', price, re.IGNORECASE):
+        return False
+    return True
+
+
+def normalize_product_name(name: str) -> str:
+    """Normalisiert Produktnamen für Deduplizierung"""
+    name = fix_mojibake(name).strip()
+    # Entferne Mengenangaben am Ende für Vergleich
+    name = re.sub(r'\s+\d+\s*g$', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'\s+\d+[.,]\d*\s*g$', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'\s*\(100\s*g\)$', '', name, flags=re.IGNORECASE)
+    # Entferne " 100 g" oder " 100g" am Ende
+    name = re.sub(r'\s+100\s*g$', '', name, flags=re.IGNORECASE)
+    # Entferne " 500 g" etc.
+    name = re.sub(r'\s+\d{2,3}\s*g$', '', name, flags=re.IGNORECASE)
+    # Normalisiere Bindestriche und Leerzeichen
+    name = re.sub(r'\s+', ' ', name)
+    name = name.strip(' -')
+    return name.lower().strip()
+
+
 def week_key():
     today = datetime.now()
     monday = today - timedelta(days=today.weekday())
@@ -24,55 +92,101 @@ def week_key():
     return monday.strftime('%d.%m.%Y') + ' - ' + friday.strftime('%d.%m.%Y')
 
 
-def week_key_next():
-    today = datetime.now()
-    monday = today - timedelta(days=today.weekday()) + timedelta(weeks=1)
-    friday = monday + timedelta(days=4)
-    return monday.strftime('%d.%m.%Y') + ' - ' + friday.strftime('%d.%m.%Y')
+def extract_offers_from_metzger(metzger_entry):
+    """Extrahiert alle Produkte mit Preisen aus einem Metzger-Eintrag"""
+    all_offers = []
+    name = metzger_entry.get("name", "Unknown")
+    
+    for a in metzger_entry.get("angebote", []):
+        if not isinstance(a, dict):
+            continue
+            
+        gueltig = a.get("gueltig", "")
+        produkte = a.get("produkte", [])
+        
+        for p in produkte:
+            if not isinstance(p, dict):
+                continue
+                
+            # Prüfe ob nested structure (Wasner)
+            if "produkte" in p:
+                # Nested: iterate over sub-produkte
+                for pp in p.get("produkte", []):
+                    if not isinstance(pp, dict):
+                        continue
+                    prod_name = fix_mojibake(pp.get("name", "")).strip()
+                    price = fix_mojibake(pp.get("preis", "")).strip()
+                    if prod_name and prod_name.lower() != "none" and is_valid_price(price):
+                        all_offers.append({
+                            "name": prod_name,
+                            "price": price,
+                            "gueltig": gueltig
+                        })
+            else:
+                # Flat structure
+                prod_name = fix_mojibake(p.get("name", "")).strip()
+                price = fix_mojibake(p.get("preis", "")).strip()
+                
+                # Skip non-product entries (days, times, etc.)
+                if not prod_name:
+                    continue
+                if prod_name.startswith(("Mo:", "Di:", "Mi:", "Do:", "Fr:", "Sa:", "So:", "Â:")):
+                    continue
+                if "Uhr" in prod_name or re.match(r'^\d{1,2}:\d{2}', prod_name):
+                    continue
+                if prod_name.lower() == "none":
+                    continue
+                    
+                if is_valid_price(price):
+                    all_offers.append({
+                        "name": prod_name,
+                        "price": price,
+                        "gueltig": gueltig
+                    })
+    
+    # Deduplicate by normalized name (keep first occurrence with price)
+    seen = {}
+    for o in all_offers:
+        key = normalize_product_name(o["name"])
+        if key and key not in seen:
+            seen[key] = o
+        elif key in seen and len(o["price"]) > len(seen[key]["price"]):
+            # Bevorzuge längere/ausführlichere Preise
+            seen[key] = o
+    
+    return list(seen.values())
 
 
 def build_week_overview(data):
     """Baut die Wochen-Übersicht mit allen Produkten aller Metzger"""
     metzger_data = {}
+    
     for m in data.get("metzgereien", []):
         name = m.get("name", "Unknown")
-        city = m.get("city", "")
-        offers = []
-        for a in m.get("angebote", []):
-            if isinstance(a, dict):
-                for p in a.get("produkte", []):
-                    if isinstance(p, dict):
-                        prod_name = p.get("name", "")
-                        price = p.get("preis", "")
-                        if prod_name and price and price.strip() and price.lower() != "k.a.":
-                            offers.append({"name": prod_name, "price": price, "desc": ""})
-        seen = set()
-        unique_offers = []
-        for o in offers:
-            key = o["name"].lower().strip()
-            if key not in seen:
-                seen.add(key)
-                unique_offers.append(o)
-        if unique_offers:
-            m_data = {"city": m.get("city", ""), "offers": unique_offers}
-            metzger_data[name] = m_data
+        city = m.get("city", "") or m.get("standort", "")
+        offers = extract_offers_from_metzger(m)
+        
+        if offers:
+            metzger_data[name] = {"city": city, "offers": offers}
+    
     return metzger_data
 
 
 def build_uebersicht_rows(metzger_data):
     """Baut die Zeilen für die Wochen-Übersicht-Tabelle"""
     all_products = {}
+    
     for metzger_name, data in metzger_data.items():
         for offer in data["offers"]:
             name = offer["name"]
             price = offer["price"]
-            if price and price.strip() and price.lower() != "k.a.":
-                if name not in all_products:
-                    all_products[name] = (metzger_name, price)
+            norm_name = normalize_product_name(name)
+            if norm_name and norm_name not in all_products:
+                all_products[norm_name] = (name, metzger_name, price)
     
-    sorted_products = sorted(all_products.items(), key=lambda x: x[0].lower())
+    sorted_products = sorted(all_products.values(), key=lambda x: x[0].lower())
     wo_rows = []
-    for name, (metzger, price) in sorted_products:
+    for name, metzger, price in sorted_products:
         wo_rows.append(
             '<tr>'
             f'<td class="uebersicht-produkt" data-label="Produkt">'
@@ -99,47 +213,20 @@ def build_metzger_cards(data):
         if not metzger_entry:
             continue
             
-        city = metzger_entry.get("city", "")
-        angebote_list = metzger_entry.get("angebote", [])
+        city = metzger_entry.get("city", "") or metzger_entry.get("standort", "")
+        all_offers = extract_offers_from_metzger(metzger_entry)
         
-        # Sammle alle Produkte aus allen Wochen
-        all_offers = []
-        for woche in angebote_list:
-            if isinstance(woche, dict):
-                for p in woche.get("produkte", []):
-                    if isinstance(p, dict):
-                        prod_name = p.get("name", "")
-                        price = p.get("preis", "")
-                        if prod_name:
-                            all_offers.append({"name": prod_name, "price": price})
-        
-        # Duplikate entfernen
-        seen = set()
-        unique_offers = []
-        for o in all_offers:
-            key = o["name"].lower().strip()
-            if key not in seen:
-                seen.add(key)
-                unique_offers.append(o)
-        
-        if not unique_offers:
+        if not all_offers:
             continue  # Skip butchers with no offers
         
         lines = []
-        for o in unique_offers:
-            if o["price"] and o["price"].strip() and o["price"].lower() != "k.a.":
-                lines.append(
-                    '<div class="angebot">'
-                    f'<div class="angebot-header"><span class="angebot-name">{o["name"]}</span>'
-                    f'<span class="angebot-preis">{o["price"]}</span></div>'
-                    '</div>'
-                )
-            else:
-                lines.append(
-                    '<div class="angebot">'
-                    f'<div class="angebot-header"><span class="angebot-name">{o["name"]}</span></div>'
-                    '</div>'
-                )
+        for o in all_offers:
+            lines.append(
+                '<div class="angebot">'
+                f'<div class="angebot-header"><span class="angebot-name">{o["name"]}</span>'
+                f'<span class="angebot-preis">{o["price"]}</span></div>'
+                '</div>'
+            )
         
         content = "\n".join(lines)
         
