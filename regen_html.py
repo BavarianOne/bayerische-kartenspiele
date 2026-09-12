@@ -2,8 +2,7 @@
 """
 Regeneriert metzger-angebote.html aus data/metzger/all.json
 Mit PWA-Support (Manifest + Service Worker)
-Behandelt verschachtelte Datenstrukturen (Wasner) und filtert korrekt nach Preisen
-Bereinigt Encoding-Probleme (Mojibake) und dedupliziert Produkte
+Zeigt nur aktuelle und nächste Woche, filtert Encoding-Probleme, dedupliziert Produkte
 """
 
 import json
@@ -85,97 +84,118 @@ def normalize_product_name(name: str) -> str:
     return name.lower().strip()
 
 
-def week_key():
+def get_current_and_next_week_keys():
+    """Gibt aktuelles und nächstes Wochen-Schlüssel zurück"""
     today = datetime.now()
     monday = today - timedelta(days=today.weekday())
     friday = monday + timedelta(days=4)
-    return monday.strftime('%d.%m.%Y') + ' - ' + friday.strftime('%d.%m.%Y')
+    current = monday.strftime('%d.%m.%Y') + ' - ' + friday.strftime('%d.%m.%Y')
+
+    next_monday = monday + timedelta(weeks=1)
+    next_friday = next_monday + timedelta(days=4)
+    next_week = next_monday.strftime('%d.%m.%Y') + ' - ' + next_friday.strftime('%d.%m.%Y')
+
+    return current, next_week
 
 
-def extract_offers_from_metzger(metzger_entry):
-    """Extrahiert alle Produkte mit Preisen aus einem Metzger-Eintrag"""
-    all_offers = []
-    name = metzger_entry.get("name", "Unknown")
-    
-    for a in metzger_entry.get("angebote", []):
-        if not isinstance(a, dict):
+def extract_offers_from_week(wochen_entry):
+    """Extrahiert alle Produkte mit Preisen aus einem Wochen-Eintrag"""
+    offers = []
+
+    if not isinstance(wochen_entry, dict):
+        return offers
+
+    gueltig = wochen_entry.get("gueltig", "")
+    typ = wochen_entry.get("typ", "")
+    produkte = wochen_entry.get("produkte", [])
+
+    for p in produkte:
+        if not isinstance(p, dict):
             continue
-            
-        gueltig = a.get("gueltig", "")
-        produkte = a.get("produkte", [])
-        
-        for p in produkte:
-            if not isinstance(p, dict):
-                continue
-                
-            # Prüfe ob nested structure (Wasner)
-            if "produkte" in p:
-                # Nested: iterate over sub-produkte
-                for pp in p.get("produkte", []):
-                    if not isinstance(pp, dict):
-                        continue
-                    prod_name = fix_mojibake(pp.get("name", "")).strip()
-                    price = fix_mojibake(pp.get("preis", "")).strip()
-                    if prod_name and prod_name.lower() != "none" and is_valid_price(price):
-                        all_offers.append({
-                            "name": prod_name,
-                            "price": price,
-                            "gueltig": gueltig
-                        })
-            else:
-                # Flat structure
-                prod_name = fix_mojibake(p.get("name", "")).strip()
-                price = fix_mojibake(p.get("preis", "")).strip()
-                
-                # Skip non-product entries (days, times, etc.)
-                if not prod_name:
+
+        # Prüfe ob nested structure (Wasner)
+        if "produkte" in p:
+            # Nested: iterate over sub-produkte
+            for pp in p.get("produkte", []):
+                if not isinstance(pp, dict):
                     continue
-                if prod_name.startswith(("Mo:", "Di:", "Mi:", "Do:", "Fr:", "Sa:", "So:", "Â:")):
-                    continue
-                if "Uhr" in prod_name or re.match(r'^\d{1,2}:\d{2}', prod_name):
-                    continue
-                if prod_name.lower() == "none":
-                    continue
-                    
-                if is_valid_price(price):
-                    all_offers.append({
+                prod_name = fix_mojibake(pp.get("name", "")).strip()
+                price = fix_mojibake(pp.get("preis", "")).strip()
+                if prod_name and prod_name.lower() != "none" and is_valid_price(price):
+                    offers.append({
                         "name": prod_name,
                         "price": price,
-                        "gueltig": gueltig
+                        "gueltig": gueltig,
+                        "typ": typ
                     })
-    
-    # Deduplicate by normalized name (keep first occurrence with price)
+        else:
+            # Flat structure
+            prod_name = fix_mojibake(p.get("name", "")).strip()
+            # For Rümenapf, price is in 'gewicht' field, 'preis' contains unit like "100 g"
+            price = fix_mojibake(p.get("preis", "")).strip()
+            gewicht = fix_mojibake(p.get("gewicht", "")).strip()
+
+            # Use gewicht as price if it contains € and preis doesn't
+            actual_price = price
+            if is_valid_price(gewicht) and not is_valid_price(price):
+                actual_price = gewicht
+
+            # Skip non-product entries (days, times, etc.)
+            if not prod_name:
+                continue
+            # Filter day abbreviations (with or without colon, or end of string)
+            if re.match(r'^(Mo|Di|Mi|Do|Fr|Sa|So|Â)(:?\s|$)', prod_name):
+                continue
+            if "Uhr" in prod_name or re.match(r'^\d{1,2}:\d{2}', prod_name):
+                continue
+            if prod_name.lower() == "none":
+                continue
+
+            if is_valid_price(actual_price):
+                offers.append({
+                    "name": prod_name,
+                    "price": actual_price,
+                    "gueltig": gueltig,
+                    "typ": typ
+                })
+
+    # Deduplicate by normalized name within this week
     seen = {}
-    for o in all_offers:
+    for o in offers:
         key = normalize_product_name(o["name"])
         if key and key not in seen:
             seen[key] = o
         elif key in seen and len(o["price"]) > len(seen[key]["price"]):
-            # Bevorzuge längere/ausführlichere Preise
             seen[key] = o
-    
+
     return list(seen.values())
 
 
-def build_week_overview(data):
-    """Baut die Wochen-Übersicht mit allen Produkten aller Metzger"""
+def build_week_overview(data, current_week, next_week):
+    """Baut die Wochen-Übersicht mit allen Produkten aller Metzger für aktuelle/nächste Woche"""
     metzger_data = {}
-    
+
     for m in data.get("metzgereien", []):
         name = m.get("name", "Unknown")
         city = m.get("city", "") or m.get("standort", "")
-        offers = extract_offers_from_metzger(m)
-        
-        if offers:
-            metzger_data[name] = {"city": city, "offers": offers}
-    
+        all_offers = []
+
+        # Sammle Angebote nur für aktuelle und nächste Woche
+        for wochen_entry in m.get("angebote", []):
+            gueltig = wochen_entry.get("gueltig", "")
+            if gueltig == current_week or gueltig == next_week:
+                all_offers.extend(extract_offers_from_week(wochen_entry))
+
+        if all_offers:
+            metzger_data[name] = {"city": city, "offers": all_offers}
+
     return metzger_data
 
 
 def build_uebersicht_rows(metzger_data):
     """Baut die Zeilen für die Wochen-Übersicht-Tabelle"""
     all_products = {}
-    
+
     for metzger_name, data in metzger_data.items():
         for offer in data["offers"]:
             name = offer["name"]
@@ -183,7 +203,7 @@ def build_uebersicht_rows(metzger_data):
             norm_name = normalize_product_name(name)
             if norm_name and norm_name not in all_products:
                 all_products[norm_name] = (name, metzger_name, price)
-    
+
     sorted_products = sorted(all_products.values(), key=lambda x: x[0].lower())
     wo_rows = []
     for name, metzger, price in sorted_products:
@@ -198,11 +218,11 @@ def build_uebersicht_rows(metzger_data):
     return "".join(wo_rows)
 
 
-def build_metzger_cards(data):
-    """Baut die einzelnen Metzger-Karten"""
+def build_metzger_cards(data, current_week, next_week):
+    """Baut die einzelnen Metzger-Karten mit separaten Wochen"""
     correct_order = ["Metzgerei Wasner", "Metzgerei Brandl", "Brunner Metzgerei", "Metzgerei Rümenapf", "Metzgerei Tristlhof"]
     cards = []
-    
+
     for name in correct_order:
         # Finde Metzger in Daten
         metzger_entry = None
@@ -212,24 +232,47 @@ def build_metzger_cards(data):
                 break
         if not metzger_entry:
             continue
-            
+
         city = metzger_entry.get("city", "") or metzger_entry.get("standort", "")
-        all_offers = extract_offers_from_metzger(metzger_entry)
-        
-        if not all_offers:
-            continue  # Skip butchers with no offers
-        
-        lines = []
-        for o in all_offers:
-            lines.append(
-                '<div class="angebot">'
-                f'<div class="angebot-header"><span class="angebot-name">{o["name"]}</span>'
-                f'<span class="angebot-preis">{o["price"]}</span></div>'
-                '</div>'
-            )
-        
-        content = "\n".join(lines)
-        
+
+        # Sammle Wochen getrennt
+        week_sections = []
+        for wochen_entry in metzger_entry.get("angebote", []):
+            gueltig = wochen_entry.get("gueltig", "")
+            if gueltig != current_week and gueltig != next_week:
+                continue
+
+            offers = extract_offers_from_week(wochen_entry)
+            if not offers:
+                continue
+
+            lines = []
+            for o in offers:
+                lines.append(
+                    '<div class="angebot">'
+                    f'<div class="angebot-header"><span class="angebot-name">{o["name"]}</span>'
+                    f'<span class="angebot-preis">{o["price"]}</span></div>'
+                    '</div>'
+                )
+
+            if lines:
+                content = "\n".join(lines)
+                week_header_label = gueltig
+                if gueltig == current_week:
+                    week_header_label = f"Woche {gueltig} (aktuell)"
+                elif gueltig == next_week:
+                    week_header_label = f"Woche {gueltig} (nächste Woche)"
+
+                week_sections.append(
+                    f'<div class="week-section" style="border-left: 5px solid #ff9800;">'
+                    f'<div class="week-header" style="background: #ff9800;">{week_header_label}</div>'
+                    f'<div class="week-content" style="background: #fff3e0;">{content}</div>'
+                    f'</div>'
+                )
+
+        if not week_sections:
+            continue  # Skip butchers with no current/next week offers
+
         # Spezielle Behandlung für Tristlhof mit Kontakt-Info
         if name == "Metzgerei Tristlhof":
             card = (
@@ -245,35 +288,30 @@ def build_metzger_cards(data):
                 '<p>Mobil Hofladen: Montag, Freitag & Samstag, Tristl am Damm 1, Tel.: 08706/270</p>'
                 '<p>Donnerstag: Landshuter Str. 67 b, Ergolding bei Getränke Fleischmann</p>'
                 '<hr>'
-                f'<div class="week-section" style="border-left: 5px solid #ff9800;">'
-                f'<div class="week-header" style="background: #ff9800;">Woche vom {week_key()}</div>'
-                f'<div class="week-content" style="background: #fff3e0;">{content}</div>'
-                f'</div>'
-                '</div>'
+                + "\n".join(week_sections)
+                + '</div>'
             )
         else:
             card = (
                 f'<div class="metzger-card">'
                 f'<div class="metzger-name">{name}</div>'
                 f'<div class="city">{city}</div>'
-                f'<div class="week-section" style="border-left: 5px solid #ff9800;">'
-                f'<div class="week-header" style="background: #ff9800;">Woche vom {week_key()}</div>'
-                f'<div class="week-content" style="background: #fff3e0;">{content}</div>'
-                f'</div>'
-                '</div>'
+                + "\n".join(week_sections)
+                + '</div>'
             )
         cards.append(card)
-    
+
     return "\n".join(cards)
 
 
 def generate_html(data):
     """Generiert das vollständige HTML mit PWA-Support"""
-    metzger_data = build_week_overview(data)
+    current_week, next_week = get_current_and_next_week_keys()
+    metzger_data = build_week_overview(data, current_week, next_week)
     uebersicht_rows = build_uebersicht_rows(metzger_data)
-    metzger_cards = build_metzger_cards(data)
+    metzger_cards = build_metzger_cards(data, current_week, next_week)
     timestamp = datetime.now().strftime('%d.%m.%Y %H:%M')
-    
+
     html = f'''<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -394,9 +432,9 @@ async function shareFullContent() {{
 </script>
 
 <div class="wochen-uebersicht">
- <h2>📋 Wochen-Übersicht</h2>
+ <h2>📋 Wochen-Übersicht (alle Metzgereien)</h2>
  <div class="wochen-tabelle">
- <h3 class="wochen-header">Woche {week_key()}</h3>
+ <h3 class="wochen-header">Woche {current_week} (aktuell)</h3>
  <table class="uebersicht-table">
  <tbody>
 {uebersicht_rows}
@@ -429,21 +467,21 @@ if ('serviceWorker' in navigator) {{
 </script>
 </body>
 </html>'''
-    
+
     return html
 
 
 def main():
     print("Lade Daten...")
     data = load_data()
-    
+
     print("Generiere HTML...")
     html = generate_html(data)
-    
+
     print(f"Schreibe {HTML_FILE}...")
     with open(HTML_FILE, "w", encoding="utf-8") as f:
         f.write(html)
-    
+
     print("✅ Fertig!")
 
 
