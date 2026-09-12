@@ -3,6 +3,7 @@
 Regeneriert metzger-angebote.html aus data/metzger/all.json
 Mit PWA-Support (Manifest + Service Worker)
 Zeigt nur aktuelle und nächste Woche, filtert Encoding-Probleme, dedupliziert Produkte
+Behält verschachtelte Sub-Typen bei (Wasner: Plakat Seite 1, Seite 2, Grillhaxe, etc.)
 """
 
 import json
@@ -98,68 +99,31 @@ def get_current_and_next_week_keys():
     return current, next_week
 
 
-def extract_offers_from_week(wochen_entry):
-    """Extrahiert alle Produkte mit Preisen aus einem Wochen-Eintrag"""
+def extract_offers_from_subtype(subtype_entry):
+    """Extrahiert Produkte aus einem Sub-Typ-Eintrag (z.B. 'Wochenangebote (Plakat KW 32/33)')"""
     offers = []
-
-    if not isinstance(wochen_entry, dict):
+    
+    if not isinstance(subtype_entry, dict):
         return offers
-
-    gueltig = wochen_entry.get("gueltig", "")
-    typ = wochen_entry.get("typ", "")
-    produkte = wochen_entry.get("produkte", [])
-
+    
+    subtype_name = subtype_entry.get("typ", "")
+    produkte = subtype_entry.get("produkte", [])
+    
     for p in produkte:
         if not isinstance(p, dict):
             continue
-
-        # Prüfe ob nested structure (Wasner)
-        if "produkte" in p:
-            # Nested: iterate over sub-produkte
-            for pp in p.get("produkte", []):
-                if not isinstance(pp, dict):
-                    continue
-                prod_name = fix_mojibake(pp.get("name", "")).strip()
-                price = fix_mojibake(pp.get("preis", "")).strip()
-                if prod_name and prod_name.lower() != "none" and is_valid_price(price):
-                    offers.append({
-                        "name": prod_name,
-                        "price": price,
-                        "gueltig": gueltig,
-                        "typ": typ
-                    })
-        else:
-            # Flat structure
-            prod_name = fix_mojibake(p.get("name", "")).strip()
-            # For Rümenapf, price is in 'gewicht' field, 'preis' contains unit like "100 g"
-            price = fix_mojibake(p.get("preis", "")).strip()
-            gewicht = fix_mojibake(p.get("gewicht", "")).strip()
-
-            # Use gewicht as price if it contains € and preis doesn't
-            actual_price = price
-            if is_valid_price(gewicht) and not is_valid_price(price):
-                actual_price = gewicht
-
-            # Skip non-product entries (days, times, etc.)
-            if not prod_name:
-                continue
-            # Filter day abbreviations (with or without colon, or end of string)
-            if re.match(r'^(Mo|Di|Mi|Do|Fr|Sa|So|Â)(:?\s|$)', prod_name):
-                continue
-            if "Uhr" in prod_name or re.match(r'^\d{1,2}:\d{2}', prod_name):
-                continue
-            if prod_name.lower() == "none":
-                continue
-
-            if is_valid_price(actual_price):
-                offers.append({
-                    "name": prod_name,
-                    "price": actual_price,
-                    "gueltig": gueltig,
-                    "typ": typ
-                })
-
-    # Deduplicate by normalized name within this week
+            
+        prod_name = fix_mojibake(p.get("name", "")).strip()
+        price = fix_mojibake(p.get("preis", "")).strip()
+        
+        if prod_name and prod_name.lower() != "none" and is_valid_price(price):
+            offers.append({
+                "name": prod_name,
+                "price": price,
+                "subtype": subtype_name
+            })
+    
+    # Deduplicate within subtype
     seen = {}
     for o in offers:
         key = normalize_product_name(o["name"])
@@ -167,8 +131,84 @@ def extract_offers_from_week(wochen_entry):
             seen[key] = o
         elif key in seen and len(o["price"]) > len(seen[key]["price"]):
             seen[key] = o
-
+    
     return list(seen.values())
+
+
+def extract_week_sections(wochen_entry):
+    """Extrahiert alle Sub-Typen einer Woche als strukturierte Liste"""
+    sections = []
+    
+    if not isinstance(wochen_entry, dict):
+        return sections
+        
+    gueltig = wochen_entry.get("gueltig", "")
+    typ = wochen_entry.get("typ", "")
+    produkte = wochen_entry.get("produkte", [])
+    
+    for p in produkte:
+        if not isinstance(p, dict):
+            continue
+            
+        # Prüfe ob nested structure (Wasner: hat "produkte" und "typ" aber kein "preis" direkt)
+        if "produkte" in p and "preis" not in p:
+            # Sub-Typ wie "Wochenangebote (Plakat KW 32/33)"
+            subtype_offers = extract_offers_from_subtype(p)
+            if subtype_offers:
+                sections.append({
+                    "name": fix_mojibake(p.get("typ", "")).strip(),
+                    "offers": subtype_offers,
+                    "gueltig": gueltig
+                })
+        else:
+            # Flat structure (Brandl, Rümenapf, etc.)
+            prod_name = fix_mojibake(p.get("name", "")).strip()
+            price = fix_mojibake(p.get("preis", "")).strip()
+            gewicht = fix_mojibake(p.get("gewicht", "")).strip()
+            
+            # Use gewicht as price if it contains € and preis doesn't
+            actual_price = price
+            if is_valid_price(gewicht) and not is_valid_price(price):
+                actual_price = gewicht
+            
+            # Skip non-product entries (days, times, etc.)
+            if not prod_name:
+                continue
+            if re.match(r'^(Mo|Di|Mi|Do|Fr|Sa|So|Â)(:?\s|$)', prod_name):
+                continue
+            if "Uhr" in prod_name or re.match(r'^\d{1,2}:\d{2}', prod_name):
+                continue
+            if prod_name.lower() == "none":
+                continue
+                
+            if is_valid_price(actual_price):
+                # Sammle als einen großen "Angebote" Sub-Typ
+                if not sections or sections[-1].get("name") != "Angebote":
+                    sections.append({
+                        "name": "Angebote",
+                        "offers": [],
+                        "gueltig": gueltig
+                    })
+                sections[-1]["offers"].append({
+                    "name": prod_name,
+                    "price": actual_price,
+                    "subtype": "Angebote"
+                })
+    
+    # Deduplicate within each section
+    for section in sections:
+        seen = {}
+        unique = []
+        for o in section["offers"]:
+            key = normalize_product_name(o["name"])
+            if key and key not in seen:
+                seen[key] = o
+                unique.append(o)
+            elif key in seen and len(o["price"]) > len(seen[key]["price"]):
+                seen[key] = o
+        section["offers"] = unique
+    
+    return sections
 
 
 def build_week_overview(data, current_week, next_week):
@@ -184,7 +224,9 @@ def build_week_overview(data, current_week, next_week):
         for wochen_entry in m.get("angebote", []):
             gueltig = wochen_entry.get("gueltig", "")
             if gueltig == current_week or gueltig == next_week:
-                all_offers.extend(extract_offers_from_week(wochen_entry))
+                sections = extract_week_sections(wochen_entry)
+                for section in sections:
+                    all_offers.extend(section["offers"])
 
         if all_offers:
             metzger_data[name] = {"city": city, "offers": all_offers}
@@ -219,7 +261,7 @@ def build_uebersicht_rows(metzger_data):
 
 
 def build_metzger_cards(data, current_week, next_week):
-    """Baut die einzelnen Metzger-Karten mit separaten Wochen"""
+    """Baut die einzelnen Metzger-Karten mit separaten Wochen und Sub-Typen"""
     correct_order = ["Metzgerei Wasner", "Metzgerei Brandl", "Brunner Metzgerei", "Metzgerei Rümenapf", "Metzgerei Tristlhof"]
     cards = []
 
@@ -242,33 +284,43 @@ def build_metzger_cards(data, current_week, next_week):
             if gueltig != current_week and gueltig != next_week:
                 continue
 
-            offers = extract_offers_from_week(wochen_entry)
-            if not offers:
+            sections = extract_week_sections(wochen_entry)
+            if not sections:
                 continue
 
-            lines = []
-            for o in offers:
-                lines.append(
-                    '<div class="angebot">'
-                    f'<div class="angebot-header"><span class="angebot-name">{o["name"]}</span>'
-                    f'<span class="angebot-preis">{o["price"]}</span></div>'
-                    '</div>'
-                )
+            for section in sections:
+                offers = section["offers"]
+                if not offers:
+                    continue
 
-            if lines:
-                content = "\n".join(lines)
-                week_header_label = gueltig
-                if gueltig == current_week:
-                    week_header_label = f"Woche {gueltig} (aktuell)"
-                elif gueltig == next_week:
-                    week_header_label = f"Woche {gueltig} (nächste Woche)"
+                lines = []
+                for o in offers:
+                    lines.append(
+                        '<div class="angebot">'
+                        f'<div class="angebot-header"><span class="angebot-name">{o["name"]}</span>'
+                        f'<span class="angebot-preis">{o["price"]}</span></div>'
+                        '</div>'
+                    )
 
-                week_sections.append(
-                    f'<div class="week-section" style="border-left: 5px solid #ff9800;">'
-                    f'<div class="week-header" style="background: #ff9800;">{week_header_label}</div>'
-                    f'<div class="week-content" style="background: #fff3e0;">{content}</div>'
-                    f'</div>'
-                )
+                if lines:
+                    content = "\n".join(lines)
+                    week_label = gueltig
+                    if gueltig == current_week:
+                        week_label = f"Woche {gueltig} (aktuell)"
+                    elif gueltig == next_week:
+                        week_label = f"Woche {gueltig} (nächste Woche)"
+                    
+                    # Add subtype name if available and not generic
+                    section_title = week_label
+                    if section["name"] and section["name"] != "Angebote":
+                        section_title = f"{week_label} – {section['name']}"
+                    
+                    week_sections.append(
+                        f'<div class="week-section" style="border-left: 5px solid #ff9800;">'
+                        f'<div class="week-header" style="background: #ff9800;">{section_title}</div>'
+                        f'<div class="week-content" style="background: #fff3e0;">{content}</div>'
+                        f'</div>'
+                    )
 
         if not week_sections:
             continue  # Skip butchers with no current/next week offers
