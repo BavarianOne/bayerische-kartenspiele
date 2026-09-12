@@ -85,18 +85,30 @@ def normalize_product_name(name: str) -> str:
     return name.lower().strip()
 
 
-def get_current_and_next_week_keys():
-    """Gibt aktuelles und nächstes Wochen-Schlüssel zurück"""
-    today = datetime.now()
-    monday = today - timedelta(days=today.weekday())
-    friday = monday + timedelta(days=4)
-    current = monday.strftime('%d.%m.%Y') + ' - ' + friday.strftime('%d.%m.%Y')
-
-    next_monday = monday + timedelta(weeks=1)
-    next_friday = next_monday + timedelta(days=4)
-    next_week = next_monday.strftime('%d.%m.%Y') + ' - ' + next_friday.strftime('%d.%m.%Y')
-
-    return current, next_week
+def get_available_weeks(data, limit=6):
+    """Sammelt alle verfügbaren Wochen aus den Daten, sortiert chronologisch, neueste zuerst"""
+    all_weeks = set()
+    for m in data.get("metzgereien", []):
+        for a in m.get("angebote", []):
+            g = a.get("gueltig", "")
+            if g:
+                all_weeks.add(g)
+    
+    # Sortiere nach Datum (versuche Datum zu parsen)
+    def parse_week_key(w):
+        try:
+            # Format: "07.09.2026 - 11.09.2026" oder "03.08. - 08.08.2026"
+            parts = w.split(' - ')
+            start = parts[0].strip()
+            if len(start.split('.')) == 2:
+                # "03.08." -> add current/last year
+                start = start + str(datetime.now().year)
+            return datetime.strptime(start, '%d.%m.%Y')
+        except:
+            return datetime.min
+    
+    sorted_weeks = sorted(all_weeks, key=parse_week_key, reverse=True)
+    return sorted_weeks[:limit]
 
 
 def extract_offers_from_subtype(subtype_entry):
@@ -211,8 +223,8 @@ def extract_week_sections(wochen_entry):
     return sections
 
 
-def build_week_overview(data, current_week, next_week):
-    """Baut die Wochen-Übersicht mit allen Produkten aller Metzger für aktuelle/nächste Woche"""
+def build_week_overview(data, available_weeks):
+    """Baut die Wochen-Übersicht mit allen Produkten aller Metzger für verfügbare Wochen"""
     metzger_data = {}
 
     for m in data.get("metzgereien", []):
@@ -220,10 +232,10 @@ def build_week_overview(data, current_week, next_week):
         city = m.get("city", "") or m.get("standort", "")
         all_offers = []
 
-        # Sammle Angebote nur für aktuelle und nächste Woche
+        # Sammle Angebote für alle verfügbaren Wochen
         for wochen_entry in m.get("angebote", []):
             gueltig = wochen_entry.get("gueltig", "")
-            if gueltig == current_week or gueltig == next_week:
+            if gueltig in available_weeks:
                 sections = extract_week_sections(wochen_entry)
                 for section in sections:
                     all_offers.extend(section["offers"])
@@ -260,7 +272,7 @@ def build_uebersicht_rows(metzger_data):
     return "".join(wo_rows)
 
 
-def build_metzger_cards(data, current_week, next_week):
+def build_metzger_cards(data, available_weeks):
     """Baut die einzelnen Metzger-Karten mit separaten Wochen und Sub-Typen"""
     correct_order = ["Metzgerei Wasner", "Metzgerei Brandl", "Brunner Metzgerei", "Metzgerei Rümenapf", "Metzgerei Tristlhof"]
     cards = []
@@ -277,12 +289,16 @@ def build_metzger_cards(data, current_week, next_week):
 
         city = metzger_entry.get("city", "") or metzger_entry.get("standort", "")
 
-        # Sammle Wochen getrennt
+        # Sammle Wochen getrennt - dedupliziere Wochen pro Metzger
+        seen_weeks = set()
         week_sections = []
         for wochen_entry in metzger_entry.get("angebote", []):
             gueltig = wochen_entry.get("gueltig", "")
-            if gueltig != current_week and gueltig != next_week:
+            if gueltig not in available_weeks:
                 continue
+            if gueltig in seen_weeks:
+                continue
+            seen_weeks.add(gueltig)
 
             sections = extract_week_sections(wochen_entry)
             if not sections:
@@ -305,10 +321,19 @@ def build_metzger_cards(data, current_week, next_week):
                 if lines:
                     content = "\n".join(lines)
                     week_label = gueltig
-                    if gueltig == current_week:
-                        week_label = f"Woche {gueltig} (aktuell)"
-                    elif gueltig == next_week:
-                        week_label = f"Woche {gueltig} (nächste Woche)"
+                    # Bestimme Label basierend auf Position in available_weeks
+                    try:
+                        idx = available_weeks.index(gueltig)
+                        if idx == 0:
+                            week_label = f"Woche {gueltig} (aktuell)"
+                        elif idx == 1:
+                            week_label = f"Woche {gueltig} (vergangene Woche)"
+                        elif idx == 2:
+                            week_label = f"Woche {gueltig} (vor 2 Wochen)"
+                        else:
+                            week_label = f"Woche {gueltig}"
+                    except ValueError:
+                        week_label = f"Woche {gueltig}"
                     
                     # Add subtype name if available and not generic
                     section_title = week_label
@@ -358,10 +383,13 @@ def build_metzger_cards(data, current_week, next_week):
 
 def generate_html(data):
     """Generiert das vollständige HTML mit PWA-Support"""
-    current_week, next_week = get_current_and_next_week_keys()
-    metzger_data = build_week_overview(data, current_week, next_week)
+    available_weeks = get_available_weeks(data, limit=6)
+    # Current week is the first (newest)
+    current_week = available_weeks[0] if available_weeks else ""
+    
+    metzger_data = build_week_overview(data, available_weeks)
     uebersicht_rows = build_uebersicht_rows(metzger_data)
-    metzger_cards = build_metzger_cards(data, current_week, next_week)
+    metzger_cards = build_metzger_cards(data, available_weeks)
     timestamp = datetime.now().strftime('%d.%m.%Y %H:%M')
 
     html = f'''<!DOCTYPE html>
