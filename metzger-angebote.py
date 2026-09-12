@@ -499,6 +499,14 @@ def fetch_tristlhof_offers() -> List[Dict]:
         {"typ": "Wiener knackig und frisch", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Frisch aus Stadler's Wurstküche, knackig und frisch, echt lecker", "website": ""},
         {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind", "preis": "4,98 €/500g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
         {"typ": "Samstag ist Haxentag frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Samstag ist Haxentag, frisch und kross, solange Vorrat reicht", "website": ""},
+        # Woche 14.09.-19.09.2026 (neue Zeitungsanzeige aus Stadler's Wurstküche)
+        {"typ": "Gulasch gemischt (schön geschnitten)", "preis": "1,29 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: schön geschnitten", "website": ""},
+        {"typ": "Surbraten (mild und saftig)", "preis": "0,79 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: mild und saftig", "website": ""},
+        {"typ": "Tristlhof Dicke u. Regensburger (über Buchenspänen geräuchert)", "preis": "1,19 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: über Buchenspänen geräuchert", "website": ""},
+        {"typ": "Pfefferbeißer oder Polnische (luftgetrocknet)", "preis": "1,39 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: luftgetrocknet", "website": ""},
+        {"typ": "Goldsteig Emmentaler 40% F.i.T. (echt bayrisch)", "preis": "1,19 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: echt bayrisch", "website": ""},
+        {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
+        {"typ": "Samstag ist Haxentag", "preis": "0,69 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: Samstag ist Haxentag", "website": ""},
     ]
 
 
