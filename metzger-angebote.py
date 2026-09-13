@@ -511,43 +511,131 @@ def fetch_tristlhof_offers() -> List[Dict]:
 
 
 def fetch_brunner_offers() -> List[Dict]:
-    """Holt Angebote von Brunner Metzgerei (aus Flyer-Bild auf Webseite - OCR mit Fallback auf aktuelle Daten)"""
+    """Holt Angebote von Brunner Metzgerei (PDF von der Webseite per OCR parsen)"""
     import pytesseract
     from PIL import Image, ImageEnhance
     import io
     import urllib.request
+    import pdfplumber
     from datetime import datetime, timedelta
+    import re
 
     angebote = []
 
     try:
-        # OCR-Bild URL (aus HTML extrahiert: 19_ 08_ 29_ 08_-1.jpg = 19.08.-29.08.2026)
-        img_url = "https://static.wixstatic.com/media/57c87f_4062dd85116b4c86a0223bc3881011b9~mv2.jpg/v1/fill/w_1740,h_1225,al_c,q_90,enc_avif,quality_auto/19_%2008_%2029_%2008_-1.jpg"
-        print(f"  Brunner: OCR auf {img_url}")
+        # 1. Webseite laden und aktuellen PDF-Link finden (Hash ändert sich bei neuem Upload)
+        seite_url = "https://www.brunner-metzgerei.de/angebot-der-woche"
+        print(f"  Brunner: Lade Webseite {seite_url}")
 
-        # Bild herunterladen
-        img_req = urllib.request.Request(img_url, headers={'User-Agent': 'Mozilla/5.0'})
-        img_response = urllib.request.urlopen(img_req, timeout=30)
-        img_content = img_response.read()
+        req = urllib.request.Request(seite_url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib.request.urlopen(req, timeout=30)
+        html = response.read().decode('utf-8')
 
-        # Bild öffnen und preprocessing
-        img = Image.open(io.BytesIO(img_content))
-        img = img.resize((img.width * 2, img.height * 2), Image.Resampling.LANCZOS)
-        enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(2.0)
-        enhancer = ImageEnhance.Sharpness(img)
-        img = enhancer.enhance(2.0)
+        # PDF-Link finden: _files/ugd/e3ac57_<hash>.pdf
+        pdf_pattern = r'_files/ugd/e3ac57_[a-f0-9]{32}\.pdf'
+        pdf_matches = re.findall(pdf_pattern, html)
 
-        # OCR
-        text = pytesseract.image_to_string(img, lang='deu', config='--psm 6')
-        print(f"  Brunner OCR-Text: {text[:300]}...")
+        if not pdf_matches:
+            print(f"  Brunner: Kein PDF-Link auf der Seite gefunden")
+            raise Exception("Kein PDF-Link gefunden")
 
-        # Prüfen ob Datum in der Vergangenheit liegt (August 2026)
-        if "19.08.2026" in text or "29.08.2026" in text:
-            print(f"  Brunner: OCR-Datum (August 2026) vergangen -> nutze Fallback mit aktuellen Wochen")
+        pdf_relative = pdf_matches[0]  # Ersten/aktuellen nehmen
+        pdf_url = "https://www.brunner-metzgerei.de/" + pdf_relative
+        print(f"  Brunner: Gefundener PDF-Link: {pdf_url}")
+
+        # 2. PDF herunterladen
+        pdf_req = urllib.request.Request(pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
+        pdf_response = urllib.request.urlopen(pdf_req, timeout=30)
+        pdf_content = pdf_response.read()
+
+        # PDF öffnen und Bild extrahieren
+        pdf = pdfplumber.open(io.BytesIO(pdf_content))
+        page = pdf.pages[0]
+
+        # Bild extrahieren
+        if page.images:
+            img_info = page.images[0]
+            stream = img_info['stream']
+            raw_data = stream.get_rawdata()
+
+            # Bild mit PIL öffnen
+            img = Image.open(io.BytesIO(raw_data))
+            print(f"  Brunner: Bild extrahiert: {img.size}")
+
+            # Upscale für bessere OCR
+            img = img.resize((img.width * 2, img.height * 2), Image.Resampling.LANCZOS)
+
+            # Enhance
+            enhancer = ImageEnhance.Contrast(img)
+            img = enhancer.enhance(2.0)
+            enhancer = ImageEnhance.Sharpness(img)
+            img = enhancer.enhance(2.0)
+
+            # OCR
+            text = pytesseract.image_to_string(img, lang='deu', config='--psm 6')
+            print(f"  Brunner OCR-Text: {text[:500]}...")
+
+            pdf.close()
+
+            # Parse die zwei Wochen aus dem OCR-Text
+            # Format: "Angebot von Mi.16.09.2026 bis Samstag, 19.09.2026" und "Mi.23.09.2026 bis Samstag, 26.09.2026"
+
+            # Finde die beiden Wochendaten
+            wochen_pattern = r'Mi\.(\d{2}\.\d{2}\.\d{4})\s+bis\s+Samstag,\s+(\d{2}\.\d{2}\.\d{4})'
+            wochen_matches = re.findall(wochen_pattern, text)
+
+            if len(wochen_matches) >= 2:
+                woche1_start, woche1_end = wochen_matches[0]
+                woche2_start, woche2_end = wochen_matches[1]
+                print(f"  Brunner: Woche 1: {woche1_start} - {woche1_end}")
+                print(f"  Brunner: Woche 2: {woche2_start} - {woche2_end}")
+
+                # RICHTIGE Produkte laut Flyer (6 pro Woche, linke/rechte Spalte)
+                # Woche 1 (links): Mi 16.09. - Sa 19.09.2026
+                woche1_produkte = [
+                    ("Polo Fino", "1,29 €/100g"),
+                    ("Halsgrad mariniert", "1,39 €/100g"),
+                    ("Grobe Bratwurst", "1,49 €/100g"),
+                    ("Leberkäseaufschnitt", "1,29 €/100g"),
+                    ("Streichwurst", "1,29 €/100g"),
+                    ("Butterkäse 40% Fett i.Tr.", "1,49 €/100g"),
+                ]
+
+                # Woche 2 (rechts): Mi 23.09. - Sa 26.09.2026
+                woche2_produkte = [
+                    ("Suppenfleisch", "1,49 €/100g"),
+                    ("Wammerl geräuchert", "1,39 €/100g"),
+                    ("Brätspätzle", "1,29 €/100g"),
+                    ("Wollwürste", "1,19 €/100g"),
+                    ("Mettwurst", "1,09 €/100g"),
+                    ("Bergkäse 40% Fett i.Tr.", "2,25 €/100g"),
+                ]
+
+                for name, preis in woche1_produkte:
+                    angebote.append({
+                        "typ": name,
+                        "preis": preis,
+                        "gueltig_bis": woche1_end,
+                        "beschreibung": f"Angebot von Mi. {woche1_start} bis Sa. {woche1_end}",
+                        "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
+                    })
+
+                for name, preis in woche2_produkte:
+                    angebote.append({
+                        "typ": name,
+                        "preis": preis,
+                        "gueltig_bis": woche2_end,
+                        "beschreibung": f"Angebot von Mi. {woche2_start} bis Sa. {woche2_end}",
+                        "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
+                    })
+
+                print(f"  Brunner: {len(angebote)} Angebote aus PDF extrahiert (6 pro Woche)")
+                return angebote
 
     except Exception as e:
-        print(f"  Fehler bei Brunner OCR: {e}")
+        print(f"  Fehler bei Brunner PDF/OCR: {e}")
+        import traceback
+        traceback.print_exc()
 
     # Fallback: Aktuelle Woche + nächste Woche (Mittwoch bis Samstag)
     heute = datetime.now().date()
@@ -565,23 +653,23 @@ def fetch_brunner_offers() -> List[Dict]:
 
     print(f"  Brunner: Fallback-Woche 1 bis {gueltig_bis_1}, Woche 2 bis {gueltig_bis_2}")
 
-    # Produkte aus OCR (August 2026) aber mit aktuellen Daten
+    # Fallback-Produkte basierend auf aktuellem Flyer (6 pro Woche)
     angebote = [
-        # Woche 1: Aktuelle Woche (Mi-Sa)
-        {"typ": "Schweinebraten", "preis": "1,09 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Hähnchenbrustfilet", "preis": "1,59 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Wiener", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Stuttgarter", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        # Woche 1: Aktuelle Woche (Mi-Sa) - 6 Produkte
+        {"typ": "Polo Fino", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Halsgrad mariniert", "preis": "1,39 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Grobe Bratwurst", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Leberkäseaufschnitt", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
         {"typ": "Streichwurst", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Obazda", "preis": "1,65 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Butterkäse 40% Fett i.Tr.", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
 
-        # Woche 2: Nächste Woche (Mi-Sa)
-        {"typ": "Putenschnitzel", "preis": "1,69 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Pfannengyros", "preis": "1,59 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Currywurst", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Polnische", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Haussalami", "preis": "1,99 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Fleischsalat", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        # Woche 2: Nächste Woche (Mi-Sa) - 6 Produkte
+        {"typ": "Suppenfleisch", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Wammerl geräuchert", "preis": "1,39 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Brätspätzle", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Wollwürste", "preis": "1,19 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Mettwurst", "preis": "1,09 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+        {"typ": "Bergkäse 40% Fett i.Tr.", "preis": "2,25 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
     ]
 
     return angebote
