@@ -1054,13 +1054,13 @@ async function shareFullContent() {{
 
     html_content = "\n".join(html_parts)
 
-    # HTML speichern
-    output_file = "/root/bayerische-kartenspiele/metzger-angebote.html"
+    # HTML speichern (relative Pfade für CI-Kompatibilität)
+    output_file = "metzger-angebote.html"
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html_content)
 
     # JSON-Daten speichern
-    data_file = "/root/bayerische-kartenspiele/metzger-angebote-data.json"
+    data_file = "metzger-angebote-data.json"
     with open(data_file, "w", encoding="utf-8") as f:
         json.dump({
             "timestamp": datetime.now().isoformat(),
