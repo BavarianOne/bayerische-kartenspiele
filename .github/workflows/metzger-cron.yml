@@ -38,17 +38,9 @@ jobs:
           git config user.name "metzger-bot"
           git config user.email "metzger@users.noreply.github.com"
           git add metzger-angebote.html metzger-angebote-data.json
-          git diff --staged --quiet || git commit -m "chore: update metzger angebote $(date -u +'%Y-%m-%d %H:%M UTC')"
-          git push
-
-      - name: Trigger GitHub Pages deploy
-        if: github.ref == 'refs/heads/master' && github.event_name != 'workflow_dispatch'
-        run: |
-          echo "Triggering Pages deployment via API..."
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-pages.yml/dispatches \
-            -d '{"ref":"master"}'
-          echo "Pages deployment triggered!"
+          if git diff --staged --quiet; then
+            echo "Keine Änderungen - nichts zu committen"
+          else
+            git commit -m "chore: update metzger angebote $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
