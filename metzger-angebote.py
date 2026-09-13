@@ -8,7 +8,7 @@ import json
 import urllib.request
 import urllib.parse
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from typing import List, Dict
 from pathlib import Path
 
@@ -587,8 +587,24 @@ def fetch_brunner_offers() -> List[Dict]:
     return angebote
 
 
-# Hard cutoff: Nur Angebote ab diesem Datum anzeigen (07.09.2026)
-CUTOFF_DATE = datetime(2026, 9, 7).date()
+def get_cutoff_date() -> date:
+    """Berechnet das Cutoff-Datum: nächsten Montag (da Metzger sonntags zu).
+    Wenn heute Montag-Samstag -> diese Woche (Montag).
+    Wenn heute Sonntag -> nächste Woche (morgiger Montag)."""
+    heute = date.today()
+    # weekday(): Mo=0, Di=1, ..., So=6
+    if heute.weekday() == 6:  # Sonntag
+        # Nächster Montag = morgen
+        tage_bis_montag = 1
+    else:
+        # Dieser Montag (falls heute Mo=0, dann 0 Tage)
+        tage_bis_montag = -heute.weekday() if heute.weekday() > 0 else 0
+    montag = heute + timedelta(days=tage_bis_montag)
+    return montag
+
+
+# Dynamisches Cutoff: Woche ab nächstem Montag
+CUTOFF_DATE = get_cutoff_date()
 
 
 def main():
