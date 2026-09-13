@@ -4,12 +4,6 @@
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Metzger-Angebote Bayern | Bavarian Card Games</title>
- <link rel="manifest" href="manifest.json" />
- <meta name="theme-color" content="#8b4513" />
- <meta name="apple-mobile-web-app-capable" content="yes" />
- <meta name="apple-mobile-web-app-status-bar-style" content="default" />
- <meta name="apple-mobile-web-app-title" content="Metzger-Angebote" />
- <link rel="apple-touch-icon" href="icon-192.png" />
  <style>
  body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
  h1 { color: #8b4513; text-align: center; border-bottom: 3px solid #d4af37; padding-bottom: 10px; }
@@ -54,17 +48,47 @@
  .search-container { margin: 20px 0; }
  .search-input { width: 100%; padding: 12px; font-size: 1em; border: 2px solid #d4af37; border-radius: 8px; box-sizing: border-box; }
  </style>
- <script>
-   function filterAngebote() {
-    var query = document.getElementById('searchInput').value.toLowerCase().trim();
-    document.querySelectorAll('.angebot').forEach(function(el) {
-     var text = (el.textContent || '').toLowerCase();
-     el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
-    });
-   }
-  </script>
-</head>
-<body>
+  <script>
+    function filterAngebote() {
+     var query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+     // 1. Filter Detail-Karten (.angebot)
+     document.querySelectorAll('.angebot').forEach(function(el) {
+      var text = (el.textContent || '').toLowerCase();
+      el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
+     });
+
+     // 2. Filter Wochen-Übersicht Tabellenzeilen (.uebersicht-table tr)
+     document.querySelectorAll('.uebersicht-table tbody tr').forEach(function(row) {
+      var text = (row.textContent || '').toLowerCase();
+      row.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
+     });
+
+     // 3. Filter Wochen-Abschnitte wenn ALLE Zeilen ausgeblendet sind
+     document.querySelectorAll('.wochen-tabelle').forEach(function(weekTable) {
+      var visibleRows = weekTable.querySelectorAll('tbody tr:not([style*="display: none"])');
+      var header = weekTable.querySelector('.wochen-header');
+      if (header) {
+        header.style.display = (visibleRows.length > 0 || query === '') ? '' : 'none';
+      }
+      weekTable.style.display = (visibleRows.length > 0 || query === '') ? '' : 'none';
+     });
+
+     // 4. Filter Metzger-Karten wenn ALLE Angebote ausgeblendet sind
+     document.querySelectorAll('.metzger-card').forEach(function(card) {
+      var visibleOffers = card.querySelectorAll('.angebot:not([style*="display: none"])');
+      var weekSections = card.querySelectorAll('.week-section');
+      var hasVisibleWeek = false;
+      weekSections.forEach(function(ws) {
+        var wsOffers = ws.querySelectorAll('.angebot:not([style*="display: none"])');
+        if (wsOffers.length > 0) hasVisibleWeek = true;
+      });
+      card.style.display = (hasVisibleWeek || query === '') ? '' : 'none';
+     });
+    }
+   </script>
+ </head>
+ <body>
 <header style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #d4af37;">
  <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
  <h1 style="margin:0; font-size:1.5rem; color:#8b4513; white-space:nowrap;">🥩 Metzger-Angebote aus Bayern</h1>
@@ -73,7 +97,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 13.09.2026 05:40</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 13.09.2026 08:59</span>
  </div>
 </header>
 
@@ -558,17 +582,7 @@ async function shareFullContent() {
 </div>
 
 <div class="last-update">
- Letzte Aktualisierung: 13.09.2026 05:40 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+ Letzte Aktualisierung: 13.09.2026 08:59 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
 </div>
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('[SW] Registered:', reg.scope))
-            .catch(err => console.log('[SW] Registration failed:', err));
-        });
-      }
-    </script>
 </body>
 </html>

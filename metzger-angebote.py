@@ -759,17 +759,47 @@ def main():
  .search-container {{ margin: 20px 0; }}
  .search-input {{ width: 100%; padding: 12px; font-size: 1em; border: 2px solid #d4af37; border-radius: 8px; box-sizing: border-box; }}
  </style>
- <script>
-   function filterAngebote() {{
-    var query = document.getElementById('searchInput').value.toLowerCase().trim();
-    document.querySelectorAll('.angebot').forEach(function(el) {{
-     var text = (el.textContent || '').toLowerCase();
-     el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
-    }});
-   }}
-  </script>
-</head>
-<body>
+  <script>
+    function filterAngebote() {{
+     var query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+     // 1. Filter Detail-Karten (.angebot)
+     document.querySelectorAll('.angebot').forEach(function(el) {{
+      var text = (el.textContent || '').toLowerCase();
+      el.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
+     }});
+
+     // 2. Filter Wochen-Übersicht Tabellenzeilen (.uebersicht-table tr)
+     document.querySelectorAll('.uebersicht-table tbody tr').forEach(function(row) {{
+      var text = (row.textContent || '').toLowerCase();
+      row.style.display = (query === '' || text.indexOf(query) !== -1) ? '' : 'none';
+     }});
+
+     // 3. Filter Wochen-Abschnitte wenn ALLE Zeilen ausgeblendet sind
+     document.querySelectorAll('.wochen-tabelle').forEach(function(weekTable) {{
+      var visibleRows = weekTable.querySelectorAll('tbody tr:not([style*="display: none"])');
+      var header = weekTable.querySelector('.wochen-header');
+      if (header) {{
+        header.style.display = (visibleRows.length > 0 || query === '') ? '' : 'none';
+      }}
+      weekTable.style.display = (visibleRows.length > 0 || query === '') ? '' : 'none';
+     }});
+
+     // 4. Filter Metzger-Karten wenn ALLE Angebote ausgeblendet sind
+     document.querySelectorAll('.metzger-card').forEach(function(card) {{
+      var visibleOffers = card.querySelectorAll('.angebot:not([style*="display: none"])');
+      var weekSections = card.querySelectorAll('.week-section');
+      var hasVisibleWeek = false;
+      weekSections.forEach(function(ws) {{
+        var wsOffers = ws.querySelectorAll('.angebot:not([style*="display: none"])');
+        if (wsOffers.length > 0) hasVisibleWeek = true;
+      }});
+      card.style.display = (hasVisibleWeek || query === '') ? '' : 'none';
+     }});
+    }}
+   </script>
+ </head>
+ <body>
 <header style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #d4af37;">
  <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
  <h1 style="margin:0; font-size:1.5rem; color:#8b4513; white-space:nowrap;">🥩 Metzger-Angebote aus Bayern</h1>
