@@ -16,12 +16,12 @@
       href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="manifest" href="math-quest/manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#4a90d9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Bayerische Spiele" />
-    <link rel="apple-touch-icon" href="math-quest/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <style>
       * {
         margin: 0;
@@ -2115,6 +2115,16 @@
               imageObserver.unobserve(img);
             }
           });
+        });
+      }
+    </script>
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('[SW] Registered:', reg.scope))
+            .catch(err => console.log('[SW] Registration failed:', err));
         });
       }
     </script>

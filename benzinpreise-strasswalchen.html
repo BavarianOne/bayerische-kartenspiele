@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Benzin- & Dieselpreise Straßwalchen | Bavarian Card Games</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#8b4513" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Spritpreise" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -425,5 +431,15 @@ async function shareFullContent() {
         Lizenz: <a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener">CC BY 4.0</a> ·
         Stand: 02.08.2026 04:36 Uhr
     </div>
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('[SW] Registered:', reg.scope))
+            .catch(err => console.log('[SW] Registration failed:', err));
+        });
+      }
+    </script>
 </body>
 </html>

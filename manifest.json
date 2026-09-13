@@ -1,37 +1,57 @@
 {
-  "name": "Wetter Radar",
-  "short_name": "Wetter",
-  "description": "Werbefreie Wetter-App mit Satellit, Wolken, Regen, Wind & Sturm-Radar. Offline-fähig, installierbar, Open Data.",
-  "start_url": "wetter.html",
+  "name": "Bayerische Kartenspiele & Kinderspiele",
+  "short_name": "Bayerische Spiele",
+  "description": "Spaßige Lern- und Kartenspiele für alle Altersgruppen - Schafkopf, Watten, Mau Mau, Mathe-Spiele und mehr",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0d1b2a",
-  "theme_color": "#1e3a5f",
+  "background_color": "#f0f4f8",
+  "theme_color": "#4a90d9",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "./",
   "lang": "de",
-  "categories": ["weather", "utilities"],
+  "categories": ["games", "education", "entertainment"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Aktuelles Wetter",
-      "short_name": "Jetzt",
-      "description": "Aktuelles Wetter am Standort anzeigen",
-      "url": "wetter.html#current",
-      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>", "sizes": "96x96" }]
+      "name": "Kartenspiele",
+      "short_name": "Karten",
+      "description": "Schafkopf, Watten, Mau Mau, Skat",
+      "url": "./index.html#kartenspiele",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Satellit & Radar",
-      "short_name": "Radar",
-      "description": "Satellitenbild mit Wolken, Regen, Wind Overlays",
-      "url": "wetter.html#map",
-      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>", "sizes": "96x96" }]
+      "name": "Kinderspiele",
+      "short_name": "Kinder",
+      "description": "Mathe, Memory, Malen, Lernspiele",
+      "url": "./index.html#kinderspiele",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Spritpreise",
+      "short_name": "Sprit",
+      "description": "Aktuelle Kraftstoffpreise in Landshut",
+      "url": "./landshut-spritpreise.html",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Metzger-Angebote",
+      "short_name": "Metzger",
+      "description": "Wöchentliche Angebote bayerischer Metzgereien",
+      "url": "./metzger-angebote.html",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
     }
   ],
   "prefer_related_applications": false,
