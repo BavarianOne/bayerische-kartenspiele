@@ -1,0 +1,54 @@
+name: Update Metzger Angebote
+
+on:
+  schedule:
+    # Sonntags 16:00 MESZ = 14:00 UTC (Sommer) / 15:00 UTC (Winter)
+    - cron: "0 14 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-metze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pdfplumber pytesseract pillow httpx beautifulsoup4
+
+      - name: Install tesseract-ocr (for Wasner/Brunner OCR)
+        run: |
+          sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-deu
+
+      - name: Run metzger-angebote.py
+        run: python metzger-angebote.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "metzger-bot"
+          git config user.email "metzger@users.noreply.github.com"
+          git add metzger-angebote.html metzger-angebote-data.json
+          git diff --staged --quiet || git commit -m "chore: update metzger angebote $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
+
+      - name: Trigger GitHub Pages deploy
+        if: github.ref == 'refs/heads/master' && github.event_name != 'workflow_dispatch'
+        run: |
+          echo "Triggering Pages deployment via API..."
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-pages.yml/dispatches \
+            -d '{"ref":"master"}'
+          echo "Pages deployment triggered!"
