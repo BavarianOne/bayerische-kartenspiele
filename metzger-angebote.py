@@ -942,7 +942,14 @@ async function shareFullContent() {{
  <h2>📋 Wochen-Übersicht</h2>""")
 
     if wochen_uebersicht:
-        for gueltig in sorted(wochen_uebersicht.keys()):
+        # Sortiere nach echtem Datum (nicht String)
+        def woche_sort_key(woche_key):
+            try:
+                return datetime.strptime(woche_key, "%d.%m.%Y").date()
+            except:
+                return date.max  # Ungültige ans Ende
+        
+        for gueltig in sorted(wochen_uebersicht.keys(), key=woche_sort_key):
             wochen_data = wochen_uebersicht[gueltig]
             if wochen_data["angebote"]:
                 # Tabelle für diese Woche
@@ -1026,7 +1033,17 @@ async function shareFullContent() {{
                 wochen[gueltig] = []
             wochen[gueltig].append(angebot)
 
-        sorted_weeks = sorted(wochen.items(), key=lambda x: x[0] if x[0] else 'zzz')
+        # Sortiere Wochen nach echtem Datum (nicht String)
+        def metzger_woche_sort_key(item):
+            gueltig = item[0]
+            if not gueltig:
+                return date.max  # Kein Datum -> ans Ende
+            try:
+                return datetime.strptime(gueltig, "%d.%m.%Y").date()
+            except:
+                return date.max
+        
+        sorted_weeks = sorted(wochen.items(), key=metzger_woche_sort_key)
 
         html_parts.append(f"""<div class="metzger-card">
  <div class="metzger-name">{f'<a href="{metzger_website}" target="_blank" rel="noopener" style="color: #8b4513; text-decoration: none; border-bottom: 1px solid transparent; transition: border-bottom 0.2s;">{metzger_name}</a>' if metzger_website else metzger_name}</div>
