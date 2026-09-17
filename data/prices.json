@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-09-17T14:46:17.957735+00:00",
-  "workflowRunAt": "2026-09-17T14:46:17.957735+00:00",
+  "fetchedAt": "2026-09-17T18:52:23.929634+00:00",
+  "workflowRunAt": "2026-09-17T18:52:23.929634+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -9,14 +9,6 @@
   },
   "fuels": {
     "diesel": [
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
-        "radius": "60",
-        "price": 2.299
-      },
       {
         "lat": "48.54391202",
         "lon": "12.15421289",
@@ -74,6 +66,14 @@
         "price": 2.399
       },
       {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.429
+      },
+      {
         "lat": "48.546949",
         "lon": "12.112422",
         "address": null,
@@ -90,14 +90,6 @@
         "price": 2.429
       },
       {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.429
-      },
-      {
         "lat": "48.55575",
         "lon": "12.1376",
         "address": null,
@@ -106,10 +98,10 @@
         "price": 2.429
       },
       {
-        "lat": "48.547993",
-        "lon": "12.13178",
+        "lat": "48.540893",
+        "lon": "12.141405",
         "address": null,
-        "name": "TotalEnergies",
+        "name": "ESSO",
         "radius": "60",
         "price": 2.429
       },
@@ -120,17 +112,17 @@
         "name": "ESSO",
         "radius": "60",
         "price": 2.429
-      }
-    ],
-    "e10": [
+      },
       {
         "lat": "48.5519",
         "lon": "12.1616",
         "address": null,
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
-        "price": 2.119
-      },
+        "price": null
+      }
+    ],
+    "e10": [
       {
         "lat": "48.558857",
         "lon": "12.1654835",
@@ -188,6 +180,14 @@
         "price": 2.169
       },
       {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.229
+      },
+      {
         "lat": "48.546949",
         "lon": "12.112422",
         "address": null,
@@ -204,14 +204,6 @@
         "price": 2.229
       },
       {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.229
-      },
-      {
         "lat": "48.55575",
         "lon": "12.1376",
         "address": null,
@@ -220,10 +212,10 @@
         "price": 2.229
       },
       {
-        "lat": "48.547993",
-        "lon": "12.13178",
+        "lat": "48.540893",
+        "lon": "12.141405",
         "address": null,
-        "name": "TotalEnergies",
+        "name": "ESSO",
         "radius": "60",
         "price": 2.229
       },
@@ -234,17 +226,17 @@
         "name": "ESSO",
         "radius": "60",
         "price": 2.229
-      }
-    ],
-    "e5": [
+      },
       {
         "lat": "48.5519",
         "lon": "12.1616",
         "address": null,
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
-        "price": 2.179
-      },
+        "price": null
+      }
+    ],
+    "e5": [
       {
         "lat": "48.54391202",
         "lon": "12.15421289",
@@ -302,6 +294,14 @@
         "price": 2.229
       },
       {
+        "lat": "48.547993",
+        "lon": "12.13178",
+        "address": null,
+        "name": "TotalEnergies",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
         "lat": "48.546949",
         "lon": "12.112422",
         "address": null,
@@ -318,14 +318,6 @@
         "price": 2.289
       },
       {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.289
-      },
-      {
         "lat": "48.55575",
         "lon": "12.1376",
         "address": null,
@@ -334,10 +326,10 @@
         "price": 2.289
       },
       {
-        "lat": "48.547993",
-        "lon": "12.13178",
+        "lat": "48.540893",
+        "lon": "12.141405",
         "address": null,
-        "name": "TotalEnergies",
+        "name": "ESSO",
         "radius": "60",
         "price": 2.289
       },
@@ -348,6 +340,14 @@
         "name": "ESSO",
         "radius": "60",
         "price": 2.289
+      },
+      {
+        "lat": "48.5519",
+        "lon": "12.1616",
+        "address": null,
+        "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
       }
     ]
   }
