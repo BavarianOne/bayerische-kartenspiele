@@ -429,19 +429,20 @@ def fetch_wasner_offers() -> List[Dict]:
         # Falls OCR zu wenige Angebote findet: Fallback auf bekannte Produkte mit aktuellem Datum
         if len(unique_angebote) < 5:
             print(f"  Wasner: OCR nur {len(unique_angebote)} Angebote -> nutze Fallback mit aktuellen Daten")
-            # Bekannte Produkte aus Flyern KW36/37 (31.08.-12.09.2026)
+            # Bekannte Produkte aus Flyern KW38/39 (14.09.-26.09.2026)
             fallback_angebote = [
-                {"typ": "Schweinebraten", "preis": "0,89 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Kasseler Braten", "preis": "0,89 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Schweinegulasch", "preis": "0,99 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Bratensosse", "preis": "2,50 €/Stück", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Sauerbraten", "preis": "1,69 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Krustenbraten", "preis": "0,89 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Emmentaler", "preis": "0,99 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Bayrischer Kartoffelsalat", "preis": "0,99 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Gulaschsuppe", "preis": "4,50 €/Stück", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
                 {"typ": "Sauerkraut", "preis": "2,50 €/Stück", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 1", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Bayrischer Leberkäse", "preis": "1,19 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Bierschinken", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Gutsleberlende", "preis": "1,69 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Streichwurst", "preis": "1,19 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Pfefferbeißer", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
-                {"typ": "Sportsalami", "preis": "1,39 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Debreziner", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Bratwurst", "preis": "2,99 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Rottaler Bauerschinken", "preis": "0,99 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Blut- & Leberwurst", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 2", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Feine Mettwurst", "preis": "0,99 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 3", "website": "https://www.metzgereiwasner.de/angebote/"},
+                {"typ": "Feuerteufel", "preis": "1,69 €/100g", "gueltig_bis": gueltig_bis, "beschreibung": f"Flyer {gueltig_von}-{gueltig_bis}: Hauptflyer 3", "website": "https://www.metzgereiwasner.de/angebote/"},
             ]
             # OCR-Angebote hinzufügen (falls nicht schon in Fallback)
             for ocr_angebot in unique_angebote:
