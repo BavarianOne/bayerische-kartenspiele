@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-09-20T14:00:41.829609+00:00",
-  "workflowRunAt": "2026-09-20T14:00:41.829609+00:00",
+  "fetchedAt": "2026-09-20T17:35:40.964256+00:00",
+  "workflowRunAt": "2026-09-20T17:35:40.964256+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -34,20 +34,12 @@
         "price": 2.389
       },
       {
-        "lat": "48.558857",
-        "lon": "12.1654835",
+        "lat": "48.547993",
+        "lon": "12.13178",
         "address": null,
-        "name": "Sprint",
+        "name": "TotalEnergies",
         "radius": "60",
-        "price": 2.509
-      },
-      {
-        "lat": "48.55575",
-        "lon": "12.1376",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.519
+        "price": 2.489
       },
       {
         "lat": "48.542111332336",
@@ -55,23 +47,7 @@
         "address": null,
         "name": "AGIP ENI",
         "radius": "60",
-        "price": 2.519
-      },
-      {
-        "lat": "48.55888",
-        "lon": "12.166602",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.519
-      },
-      {
-        "lat": "48.547993",
-        "lon": "12.13178",
-        "address": null,
-        "name": "TotalEnergies",
-        "radius": "60",
-        "price": 2.519
+        "price": 2.489
       },
       {
         "lat": "48.540893",
@@ -79,7 +55,15 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.519
+        "price": 2.489
+      },
+      {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.489
       },
       {
         "lat": "48.546949",
@@ -87,7 +71,15 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.519
+        "price": 2.489
+      },
+      {
+        "lat": "48.558857",
+        "lon": "12.1654835",
+        "address": null,
+        "name": "Sprint",
+        "radius": "60",
+        "price": 2.489
       },
       {
         "lat": "48.548382",
@@ -95,7 +87,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.519
+        "price": 2.489
       },
       {
         "lat": "48.556646",
@@ -103,7 +95,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.519
+        "price": 2.499
       },
       {
         "lat": "48.546207",
@@ -111,7 +103,15 @@
         "address": null,
         "name": "ARAL",
         "radius": "60",
-        "price": 2.529
+        "price": 2.499
+      },
+      {
+        "lat": "48.55888",
+        "lon": "12.166602",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.499
       },
       {
         "lat": "48.5519",
@@ -148,60 +148,12 @@
         "price": 2.179
       },
       {
-        "lat": "48.542111332336",
-        "lon": "12.13959734008",
-        "address": null,
-        "name": "AGIP ENI",
-        "radius": "60",
-        "price": 2.339
-      },
-      {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.339
-      },
-      {
         "lat": "48.558857",
         "lon": "12.1654835",
         "address": null,
         "name": "Sprint",
         "radius": "60",
-        "price": 2.339
-      },
-      {
-        "lat": "48.546949",
-        "lon": "12.112422",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.339
-      },
-      {
-        "lat": "48.548382",
-        "lon": "12.147233",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.339
-      },
-      {
-        "lat": "48.55575",
-        "lon": "12.1376",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.349
-      },
-      {
-        "lat": "48.55888",
-        "lon": "12.166602",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.349
+        "price": 2.279
       },
       {
         "lat": "48.547993",
@@ -209,7 +161,55 @@
         "address": null,
         "name": "TotalEnergies",
         "radius": "60",
-        "price": 2.349
+        "price": 2.289
+      },
+      {
+        "lat": "48.542111332336",
+        "lon": "12.13959734008",
+        "address": null,
+        "name": "AGIP ENI",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.540893",
+        "lon": "12.141405",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.546949",
+        "lon": "12.112422",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.55888",
+        "lon": "12.166602",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.548382",
+        "lon": "12.147233",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.289
       },
       {
         "lat": "48.556646",
@@ -217,7 +217,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.349
+        "price": 2.299
       },
       {
         "lat": "48.546207",
@@ -225,7 +225,7 @@
         "address": null,
         "name": "ARAL",
         "radius": "60",
-        "price": 2.369
+        "price": 2.299
       },
       {
         "lat": "48.5519",
@@ -262,60 +262,12 @@
         "price": 2.239
       },
       {
-        "lat": "48.542111332336",
-        "lon": "12.13959734008",
-        "address": null,
-        "name": "AGIP ENI",
-        "radius": "60",
-        "price": 2.399
-      },
-      {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.399
-      },
-      {
         "lat": "48.558857",
         "lon": "12.1654835",
         "address": null,
         "name": "Sprint",
         "radius": "60",
-        "price": 2.399
-      },
-      {
-        "lat": "48.546949",
-        "lon": "12.112422",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.399
-      },
-      {
-        "lat": "48.548382",
-        "lon": "12.147233",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.399
-      },
-      {
-        "lat": "48.55575",
-        "lon": "12.1376",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.409
-      },
-      {
-        "lat": "48.55888",
-        "lon": "12.166602",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.409
+        "price": 2.339
       },
       {
         "lat": "48.547993",
@@ -323,7 +275,55 @@
         "address": null,
         "name": "TotalEnergies",
         "radius": "60",
-        "price": 2.409
+        "price": 2.349
+      },
+      {
+        "lat": "48.542111332336",
+        "lon": "12.13959734008",
+        "address": null,
+        "name": "AGIP ENI",
+        "radius": "60",
+        "price": 2.349
+      },
+      {
+        "lat": "48.540893",
+        "lon": "12.141405",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.349
+      },
+      {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.349
+      },
+      {
+        "lat": "48.546949",
+        "lon": "12.112422",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.349
+      },
+      {
+        "lat": "48.55888",
+        "lon": "12.166602",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.349
+      },
+      {
+        "lat": "48.548382",
+        "lon": "12.147233",
+        "address": null,
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.349
       },
       {
         "lat": "48.556646",
@@ -331,7 +331,7 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.409
+        "price": 2.359
       },
       {
         "lat": "48.546207",
@@ -339,7 +339,7 @@
         "address": null,
         "name": "ARAL",
         "radius": "60",
-        "price": 2.429
+        "price": 2.359
       },
       {
         "lat": "48.5519",
