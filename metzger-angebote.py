@@ -473,41 +473,14 @@ def fetch_tristlhof_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeigen)"""
 
     return [
-        # Woche 17.08.-22.08.2026 (aus Zeitungsanzeige Frontenhausen)
-        {"typ": "Krustenbraten (magere Stücke vom Schlegel/Schulter)", "preis": "0,88 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: magere Stücke vom Schlegel oder Schulter", "website": ""},
-        {"typ": "Milzwurst pikant", "preis": "1,29 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: pikant", "website": ""},
-        {"typ": "Kochsalami (pikant im Geschmack, aus Stadler's Wurstküche)", "preis": "1,29 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: pikant im Geschmack, aus Stadler's Wurstküche", "website": ""},
-        {"typ": "Weißwürste (frisch aus der Wurstküche)", "preis": "1,29 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: frisch aus der Wurstküche", "website": ""},
+        # Woche 28.09. - 02.10.2026 (neue Zeitungsanzeige - Stadler's Wurstküche)
+        {"typ": "frische Koteletts (natur oder mariniert)", "preis": "0,88 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: frisch, natürlich und hausgemacht", "website": ""},
+        {"typ": "Hähnchenkeulen frisch", "preis": "0,89 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: frisch", "website": ""},
+        {"typ": "Brat- oder Wollwürste (aus Stadler's Wurstküche)", "preis": "1,29 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: Frisch aus Stadler's Wurstküche", "website": ""},
+        {"typ": "Aufschnitt gemischt (eine bunte Mischung)", "preis": "1,39 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: eine bunte Mischung", "website": ""},
         # Aktionstage
-        {"typ": "Gemischtes Hackfleisch (Schwein & Rind, 500g)", "preis": "4,98 €/500g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
-        {"typ": "Schweinshaxe frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "22.08.2026", "beschreibung": "Zeitungsanzeige 17.-22.08.2026: Samstag ist Haxentag, frisch & kross, solange Vorrat reicht", "website": ""},
-        # Woche 24.08.-29.08.2026 (neue Zeitungsanzeige)
-        {"typ": "frische Koteletts natur oder gewürzt", "preis": "0,89 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: frisch, natürlich und hausgemacht", "website": ""},
-        {"typ": "Gelbwurst mit und ohne Grün (aus Stadler's Wurstküche)", "preis": "1,29 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Frisch aus Stadler's Wurstküche", "website": ""},
-        {"typ": "Bratwürste oder Wollwürste immer frisch (aus Stadler's Wurstküche)", "preis": "1,19 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Frisch aus Stadler's Wurstküche", "website": ""},
-        {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Montag ist Hackfleischtag", "website": ""},
-        {"typ": "Samstag ist Haxentag frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "29.08.2026", "beschreibung": "Zeitungsanzeige 24.-29.08.2026: Samstag ist Haxentag, frisch & kross, solange Vorrat reicht", "website": ""},
-        # Woche 31.08.-05.09.2026 (neue Zeitungsanzeige)
-        {"typ": "Pfannengerichte vom Schwein (versch. Sorten)", "preis": "1,29 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: für die schnelle Küche", "website": ""},
-        {"typ": "Tristlhof Schweineschnitzel zart und mager", "preis": "1,09 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026", "website": ""},
-        {"typ": "Currywurst oder Käsegriller (frisch aus Buchenrauch)", "preis": "1,09 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: Frisch aus Stadler's Wurstküche", "website": ""},
-        {"typ": "Schinken-Aufschnitt hausgemacht (saftig, pikant)", "preis": "1,89 €/100g", "gueltig_bis": "05.09.2026", "beschreibung": "Zeitungsanzeige 31.08.-05.09.2026: Frisch aus Stadler's Wurstküche, solange Vorrat reicht", "website": ""},
-        # Woche 07.09.-12.09.2026 (neue Zeitungsanzeige - "Unsere Empfehlungen vom 07.09.26-12.09.26")
-        {"typ": "Schweine-Lendchen zart und mager (Top Preis)", "preis": "0,88 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: zart und mager, Top Preis (UVP 1,09 €/100g)", "website": ""},
-        {"typ": "Krustenbraten magere Stücke", "preis": "1,29 €/100g (500g 4,98 €)", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: magere Stücke", "website": ""},
-        # Frisch aus Stadler's Wurstküche
-        {"typ": "Weißwürste frisch gemacht", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Frisch aus Stadler's Wurstküche, frisch gemacht", "website": ""},
-        {"typ": "Wiener knackig und frisch", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Frisch aus Stadler's Wurstküche, knackig und frisch, echt lecker", "website": ""},
-        {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind", "preis": "4,98 €/500g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
-        {"typ": "Samstag ist Haxentag frisch & kross", "preis": "0,79 €/100g", "gueltig_bis": "12.09.2026", "beschreibung": "Zeitungsanzeige 07.-12.09.2026: Samstag ist Haxentag, frisch und kross, solange Vorrat reicht", "website": ""},
-        # Woche 14.09.-19.09.2026 (neue Zeitungsanzeige aus Stadler's Wurstküche)
-        {"typ": "Gulasch gemischt (schön geschnitten)", "preis": "1,29 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: schön geschnitten", "website": ""},
-        {"typ": "Surbraten (mild und saftig)", "preis": "0,79 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: mild und saftig", "website": ""},
-        {"typ": "Tristlhof Dicke u. Regensburger (über Buchenspänen geräuchert)", "preis": "1,19 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: über Buchenspänen geräuchert", "website": ""},
-        {"typ": "Pfefferbeißer oder Polnische (luftgetrocknet)", "preis": "1,39 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: luftgetrocknet", "website": ""},
-        {"typ": "Goldsteig Emmentaler 40% F.i.T. (echt bayrisch)", "preis": "1,19 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: echt bayrisch", "website": ""},
-        {"typ": "Montag ist Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
-        {"typ": "Samstag ist Haxentag", "preis": "0,69 €/100g", "gueltig_bis": "19.09.2026", "beschreibung": "Zeitungsanzeige 14.-19.09.2026: Samstag ist Haxentag", "website": ""},
+        {"typ": "Montag: Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
+        {"typ": "Samstag: Haxentag - frisch und kross", "preis": "0,79 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: Samstag ist Haxentag, frisch und kross", "website": ""},
     ]
 
 
