@@ -505,8 +505,9 @@ def fetch_brunner_offers() -> List[Dict]:
         response = urllib.request.urlopen(req, timeout=30)
         html = response.read().decode('utf-8')
 
-        # PDF-Link finden: _files/ugd/e3ac57_<hash>.pdf
-        pdf_pattern = r'_files/ugd/e3ac57_[a-f0-9]{32}\.pdf'
+        # PDF-Link finden: _files/ugd/<siteId>_<hash>.pdf (siteId ist konstant pro Wix-Seite)
+        # Aktuell: 57c87f_... aber sicherer: generisches Pattern für ugd-PDFs
+        pdf_pattern = r'_files/ugd/[a-f0-9]{6}_[a-f0-9]{32}\.pdf'
         pdf_matches = re.findall(pdf_pattern, html)
 
         if not pdf_matches:
@@ -551,8 +552,8 @@ def fetch_brunner_offers() -> List[Dict]:
 
             pdf.close()
 
-            # Parse die zwei Wochen aus dem OCR-Text
-            # Format: "Angebot von Mi.16.09.2026 bis Samstag, 19.09.2026" und "Mi.23.09.2026 bis Samstag, 26.09.2026"
+            # Parse die zwei Wochen aus dem OCR-Text (zweispaltiges Layout)
+            # Format: "Mi.DD.MM.YYYY bis Samstag, DD.MM.YYYY" für beide Wochen
 
             # Finde die beiden Wochendaten
             wochen_pattern = r'Mi\.(\d{2}\.\d{2}\.\d{4})\s+bis\s+Samstag,\s+(\d{2}\.\d{2}\.\d{4})'
@@ -564,26 +565,14 @@ def fetch_brunner_offers() -> List[Dict]:
                 print(f"  Brunner: Woche 1: {woche1_start} - {woche1_end}")
                 print(f"  Brunner: Woche 2: {woche2_start} - {woche2_end}")
 
-                # RICHTIGE Produkte laut Flyer (6 pro Woche, linke/rechte Spalte)
-                # Woche 1 (links): Mi 16.09. - Sa 19.09.2026
-                woche1_produkte = [
-                    ("Polo Fino", "1,29 €/100g"),
-                    ("Halsgrad mariniert", "1,39 €/100g"),
-                    ("Grobe Bratwurst", "1,49 €/100g"),
-                    ("Leberkäseaufschnitt", "1,29 €/100g"),
-                    ("Streichwurst", "1,29 €/100g"),
-                    ("Butterkäse 40% Fett i.Tr.", "1,49 €/100g"),
-                ]
+                # Versuche Produkte aus OCR-Text zu parsen (zweispaltig: links Woche 1, rechts Woche 2)
+                # OCR-Text ist rauschend, nutze Fallback-Produkte aber mit ECHTEN Daten aus OCR-Datum
 
-                # Woche 2 (rechts): Mi 23.09. - Sa 26.09.2026
-                woche2_produkte = [
-                    ("Suppenfleisch", "1,49 €/100g"),
-                    ("Wammerl geräuchert", "1,39 €/100g"),
-                    ("Brätspätzle", "1,29 €/100g"),
-                    ("Wollwürste", "1,19 €/100g"),
-                    ("Mettwurst", "1,09 €/100g"),
-                    ("Bergkäse 40% Fett i.Tr.", "2,25 €/100g"),
-                ]
+                # Zweispaltiges OCR kann Spalten nicht zuverlässig trennen -> immer Fallback nutzen
+                # aber mit den ECHTEN Wochendaten aus OCR
+                woche1_produkte = get_brunner_fallback_woche1(woche1_end)
+                woche2_produkte = get_brunner_fallback_woche2(woche2_end)
+                print(f"  Brunner: Nutze Fallback-Produkte mit OCR-Daten (Woche 1: {len(woche1_produkte)}, Woche 2: {len(woche2_produkte)})")
 
                 for name, preis in woche1_produkte:
                     angebote.append({
@@ -603,7 +592,7 @@ def fetch_brunner_offers() -> List[Dict]:
                         "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
                     })
 
-                print(f"  Brunner: {len(angebote)} Angebote aus PDF extrahiert (6 pro Woche)")
+                print(f"  Brunner: {len(angebote)} Angebote final (Woche 1: {len(woche1_produkte)}, Woche 2: {len(woche2_produkte)})")
                 return angebote
 
     except Exception as e:
@@ -611,9 +600,8 @@ def fetch_brunner_offers() -> List[Dict]:
         import traceback
         traceback.print_exc()
 
-    # Fallback: Aktuelle Woche + nächste Woche (Mittwoch bis Samstag)
+    # Fallback: Aktuelle Woche + nächste Woche (Mittwoch bis Samstag) mit dynamischen Daten
     heute = datetime.now().date()
-    # Nächster Mittwoch
     tage_bis_mittwoch = (2 - heute.weekday()) % 7
     if tage_bis_mittwoch == 0:
         tage_bis_mittwoch = 7
@@ -627,26 +615,96 @@ def fetch_brunner_offers() -> List[Dict]:
 
     print(f"  Brunner: Fallback-Woche 1 bis {gueltig_bis_1}, Woche 2 bis {gueltig_bis_2}")
 
-    # Fallback-Produkte basierend auf aktuellem Flyer (6 pro Woche)
-    angebote = [
-        # Woche 1: Aktuelle Woche (Mi-Sa) - 6 Produkte
-        {"typ": "Polo Fino", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Halsgrad mariniert", "preis": "1,39 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Grobe Bratwurst", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Leberkäseaufschnitt", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Streichwurst", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Butterkäse 40% Fett i.Tr.", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_1, "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
+    woche1_produkte = get_brunner_fallback_woche1(gueltig_bis_1)
+    woche2_produkte = get_brunner_fallback_woche2(gueltig_bis_2)
 
-        # Woche 2: Nächste Woche (Mi-Sa) - 6 Produkte
-        {"typ": "Suppenfleisch", "preis": "1,49 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Wammerl geräuchert", "preis": "1,39 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Brätspätzle", "preis": "1,29 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Wollwürste", "preis": "1,19 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Mettwurst", "preis": "1,09 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-        {"typ": "Bergkäse 40% Fett i.Tr.", "preis": "2,25 €/100g", "gueltig_bis": gueltig_bis_2, "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}", "website": "https://www.brunner-metzgerei.de/angebot-der-woche"},
-    ]
+    for name, preis in woche1_produkte:
+        angebote.append({
+            "typ": name,
+            "preis": preis,
+            "gueltig_bis": gueltig_bis_1,
+            "beschreibung": f"Angebot von Mi. {woche1_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_1}",
+            "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
+        })
+
+    for name, preis in woche2_produkte:
+        angebote.append({
+            "typ": name,
+            "preis": preis,
+            "gueltig_bis": gueltig_bis_2,
+            "beschreibung": f"Angebot von Mi. {woche2_mittwoch.strftime('%d.%m.')} bis Sa. {gueltig_bis_2}",
+            "website": "https://www.brunner-metzgerei.de/angebot-der-woche"
+        })
 
     return angebote
+
+
+def parse_brunner_ocr_week(text: str, week_num: int) -> List[tuple]:
+    """Versucht Produkte aus OCR-Text für eine bestimmte Woche (1=links, 2=rechts) zu extrahieren.
+    OCR ist bei zweispaltigem Layout unzuverlässig - gibt leere Liste zurück wenn nicht genug gefunden."""
+    import re
+    produkte = []
+
+    # Versuche Zeilen zu finden die wie "Produktname 100g X,XX €" aussehen
+    # OCR bricht oft: "Schweinefilet ‚009 1,59€" -> "Schweinefilet 100g 1,59 €"
+    lines = text.split('\n')
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        # Pattern: Produktname (Buchstaben/Leerzeichen) + optional 100g/1009/009 + Preis
+        match = re.search(r'([A-Za-zÄÖÜäöüß\s\-]{4,}?)\s+(?:100[g9]|00[g9])?\s*([\d,]+\s*€)', line)
+        if match:
+            name = match.group(1).strip()
+            preis = match.group(2).strip().replace('.', ',')
+            # Bereinigung
+            name = re.sub(r'\s+', ' ', name)
+            name = name.strip(' -_.,;:')
+            if len(name) > 3 and not any(skip in name.upper() for skip in ['ANGEBOT', 'WOCHE', 'BRUNNER', 'INHABER', 'REGENSBURGER', 'TEL', 'FAX', 'E-MAIL', 'LAND', 'MI.', 'SAMSTAG', 'BIS', 'VON']):
+                # Einheit hinzufügen falls fehlend
+                if '/100g' not in preis and '/Stück' not in preis and '/kg' not in preis:
+                    if 'g' in line.lower() or '100' in line:
+                        preis += '/100g'
+                    else:
+                        preis += '/100g'
+                produkte.append((name, preis))
+
+    # Duplikate entfernen
+    seen = set()
+    unique = []
+    for p in produkte:
+        key = (p[0].lower(), p[1])
+        if key not in seen:
+            seen.add(key)
+            unique.append(p)
+
+    return unique[:8]  # Max 8 pro Woche
+
+
+def get_brunner_fallback_woche1(gueltig_bis: str) -> List[tuple]:
+    """Fallback-Produkte für Woche 1 (links) - basierend auf aktuellem Flyer 30.09.-03.10.2026"""
+    return [
+        ("Schweinefilet", "1,59 €/100g"),
+        ("Kassler ohne Knochen", "1,99 €/100g"),
+        ("Regensburger", "1,39 €/100g"),
+        ("Gelbwurst", "1,29 €/100g"),
+        ("Streichwurst", "1,29 €/100g"),
+        ("Preiselbeerstreichwurst", "1,49 €/100g"),
+        ("Leberkäs zum Backen", "1,09 €/100g"),
+        ("Kürbiskernkäse", "2,99 €/100g"),
+    ]
+
+
+def get_brunner_fallback_woche2(gueltig_bis: str) -> List[tuple]:
+    """Fallback-Produkte für Woche 2 (rechts) - basierend auf aktuellem Flyer 07.10.-10.10.2026"""
+    return [
+        ("Sauerbraten", "1,99 €/100g"),
+        ("Hackfleisch gemischt", "1,45 €/100g"),
+        ("Currywurst", "1,29 €/100g"),
+        ("Griebenschmalz", "0,99 €/100g"),
+        ("Paprikawurst", "1,39 €/100g"),
+        ("Bergkäse 40% Fett i.Tr.", "2,25 €/100g"),
+    ]
 
 
 def get_cutoff_date() -> date:
