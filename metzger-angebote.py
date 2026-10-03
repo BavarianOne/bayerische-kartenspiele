@@ -189,7 +189,7 @@ def fetch_brandl_offers() -> List[Dict]:
 
 
 def fetch_ruemenapf_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Rümenapf (HTML-Tabellen) - NUR ZUKÜNFTIGE Wochen"""
+    """Holt Angebote von Metzgerei Rümenapf (HTML-Tabellen) - AKTUELLE + ZUKÜNFTIGE Wochen"""
     angebote = []
 
     try:
@@ -203,8 +203,17 @@ def fetch_ruemenapf_offers() -> List[Dict]:
 
         print(f"  Rümenapf: {len(angebot_sections)} Wochen insgesamt gefunden")
 
+        from datetime import timedelta
         heute = datetime.now().date()
-        zukuenftige_wochen = 0
+        # Cutoff: Montag dieser Woche (nicht nächster Montag!)
+        # Wenn heute Mo-Sa -> dieser Montag; So -> morgiger Montag
+        if heute.weekday() == 6:  # Sonntag
+            cutoff_montag = heute + timedelta(days=1)
+        else:
+            cutoff_montag = heute - timedelta(days=heute.weekday())
+        print(f"  Rümenapf: Cutoff-Montag = {cutoff_montag.strftime('%d.%m.%Y')}")
+
+        wochen_genommen = 0
 
         for date_header, table_html in angebot_sections:
             print(f"  Rümenapf: {date_header}")
@@ -217,11 +226,13 @@ def fetch_ruemenapf_offers() -> List[Dict]:
                 print(f"  Warnung: Ungültiges Datumsformat '{gueltig_bis_str}', überspringe Woche")
                 continue
 
-            if gueltig_bis < heute:
-                print(f"  -> Überspringe vergangene Woche (bis {gueltig_bis_str})")
+            # Woche nehmen wenn End-Datum >= Cutoff-Montag (also diese Woche oder zukünftig)
+            # D.h. Woche bis 02.10. wird genommen, wenn Cutoff 28.09. oder 05.10. ist
+            if gueltig_bis < cutoff_montag:
+                print(f"  -> Überspringe Woche vor Cutoff (bis {gueltig_bis_str}, Cutoff: {cutoff_montag.strftime('%d.%m.%Y')})")
                 continue
 
-            zukuenftige_wochen += 1
+            wochen_genommen += 1
             print(f"  -> Nimm Woche (bis {gueltig_bis_str})")
 
             rows = re.findall(r'<tr>\s*<td[^>]*>([^<]+)</td>\s*<td[^>]*>([^<]+)</td>\s*<td[^>]*>([^<]+)</td>\s*</tr>', table_html)
@@ -241,7 +252,7 @@ def fetch_ruemenapf_offers() -> List[Dict]:
                         "website": "https://www.metzgerei-ruemenapf.de"
                     })
 
-        print(f"  Rümenapf: {zukuenftige_wochen} zukünftige Wochen genommen")
+        print(f"  Rümenapf: {wochen_genommen} Wochen genommen (ab Cutoff {cutoff_montag.strftime('%d.%m.%Y')})")
 
     except Exception as e:
         print(f"  Fehler bei Rümenapf: {e}")
