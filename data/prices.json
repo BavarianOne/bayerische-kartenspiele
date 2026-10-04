@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-10-04T15:55:35.344167+00:00",
-  "workflowRunAt": "2026-10-04T15:55:35.344167+00:00",
+  "fetchedAt": "2026-10-04T19:20:53.849150+00:00",
+  "workflowRunAt": "2026-10-04T19:20:53.849150+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -22,6 +22,14 @@
         "lon": "12.1654835",
         "address": null,
         "name": "Sprint",
+        "radius": "60",
+        "price": 2.339
+      },
+      {
+        "lat": "48.586643",
+        "lon": "12.189711",
+        "address": null,
+        "name": "Shell",
         "radius": "60",
         "price": 2.339
       },
@@ -74,26 +82,10 @@
         "price": 2.349
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.349
-      },
-      {
         "lat": "48.542111332336",
         "lon": "12.13959734008",
         "address": null,
         "name": "AGIP ENI",
-        "radius": "60",
-        "price": 2.349
-      },
-      {
-        "lat": "48.586643",
-        "lon": "12.189711",
-        "address": null,
-        "name": "Shell",
         "radius": "60",
         "price": 2.349
       },
@@ -120,17 +112,17 @@
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": null
-      }
-    ],
-    "e10": [
+      },
       {
         "lat": "48.613932",
         "lon": "12.219227",
         "address": null,
         "name": "Shell",
         "radius": "60",
-        "price": 2.189
-      },
+        "price": null
+      }
+    ],
+    "e10": [
       {
         "lat": "48.586643",
         "lon": "12.189711",
@@ -234,17 +226,17 @@
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": null
-      }
-    ],
-    "e5": [
+      },
       {
         "lat": "48.613932",
         "lon": "12.219227",
         "address": null,
         "name": "Shell",
         "radius": "60",
-        "price": 2.249
-      },
+        "price": null
+      }
+    ],
+    "e5": [
       {
         "lat": "48.586643",
         "lon": "12.189711",
@@ -346,6 +338,14 @@
         "lon": "12.1616",
         "address": null,
         "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
         "radius": "60",
         "price": null
       }
