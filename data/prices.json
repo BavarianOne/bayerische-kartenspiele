@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-10-07T11:36:40.169373+00:00",
-  "workflowRunAt": "2026-10-07T11:36:40.169373+00:00",
+  "fetchedAt": "2026-10-07T18:39:33.162097+00:00",
+  "workflowRunAt": "2026-10-07T18:39:33.162097+00:00",
   "location": {
     "lat": "48.5763411758753",
     "lon": "12.1714786340021",
@@ -10,18 +10,26 @@
   "fuels": {
     "diesel": [
       {
+        "lat": "48.586643",
+        "lon": "12.189711",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.249
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.249
+      },
+      {
         "lat": "48.54391202",
         "lon": "12.15421289",
         "address": null,
         "name": "SIT",
-        "radius": "60",
-        "price": 2.299
-      },
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": 2.299
       },
@@ -32,6 +40,14 @@
         "name": "Sprint",
         "radius": "60",
         "price": 2.309
+      },
+      {
+        "lat": "48.546207",
+        "lon": "12.181083",
+        "address": null,
+        "name": "ARAL",
+        "radius": "60",
+        "price": 2.319
       },
       {
         "lat": "48.556646",
@@ -50,44 +66,12 @@
         "price": 2.319
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
+        "lat": "48.548382",
+        "lon": "12.147233",
         "address": null,
-        "name": "Shell",
+        "name": "ESSO",
         "radius": "60",
-        "price": 2.319
-      },
-      {
-        "lat": "48.586643",
-        "lon": "12.189711",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.319
-      },
-      {
-        "lat": "48.55575",
-        "lon": "12.1376",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.359
-      },
-      {
-        "lat": "48.546207",
-        "lon": "12.181083",
-        "address": null,
-        "name": "ARAL",
-        "radius": "60",
-        "price": 2.359
-      },
-      {
-        "lat": "48.542111332336",
-        "lon": "12.13959734008",
-        "address": null,
-        "name": "AGIP ENI",
-        "radius": "60",
-        "price": 2.359
+        "price": 2.329
       },
       {
         "lat": "48.547993",
@@ -95,15 +79,7 @@
         "address": null,
         "name": "TotalEnergies",
         "radius": "60",
-        "price": 2.359
-      },
-      {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.359
+        "price": 2.329
       },
       {
         "lat": "48.546949",
@@ -111,25 +87,57 @@
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.359
+        "price": 2.329
       },
       {
-        "lat": "48.548382",
-        "lon": "12.147233",
+        "lat": "48.540893",
+        "lon": "12.141405",
         "address": null,
         "name": "ESSO",
         "radius": "60",
-        "price": 2.359
-      }
-    ],
-    "e10": [
+        "price": 2.329
+      },
+      {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.329
+      },
+      {
+        "lat": "48.542111332336",
+        "lon": "12.13959734008",
+        "address": null,
+        "name": "AGIP ENI",
+        "radius": "60",
+        "price": 2.329
+      },
       {
         "lat": "48.5519",
         "lon": "12.1616",
         "address": null,
         "name": "Supermarkt-Tankstelle",
         "radius": "60",
-        "price": 2.199
+        "price": null
+      }
+    ],
+    "e10": [
+      {
+        "lat": "48.586643",
+        "lon": "12.189711",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.079
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.079
       },
       {
         "lat": "48.558857",
@@ -156,26 +164,34 @@
         "price": 2.219
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
+        "lat": "48.548382",
+        "lon": "12.147233",
         "address": null,
-        "name": "Shell",
+        "name": "ESSO",
         "radius": "60",
-        "price": 2.219
+        "price": 2.229
       },
       {
-        "lat": "48.586643",
-        "lon": "12.189711",
+        "lat": "48.547993",
+        "lon": "12.13178",
         "address": null,
-        "name": "Shell",
+        "name": "TotalEnergies",
         "radius": "60",
-        "price": 2.219
+        "price": 2.229
       },
       {
-        "lat": "48.55575",
-        "lon": "12.1376",
+        "lat": "48.546949",
+        "lon": "12.112422",
         "address": null,
-        "name": "Shell",
+        "name": "ESSO",
+        "radius": "60",
+        "price": 2.229
+      },
+      {
+        "lat": "48.540893",
+        "lon": "12.141405",
+        "address": null,
+        "name": "ESSO",
         "radius": "60",
         "price": 2.229
       },
@@ -196,6 +212,14 @@
         "price": 2.229
       },
       {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.229
+      },
+      {
         "lat": "48.542111332336",
         "lon": "12.13959734008",
         "address": null,
@@ -204,52 +228,36 @@
         "price": 2.229
       },
       {
-        "lat": "48.547993",
-        "lon": "12.13178",
+        "lat": "48.5519",
+        "lon": "12.1616",
         "address": null,
-        "name": "TotalEnergies",
+        "name": "Supermarkt-Tankstelle",
         "radius": "60",
-        "price": 2.229
-      },
-      {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.229
-      },
-      {
-        "lat": "48.546949",
-        "lon": "12.112422",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.229
-      },
-      {
-        "lat": "48.548382",
-        "lon": "12.147233",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.229
+        "price": null
       }
     ],
     "e5": [
+      {
+        "lat": "48.586643",
+        "lon": "12.189711",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.139
+      },
+      {
+        "lat": "48.613932",
+        "lon": "12.219227",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.139
+      },
       {
         "lat": "48.54391202",
         "lon": "12.15421289",
         "address": null,
         "name": "SIT",
-        "radius": "60",
-        "price": 2.259
-      },
-      {
-        "lat": "48.5519",
-        "lon": "12.1616",
-        "address": null,
-        "name": "Supermarkt-Tankstelle",
         "radius": "60",
         "price": 2.259
       },
@@ -278,42 +286,10 @@
         "price": 2.279
       },
       {
-        "lat": "48.613932",
-        "lon": "12.219227",
+        "lat": "48.548382",
+        "lon": "12.147233",
         "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.279
-      },
-      {
-        "lat": "48.586643",
-        "lon": "12.189711",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.279
-      },
-      {
-        "lat": "48.55575",
-        "lon": "12.1376",
-        "address": null,
-        "name": "Shell",
-        "radius": "60",
-        "price": 2.289
-      },
-      {
-        "lat": "48.546207",
-        "lon": "12.181083",
-        "address": null,
-        "name": "ARAL",
-        "radius": "60",
-        "price": 2.289
-      },
-      {
-        "lat": "48.542111332336",
-        "lon": "12.13959734008",
-        "address": null,
-        "name": "AGIP ENI",
+        "name": "ESSO",
         "radius": "60",
         "price": 2.289
       },
@@ -326,14 +302,6 @@
         "price": 2.289
       },
       {
-        "lat": "48.540893",
-        "lon": "12.141405",
-        "address": null,
-        "name": "ESSO",
-        "radius": "60",
-        "price": 2.289
-      },
-      {
         "lat": "48.546949",
         "lon": "12.112422",
         "address": null,
@@ -342,12 +310,44 @@
         "price": 2.289
       },
       {
-        "lat": "48.548382",
-        "lon": "12.147233",
+        "lat": "48.540893",
+        "lon": "12.141405",
         "address": null,
         "name": "ESSO",
         "radius": "60",
         "price": 2.289
+      },
+      {
+        "lat": "48.546207",
+        "lon": "12.181083",
+        "address": null,
+        "name": "ARAL",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.55575",
+        "lon": "12.1376",
+        "address": null,
+        "name": "Shell",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.542111332336",
+        "lon": "12.13959734008",
+        "address": null,
+        "name": "AGIP ENI",
+        "radius": "60",
+        "price": 2.289
+      },
+      {
+        "lat": "48.5519",
+        "lon": "12.1616",
+        "address": null,
+        "name": "Supermarkt-Tankstelle",
+        "radius": "60",
+        "price": null
       }
     ]
   }
