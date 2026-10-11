@@ -164,6 +164,7 @@
      <option value="child">Kind von</option>
      <option value="parent">Elternteil von</option>
      <option value="partner">Partner/in von</option>
+     <option value="sharedChild">Gemeinsames Kind mit</option>
      <option value="sibling">Geschwister von</option>
     </select>
    </div>
@@ -317,14 +318,42 @@ function savePerson(e) {
  };
  
  persons[id] = person;
- 
- const relationType = form.relationType.value;
- const targetId = form.relationTarget.value;
- if (relationType && targetId && persons[targetId]) {
-  addConnection(id, targetId, relationType);
- }
- 
- saveData();
+
+  const relationType = form.relationType.value;
+  const targetId = form.relationTarget.value;
+  if (relationType && targetId && persons[targetId]) {
+   if (relationType === 'sharedChild') {
+    // Find target's partner
+    const partnerConn = connections.find(c => 
+     (c.from === targetId && c.type === 'partner') || 
+     (c.to === targetId && c.type === 'partner')
+    );
+    const partnerId = partnerConn ? (partnerConn.from === targetId ? partnerConn.to : partnerConn.from) : null;
+   
+    // Add child connections to both parents
+    addConnection(id, targetId, 'child');
+    if (partnerId) addConnection(id, partnerId, 'child');
+   
+    // Position child above parents
+    const targetPerson = persons[targetId];
+    person.x = targetPerson.x;
+    person.y = targetPerson.y - 200;
+    if (partnerId) {
+     const partnerPerson = persons[partnerId];
+     person.x = (targetPerson.x + partnerPerson.x) / 2;
+    }
+   } else if (relationType === 'partner') {
+    addConnection(id, targetId, 'partner');
+    // Position partner side by side
+    const targetPerson = persons[targetId];
+    person.x = targetPerson.x + 250;
+    person.y = targetPerson.y;
+   } else {
+    addConnection(id, targetId, relationType);
+   }
+  }
+
+  saveData();
  closeModal();
  render();
 }
@@ -630,9 +659,13 @@ function layoutTree(person, generation, index, positioned) {
  person.x = index * 250 + 100;
  person.y = -generation * 200 + 500;
  
- const children = connections.filter(c => c.from === person.id && c.type === 'parent')
+ // Find children (both via 'parent' and 'child' connection types)
+ const childrenAsParent = connections.filter(c => c.from === person.id && c.type === 'parent')
   .map(c => persons[c.to]).filter(Boolean);
- children.forEach((child, i) => layoutTree(child, generation - 1, index * children.length + i, positioned));
+ const childrenAsChild = connections.filter(c => c.to === person.id && c.type === 'child')
+  .map(c => persons[c.from]).filter(Boolean);
+ const allChildren = [...new Set([...childrenAsParent, ...childrenAsChild])];
+ allChildren.forEach((child, i) => layoutTree(child, generation - 1, index * allChildren.length + i, positioned));
  
  const partners = connections.filter(c => c.from === person.id && c.type === 'partner')
   .map(c => persons[c.to]).filter(Boolean);
