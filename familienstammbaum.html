@@ -616,21 +616,23 @@ function autoLayout() {
    p.y = Math.floor(i / 5) * 200 + 100;
   });
  } else {
+  // Roots (oldest generation) at bottom, children above
   layoutTree(roots[0], 0, 0, {});
  }
  saveData();
  render();
 }
 
-function layoutTree(person, depth, index, positioned) {
+function layoutTree(person, generation, index, positioned) {
  if (positioned[person.id]) return;
  positioned[person.id] = true;
+ // generation 0 = bottom (oldest), negative = children above
  person.x = index * 250 + 100;
- person.y = depth * 200 + 100;
+ person.y = -generation * 200 + 500;
  
  const children = connections.filter(c => c.from === person.id && c.type === 'parent')
   .map(c => persons[c.to]).filter(Boolean);
- children.forEach((child, i) => layoutTree(child, depth + 1, index * children.length + i, positioned));
+ children.forEach((child, i) => layoutTree(child, generation - 1, index * children.length + i, positioned));
  
  const partners = connections.filter(c => c.from === person.id && c.type === 'partner')
   .map(c => persons[c.to]).filter(Boolean);
