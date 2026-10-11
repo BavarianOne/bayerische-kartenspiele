@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Familienstammbaum | Bavarian Card Games</title>
+ <link rel="manifest" href="manifest.json">
+ <meta name="theme-color" content="#8b4513">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="default">
+ <meta name="apple-mobile-web-app-title" content="Familienstammbaum">
+ <link rel="apple-touch-icon" href="icon-192.png">
+ <style>
+ body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 1400px; margin: 0 auto; padding: 20px; background: #faf8f5; min-height: 100vh; }
+ header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #d4af37; }
+ h1 { margin: 0; color: #8b4513; font-size: 1.8rem; }
+ .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+ .btn { background: #8b4513; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, transform 0.1s; }
+ .btn:hover { background: #a0522d; }
+ .btn:active { transform: scale(0.98); }
+ .btn.secondary { background: #d4af37; color: #4a3728; }
+ .btn.danger { background: #c0392b; }
+ .btn.small { padding: 6px 10px; font-size: 0.8rem; }
+ #canvas-wrap { position: relative; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; min-height: 600px; }
+ #tree-canvas { display: block; width: 100%; height: 600px; touch-action: pan-x pan-y; }
+ .toolbar { position: absolute; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+ .toolbar-btn { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s; }
+ .toolbar-btn:hover { background: #faf8f5; border-color: #d4af37; }
+ .legend { position: absolute; bottom: 16px; right: 16px; background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px 16px; font-size: 0.8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; }
+ .legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+ .legend-color { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #8b4513; }
+ .legend-color.male { background: #e3f2fd; border-color: #2196f3; }
+ .legend-color.female { background: #fce4ec; border-color: #e91e63; }
+ .legend-color.partner { background: #fff3e0; border-color: #ff9800; }
+ .legend-line { width: 24px; height: 2px; background: #8b4513; }
+ .legend-line.partner { background: #ff9800; border-radius: 2px; border: none; }
+ .legend-line.dashed { border-top: 2px dashed #8b4513; background: none; }
+ .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+ .modal-overlay.open { display: flex; }
+ .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+ .modal h2 { margin: 0 0 20px; color: #8b4513; }
+ .form-group { margin-bottom: 16px; }
+ .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #4a3728; }
+ .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s; }
+ .form-group input:focus, .form-group select:focus { outline: none; border-color: #d4af37; }
+ .form-row { display: flex; gap: 12px; }
+ .form-row .form-group { flex: 1; }
+ .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+ .person-node { position: absolute; cursor: grab; user-select: none; transition: transform 0.1s; }
+ .person-node.dragging { cursor: grabbing; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+ .person-card { background: white; border: 2px solid #8b4513; border-radius: 10px; padding: 12px 16px; min-width: 160px; max-width: 200px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
+ .person-card.male { border-color: #2196f3; }
+ .person-card.female { border-color: #e91e63; }
+ .person-card.partner { border-color: #ff9800; }
+ .person-name { font-weight: 700; color: #8b4513; font-size: 0.95rem; margin-bottom: 4px; text-align: center; }
+ .person-details { font-size: 0.75rem; color: #666; text-align: center; line-height: 1.4; }
+ .person-detail-row { display: flex; justify-content: space-between; gap: 8px; }
+ .person-actions { position: absolute; top: -8px; right: -8px; display: none; gap: 4px; }
+ .person-node:hover .person-actions { display: flex; }
+ .person-actions button { background: white; border: 1px solid #ddd; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+ .person-actions button:hover { background: #faf8f5; border-color: #d4af37; }
+ .person-actions .delete-btn:hover { background: #fdeaea; border-color: #c0392b; color: #c0392b; }
+ .connection { position: absolute; pointer-events: none; z-index: 1; }
+ .connection-line { position: absolute; background: #8b4513; }
+ .connection-line.partner { background: #ff9800; }
+ .connection-line.dashed { background: none; border-top: 2px dashed #8b4513; }
+ .empty-state { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #999; pointer-events: none; }
+ .empty-state svg { width: 80px; height: 80px; margin-bottom: 16px; opacity: 0.5; }
+ .tooltip { position: fixed; background: #333; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; pointer-events: none; z-index: 200; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+ .tooltip.visible { opacity: 1; }
+ @media (max-width: 768px) {
+  header { flex-direction: column; align-items: flex-start; }
+  .controls { width: 100%; }
+  .btn { flex: 1; text-align: center; }
+  #tree-canvas { height: 500px; }
+ }
+ </style>
+</head>
+<body>
+<header>
+ <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+  <h1 style="margin:0; font-size:1.5rem; color:#8b4513; white-space:nowrap;">🌳 Familienstammbaum</h1>
+  <p style="margin:0; font-size:0.85rem; color:#666;">Interaktiv: Personen hinzufügen, Beziehungen definieren, verschieben</p>
+ </div>
+ <div class="controls">
+  <button class="btn" onclick="openModal()">➕ Person hinzufügen</button>
+  <button class="btn secondary" onclick="exportData()">💾 Speichern (JSON)</button>
+  <button class="btn secondary" onclick="importData()">📂 Laden</button>
+  <button class="btn secondary" onclick="exportImage()">📸 Als Bild</button>
+  <button class="btn danger" onclick="clearAll()">🗑️ Alles löschen</button>
+ </div>
+</header>
+
+<div id="canvas-wrap">
+ <canvas id="tree-canvas"></canvas>
+ 
+ <div class="toolbar">
+  <button class="toolbar-btn" onclick="fitToScreen()" title="Alles in Ansicht">🔍 In Ansicht</button>
+  <button class="toolbar-btn" onclick="resetView()" title="Zurücksetzen">🔄 Reset</button>
+  <button class="toolbar-btn" onclick="toggleGrid()" title="Raster an/aus">⊞ Raster</button>
+  <button class="toolbar-btn" onclick="autoLayout()" title="Automatisch anordnen">📐 Auto-Layout</button>
+ </div>
+
+ <div class="legend">
+  <div class="legend-item"><span class="legend-color male"></span> Männlich</div>
+  <div class="legend-item"><span class="legend-color female"></span> Weiblich</div>
+  <div class="legend-item"><span class="legend-color partner"></span> Partner/in</div>
+  <div class="legend-item"><span class="legend-line"></span> Eltern → Kind</div>
+  <div class="legend-item"><span class="legend-line partner"></span> Partnerschaft</div>
+  <div class="legend-item"><span class="legend-line dashed"></span> Geschwister</div>
+ </div>
+
+ <div class="empty-state" id="empty-state">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  <p style="font-size:1.1rem; margin:0 0 8px;">Keine Personen vorhanden</p>
+  <p style="font-size:0.9rem; margin:0;">Klicke auf „Person hinzufügen“ um zu starten</p>
+ </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
+ <div class="modal">
+  <h2 id="modal-title">Person hinzufügen</h2>
+  <form id="person-form" onsubmit="savePerson(event)">
+   <input type="hidden" id="person-id" name="id">
+   <div class="form-group">
+    <label>Vorname *</label>
+    <input type="text" id="firstName" name="firstName" required placeholder="z.B. Hans">
+   </div>
+   <div class="form-group">
+    <label>Nachname</label>
+    <input type="text" id="lastName" name="lastName" placeholder="z.B. Müller">
+   </div>
+   <div class="form-row">
+    <div class="form-group">
+     <label>Geburtsdatum</label>
+     <input type="date" id="birthDate" name="birthDate">
+    </div>
+    <div class="form-group">
+     <label>Sterbedatum</label>
+     <input type="date" id="deathDate" name="deathDate">
+    </div>
+   </div>
+   <div class="form-row">
+    <div class="form-group">
+     <label>Geschlecht *</label>
+     <select id="gender" name="gender" required>
+      <option value="male">Männlich</option>
+      <option value="female">Weiblich</option>
+      <option value="other">Divers</option>
+     </select>
+    </div>
+    <div class="form-group">
+     <label>Status</label>
+     <select id="status" name="status">
+      <option value="living">Lebend</option>
+      <option value="deceased">Verstorben</option>
+     </select>
+    </div>
+   </div>
+   <div class="form-group">
+    <label>Beziehung zu bestehender Person</label>
+    <select id="relationType" name="relationType">
+     <option value="">— Keine —</option>
+     <option value="child">Kind von</option>
+     <option value="parent">Elternteil von</option>
+     <option value="partner">Partner/in von</option>
+     <option value="sibling">Geschwister von</option>
+    </select>
+   </div>
+   <div class="form-group" id="relationTargetGroup" style="display:none;">
+    <label>Zielperson</label>
+    <select id="relationTarget" name="relationTarget"></select>
+   </div>
+   <div class="form-group">
+    <label>Notizen</label>
+    <input type="text" id="notes" name="notes" placeholder="Beruf, Orte, Besonderheiten...">
+   </div>
+   <div class="modal-actions">
+    <button type="button" class="btn secondary" onclick="closeModal()">Abbrechen</button>
+    <button type="submit" class="btn">Speichern</button>
+   </div>
+  </form>
+ </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+if ('serviceWorker' in navigator) {
+ window.addEventListener('load', () => {
+  navigator.serviceWorker.register('sw.js')
+   .then(reg => console.log('[SW] Registered:', reg.scope))
+   .catch(err => console.log('[SW] Registration failed:', err));
+ });
+}
+
+const canvas = document.getElementById('tree-canvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+const emptyState = document.getElementById('empty-state');
+const modalOverlay = document.getElementById('modal-overlay');
+const tooltip = document.getElementById('tooltip');
+
+let persons = {};
+let connections = [];
+let selectedPersonId = null;
+let draggedPersonId = null;
+let dragOffset = { x: 0, y: 0 };
+let viewOffset = { x: 0, y: 0 };
+let viewScale = 1;
+let isPanning = false;
+let panStart = { x: 0, y: 0 };
+let showGrid = false;
+let nextId = 1;
+
+const STORAGE_KEY = 'familienstammbaum-data';
+
+function loadData() {
+ try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+   const data = JSON.parse(saved);
+   persons = data.persons || {};
+   connections = data.connections || [];
+   nextId = data.nextId || 1;
+   viewOffset = data.viewOffset || { x: 0, y: 0 };
+   viewScale = data.viewScale || 1;
+  }
+ } catch (e) {
+  console.warn('Failed to load data:', e);
+ }
+ render();
+}
+
+function saveData() {
+ try {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+   persons, connections, nextId, viewOffset, viewScale
+  }));
+ } catch (e) {
+  console.warn('Failed to save data:', e);
+ }
+}
+
+function generateId() {
+ return 'p' + nextId++;
+}
+
+function getPersonDisplayName(p) {
+ return (p.firstName || '') + (p.lastName ? ' ' + p.lastName : '');
+}
+
+function getPersonAge(p) {
+ if (!p.birthDate) return '';
+ const birth = new Date(p.birthDate);
+ const end = p.deathDate ? new Date(p.deathDate) : new Date();
+ let age = end.getFullYear() - birth.getFullYear();
+ const m = end.getMonth() - birth.getMonth();
+ if (m < 0 || (m === 0 && end.getDate() < birth.getDate())) age--;
+ return p.status === 'deceased' ? `† ${age}` : `${age} Jahre`;
+}
+
+function openModal(personId = null) {
+ const form = document.getElementById('person-form');
+ form.reset();
+ document.getElementById('person-id').value = '';
+ document.getElementById('modal-title').textContent = personId ? 'Person bearbeiten' : 'Person hinzufügen';
+ 
+ const targetSelect = document.getElementById('relationTarget');
+ targetSelect.innerHTML = '<option value="">— Person wählen —</option>';
+ Object.values(persons).forEach(p => {
+  const opt = document.createElement('option');
+  opt.value = p.id;
+  opt.textContent = getPersonDisplayName(p) + (p.birthDate ? ` (${new Date(p.birthDate).getFullYear()})` : '');
+  targetSelect.appendChild(opt);
+ });
+ 
+ if (personId) {
+  const p = persons[personId];
+  document.getElementById('person-id').value = p.id;
+  document.getElementById('firstName').value = p.firstName || '';
+  document.getElementById('lastName').value = p.lastName || '';
+  document.getElementById('birthDate').value = p.birthDate || '';
+  document.getElementById('deathDate').value = p.deathDate || '';
+  document.getElementById('gender').value = p.gender || 'male';
+  document.getElementById('status').value = p.status || 'living';
+  document.getElementById('notes').value = p.notes || '';
+  document.getElementById('relationType').value = '';
+  document.getElementById('relationTargetGroup').style.display = 'none';
+ }
+ 
+ modalOverlay.classList.add('open');
+ document.getElementById('firstName').focus();
+}
+
+function closeModal() {
+ modalOverlay.classList.remove('open');
+}
+
+function savePerson(e) {
+ e.preventDefault();
+ const form = e.target;
+ const id = form.id.value || generateId();
+ const isNew = !persons[id];
+ 
+ const person = {
+  id,
+  firstName: form.firstName.value.trim(),
+  lastName: form.lastName.value.trim(),
+  birthDate: form.birthDate.value || null,
+  deathDate: form.deathDate.value || null,
+  gender: form.gender.value,
+  status: form.status.value,
+  notes: form.notes.value.trim(),
+  x: isNew ? (canvas.width / 2 / viewScale - viewOffset.x) : persons[id].x,
+  y: isNew ? (canvas.height / 2 / viewScale - viewOffset.y) : persons[id].y
+ };
+ 
+ persons[id] = person;
+ 
+ const relationType = form.relationType.value;
+ const targetId = form.relationTarget.value;
+ if (relationType && targetId && persons[targetId]) {
+  addConnection(id, targetId, relationType);
+ }
+ 
+ saveData();
+ closeModal();
+ render();
+}
+
+function addConnection(fromId, toId, type) {
+ const exists = connections.some(c => 
+  (c.from === fromId && c.to === toId && c.type === type) ||
+  (c.from === toId && c.to === fromId && c.type === type)
+ );
+ if (!exists) {
+  connections.push({ from: fromId, to: toId, type });
+ }
+}
+
+function deletePerson(id) {
+ if (!confirm('Person wirklich löschen? Alle Beziehungen werden entfernt.')) return;
+ delete persons[id];
+ connections = connections.filter(c => c.from !== id && c.to !== id);
+ saveData();
+ render();
+}
+
+function deleteConnection(conn) {
+ connections = connections.filter(c => c !== conn);
+ saveData();
+ render();
+}
+
+function clearAll() {
+ if (!confirm('Gesamten Stammbaum löschen?')) return;
+ persons = {};
+ connections = [];
+ nextId = 1;
+ viewOffset = { x: 0, y: 0 };
+ viewScale = 1;
+ saveData();
+ render();
+}
+
+function exportData() {
+ const data = { persons, connections, nextId, viewOffset, viewScale, exported: new Date().toISOString() };
+ const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement('a');
+ a.href = url;
+ a.download = `familienstammbaum-${new Date().toISOString().slice(0,10)}.json`;
+ a.click();
+ URL.revokeObjectURL(url);
+}
+
+function importData() {
+ const input = document.createElement('input');
+ input.type = 'file';
+ input.accept = '.json';
+ input.onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+   try {
+    const data = JSON.parse(ev.target.result);
+    persons = data.persons || {};
+    connections = data.connections || [];
+    nextId = data.nextId || 1;
+    viewOffset = data.viewOffset || { x: 0, y: 0 };
+    viewScale = data.viewScale || 1;
+    saveData();
+    render();
+   } catch (err) {
+    alert('Fehler beim Laden: ' + err.message);
+   }
+  };
+  reader.readAsText(file);
+ };
+ input.click();
+}
+
+function exportImage() {
+ const dataUrl = canvas.toDataURL('image/png');
+ const a = document.createElement('a');
+ a.href = dataUrl;
+ a.download = `familienstammbaum-${new Date().toISOString().slice(0,10)}.png`;
+ a.click();
+}
+
+function resizeCanvas() {
+ const rect = wrap.getBoundingClientRect();
+ const dpr = window.devicePixelRatio || 1;
+ canvas.width = rect.width * dpr;
+ canvas.height = Math.max(600, rect.height) * dpr;
+ canvas.style.width = rect.width + 'px';
+ canvas.style.height = Math.max(600, rect.height) + 'px';
+ ctx.scale(dpr, dpr);
+ render();
+}
+
+function worldToScreen(wx, wy) {
+ return { x: (wx + viewOffset.x) * viewScale, y: (wy + viewOffset.y) * viewScale };
+}
+
+function screenToWorld(sx, sy) {
+ return { x: sx / viewScale - viewOffset.x, y: sy / viewScale - viewOffset.y };
+}
+
+function getNodeBounds(p) {
+ const name = getPersonDisplayName(p);
+ const ctx2 = canvas.getContext('2d');
+ ctx2.font = '600 14px Segoe UI';
+ const textWidth = ctx2.measureText(name).width;
+ const width = Math.max(160, Math.min(200, textWidth + 32));
+ const height = 80 + (p.birthDate ? 18 : 0) + (p.notes ? 18 : 0);
+ return { width, height };
+}
+
+function isPointInNode(px, py, node) {
+ const bounds = getNodeBounds(persons[node.id]);
+ const wx = node.x - bounds.width / 2;
+ const wy = node.y - bounds.height / 2;
+ return px >= wx && px <= wx + bounds.width && py >= wy && py <= wy + bounds.height;
+}
+
+function findNodeAt(x, y) {
+ for (const id in persons) {
+  if (isPointInNode(x, y, persons[id])) return persons[id];
+ }
+ return null;
+}
+
+function render() {
+ const width = canvas.width / (window.devicePixelRatio || 1);
+ const height = canvas.height / (window.devicePixelRatio || 1);
+ 
+ ctx.clearRect(0, 0, width, height);
+ 
+ emptyState.style.display = Object.keys(persons).length === 0 ? 'block' : 'none';
+ 
+ if (showGrid) {
+  ctx.strokeStyle = '#f0ebe7';
+  ctx.lineWidth = 1;
+  const gridSize = 50 * viewScale;
+  const startX = (-viewOffset.x * viewScale) % gridSize;
+  const startY = (-viewOffset.y * viewScale) % gridSize;
+  for (let x = startX; x < width; x += gridSize) {
+   ctx.beginPath();
+   ctx.moveTo(x, 0);
+   ctx.lineTo(x, height);
+   ctx.stroke();
+  }
+  for (let y = startY; y < height; y += gridSize) {
+   ctx.beginPath();
+   ctx.moveTo(0, y);
+   ctx.lineTo(width, y);
+   ctx.stroke();
+  }
+ }
+ 
+ connections.forEach(conn => {
+  const from = persons[conn.from];
+  const to = persons[toId = conn.to];
+  if (!from || !to) return;
+  
+  const fromPos = worldToScreen(from.x, from.y);
+  const toPos = worldToScreen(to.x, to.y);
+  
+  const fromBounds = getNodeBounds(from);
+  const toBounds = getNodeBounds(to);
+  
+  let fromX = fromPos.x;
+  let fromY = fromPos.y;
+  let toX = toPos.x;
+  let toY = toPos.y;
+  
+  if (conn.type === 'partner') {
+   ctx.strokeStyle = '#ff9800';
+   ctx.lineWidth = 3;
+   ctx.setLineDash([]);
+   ctx.beginPath();
+   ctx.moveTo(fromX, fromY);
+   ctx.lineTo(toX, toY);
+   ctx.stroke();
+   
+   const mx = (fromX + toX) / 2;
+   const my = (fromY + toY) / 2 - 20;
+   ctx.fillStyle = '#ff9800';
+   ctx.font = 'bold 12px Segoe UI';
+   ctx.textAlign = 'center';
+   ctx.fillText('♡', mx, my);
+  } else if (conn.type === 'sibling') {
+   ctx.strokeStyle = '#8b4513';
+   ctx.lineWidth = 2;
+   ctx.setLineDash([8, 6]);
+   ctx.beginPath();
+   ctx.moveTo(fromX, fromY);
+   ctx.lineTo(toX, toY);
+   ctx.stroke();
+   ctx.setLineDash([]);
+  } else {
+   ctx.strokeStyle = '#8b4513';
+   ctx.lineWidth = 2;
+   ctx.setLineDash([]);
+   
+   if (conn.type === 'child') {
+    const midX = (fromX + toX) / 2;
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY + fromBounds.height / 2);
+    ctx.lineTo(midX, fromY + fromBounds.height / 2);
+    ctx.lineTo(midX, toY - toBounds.height / 2);
+    ctx.lineTo(toX, toY - toBounds.height / 2);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#8b4513';
+    ctx.beginPath();
+    ctx.arc(toX, toY - toBounds.height / 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+   } else if (conn.type === 'parent') {
+    const midX = (fromX + toX) / 2;
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY - fromBounds.height / 2);
+    ctx.lineTo(midX, fromY - fromBounds.height / 2);
+    ctx.lineTo(midX, toY + toBounds.height / 2);
+    ctx.lineTo(toX, toY + toBounds.height / 2);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#8b4513';
+    ctx.beginPath();
+    ctx.arc(fromX, fromY - fromBounds.height / 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+   }
+  }
+ });
+ 
+ Object.values(persons).forEach(p => {
+  const pos = worldToScreen(p.x, p.y);
+  const bounds = getNodeBounds(p);
+  const x = pos.x - bounds.width / 2;
+  const y = pos.y - bounds.height / 2;
+  
+  ctx.fillStyle = p.gender === 'male' ? '#e3f2fd' : p.gender === 'female' ? '#fce4ec' : '#f3e5f5';
+  ctx.strokeStyle = p.gender === 'male' ? '#2196f3' : p.gender === 'female' ? '#e91e63' : '#8b4513';
+  ctx.lineWidth = p.id === selectedPersonId ? 3 : 2;
+  
+  roundRect(ctx, x, y, bounds.width, bounds.height, 10, true, true);
+  
+  ctx.fillStyle = '#8b4513';
+  ctx.font = '600 14px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText(getPersonDisplayName(p), pos.x, y + 22);
+  
+  let lineY = y + 42;
+  if (p.birthDate) {
+   const birthYear = new Date(p.birthDate).getFullYear();
+   const deathYear = p.deathDate ? new Date(p.deathDate).getFullYear() : '';
+   ctx.font = '12px Segoe UI';
+   ctx.fillStyle = '#666';
+   ctx.fillText(`${birthYear}${deathYear ? ' – ' + deathYear : ''}`, pos.x, lineY);
+   lineY += 18;
+  }
+  if (p.notes) {
+   ctx.font = '11px Segoe UI';
+   ctx.fillStyle = '#888';
+   ctx.fillText(p.notes.substring(0, 24) + (p.notes.length > 24 ? '…' : ''), pos.x, lineY);
+  }
+ });
+ 
+ ctx.setLineDash([]);
+}
+
+function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+ if (w < 2 * r) r = w / 2;
+ if (h < 2 * r) r = h / 2;
+ ctx.beginPath();
+ ctx.moveTo(x + r, y);
+ ctx.arcTo(x + w, y, x + w, y + h, r);
+ ctx.arcTo(x + w, y + h, x, y + h, r);
+ ctx.arcTo(x, y + h, x, y, r);
+ ctx.arcTo(x, y, x + w, y, r);
+ ctx.closePath();
+ if (fill) ctx.fill();
+ if (stroke) ctx.stroke();
+}
+
+function autoLayout() {
+ const roots = Object.values(persons).filter(p => 
+  !connections.some(c => (c.to === p.id && c.type === 'child') || (c.from === p.id && c.type === 'parent'))
+ );
+ if (roots.length === 0) {
+  Object.values(persons).forEach((p, i) => {
+   p.x = (i % 5) * 250 + 100;
+   p.y = Math.floor(i / 5) * 200 + 100;
+  });
+ } else {
+  layoutTree(roots[0], 0, 0, {});
+ }
+ saveData();
+ render();
+}
+
+function layoutTree(person, depth, index, positioned) {
+ if (positioned[person.id]) return;
+ positioned[person.id] = true;
+ person.x = index * 250 + 100;
+ person.y = depth * 200 + 100;
+ 
+ const children = connections.filter(c => c.from === person.id && c.type === 'parent')
+  .map(c => persons[c.to]).filter(Boolean);
+ children.forEach((child, i) => layoutTree(child, depth + 1, index * children.length + i, positioned));
+ 
+ const partners = connections.filter(c => c.from === person.id && c.type === 'partner')
+  .map(c => persons[c.to]).filter(Boolean);
+ partners.forEach((partner, i) => {
+  if (!positioned[partner.id]) {
+   partner.x = person.x + 250;
+   partner.y = person.y;
+   positioned[partner.id] = true;
+  }
+ });
+}
+
+function fitToScreen() {
+ if (Object.keys(persons).length === 0) return;
+ let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+ Object.values(persons).forEach(p => {
+  const bounds = getNodeBounds(p);
+  minX = Math.min(minX, p.x - bounds.width / 2);
+  maxX = Math.max(maxX, p.x + bounds.width / 2);
+  minY = Math.min(minY, p.y - bounds.height / 2);
+  maxY = Math.max(maxY, p.y + bounds.height / 2);
+ });
+ const width = canvas.width / (window.devicePixelRatio || 1);
+ const height = canvas.height / (window.devicePixelRatio || 1);
+ const contentWidth = maxX - minX;
+ const contentHeight = maxY - minY;
+ const scaleX = (width * 0.9) / contentWidth;
+ const scaleY = (height * 0.9) / contentHeight;
+ viewScale = Math.min(scaleX, scaleY, 2);
+ viewOffset.x = -minX + (width / viewScale - contentWidth) / 2;
+ viewOffset.y = -minY + (height / viewScale - contentHeight) / 2;
+ render();
+}
+
+function resetView() {
+ viewOffset = { x: 0, y: 0 };
+ viewScale = 1;
+ render();
+}
+
+function toggleGrid() {
+ showGrid = !showGrid;
+ render();
+}
+
+canvas.addEventListener('mousedown', e => {
+ const rect = canvas.getBoundingClientRect();
+ const x = e.clientX - rect.left;
+ const y = e.clientY - rect.top;
+ const world = screenToWorld(x, y);
+ 
+ const node = findNodeAt(world.x, world.y);
+ if (node) {
+  draggedPersonId = node.id;
+  selectedPersonId = node.id;
+  const bounds = getNodeBounds(node);
+  dragOffset.x = world.x - node.x;
+  dragOffset.y = world.y - node.y;
+  canvas.style.cursor = 'grabbing';
+ } else {
+  isPanning = true;
+  panStart = { x, y };
+  canvas.style.cursor = 'grabbing';
+ }
+ render();
+});
+
+canvas.addEventListener('mousemove', e => {
+ const rect = canvas.getBoundingClientRect();
+ const x = e.clientX - rect.left;
+ const y = e.clientY - rect.top;
+ const world = screenToWorld(x, y);
+ 
+ if (draggedPersonId) {
+  persons[draggedPersonId].x = world.x - dragOffset.x;
+  persons[draggedPersonId].y = world.y - dragOffset.y;
+  render();
+ } else if (isPanning) {
+  const dx = (x - panStart.x) / viewScale;
+  const dy = (y - panStart.y) / viewScale;
+  viewOffset.x += dx;
+  viewOffset.y += dy;
+  panStart = { x, y };
+  render();
+ } else {
+  const node = findNodeAt(world.x, world.y);
+  if (node) {
+   tooltip.textContent = `${getPersonDisplayName(node)}${node.notes ? ': ' + node.notes : ''}`;
+   tooltip.classList.add('visible');
+   tooltip.style.left = e.clientX + 16 + 'px';
+   tooltip.style.top = e.clientY + 16 + 'px';
+  } else {
+   tooltip.classList.remove('visible');
+  }
+ }
+});
+
+canvas.addEventListener('mouseup', () => {
+ if (draggedPersonId) {
+  saveData();
+ }
+ draggedPersonId = null;
+ isPanning = false;
+ canvas.style.cursor = 'grab';
+});
+
+canvas.addEventListener('mouseleave', () => {
+ draggedPersonId = null;
+ isPanning = false;
+ tooltip.classList.remove('visible');
+ canvas.style.cursor = 'default';
+});
+
+canvas.addEventListener('dblclick', e => {
+ const rect = canvas.getBoundingClientRect();
+ const x = e.clientX - rect.left;
+ const y = e.clientY - rect.top;
+ const world = screenToWorld(x, y);
+ 
+ const node = findNodeAt(world.x, world.y);
+ if (node) openModal(node.id);
+});
+
+canvas.addEventListener('wheel', e => {
+ e.preventDefault();
+ const rect = canvas.getBoundingClientRect();
+ const x = e.clientX - rect.left;
+ const y = e.clientY - rect.top;
+ const worldBefore = screenToWorld(x, y);
+ 
+ const zoom = e.deltaY > 0 ? 0.9 : 1.1;
+ viewScale = Math.max(0.3, Math.min(3, viewScale * zoom));
+ 
+ const worldAfter = screenToWorld(x, y);
+ viewOffset.x += worldAfter.x - worldBefore.x;
+ viewOffset.y += worldAfter.y - worldBefore.y;
+ 
+ render();
+}, { passive: false });
+
+let touchStartDist = 0;
+let touchStartScale = 1;
+let touchCenter = { x: 0, y: 0 };
+
+canvas.addEventListener('touchstart', e => {
+ if (e.touches.length === 2) {
+  e.preventDefault();
+  const t1 = e.touches[0], t2 = e.touches[1];
+  touchStartDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+  touchStartScale = viewScale;
+  touchCenter = { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
+  isPanning = false;
+  draggedPersonId = null;
+ } else if (e.touches.length === 1) {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.touches[0].clientX - rect.left;
+  const y = e.touches[0].clientY - rect.top;
+  const world = screenToWorld(x, y);
+  const node = findNodeAt(world.x, world.y);
+  if (node) {
+   draggedPersonId = node.id;
+   selectedPersonId = node.id;
+   const bounds = getNodeBounds(node);
+   dragOffset.x = world.x - node.x;
+   dragOffset.y = world.y - node.y;
+  } else {
+   isPanning = true;
+   panStart = { x, y };
+  }
+ }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+ if (e.touches.length === 2) {
+  e.preventDefault();
+  const t1 = e.touches[0], t2 = e.touches[1];
+  const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+  const zoom = dist / touchStartDist;
+  viewScale = Math.max(0.3, Math.min(3, touchStartScale * zoom));
+  
+  const rect = canvas.getBoundingClientRect();
+  const cx = touchCenter.x - rect.left;
+  const cy = touchCenter.y - rect.top;
+  const worldBefore = screenToWorld(cx, cy);
+  const worldAfter = screenToWorld(cx, cy);
+  viewOffset.x += worldAfter.x - worldBefore.x;
+  viewOffset.y += worldAfter.y - worldBefore.y;
+  
+  render();
+ } else if (e.touches.length === 1 && (draggedPersonId || isPanning)) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const x = e.touches[0].clientX - rect.left;
+  const y = e.touches[0].clientY - rect.top;
+  const world = screenToWorld(x, y);
+  
+  if (draggedPersonId) {
+   persons[draggedPersonId].x = world.x - dragOffset.x;
+   persons[draggedPersonId].y = world.y - dragOffset.y;
+  } else if (isPanning) {
+   const dx = (x - panStart.x) / viewScale;
+   const dy = (y - panStart.y) / viewScale;
+   viewOffset.x += dx;
+   viewOffset.y += dy;
+   panStart = { x, y };
+  }
+  render();
+ }
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+ if (draggedPersonId) saveData();
+ draggedPersonId = null;
+ isPanning = false;
+ touchStartDist = 0;
+}, { passive: false });
+
+document.getElementById('relationType').addEventListener('change', e => {
+ document.getElementById('relationTargetGroup').style.display = e.target.value ? 'block' : 'none';
+});
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+loadData();
+</script>
+</body>
+</html>
