@@ -484,7 +484,7 @@ def fetch_tristlhof_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeigen)"""
 
     return [
-        # Woche 28.09. - 02.10.2026 (neue Zeitungsanzeige - Stadler's Wurstküche)
+        # Woche 28.09. - 02.10.2026 (Zeitungsanzeige - Stadler's Wurstküche)
         {"typ": "frische Koteletts (natur oder mariniert)", "preis": "0,88 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: frisch, natürlich und hausgemacht", "website": ""},
         {"typ": "Hähnchenkeulen frisch", "preis": "0,89 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: frisch", "website": ""},
         {"typ": "Brat- oder Wollwürste (aus Stadler's Wurstküche)", "preis": "1,29 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: Frisch aus Stadler's Wurstküche", "website": ""},
@@ -492,6 +492,15 @@ def fetch_tristlhof_offers() -> List[Dict]:
         # Aktionstage
         {"typ": "Montag: Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
         {"typ": "Samstag: Haxentag - frisch und kross", "preis": "0,79 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: Samstag ist Haxentag, frisch und kross", "website": ""},
+        # Woche 12.10. - 17.10.2026 (neue Zeitungsanzeige - Stadler's Wurstküche)
+        {"typ": "saftiger Rollbraten vom Schweinehals", "preis": "1,08 €/100g", "gueltig_bis": "17.10.2026", "beschreibung": "Zeitungsanzeige 12.10.-17.10.2026: Frisch, natürlich und hausgemacht...!", "website": ""},
+        {"typ": "frische Schweineschnitzel", "preis": "1,09 €/100g", "gueltig_bis": "17.10.2026", "beschreibung": "Zeitungsanzeige 12.10.-17.10.2026: zart und mager, sehr beliebt", "website": ""},
+        # Frisch aus Stadler's Wurstküche
+        {"typ": "Lyoner", "preis": "1,29 €/100g", "gueltig_bis": "17.10.2026", "beschreibung": "Zeitungsanzeige 12.10.-17.10.2026: Frisch aus dem Buchenrauch", "website": ""},
+        {"typ": "Stadler's Schinkenaufschnitt", "preis": "1,89 €/100g", "gueltig_bis": "17.10.2026", "beschreibung": "Zeitungsanzeige 12.10.-17.10.2026: gut gemischt, für jeden was dabei", "website": ""},
+        # Aktionstage
+        {"typ": "Montag: Hackfleischtag - mageres Schwein & Rind (500g)", "preis": "4,98 €/500g", "gueltig_bis": "17.10.2026", "beschreibung": "Zeitungsanzeige 12.10.-17.10.2026: Montag ist Hackfleischtag, mageres Schwein und Rind", "website": ""},
+        {"typ": "Samstag: Haxentag - frisch und kross", "preis": "0,79 €/100g", "gueltig_bis": "17.10.2026", "beschreibung": "Zeitungsanzeige 12.10.-17.10.2026: Samstag ist Haxentag, frisch und kross", "website": ""},
     ]
 
 
