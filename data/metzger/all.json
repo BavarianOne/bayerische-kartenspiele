@@ -3089,6 +3089,48 @@
       "angebote": [
         {
           "typ": "Wochenangebote",
+          "gueltig": "19.10.2026 - 23.10.2026",
+          "produkte": [
+            {
+              "name": "Frische Kassler",
+              "preis": "0,98 €/100g",
+              "desc": "ideal zu Sauerkraut"
+            },
+            {
+              "name": "Hähnchenbrust",
+              "preis": "1,49 €/100g",
+              "desc": "eiweißreich, sehr zart"
+            },
+            {
+              "name": "Gelbwurst",
+              "preis": "1,29 €/100g",
+              "desc": "mit oder ohne Grün, aus Stadler's Wurstküche"
+            },
+            {
+              "name": "Polnische oder Pfefferbeißer",
+              "preis": "1,39 €/100g",
+              "desc": "frisch aus dem Rauch"
+            },
+            {
+              "name": "Stadler's Fleischsalat",
+              "preis": "1,19 €/100g",
+              "desc": "stets frisch gemacht"
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "500 g 4,98 €",
+              "desc": "mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "100 g 0,79 €",
+              "desc": "frisch & kross"
+            }
+          ],
+          "scraped_at": "2026-10-18T12:00:00.000000"
+        },
+        {
+          "typ": "Wochenangebote",
           "gueltig": "07.09.2026 - 11.09.2026",
           "produkte": [
             {
