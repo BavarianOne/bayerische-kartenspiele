@@ -485,10 +485,27 @@ def fetch_tristlhof_offers() -> List[Dict]:
     import json
     from pathlib import Path
     import os
+    import re
     
     # Use relative path or GITHUB_WORKSPACE env var for CI compatibility
     workspace = os.environ.get('GITHUB_WORKSPACE', '.')
     ALL_JSON = Path(workspace) / "data" / "metzger" / "all.json"
+    
+    def parse_end_date(gueltig: str) -> str:
+        """Extract end date from validity string, handles multiple formats."""
+        if not gueltig:
+            return ""
+        # Format 1: "DD.MM.YYYY - DD.MM.YYYY" (with spaces)
+        if " - " in gueltig:
+            return gueltig.split(" - ")[-1].strip()
+        # Format 2: "DD.MM.-DD.MM.YYYY" (without spaces)
+        m = re.match(r'\d{2}\.\d{2}\.-(\d{2}\.\d{2}\.\d{4})', gueltig)
+        if m:
+            return m.group(1)
+        # Format 3: just "DD.MM.YYYY"
+        if re.match(r'\d{2}\.\d{2}\.\d{4}', gueltig):
+            return gueltig
+        return gueltig  # fallback
     
     if ALL_JSON.exists():
         try:
@@ -500,7 +517,8 @@ def fetch_tristlhof_offers() -> List[Dict]:
                     angebote = []
                     for wochen_entry in m.get("angebote", []):
                         gueltig = wochen_entry.get("gueltig", "")
-                        if gueltig:
+                        end_date = parse_end_date(gueltig)
+                        if end_date:
                             for p in wochen_entry.get("produkte", []):
                                 if isinstance(p, dict) and "name" in p and "preis" in p:
                                     name = p["name"]
@@ -511,7 +529,7 @@ def fetch_tristlhof_offers() -> List[Dict]:
                                         angebote.append({
                                             "typ": name,
                                             "preis": preis,
-                                            "gueltig_bis": gueltig.split(" - ")[-1].strip() if " - " in gueltig else gueltig,
+                                            "gueltig_bis": end_date,
                                             "beschreibung": desc,
                                             "website": ""
                                         })
