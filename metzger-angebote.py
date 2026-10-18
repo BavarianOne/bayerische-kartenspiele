@@ -481,8 +481,44 @@ def fetch_wasner_offers() -> List[Dict]:
 
 
 def fetch_tristlhof_offers() -> List[Dict]:
-    """Holt Angebote von Metzgerei Tristlhof (aus Zeitungsanzeigen)"""
-
+    """Holt Angebote von Metzgerei Tristlhof (aus all.json für manuelle Einträge)"""
+    import json
+    from pathlib import Path
+    
+    ALL_JSON = Path("/root/bayerische-kartenspiele/data/metzger/all.json")
+    
+    if ALL_JSON.exists():
+        try:
+            with open(ALL_JSON, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            for m in data.get("metzgereien", []):
+                if m.get("id") == "tristlhof" or m.get("name") == "Metzgerei Tristlhof":
+                    angebote = []
+                    for wochen_entry in m.get("angebote", []):
+                        gueltig = wochen_entry.get("gueltig", "")
+                        if gueltig:
+                            for p in wochen_entry.get("produkte", []):
+                                if isinstance(p, dict) and "name" in p and "preis" in p:
+                                    name = p["name"]
+                                    preis = p["preis"]
+                                    desc = p.get("desc", "")
+                                    # Skip entries without valid prices
+                                    if "k.A." not in preis and "€" in preis:
+                                        angebote.append({
+                                            "typ": name,
+                                            "preis": preis,
+                                            "gueltig_bis": gueltig.split(" - ")[-1].strip() if " - " in gueltig else gueltig,
+                                            "beschreibung": desc,
+                                            "website": ""
+                                        })
+                    if angebote:
+                        print(f"  Tristlhof: {len(angebote)} manuelle Angebote aus all.json geladen")
+                        return angebote
+        except Exception as e:
+            print(f"  Tristlhof: Fehler beim Laden aus all.json: {e}")
+    
+    # Fallback: alte harte Daten (sollte nicht mehr passieren)
     return [
         # Woche 28.09. - 02.10.2026 (Zeitungsanzeige - Stadler's Wurstküche)
         {"typ": "frische Koteletts (natur oder mariniert)", "preis": "0,88 €/100g", "gueltig_bis": "02.10.2026", "beschreibung": "Zeitungsanzeige 28.09.-02.10.2026: frisch, natürlich und hausgemacht", "website": ""},
