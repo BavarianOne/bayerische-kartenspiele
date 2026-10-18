@@ -484,8 +484,11 @@ def fetch_tristlhof_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Tristlhof (aus all.json für manuelle Einträge)"""
     import json
     from pathlib import Path
+    import os
     
-    ALL_JSON = Path("/root/bayerische-kartenspiele/data/metzger/all.json")
+    # Use relative path or GITHUB_WORKSPACE env var for CI compatibility
+    workspace = os.environ.get('GITHUB_WORKSPACE', '.')
+    ALL_JSON = Path(workspace) / "data" / "metzger" / "all.json"
     
     if ALL_JSON.exists():
         try:
