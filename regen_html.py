@@ -85,14 +85,63 @@ def normalize_product_name(name: str) -> str:
     return name.lower().strip()
 
 
+def get_cutoff_date():
+    """Berechnet das Cutoff-Datum: nächsten Montag (da Metzger sonntags zu).
+    Wenn heute Montag-Samstag -> diese Woche (Montag).
+    Wenn heute Sonntag -> nächste Woche (morgiger Montag)."""
+    from datetime import date, timedelta
+    heute = date.today()
+    if heute.weekday() == 6:  # Sonntag
+        tage_bis_montag = 1
+    else:
+        tage_bis_montag = -heute.weekday() if heute.weekday() > 0 else 0
+    montag = heute + timedelta(days=tage_bis_montag)
+    return montag
+
+
 def get_available_weeks(data, limit=6):
-    """Sammelt alle verfügbaren Wochen aus den Daten, sortiert chronologisch, neueste zuerst"""
+    """Sammelt alle verfügbaren Wochen aus den Daten, sortiert chronologisch, neueste zuerst
+    Filtert Wochen vor CUTOFF_DATE"""
+    from datetime import datetime
+    import re
+    
+    CUTOFF_DATE = get_cutoff_date()
+    heute = datetime.now().date()
+    
+    def parse_end_date(gueltig: str):
+        """Extract end date from validity string, handles multiple formats."""
+        if not gueltig:
+            return None
+        # Format 1: "DD.MM.YYYY - DD.MM.YYYY" (with spaces)
+        if " - " in gueltig:
+            end_str = gueltig.split(" - ")[-1].strip()
+        # Format 2: "DD.MM.-DD.MM.YYYY" (without spaces)
+        elif re.match(r'\d{2}\.\d{2}\.-(\d{2}\.\d{2}\.\d{4})', gueltig):
+            m = re.match(r'\d{2}\.\d{2}\.-(\d{2}\.\d{2}\.\d{4})', gueltig)
+            end_str = m.group(1)
+        # Format 3: just "DD.MM.YYYY"
+        elif re.match(r'\d{2}\.\d{2}\.\d{4}', gueltig):
+            end_str = gueltig
+        else:
+            return None
+        try:
+            return datetime.strptime(end_str, '%d.%m.%Y').date()
+        except:
+            return None
+    
     all_weeks = set()
     for m in data.get("metzgereien", []):
         for a in m.get("angebote", []):
             g = a.get("gueltig", "")
             if g:
-                all_weeks.add(g)
+                end_date = parse_end_date(g)
+                if end_date:
+                    # Nur Wochen aufnehmen, die heute oder in der Zukunft liegen UND ab CUTOFF_DATE
+                    if end_date < heute:
+                        continue  # Vergangene Woche überspringen
+                    if end_date < CUTOFF_DATE:
+                        continue  # Vor Cutoff-Datum überspringen
+                    all_weeks.add(g)
     
     # Sortiere nach Datum (versuche Datum zu parsen)
     def parse_week_key(w):
