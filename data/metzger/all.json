@@ -3089,6 +3089,48 @@
       "angebote": [
         {
           "typ": "Wochenangebote",
+          "gueltig": "26.10.2026 - 31.10.2026",
+          "produkte": [
+            {
+              "name": "Hähnchenkeulen frisch",
+              "preis": "0,89 €/100g",
+              "desc": "Frisch vom Tristlhof und aus eigener Tierhaltung"
+            },
+            {
+              "name": "Surbraten aus mageren Stücken",
+              "preis": "0,79 €/100g",
+              "desc": "Frisch vom Tristlhof und aus eigener Tierhaltung, mild gepökelt"
+            },
+            {
+              "name": "Stadler's Leberkäse",
+              "preis": "1,19 €/100g",
+              "desc": "Frisch aus „Stadler's Wurstküche“, täglich frisch gebacken"
+            },
+            {
+              "name": "Weißwürste",
+              "preis": "1,29 €/100g",
+              "desc": "Frisch aus „Stadler's Wurstküche“, immer frisch, ein Klassiker"
+            },
+            {
+              "name": "Emmentaler",
+              "preis": "1,19 €/100g",
+              "desc": "Käse, echt bayerisch"
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "4,98 €/500g",
+              "desc": "Aktionstag (Montag), mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "0,79 €/100g",
+              "desc": "Aktionstag (Samstag), frisch und kross"
+            }
+          ],
+          "scraped_at": "2026-10-24T12:00:00.000000"
+        },
+        {
+          "typ": "Wochenangebote",
           "gueltig": "19.10.2026 - 23.10.2026",
           "produkte": [
             {

@@ -97,7 +97,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 24.10.2026 10:13</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 24.10.2026 10:23</span>
  </div>
 </header>
 
@@ -275,6 +275,11 @@ async function shareFullContent() {
  <tbody>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Emmentaler – <span class="uebersicht-preis">1,19 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Farmerschinken (100 g) – <span class="uebersicht-preis">1,89 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
@@ -287,6 +292,11 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt (100 g) – <span class="uebersicht-preis">1,59 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hähnchenkeulen frisch – <span class="uebersicht-preis">0,89 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -330,13 +340,38 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Stadler's Leberkäse – <span class="uebersicht-preis">1,19 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Streichwurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Surbraten aus mageren Stücken – <span class="uebersicht-preis">0,79 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Weißwurst (100 g) – <span class="uebersicht-preis">1,59 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Weißwürste – <span class="uebersicht-preis">1,29 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">🥩 Hackfleischtag (Montag) – <span class="uebersicht-preis">4,98 €/500g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">🥩 Haxentag (Samstag) – <span class="uebersicht-preis">0,79 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
  </tr>
 
  </tbody>
@@ -726,6 +761,69 @@ async function shareFullContent() {
  </div>
  </div>
 
+ <div class="week-section" style="border-left: 5px solid #4caf50;">
+ <div class="week-header" style="background: #4caf50;">Woche bis 31.10.2026</div>
+ <div class="week-content" style="background: #e8f5e9;">
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Hähnchenkeulen frisch</span>
+ <span class="angebot-preis">0,89 €/100g</span>
+ </div>
+ <div class="angebot-desc">Frisch vom Tristlhof und aus eigener Tierhaltung</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Surbraten aus mageren Stücken</span>
+ <span class="angebot-preis">0,79 €/100g</span>
+ </div>
+ <div class="angebot-desc">Frisch vom Tristlhof und aus eigener Tierhaltung, mild gepökelt</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Stadler's Leberkäse</span>
+ <span class="angebot-preis">1,19 €/100g</span>
+ </div>
+ <div class="angebot-desc">Frisch aus „Stadler's Wurstküche“, täglich frisch gebacken</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Weißwürste</span>
+ <span class="angebot-preis">1,29 €/100g</span>
+ </div>
+ <div class="angebot-desc">Frisch aus „Stadler's Wurstküche“, immer frisch, ein Klassiker</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Emmentaler</span>
+ <span class="angebot-preis">1,19 €/100g</span>
+ </div>
+ <div class="angebot-desc">Käse, echt bayerisch</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">🥩 Hackfleischtag (Montag)</span>
+ <span class="angebot-preis">4,98 €/500g</span>
+ </div>
+ <div class="angebot-desc">Aktionstag (Montag), mageres Schwein und Rind</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">🥩 Haxentag (Samstag)</span>
+ <span class="angebot-preis">0,79 €/100g</span>
+ </div>
+ <div class="angebot-desc">Aktionstag (Samstag), frisch und kross</div>
+ </div>
+
+ </div>
+ </div>
+
         <div class="week-section" style="border-left: 5px solid #2196f3;">
         <div class="week-header" style="background: #2196f3;">📞 Kontakt & Filialen</div>
         <div class="week-content" style="background: #e3f2fd;">
@@ -925,7 +1023,7 @@ async function shareFullContent() {
 </div>
 
 <div class="last-update">
- Letzte Aktualisierung: 24.10.2026 10:13 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+ Letzte Aktualisierung: 24.10.2026 10:23 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
 </div>
 </body>
 </html>
