@@ -97,7 +97,7 @@
  <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
  <button onclick="shareLinkOnly()" style="background:#25D366; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">🔗 Link</button>
  <button onclick="shareFullContent()" style="background:#128C7E; color:#fff; border:none; padding:6px 10px; border-radius:16px; font-weight:600; cursor:pointer; font-size:0.75rem; white-space:nowrap;">📱 Inhalt</button>
- <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 26.10.2026 06:25</span>
+ <span style="font-size:0.75rem; color:#888; white-space:nowrap;">🕐 26.10.2026 06:41</span>
  </div>
 </header>
 
@@ -156,8 +156,18 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Farmerschinken (100 g) – <span class="uebersicht-preis">1,89 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Gelbwurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt (100 g) – <span class="uebersicht-preis">1,59 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -168,6 +178,11 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Kassler ohne Knochen – <span class="uebersicht-preis">1,99 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Kochsalami (100 g) – <span class="uebersicht-preis">1,59 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -206,6 +221,11 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweine-Schnitzel (100 g) – <span class="uebersicht-preis">1,49 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Schweinebauch (100 g) – <span class="uebersicht-preis">1,09 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
  </tr>
@@ -228,6 +248,11 @@ async function shareFullContent() {
  <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Surbraten aus mageren Stücken – <span class="uebersicht-preis">0,79 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Tristlhof</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Weißwurst (100 g) – <span class="uebersicht-preis">1,59 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -265,6 +290,21 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bierschinken – <span class="uebersicht-preis">1,49 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Blut- & Leberwurst – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Bratensosse – <span class="uebersicht-preis">2,50 €/Stück</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Currywurst – <span class="uebersicht-preis">1,29 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
@@ -280,18 +320,28 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Grünländer – <span class="uebersicht-preis">1,79 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Hackfleisch gemischt – <span class="uebersicht-preis">1,45 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Brunner Metzgerei</strong> (Landshut)</td>
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Hals gewürzt – <span class="uebersicht-preis">1,49 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ <td class="uebersicht-produkt" data-label="Produkt">Haussalami (100 g) – <span class="uebersicht-preis">1,99 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Haussalami (100 g) – <span class="uebersicht-preis">1,99 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ <td class="uebersicht-produkt" data-label="Produkt">Hähnchenkeule – <span class="uebersicht-preis">0,59 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Jägerkranzl – <span class="uebersicht-preis">1,19 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -310,7 +360,17 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Münchner Weißwurst – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Nacken – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Paprikasalam – <span class="uebersicht-preis">2,49 €/100g</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
@@ -320,8 +380,23 @@ async function shareFullContent() {
  </tr>
 
  <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Prager Schinken – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
  <td class="uebersicht-produkt" data-label="Produkt">Rinderbraten (100 g) – <span class="uebersicht-preis">1,99 €</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Rümenapf</strong> (Ergolding)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Rohpolnische – <span class="uebersicht-preis">1,29 €</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
+ </tr>
+
+ <tr>
+ <td class="uebersicht-produkt" data-label="Produkt">Sauerbraten – <span class="uebersicht-preis">1,69 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -330,13 +405,13 @@ async function shareFullContent() {
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Sauerkraut – <span class="uebersicht-preis">2,50 €/100g</span></td>
+ <td class="uebersicht-produkt" data-label="Produkt">Sauerkraut – <span class="uebersicht-preis">2,50 €/Stück</span></td>
  <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
- <td class="uebersicht-produkt" data-label="Produkt">Schweine-Schnitzel – <span class="uebersicht-preis">1,49 €</span></td>
- <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Brandl</strong> (Landshut)</td>
+ <td class="uebersicht-produkt" data-label="Produkt">Schweinehals – <span class="uebersicht-preis">0,99 €/100g</span></td>
+ <td class="uebersicht-metzger" data-label="Metzger"><strong>Metzgerei Wasner</strong> (Landshut)</td>
  </tr>
 
  <tr>
@@ -399,23 +474,47 @@ async function shareFullContent() {
  <div class="city">📍 Landshut</div>
 
  <div class="week-section" style="border-left: 5px solid #ff9800;">
- <div class="week-header" style="background: #ff9800;">Woche bis 02.11.2026</div>
+ <div class="week-header" style="background: #ff9800;">Woche bis 31.10.2026</div>
  <div class="week-content" style="background: #fff3e0;">
 
  <div class="angebot">
  <div class="angebot-header">
- <span class="angebot-name">Schweine-Schnitzel</span>
- <span class="angebot-preis">1,49 €</span>
+ <span class="angebot-name">Hackfleisch gemischt (100 g)</span>
+ <span class="angebot-preis">1,59 €</span>
  </div>
- <div class="angebot-desc">Angebot v. 02.11.2026 - Landshut</div>
+ <div class="angebot-desc">Angebot v. 31.10.2026 - Landshut/Ergolding</div>
  </div>
 
  <div class="angebot">
  <div class="angebot-header">
- <span class="angebot-name">Hals gewürzt</span>
+ <span class="angebot-name">Schweine-Schnitzel (100 g)</span>
  <span class="angebot-preis">1,49 €</span>
  </div>
- <div class="angebot-desc">Angebot v. 02.11.2026 - Landshut</div>
+ <div class="angebot-desc">Angebot v. 31.10.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Farmerschinken (100 g)</span>
+ <span class="angebot-preis">1,89 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 31.10.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Weißwurst (100 g)</span>
+ <span class="angebot-preis">1,59 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 31.10.2026 - Landshut/Ergolding</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Kochsalami (100 g)</span>
+ <span class="angebot-preis">1,59 €</span>
+ </div>
+ <div class="angebot-desc">Angebot v. 31.10.2026 - Landshut/Ergolding</div>
  </div>
 
  </div>
@@ -602,18 +701,106 @@ async function shareFullContent() {
 
  <div class="angebot">
  <div class="angebot-header">
- <span class="angebot-name">Nacken</span>
+ <span class="angebot-name">Schweinehals</span>
  <span class="angebot-preis">0,99 €/100g</span>
  </div>
- <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (Tesseract Fallback)</div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Sauerbraten</span>
+ <span class="angebot-preis">1,69 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Hähnchenkeule</span>
+ <span class="angebot-preis">0,59 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Grünländer</span>
+ <span class="angebot-preis">1,79 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bratensosse</span>
+ <span class="angebot-preis">2,50 €/Stück</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 1</div>
  </div>
 
  <div class="angebot">
  <div class="angebot-header">
  <span class="angebot-name">Sauerkraut</span>
- <span class="angebot-preis">2,50 €/100g</span>
+ <span class="angebot-preis">2,50 €/Stück</span>
  </div>
- <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (Tesseract Fallback)</div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 1</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Münchner Weißwurst</span>
+ <span class="angebot-preis">0,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Jägerkranzl</span>
+ <span class="angebot-preis">1,19 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Bierschinken</span>
+ <span class="angebot-preis">1,49 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Blut- & Leberwurst</span>
+ <span class="angebot-preis">0,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Paprikasalam</span>
+ <span class="angebot-preis">2,49 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Prager Schinken</span>
+ <span class="angebot-preis">1,69 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026: Hauptflyer 2</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Nacken</span>
+ <span class="angebot-preis">0,99 €/100g</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (OCR)</div>
  </div>
 
  <div class="angebot">
@@ -621,7 +808,7 @@ async function shareFullContent() {
  <span class="angebot-name">Kalbslüngerl</span>
  <span class="angebot-preis">4,50 €/Stück</span>
  </div>
- <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (Tesseract Fallback)</div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (OCR)</div>
  </div>
 
  <div class="angebot">
@@ -629,7 +816,15 @@ async function shareFullContent() {
  <span class="angebot-name">Stück A</span>
  <span class="angebot-preis">118€</span>
  </div>
- <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (Tesseract Fallback)</div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (OCR)</div>
+ </div>
+
+ <div class="angebot">
+ <div class="angebot-header">
+ <span class="angebot-name">Rohpolnische</span>
+ <span class="angebot-preis">1,29 €</span>
+ </div>
+ <div class="angebot-desc">Flyer 26.10.2026-07.11.2026 (OCR)</div>
  </div>
 
  </div>
@@ -780,7 +975,7 @@ async function shareFullContent() {
  <span class="angebot-name">Schweinefilet</span>
  <span class="angebot-preis">1,59 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  <div class="angebot">
@@ -788,7 +983,7 @@ async function shareFullContent() {
  <span class="angebot-name">Kassler ohne Knochen</span>
  <span class="angebot-preis">1,99 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  <div class="angebot">
@@ -796,7 +991,7 @@ async function shareFullContent() {
  <span class="angebot-name">Regensburger</span>
  <span class="angebot-preis">1,39 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  <div class="angebot">
@@ -804,7 +999,7 @@ async function shareFullContent() {
  <span class="angebot-name">Gelbwurst</span>
  <span class="angebot-preis">1,29 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  <div class="angebot">
@@ -812,7 +1007,7 @@ async function shareFullContent() {
  <span class="angebot-name">Streichwurst</span>
  <span class="angebot-preis">1,29 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  <div class="angebot">
@@ -820,7 +1015,7 @@ async function shareFullContent() {
  <span class="angebot-name">Preiselbeerstreichwurst</span>
  <span class="angebot-preis">1,49 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  <div class="angebot">
@@ -828,7 +1023,7 @@ async function shareFullContent() {
  <span class="angebot-name">Leberkäs zum Backen</span>
  <span class="angebot-preis">1,09 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  <div class="angebot">
@@ -836,7 +1031,7 @@ async function shareFullContent() {
  <span class="angebot-name">Kürbiskernkäse</span>
  <span class="angebot-preis">2,99 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 28.10. bis Sa. 31.10.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 23.10.2026 bis Sa. 31.10.2026</div>
  </div>
 
  </div>
@@ -851,7 +1046,7 @@ async function shareFullContent() {
  <span class="angebot-name">Sauerbraten</span>
  <span class="angebot-preis">1,99 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 04.11. bis Sa. 07.11.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 04.11.2026 bis Sa. 07.11.2026</div>
  </div>
 
  <div class="angebot">
@@ -859,7 +1054,7 @@ async function shareFullContent() {
  <span class="angebot-name">Hackfleisch gemischt</span>
  <span class="angebot-preis">1,45 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 04.11. bis Sa. 07.11.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 04.11.2026 bis Sa. 07.11.2026</div>
  </div>
 
  <div class="angebot">
@@ -867,7 +1062,7 @@ async function shareFullContent() {
  <span class="angebot-name">Currywurst</span>
  <span class="angebot-preis">1,29 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 04.11. bis Sa. 07.11.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 04.11.2026 bis Sa. 07.11.2026</div>
  </div>
 
  <div class="angebot">
@@ -875,7 +1070,7 @@ async function shareFullContent() {
  <span class="angebot-name">Griebenschmalz</span>
  <span class="angebot-preis">0,99 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 04.11. bis Sa. 07.11.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 04.11.2026 bis Sa. 07.11.2026</div>
  </div>
 
  <div class="angebot">
@@ -883,7 +1078,7 @@ async function shareFullContent() {
  <span class="angebot-name">Paprikawurst</span>
  <span class="angebot-preis">1,39 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 04.11. bis Sa. 07.11.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 04.11.2026 bis Sa. 07.11.2026</div>
  </div>
 
  <div class="angebot">
@@ -891,7 +1086,7 @@ async function shareFullContent() {
  <span class="angebot-name">Bergkäse 40% Fett i.Tr.</span>
  <span class="angebot-preis">2,25 €/100g</span>
  </div>
- <div class="angebot-desc">Angebot von Mi. 04.11. bis Sa. 07.11.2026</div>
+ <div class="angebot-desc">Angebot von Mi. 04.11.2026 bis Sa. 07.11.2026</div>
  </div>
 
  </div>
@@ -902,7 +1097,7 @@ async function shareFullContent() {
 </div>
 
 <div class="last-update">
- Letzte Aktualisierung: 26.10.2026 06:25 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
+ Letzte Aktualisierung: 26.10.2026 06:41 | Datenquelle: Eigene Recherche & Webseiten der Metzgerien
 </div>
 </body>
 </html>

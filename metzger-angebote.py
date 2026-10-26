@@ -270,6 +270,7 @@ def fetch_wasner_offers() -> List[Dict]:
     from PIL import Image, ImageEnhance
     import io
     import urllib.request
+    import re
     from datetime import datetime, timedelta
 
     angebote = []
@@ -361,7 +362,7 @@ def fetch_wasner_offers() -> List[Dict]:
                 # 4. Text parsen: Suche nach "Produktname Preis" Patterns
                 # Strategie: Erst Preise finden, dann davor stehende Produktnamen extrahieren
                 # OCR bricht Zeilen oft mitten im Wort
-                
+
                 # Normalisiere Whitespace aber behalte Zeilenstruktur für Preis-Suche
                 lines = text.split('\n')
                 cleaned_lines = []
@@ -369,7 +370,7 @@ def fetch_wasner_offers() -> List[Dict]:
                     line = line.strip()
                     if line:
                         cleaned_lines.append(line)
-                
+
                 # Verbinde Zeilen die mit Bindestrich enden (Silbentrennung)
                 joined_lines = []
                 i = 0
@@ -384,7 +385,7 @@ def fetch_wasner_offers() -> List[Dict]:
                     else:
                         joined_lines.append(line)
                         i += 1
-                
+
                 text_clean = ' '.join(joined_lines)
                 text_clean = re.sub(r'\s+', ' ', text_clean)  # Mehrfache Leerzeichen
 
@@ -405,12 +406,12 @@ def fetch_wasner_offers() -> List[Dict]:
                     skip_words = ['ABBILDUNGEN', 'SERVIERVORSCHLÄGE', 'KI-GENERIERT', 'GÜLTIG', 'WOCHE', 'ANGEBOT', 'FLYER', 'PLAKAT', 'WWW', 'METZGEREI', 'WASNER', 'SEITE', 'SAUERKRAUT', 'BRATENSOSSE']
                     if any(skip in name.upper() for skip in skip_words):
                         continue
-                    
+
                     # Filter: Generische/unvollständige Namen ablehnen
                     generic_names = ['SCHWEINE', 'SCHWEINE-', 'RIND', 'RIND-', 'HAHN', 'HAHN-', 'PUTEN', 'PUTEN-', 'WILD', 'WILD-']
                     if name.upper() in generic_names:
                         continue
-                    
+
                     if len(name) < 4:
                         continue
 
@@ -464,23 +465,18 @@ def fetch_wasner_offers() -> List[Dict]:
                     fallback_angebote.append(ocr_angebot)
             unique_angebote = fallback_angebote
 
-        print(f"  Wasner: {len(unique_angebote)} Angebote final")
-        for a in unique_angebote:
-            print(f"    - {a['typ']}: {a['preis']}")
-
     except Exception as e:
         print(f"  Fehler bei Wasner: {e}")
         # Fallback auf harte Daten
         heute = datetime.now().date()
         woche1 = heute + timedelta(days=(7 - heute.weekday()))
         angebote = [
-            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
-            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (g\\u00fcltig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "BIERKUGEL", "preis": "1,29 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
+            {"typ": "FEUERTEUFEL", "preis": "1,69 €", "gueltig_bis": woche1.strftime("%d.%m.%Y"), "beschreibung": f"Angebot - Landshut (gültig bis {woche1.strftime('%d.%m.%Y')})", "website": "https://www.metzgereiwasner.de/angebote/"},
         ]
         return angebote
 
     return unique_angebote
-
 
 def fetch_tristlhof_offers() -> List[Dict]:
     """Holt Angebote von Metzgerei Tristlhof (aus all.json für manuelle Einträge)"""
