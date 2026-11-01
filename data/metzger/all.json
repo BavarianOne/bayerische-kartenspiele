@@ -3089,6 +3089,43 @@
       "angebote": [
         {
           "typ": "Wochenangebote",
+          "gueltig": "02.11.2026 - 07.11.2026",
+          "produkte": [
+            {
+              "name": "Krustenbraten",
+              "preis": "0,79 €/100g",
+              "desc": "schön mager"
+            },
+            {
+              "name": "Halsgrad",
+              "preis": "1,08 €/100g",
+              "desc": "natur oder eingelegt"
+            },
+            {
+              "name": "Debreziner oder Pfälzer",
+              "preis": "1,39 €/100g",
+              "desc": "frisch aus dem Rauch"
+            },
+            {
+              "name": "Aufschnitt gemischt",
+              "preis": "1,39 €/100g",
+              "desc": "eine bunte Mischung"
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "4,98 €/500g",
+              "desc": "Hackfleisch (mageres Schwein und Rind)"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "0,79 €/100g",
+              "desc": "Haxe (frisch und kross)"
+            }
+          ],
+          "scraped_at": "2026-11-01T12:00:00.000000"
+        },
+        {
+          "typ": "Wochenangebote",
           "gueltig": "26.10.2026 - 31.10.2026",
           "produkte": [
             {
