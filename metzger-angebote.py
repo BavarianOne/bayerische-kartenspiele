@@ -67,66 +67,37 @@ def fetch_brandl_offers() -> List[Dict]:
         pdf_pattern = re.compile(r'href="([^"]*angebot-vom-[^"]*\.pdf)"')
         pdf_urls = pdf_pattern.findall(html)
 
-        # Duplikate entfernen
-        unique_pdfs = []
+        # Für jeden PDF-Link: Datum aus DATEINAMEN extrahieren (Format: angebot-vom-DD-MM-DD-MM-YY.pdf)
+        # Das ist verlässlicher als HTML-Datum-zu-Index-Mapping
+        pdf_date_map = {}
         for pdf_url in pdf_urls:
-            if pdf_url not in unique_pdfs:
-                unique_pdfs.append(pdf_url)
+            if pdf_url.startswith('/'):
+                pdf_url = "https://www.metzgerei-brandl.de" + pdf_url
+            
+            # Extrahiere End-Datum aus Dateinamen: angebot-vom-09-11-14-11-26.pdf -> 14.11.2026
+            filename = pdf_url.split('/')[-1].replace('.pdf', '')
+            parts = filename.split('-')
+            gueltig_bis = ""
+            if len(parts) >= 6 and parts[0] == 'angebot' and parts[1] == 'vom':
+                # Format: angebot-vom-DD-MM-DD-MM-YY
+                try:
+                    tag, monat, jahr = parts[-3:]
+                    pdf_date = datetime(2000 + int(jahr), int(monat), int(tag)).date()
+                    gueltig_bis = pdf_date.strftime("%d.%m.%Y")
+                except:
+                    pass
+            
+            if gueltig_bis:
+                pdf_date_map[gueltig_bis] = pdf_url
 
-        print(f"  Brandl: {len(unique_pdfs)} Angebot-PDFs gefunden")
-
-        # Suche nach allen "Angebot vom ... bis ..." im HTML und mapp sie auf PDF-URLs
-        angebot_dates = re.findall(r'Angebot vom \d{2}\.\d{2}\.\d{4}\s*bis\s*(\d{2}\.\d{2}\.\d{4})', html)
-        print(f"  Brandl: Gefundene End-Daten im HTML: {angebot_dates}")
+        print(f"  Brandl: {len(pdf_date_map)} eindeutige PDF-Wochen aus Dateinamen erkannt")
+        for end_date, pdf_url in pdf_date_map.items():
+            print(f"    -> Woche bis {end_date}: {pdf_url}")
 
         heute = datetime.now().date()
 
-        # Für jeden PDF-Link den passenden End-Datum finden und PDF parsen
-        for i, pdf_url in enumerate(unique_pdfs):
-            # Vollständige URL bauen
-            if pdf_url.startswith('/'):
-                pdf_url = "https://www.metzgerei-brandl.de" + pdf_url
-
-            gueltig_bis = ""
-            if i < len(angebot_dates):
-                gueltig_bis = angebot_dates[i]
-            else:
-                # Fallback: try to extract from PDF filename
-                date_matches = re.findall(r'(\d{2})-(\d{2})-(\d{2})', pdf_url)
-                if len(date_matches) >= 2:
-                    tag, monat, jahr = date_matches[-1]
-                    try:
-                        gueltig_bis = datetime(2000 + int(jahr), int(monat), int(tag)).strftime("%d.%m.%Y")
-                    except:
-                        pass
-
-            # Wenn HTML-Datum in der Vergangenheit liegt, aber PDF-Dateinamen ein zukünftiges Datum hat -> PDF-Datum nutzen
-            if gueltig_bis:
-                try:
-                    gueltig_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
-                    if gueltig_date < heute:
-                        # Versuche Datum aus PDF-Dateinamen zu extrahieren (Format: angebot-vom-DD-MM-DD-MM-YY.pdf)
-                        # Nimm die letzten 3 Teile vor .pdf als End-Datum: DD-MM-YY
-                        filename = pdf_url.split('/')[-1].replace('.pdf', '')
-                        parts = filename.split('-')
-                        if len(parts) >= 5:
-                            # Format: angebot-vom-DD-MM-DD-MM-YY -> letzte 3: DD, MM, YY
-                            tag, monat, jahr = parts[-3:]
-                            try:
-                                pdf_date = datetime(2000 + int(jahr), int(monat), int(tag)).date()
-                                if pdf_date >= heute:
-                                    gueltig_bis = pdf_date.strftime("%d.%m.%Y")
-                                    print(f"  -> HTML-Datum war vergangen, nutze PDF-Dateinamen-Datum: {gueltig_bis}")
-                            except:
-                                pass
-                except:
-                    pass
-
-            if not gueltig_bis:
-                print(f"  -> Kein Datum erkannt: {pdf_url}")
-                continue
-
-            # Prüfen ob Woche in der Vergangenheit liegt
+        # PDFs parsen (pro End-Datum genau 1x)
+        for gueltig_bis, pdf_url in pdf_date_map.items():
             try:
                 gueltig_date = datetime.strptime(gueltig_bis, "%d.%m.%Y").date()
                 if gueltig_date < heute:
