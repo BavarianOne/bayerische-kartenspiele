@@ -1234,18 +1234,10 @@ async function shareFullContent() {{
 
         <div class="angebot">
         <div class="angebot-header">
-        <span class="angebot-name">Montag, Freitag & Samstag</span>
-        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Tristl am Damm 1</span>
+        <span class="angebot-name">Mittwoch & Donnerstag</span>
+        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Landshuter Str. 67b / Ecke Industriestr., Ergolding</span>
         </div>
-        <div class="angebot-desc">Tel.: 08706/270</div>
-        </div>
-
-        <div class="angebot">
-        <div class="angebot-header">
-        <span class="angebot-name">Donnerstag</span>
-        <span class="angebot-preis" style="background: transparent; color: #8b4513;">📍 Landshuter Str. 67 b, Ergolding</span>
-        </div>
-        <div class="angebot-desc">bei Getränke Fleischmann</div>
+        <div class="angebot-desc">08:00 - 18:00 Uhr | bei Getränke Fleischmann</div>
         </div>
 
         </div>

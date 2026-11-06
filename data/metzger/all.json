@@ -3089,6 +3089,43 @@
       "angebote": [
         {
           "typ": "Wochenangebote",
+          "gueltig": "09.11.2026 - 14.11.2026",
+          "produkte": [
+            {
+              "name": "Schweinelendchen (sehr mager)",
+              "preis": "1,08 €/100g",
+              "desc": "sehr mager"
+            },
+            {
+              "name": "Surbraten (mild gepökelt, ideal zum Sauerkraut)",
+              "preis": "0,88 €/100g",
+              "desc": "mild gepökelt, ideal zum Sauerkraut"
+            },
+            {
+              "name": "Dicke oder Regensburger (schön geräuchert, knackig frisch)",
+              "preis": "1,19 €/100g",
+              "desc": "schön geräuchert, knackig frisch"
+            },
+            {
+              "name": "hausgemachte Leberwurst (alle Sorten)",
+              "preis": "1,19 €/100g",
+              "desc": "alle Sorten"
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "4,98 €/500g",
+              "desc": "mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "0,79 €/100g",
+              "desc": "frisch und kross"
+            }
+          ],
+          "scraped_at": "2026-11-06T12:00:00.000000"
+        },
+        {
+          "typ": "Wochenangebote",
           "gueltig": "02.11.2026 - 07.11.2026",
           "produkte": [
             {
