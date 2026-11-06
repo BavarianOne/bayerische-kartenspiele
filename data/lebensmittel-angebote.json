@@ -1,7 +1,7 @@
 {
   "meta": {
-    "scraped_at": "2026-10-26T06:26:09.315941",
-    "total_prospekts": 101,
+    "scraped_at": "2026-11-06T15:42:14.328436",
+    "total_prospekts": 111,
     "total_offers": 12,
     "categories": [
       "Butter, Margarine & Streichfette",
@@ -11,919 +11,1010 @@
     "retailers": [
       "Kaufland",
       "Lidl",
-      "PENNY",
-      "REWE"
+      "Netto Marken-Discount",
+      "REWE",
+      "Thomas Philipps"
     ]
   },
   "prospekts": [
     {
-      "id": "edeka_5327946",
-      "title": "Prospekt 5327946",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5327946-fDE-h47223?page=1&tid=mvosxa51-3672i-6adee1909235b#page/1",
+      "id": "edeka_5359293",
+      "title": "Prospekt 5359293",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5359293-fDE-h226149?page=1&tid=mw5319zk-36v99-6aede70b3ea52#page/1",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830223"
+      "scraped_at": "2026-11-06T15:41:17.034648"
     },
     {
-      "id": "edeka_5327946",
-      "title": "Prospekt 5327946",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5327946-fDE-h47223?page=2&tid=mvosxa51-3672i-6adee1909235b#page/2",
+      "id": "edeka_5359293",
+      "title": "Prospekt 5359293",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5359293-fDE-h226149?page=2&tid=mw5319zk-36v99-6aede70b3ea52#page/2",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830388"
+      "scraped_at": "2026-11-06T15:41:17.034740"
     },
     {
-      "id": "edeka_5327946",
-      "title": "Prospekt 5327946",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5327946-fDE-h47223?page=3&tid=mvosxa51-3672i-6adee1909235b#page/3",
+      "id": "edeka_5359293",
+      "title": "Prospekt 5359293",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5359293-fDE-h226149?page=3&tid=mw5319zk-36v99-6aede70b3ea52#page/3",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830426"
+      "scraped_at": "2026-11-06T15:41:17.034759"
     },
     {
-      "id": "edeka_5308281",
-      "title": "Prospekt 5308281",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5308281-fDE-h46395?page=1&tid=mvosxa51-35rw9-6adee190cf539#page/1",
+      "id": "edeka_5354262",
+      "title": "Prospekt 5354262",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5354262-h46447?page=1&tid=mw5319zk-36rdi-6aede70b8c865#page/1",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830458"
+      "scraped_at": "2026-11-06T15:41:17.034772"
     },
     {
-      "id": "edeka_5304000",
-      "title": "Prospekt 5304000",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5304000-fDE-h167193?page=1&tid=mvosxa51-35olc-6adee1910d7a9#page/1",
+      "id": "edeka_5339415",
+      "title": "Prospekt 5339415",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5339415-fDE-h48829?page=1&tid=mw5319zk-36fx3-6aede70bcc0c9#page/1",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830496"
+      "scraped_at": "2026-11-06T15:41:17.034786"
     },
     {
-      "id": "edeka_5317725",
-      "title": "Prospekt 5317725",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5317725-fDE-h181559?page=1&tid=mvosxa51-35z6l-6adee191507c7#page/1",
+      "id": "edeka_5357331",
+      "title": "Prospekt 5357331",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5357331-h49949?page=1&tid=mw5319zk-36tqr-6aede70c3aa6d#page/1",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830528"
+      "scraped_at": "2026-11-06T15:41:17.034796"
     },
     {
-      "id": "edeka_5317572",
-      "title": "Prospekt 5317572",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5317572-fDE-h49509?page=1&tid=mvosxa51-35z2c-6adee191855e5#page/1",
+      "id": "edeka_5356977",
+      "title": "Prospekt 5356977",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5356977-fDE-h49509?page=1&tid=mw5319zk-36tgx-6aede70c7627b#page/1",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830604"
+      "scraped_at": "2026-11-06T15:41:17.034807"
     },
     {
-      "id": "edeka_5328066",
-      "title": "Prospekt 5328066",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5328066-fDE-h45587?page=1&tid=mvosxa51-3675u-6adee191bc4f9#page/1",
+      "id": "edeka_5359482",
+      "title": "Prospekt 5359482",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c27-d5359482-fDE-h45587?page=1&tid=mw5319zk-36vei-6aede70cba864#page/1",
       "retailer": "EDEKA",
       "retailer_key": "edeka",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:54.830638"
+      "scraped_at": "2026-11-06T15:41:17.034818"
     },
     {
-      "id": "rewe_5313648",
-      "title": "Prospekt 5313648",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5313648-fDE-h201955?page=1&tid=mvosxd88-35w1c-6adee194802d8#page/1",
+      "id": "rewe_5368815",
+      "title": "Prospekt 5368815",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5368815-fDE-h201955?page=1&tid=mw531cj8-372lr-6aede70d11924#page/1",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558113"
+      "scraped_at": "2026-11-06T15:41:17.474496"
     },
     {
-      "id": "rewe_5315010",
-      "title": "Prospekt 5315010",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5315010-fDE-h72245?page=1&tid=mvosxd88-35x36-6adee19489f39#page/1",
+      "id": "rewe_5366307",
+      "title": "Prospekt 5366307",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5366307-fDE-h72245?page=1&tid=mw531cj8-370o3-6aede70d1b552#page/1",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558166"
+      "scraped_at": "2026-11-06T15:41:17.474570"
     },
     {
-      "id": "rewe_5310033",
-      "title": "Prospekt 5310033",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5310033-fDE-h72273?page=1&tid=mvosxd88-35t8x-6adee1948be39#page/1",
+      "id": "rewe_5367927",
+      "title": "Prospekt 5367927",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5367927-fDE-h72273?page=1&tid=mw531cj8-371x3-6aede70d1c5ce#page/1",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558178"
+      "scraped_at": "2026-11-06T15:41:17.474596"
     },
     {
-      "id": "rewe_5308263",
-      "title": "Prospekt 5308263",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5308263-fDE-h72303?page=1&tid=mvosxd88-35rvr-6adee1948e91f#page/1",
+      "id": "rewe_5354403",
+      "title": "Prospekt 5354403",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5354403-fDE-h72303?page=1&tid=mw531cj8-36rhf-6aede70d1d6e6#page/1",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558187"
+      "scraped_at": "2026-11-06T15:41:17.474622"
     },
     {
-      "id": "rewe_5313663",
-      "title": "Prospekt 5313663",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5313663-fDE-h72333?page=1&tid=mvosxd88-35w1r-6adee1949177d#page/1",
+      "id": "rewe_5367948",
+      "title": "Prospekt 5367948",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5367948-fDE-h72333?page=1&tid=mw531cj8-371xo-6aede70d1e7a6#page/1",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558197"
+      "scraped_at": "2026-11-06T15:41:17.474648"
     },
     {
-      "id": "rewe_5313357",
-      "title": "Prospekt 5313357",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5313357-fDE-h258178?page=1&tid=mvosxd88-35vt9-6adee194935c0#page/1",
+      "id": "rewe_5368749",
+      "title": "Prospekt 5368749",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5368749-fDE-h258178?page=1&tid=mw531cj8-372jx-6aede70d29ebc#page/1",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558205"
+      "scraped_at": "2026-11-06T15:41:17.474671"
     },
     {
-      "id": "rewe_5308266",
-      "title": "Prospekt 5308266",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5308266-fDE-h215065?page=1&tid=mvosxd88-35rvu-6adee19495edf#page/1",
+      "id": "rewe_5354409",
+      "title": "Prospekt 5354409",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5354409-fDE-h215065?page=1&tid=mw531cj8-36rhl-6aede70d2b286#page/1",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558212"
+      "scraped_at": "2026-11-06T15:41:17.474694"
     },
     {
-      "id": "rewe_5313648",
-      "title": "Prospekt 5313648",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5313648-fDE-h201955?page=9&tid=mvosxd88-35w1c-6adee194802d8#page/9",
+      "id": "rewe_5368815",
+      "title": "Prospekt 5368815",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5368815-fDE-h201955?page=13&tid=mw531cj8-372lr-6aede70d11924#page/13",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558219"
+      "scraped_at": "2026-11-06T15:41:17.474717"
     },
     {
-      "id": "rewe_5313648",
-      "title": "Prospekt 5313648",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5313648-fDE-h201955?page=15&tid=mvosxd88-35w1c-6adee194802d8#page/15",
+      "id": "rewe_5368815",
+      "title": "Prospekt 5368815",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5368815-fDE-h201955?page=11&tid=mw531cj8-372lr-6aede70d11924#page/11",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558226"
+      "scraped_at": "2026-11-06T15:41:17.474739"
     },
     {
-      "id": "rewe_5313648",
-      "title": "Prospekt 5313648",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5313648-fDE-h201955?page=8&tid=mvosxd88-35w1c-6adee194802d8#page/8",
+      "id": "rewe_5368815",
+      "title": "Prospekt 5368815",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c11-d5368815-fDE-h201955?page=23&tid=mw531cj8-372lr-6aede70d11924#page/23",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:13:58.558233"
+      "scraped_at": "2026-11-06T15:41:17.474761"
     },
     {
-      "id": "lidl_5309451",
-      "title": "Prospekt 5309451",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309451-fDE-h168681?page=1&tid=mvosxfa5-35ssr-6adee19791d1f#page/1",
+      "id": "lidl_5379237",
+      "title": "Prospekt 5379237",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379237-fDE-h168681?page=1&tid=mw531cl8-37an9-6aede70d7d93d#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209485"
+      "scraped_at": "2026-11-06T15:41:17.857962"
     },
     {
-      "id": "lidl_5317800",
-      "title": "Prospekt 5317800",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5317800-fDE-h168681?page=1&tid=mvosxfa5-35z8o-6adee19791d33#page/1",
+      "id": "lidl_5403375",
+      "title": "Prospekt 5403375",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5403375-fDE-h168681?page=1&tid=mw531cl8-37t9r-6aede70d7d951#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209618"
+      "scraped_at": "2026-11-06T15:41:17.858061"
     },
     {
-      "id": "lidl_5309442",
-      "title": "Prospekt 5309442",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309442-fDE-h20861?page=1&tid=mvosxfa5-35ssi-6adee1979b03a#page/1",
+      "id": "lidl_5403375",
+      "title": "Prospekt 5403375",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5403375-fDE-h168681?page=2&tid=mw531cl8-37t9r-6aede70d7d951#page/2",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209646"
+      "scraped_at": "2026-11-06T15:41:17.858090"
     },
     {
-      "id": "lidl_5309421",
-      "title": "Prospekt 5309421",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309421-fDE-h136483?page=1&tid=mvosxfa5-35srx-6adee1979d12a#page/1",
+      "id": "lidl_5403375",
+      "title": "Prospekt 5403375",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5403375-fDE-h168681?page=3&tid=mw531cl8-37t9r-6aede70d7d951#page/3",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209667"
+      "scraped_at": "2026-11-06T15:41:17.858112"
     },
     {
-      "id": "lidl_5309439",
-      "title": "Prospekt 5309439",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309439-fDE-h21645?page=1&tid=mvosxfa5-35ssf-6adee1979ec9a#page/1",
+      "id": "lidl_5379240",
+      "title": "Prospekt 5379240",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379240-fDE-h20861?page=1&tid=mw531cl8-37anc-6aede70d878a4#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209692"
+      "scraped_at": "2026-11-06T15:41:17.858136"
     },
     {
-      "id": "lidl_5309445",
-      "title": "Prospekt 5309445",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309445-fDE-h20921?page=1&tid=mvosxfa5-35ssl-6adee197a1109#page/1",
+      "id": "lidl_5379234",
+      "title": "Prospekt 5379234",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379234-fDE-h136483?page=1&tid=mw531cl8-37an6-6aede70d88c7f#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209711"
+      "scraped_at": "2026-11-06T15:41:17.858160"
     },
     {
-      "id": "lidl_5309424",
-      "title": "Prospekt 5309424",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309424-fDE-h136755?page=1&tid=mvosxfa5-35ss0-6adee197a3483#page/1",
+      "id": "lidl_5379267",
+      "title": "Prospekt 5379267",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379267-fDE-h21645?page=1&tid=mw531cl8-37ao3-6aede70d89c70#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209729"
+      "scraped_at": "2026-11-06T15:41:17.858274"
     },
     {
-      "id": "lidl_5309430",
-      "title": "Prospekt 5309430",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309430-fDE-h136227?page=1&tid=mvosxfa5-35ss6-6adee197a5539#page/1",
+      "id": "lidl_5379246",
+      "title": "Prospekt 5379246",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379246-fDE-h20921?page=1&tid=mw531cl8-37ani-6aede70d8acfe#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209746"
+      "scraped_at": "2026-11-06T15:41:17.858300"
     },
     {
-      "id": "lidl_5309451",
-      "title": "Prospekt 5309451",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5309451-fDE-h168681?page=65&tid=mvosxfa5-35ssr-6adee19791d1f#page/65",
+      "id": "lidl_5379252",
+      "title": "Prospekt 5379252",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379252-fDE-h136755?page=1&tid=mw531cl8-37ano-6aede70d8c081#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209788"
+      "scraped_at": "2026-11-06T15:41:17.858344"
     },
     {
-      "id": "lidl_5317800",
-      "title": "Prospekt 5317800",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5317800-fDE-h168681?page=2&tid=mvosxfa5-35z8o-6adee19791d33#page/2",
+      "id": "lidl_5379243",
+      "title": "Prospekt 5379243",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379243-fDE-h136227?page=1&tid=mw531cl8-37anf-6aede70d9035c#page/1",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209806"
+      "scraped_at": "2026-11-06T15:41:17.858370"
     },
     {
-      "id": "lidl_5317800",
-      "title": "Prospekt 5317800",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5317800-fDE-h168681?page=10&tid=mvosxfa5-35z8o-6adee19791d33#page/10",
+      "id": "lidl_5379237",
+      "title": "Prospekt 5379237",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379237-fDE-h168681?page=19&tid=mw531cl8-37an9-6aede70d7d93d#page/19",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:01.209822"
+      "scraped_at": "2026-11-06T15:41:17.858393"
     },
     {
-      "id": "aldi-sued_5327904",
-      "title": "Prospekt 5327904",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327904?page=1&tid=mvosxh4v-3671c-6adee199c95bc#page/1",
+      "id": "lidl_5379237",
+      "title": "Prospekt 5379237",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379237-fDE-h168681?page=31&tid=mw531cl8-37an9-6aede70d7d93d#page/31",
+      "retailer": "Lidl",
+      "retailer_key": "lidl",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:17.858416"
+    },
+    {
+      "id": "lidl_5379237",
+      "title": "Prospekt 5379237",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c5-d5379237-fDE-h168681?page=71&tid=mw531cl8-37an9-6aede70d7d93d#page/71",
+      "retailer": "Lidl",
+      "retailer_key": "lidl",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:17.858439"
+    },
+    {
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601?page=1&tid=mw531cme-36ty9-6aede70ddb077#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098729"
+      "scraped_at": "2026-11-06T15:41:18.247378"
     },
     {
-      "id": "aldi-sued_5327907",
-      "title": "Prospekt 5327907",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327907?page=1&tid=mvosxh4v-3671f-6adee199c9633#page/1",
+      "id": "aldi-sued_5357598",
+      "title": "Prospekt 5357598",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357598?page=1&tid=mw531cme-36ty6-6aede70ddb089#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098803"
+      "scraped_at": "2026-11-06T15:41:18.247415"
     },
     {
-      "id": "aldi-sued_5327910",
-      "title": "Prospekt 5327910",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327910?page=1&tid=mvosxh4v-3671i-6adee199c9639#page/1",
+      "id": "aldi-sued_5393868",
+      "title": "Prospekt 5393868",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5393868?page=1&tid=mw531cme-37lxo-6aede70ddb08e#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098819"
+      "scraped_at": "2026-11-06T15:41:18.247423"
     },
     {
-      "id": "aldi-sued_5188686",
-      "title": "Prospekt 5188686",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5188686?page=1&tid=mvosxh4v-337m6-6adee199c963d#page/1",
+      "id": "aldi-sued_5379459",
+      "title": "Prospekt 5379459",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5379459?page=1&tid=mw531cme-37atf-6aede70ddb091#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098831"
+      "scraped_at": "2026-11-06T15:41:18.247429"
     },
     {
-      "id": "aldi-sued_5278110",
-      "title": "Prospekt 5278110",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5278110?page=1&tid=mvosxh4v-354m6-6adee199c9641#page/1",
+      "id": "aldi-sued_5357595",
+      "title": "Prospekt 5357595",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357595?page=1&tid=mw531cme-36ty3-6aede70ddb093#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098843"
+      "scraped_at": "2026-11-06T15:41:18.247439"
+    },
+    {
+      "id": "aldi-sued_5357604",
+      "title": "Prospekt 5357604",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357604?page=1&tid=mw531cme-36tyc-6aede70ddb096#page/1",
+      "retailer": "ALDI SÜD",
+      "retailer_key": "aldi-sued",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.247444"
     },
     {
       "id": "aldi-sued_4248934",
       "title": "Prospekt 4248934",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d4248934-fDE?page=1&tid=mvosxh4v-2j2hy-6adee199c9644#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d4248934-fDE?page=1&tid=mw531cme-2j2hy-6aede70ddb099#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098854"
+      "scraped_at": "2026-11-06T15:41:18.247449"
     },
     {
-      "id": "aldi-sued_5327904",
-      "title": "Prospekt 5327904",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327904-h38937?page=1&tid=mvosxh4v-3671c-6adee199d4046#page/1",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601-h38937?page=1&tid=mw531cme-36ty9-6aede70de6012#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098865"
+      "scraped_at": "2026-11-06T15:41:18.247457"
     },
     {
-      "id": "aldi-sued_5327904",
-      "title": "Prospekt 5327904",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327904-h216565?page=1&tid=mvosxh4v-3671c-6adee199d669e#page/1",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601-h216565?page=1&tid=mw531cme-36ty9-6aede70de72ae#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098876"
+      "scraped_at": "2026-11-06T15:41:18.247462"
     },
     {
-      "id": "aldi-sued_5327904",
-      "title": "Prospekt 5327904",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327904-h216979?page=1&tid=mvosxh4v-3671c-6adee199d87c0#page/1",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601-h216979?page=1&tid=mw531cme-36ty9-6aede70de8101#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098886"
+      "scraped_at": "2026-11-06T15:41:18.247467"
     },
     {
-      "id": "aldi-sued_5327904",
-      "title": "Prospekt 5327904",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327904-h234251?page=1&tid=mvosxh4v-3671c-6adee199da8de#page/1",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601-h234251?page=1&tid=mw531cme-36ty9-6aede70de8eb6#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098909"
+      "scraped_at": "2026-11-06T15:41:18.247476"
     },
     {
-      "id": "aldi-sued_5327904",
-      "title": "Prospekt 5327904",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327904-h216737?page=1&tid=mvosxh4v-3671c-6adee199dcc62#page/1",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601-h216737?page=1&tid=mw531cme-36ty9-6aede70de9f5e#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.098919"
+      "scraped_at": "2026-11-06T15:41:18.247481"
     },
     {
-      "id": "aldi-sued_5327904",
-      "title": "Prospekt 5327904",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327904-h216943?page=1&tid=mvosxh4v-3671c-6adee199decb0#page/1",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601-h216943?page=1&tid=mw531cme-36ty9-6aede70dead2d#page/1",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.099056"
+      "scraped_at": "2026-11-06T15:41:18.247486"
     },
     {
-      "id": "aldi-sued_5327907",
-      "title": "Prospekt 5327907",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327907?page=6&tid=mvosxh4v-3671f-6adee199c9633#page/6",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601?page=21&tid=mw531cme-36ty9-6aede70ddb077#page/21",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.099073"
+      "scraped_at": "2026-11-06T15:41:18.247494"
     },
     {
-      "id": "aldi-sued_5327907",
-      "title": "Prospekt 5327907",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327907?page=4&tid=mvosxh4v-3671f-6adee199c9633#page/4",
+      "id": "aldi-sued_5357601",
+      "title": "Prospekt 5357601",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357601?page=2&tid=mw531cme-36ty9-6aede70ddb077#page/2",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.099083"
+      "scraped_at": "2026-11-06T15:41:18.247499"
     },
     {
-      "id": "aldi-sued_5327907",
-      "title": "Prospekt 5327907",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327907?page=3&tid=mvosxh4v-3671f-6adee199c9633#page/3",
+      "id": "aldi-sued_5357598",
+      "title": "Prospekt 5357598",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357598?page=11&tid=mw531cme-36ty6-6aede70ddb089#page/11",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.099134"
+      "scraped_at": "2026-11-06T15:41:18.247503"
     },
     {
-      "id": "aldi-sued_5327910",
-      "title": "Prospekt 5327910",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5327910?page=9&tid=mvosxh4v-3671i-6adee199c9639#page/9",
+      "id": "aldi-sued_5357598",
+      "title": "Prospekt 5357598",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357598?page=5&tid=mw531cme-36ty6-6aede70ddb089#page/5",
       "retailer": "ALDI SÜD",
       "retailer_key": "aldi-sued",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:03.099164"
+      "scraped_at": "2026-11-06T15:41:18.247508"
+    },
+    {
+      "id": "aldi-sued_5357598",
+      "title": "Prospekt 5357598",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5357598?page=3&tid=mw531cme-36ty6-6aede70ddb089#page/3",
+      "retailer": "ALDI SÜD",
+      "retailer_key": "aldi-sued",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.247512"
+    },
+    {
+      "id": "aldi-sued_5393868",
+      "title": "Prospekt 5393868",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5393868?page=61&tid=mw531cme-37lxo-6aede70ddb08e#page/61",
+      "retailer": "ALDI SÜD",
+      "retailer_key": "aldi-sued",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.247518"
+    },
+    {
+      "id": "aldi-sued_5393868",
+      "title": "Prospekt 5393868",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5393868?page=52&tid=mw531cme-37lxo-6aede70ddb08e#page/52",
+      "retailer": "ALDI SÜD",
+      "retailer_key": "aldi-sued",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.247522"
+    },
+    {
+      "id": "aldi-sued_5379459",
+      "title": "Prospekt 5379459",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c23-d5379459?page=4&tid=mw531cme-37atf-6aede70ddb091#page/4",
+      "retailer": "ALDI SÜD",
+      "retailer_key": "aldi-sued",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.247526"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h245590?page=1&tid=mw531dff-36txx-6aede70e42f7c#page/1",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629245"
     },
     {
       "id": "aldi-nord_5327943",
       "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=1&tid=mvosxi8c-3672f-6adee19b555a4#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=1&tid=mw531dff-3672f-6aede70e42f8e#page/1",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917864"
+      "scraped_at": "2026-11-06T15:41:18.629358"
     },
     {
-      "id": "aldi-nord_5296587",
-      "title": "Prospekt 5296587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5296587-h245590?page=1&tid=mvosxi8c-35ivf-6adee19b555b7#page/1",
+      "id": "aldi-nord_5357592",
+      "title": "Prospekt 5357592",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357592-h245590?page=1&tid=mw531dff-36ty0-6aede70e42f93#page/1",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917894"
-    },
-    {
-      "id": "aldi-nord_5188689",
-      "title": "Prospekt 5188689",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5188689-h245590?page=1&tid=mvosxi8c-337m9-6adee19b555bc#page/1",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917901"
+      "scraped_at": "2026-11-06T15:41:18.629392"
     },
     {
       "id": "aldi-nord_4208176",
       "title": "Prospekt 4208176",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d4208176-fDE-h245590?page=1&tid=mvosxi8c-2i71s-6adee19b555bf#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d4208176-fDE-h245590?page=1&tid=mw531dff-2i71s-6aede70e42f96#page/1",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917906"
+      "scraped_at": "2026-11-06T15:41:18.629420"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h31889?page=1&tid=mw531dff-36txx-6aede70e4f333#page/1",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629449"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h34019?page=1&tid=mw531dff-36txx-6aede70e503fa#page/1",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629479"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h270343?page=1&tid=mw531dff-36txx-6aede70e5178b#page/1",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629504"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h32821?page=1&tid=mw531dff-36txx-6aede70e5331d#page/1",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629529"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h32967?page=1&tid=mw531dff-36txx-6aede70e54d09#page/1",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629554"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h245659?page=1&tid=mw531dff-36txx-6aede70e55e86#page/1",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629578"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h245590?page=12&tid=mw531dff-36txx-6aede70e42f7c#page/12",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629602"
+    },
+    {
+      "id": "aldi-nord_5357589",
+      "title": "Prospekt 5357589",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357589-h245590?page=40&tid=mw531dff-36txx-6aede70e42f7c#page/40",
+      "retailer": "ALDI Nord",
+      "retailer_key": "aldi-nord",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:18.629624"
     },
     {
       "id": "aldi-nord_5327943",
       "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h31889?page=1&tid=mvosxi8c-3672f-6adee19b5ef0c#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=34&tid=mw531dff-3672f-6aede70e42f8e#page/34",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917911"
+      "scraped_at": "2026-11-06T15:41:18.629648"
     },
     {
       "id": "aldi-nord_5327943",
       "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h34019?page=1&tid=mvosxi8c-3672f-6adee19b60bfb#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=10&tid=mw531dff-3672f-6aede70e42f8e#page/10",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917916"
+      "scraped_at": "2026-11-06T15:41:18.629690"
     },
     {
       "id": "aldi-nord_5327943",
       "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h270343?page=1&tid=mvosxi8c-3672f-6adee19b63118#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=5&tid=mw531dff-3672f-6aede70e42f8e#page/5",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917919"
+      "scraped_at": "2026-11-06T15:41:18.629716"
     },
     {
-      "id": "aldi-nord_5327943",
-      "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h32821?page=1&tid=mvosxi8c-3672f-6adee19b652af#page/1",
+      "id": "aldi-nord_5357592",
+      "title": "Prospekt 5357592",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5357592-h245590?page=2&tid=mw531dff-36ty0-6aede70e42f93#page/2",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917923"
-    },
-    {
-      "id": "aldi-nord_5327943",
-      "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h32967?page=1&tid=mvosxi8c-3672f-6adee19b6729c#page/1",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917927"
-    },
-    {
-      "id": "aldi-nord_5327943",
-      "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245659?page=1&tid=mvosxi8c-3672f-6adee19b690dd#page/1",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917930"
-    },
-    {
-      "id": "aldi-nord_5327943",
-      "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=34&tid=mvosxi8c-3672f-6adee19b555a4#page/34",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917933"
-    },
-    {
-      "id": "aldi-nord_5327943",
-      "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=10&tid=mvosxi8c-3672f-6adee19b555a4#page/10",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917937"
-    },
-    {
-      "id": "aldi-nord_5327943",
-      "title": "Prospekt 5327943",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5327943-h245590?page=5&tid=mvosxi8c-3672f-6adee19b555a4#page/5",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917942"
-    },
-    {
-      "id": "aldi-nord_5296587",
-      "title": "Prospekt 5296587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5296587-h245590?page=8&tid=mvosxi8c-35ivf-6adee19b555b7#page/8",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917945"
-    },
-    {
-      "id": "aldi-nord_5296587",
-      "title": "Prospekt 5296587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5296587-h245590?page=5&tid=mvosxi8c-35ivf-6adee19b555b7#page/5",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917957"
-    },
-    {
-      "id": "aldi-nord_5296587",
-      "title": "Prospekt 5296587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d5296587-h245590?page=19&tid=mvosxi8c-35ivf-6adee19b555b7#page/19",
-      "retailer": "ALDI Nord",
-      "retailer_key": "aldi-nord",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917961"
+      "scraped_at": "2026-11-06T15:41:18.629740"
     },
     {
       "id": "aldi-nord_4208176",
       "title": "Prospekt 4208176",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d4208176-fDE-h245590?page=2&tid=mvosxi8c-2i71s-6adee19b555bf#page/2",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c25-d4208176-fDE-h245590?page=2&tid=mw531dff-2i71s-6aede70e42f96#page/2",
       "retailer": "ALDI Nord",
       "retailer_key": "aldi-nord",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:04.917964"
+      "scraped_at": "2026-11-06T15:41:18.629764"
     },
     {
-      "id": "penny_5315757",
-      "title": "Prospekt 5315757",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315757-fDE-h81023?page=1&tid=mvosxl2x-35xnx-6adee19e1befb#page/1",
+      "id": "penny_5363532",
+      "title": "Prospekt 5363532",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363532-fDE-h81023?page=1&tid=mw531dh3-36yj0-6aede70eb860d#page/1",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972078"
+      "scraped_at": "2026-11-06T15:41:19.134227"
     },
     {
-      "id": "penny_5315730",
-      "title": "Prospekt 5315730",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315730-fDE-h81105?page=1&tid=mvosxl2x-35xn6-6adee19e24a67#page/1",
+      "id": "penny_5363511",
+      "title": "Prospekt 5363511",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363511-fDE-h81105?page=1&tid=mw531dh3-36yif-6aede70ec2cd5#page/1",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972266"
+      "scraped_at": "2026-11-06T15:41:19.134310"
     },
     {
-      "id": "penny_5315820",
-      "title": "Prospekt 5315820",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315820-fDE-h81213?page=1&tid=mvosxl2x-35xpo-6adee19e26576#page/1",
+      "id": "penny_5363535",
+      "title": "Prospekt 5363535",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363535-fDE-h81213?page=1&tid=mw531dh3-36yj3-6aede70ec3de9#page/1",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972336"
+      "scraped_at": "2026-11-06T15:41:19.134343"
     },
     {
-      "id": "penny_5315817",
-      "title": "Prospekt 5315817",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315817-fDE-h81311?page=1&tid=mvosxl2x-35xpl-6adee19e286e3#page/1",
+      "id": "penny_5363571",
+      "title": "Prospekt 5363571",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363571-fDE-h81311?page=1&tid=mw531dh3-36yk3-6aede70ec4d3f#page/1",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972396"
+      "scraped_at": "2026-11-06T15:41:19.134370"
     },
     {
-      "id": "penny_5315736",
-      "title": "Prospekt 5315736",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315736-fDE-h81347?page=1&tid=mvosxl2x-35xnc-6adee19e2a608#page/1",
+      "id": "penny_5363457",
+      "title": "Prospekt 5363457",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363457-fDE-h81347?page=1&tid=mw531dh3-36ygx-6aede70ed01b7#page/1",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972572"
+      "scraped_at": "2026-11-06T15:41:19.134400"
     },
     {
-      "id": "penny_5315814",
-      "title": "Prospekt 5315814",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315814-fDE-h268408?page=1&tid=mvosxl2x-35xpi-6adee19e2c939#page/1",
+      "id": "penny_5363562",
+      "title": "Prospekt 5363562",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363562-fDE-h268408?page=1&tid=mw531dh3-36yju-6aede70ed134d#page/1",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972637"
+      "scraped_at": "2026-11-06T15:41:19.134438"
     },
     {
-      "id": "penny_5315754",
-      "title": "Prospekt 5315754",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315754-fDE-h81439?page=1&tid=mvosxl2x-35xnu-6adee19e2e4b2#page/1",
+      "id": "penny_5363586",
+      "title": "Prospekt 5363586",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363586-fDE-h81439?page=1&tid=mw531dh3-36yki-6aede70ed23ec#page/1",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972691"
+      "scraped_at": "2026-11-06T15:41:19.134473"
     },
     {
-      "id": "penny_5315757",
-      "title": "Prospekt 5315757",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315757-fDE-h81023?page=22&tid=mvosxl2x-35xnx-6adee19e1befb#page/22",
+      "id": "penny_5363532",
+      "title": "Prospekt 5363532",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363532-fDE-h81023?page=22&tid=mw531dh3-36yj0-6aede70eb860d#page/22",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972745"
+      "scraped_at": "2026-11-06T15:41:19.134499"
     },
     {
-      "id": "penny_5315757",
-      "title": "Prospekt 5315757",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5315757-fDE-h81023?page=8&tid=mvosxl2x-35xnx-6adee19e1befb#page/8",
+      "id": "penny_5363532",
+      "title": "Prospekt 5363532",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363532-fDE-h81023?page=47&tid=mw531dh3-36yj0-6aede70eb860d#page/47",
       "retailer": "PENNY",
       "retailer_key": "penny",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:07.972796"
+      "scraped_at": "2026-11-06T15:41:19.134523"
     },
     {
-      "id": "kaufland_5306502",
-      "title": "Prospekt 5306502",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5306502-fDE-h162609?page=1&tid=mvosxn86-35qiu-6adee1a1bf887#page/1",
+      "id": "penny_5363532",
+      "title": "Prospekt 5363532",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c13-d5363532-fDE-h81023?page=28&tid=mw531dh3-36yj0-6aede70eb860d#page/28",
+      "retailer": "PENNY",
+      "retailer_key": "penny",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:19.134548"
+    },
+    {
+      "id": "kaufland_5356425",
+      "title": "Prospekt 5356425",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356425-fDE-h108033?page=1&tid=mw531eas-36t1l-6aede70f2d095#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644420"
+      "scraped_at": "2026-11-06T15:41:19.544311"
+    },
+    {
+      "id": "kaufland_5363277",
+      "title": "Prospekt 5363277",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5363277-fDE-h162609?page=1&tid=mw531eas-36ybx-6aede70f2d0a8#page/1",
+      "retailer": "Kaufland",
+      "retailer_key": "kaufland",
+      "retailer_category": "Supermarkt",
+      "scraped_at": "2026-11-06T15:41:19.544394"
     },
     {
       "id": "kaufland_5316453",
       "title": "Prospekt 5316453",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5316453-fDE-h162609?page=1&tid=mvosxn86-35y79-6adee1a1bf89a#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5316453-fDE-h162609?page=1&tid=mw531eas-35y79-6aede70f2d0ac#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644496"
+      "scraped_at": "2026-11-06T15:41:19.544411"
     },
     {
       "id": "kaufland_5316453",
       "title": "Prospekt 5316453",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5316453-fDE-h162609?page=2&tid=mvosxn86-35y79-6adee1a1bf89a#page/2",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5316453-fDE-h162609?page=2&tid=mw531eas-35y79-6aede70f2d0ac#page/2",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644531"
+      "scraped_at": "2026-11-06T15:41:19.544423"
     },
     {
       "id": "kaufland_5316453",
       "title": "Prospekt 5316453",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5316453-fDE-h162609?page=3&tid=mvosxn86-35y79-6adee1a1bf89a#page/3",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5316453-fDE-h162609?page=3&tid=mw531eas-35y79-6aede70f2d0ac#page/3",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644560"
+      "scraped_at": "2026-11-06T15:41:19.544436"
     },
     {
-      "id": "kaufland_5305965",
-      "title": "Prospekt 5305965",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5305965-fDE-h214451?page=1&tid=mvosxn86-35q3x-6adee1a1c965a#page/1",
+      "id": "kaufland_5356404",
+      "title": "Prospekt 5356404",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356404-fDE-h213937?page=1&tid=mw531eas-36t10-6aede70f38012#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644591"
+      "scraped_at": "2026-11-06T15:41:19.544448"
     },
     {
-      "id": "kaufland_5306472",
-      "title": "Prospekt 5306472",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5306472-fDE-h108749?page=1&tid=mvosxn86-35qi0-6adee1a1cbbaa#page/1",
+      "id": "kaufland_5356464",
+      "title": "Prospekt 5356464",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356464-fDE-h108027?page=1&tid=mw531eas-36t2o-6aede70f395f6#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644623"
+      "scraped_at": "2026-11-06T15:41:19.544458"
     },
     {
-      "id": "kaufland_5305629",
-      "title": "Prospekt 5305629",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5305629-fDE-h107985?page=1&tid=mvosxn86-35pul-6adee1a1ceeb2#page/1",
+      "id": "kaufland_5362398",
+      "title": "Prospekt 5362398",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5362398-fDE-h107985?page=1&tid=mw531eas-36xni-6aede70f3ad72#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644653"
+      "scraped_at": "2026-11-06T15:41:19.544470"
     },
     {
-      "id": "kaufland_5305257",
-      "title": "Prospekt 5305257",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5305257-fDE-h108757?page=1&tid=mvosxn86-35pk9-6adee1a1d1b19#page/1",
+      "id": "kaufland_5356494",
+      "title": "Prospekt 5356494",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356494-fDE-h213821?page=1&tid=mw531eas-36t3i-6aede70f3bff9#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644682"
+      "scraped_at": "2026-11-06T15:41:19.544480"
     },
     {
-      "id": "kaufland_5305548",
-      "title": "Prospekt 5305548",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5305548-fDE-h108599?page=1&tid=mvosxn86-35psc-6adee1a1d3d33#page/1",
+      "id": "kaufland_5356455",
+      "title": "Prospekt 5356455",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356455-fDE-h108745?page=1&tid=mw531eas-36t2f-6aede70f3d06c#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644712"
+      "scraped_at": "2026-11-06T15:41:19.544491"
     },
     {
-      "id": "kaufland_5305095",
-      "title": "Prospekt 5305095",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5305095-fDE-h107567?page=1&tid=mvosxn86-35pfr-6adee1a1d677d#page/1",
+      "id": "kaufland_5356488",
+      "title": "Prospekt 5356488",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356488-fDE-h108037?page=1&tid=mw531eas-36t3c-6aede70f3e151#page/1",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644743"
+      "scraped_at": "2026-11-06T15:41:19.544501"
     },
     {
-      "id": "kaufland_5306502",
-      "title": "Prospekt 5306502",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5306502-fDE-h162609?page=7&tid=mvosxn86-35qiu-6adee1a1bf887#page/7",
+      "id": "kaufland_5356425",
+      "title": "Prospekt 5356425",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356425-fDE-h108033?page=5&tid=mw531eas-36t1l-6aede70f2d095#page/5",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644773"
+      "scraped_at": "2026-11-06T15:41:19.544511"
     },
     {
-      "id": "kaufland_5306502",
-      "title": "Prospekt 5306502",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5306502-fDE-h162609?page=3&tid=mvosxn86-35qiu-6adee1a1bf887#page/3",
+      "id": "kaufland_5356425",
+      "title": "Prospekt 5356425",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5356425-fDE-h108033?page=4&tid=mw531eas-36t1l-6aede70f2d095#page/4",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644804"
+      "scraped_at": "2026-11-06T15:41:19.544520"
     },
     {
-      "id": "kaufland_5306502",
-      "title": "Prospekt 5306502",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5306502-fDE-h162609?page=24&tid=mvosxn86-35qiu-6adee1a1bf887#page/24",
+      "id": "kaufland_5363277",
+      "title": "Prospekt 5363277",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5363277-fDE-h162609?page=15&tid=mw531eas-36ybx-6aede70f2d0a8#page/15",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "scraped_at": "2026-10-26T06:14:11.644865"
+      "scraped_at": "2026-11-06T15:41:19.544531"
+    },
+    {
+      "id": "kaufland_5363277",
+      "title": "Prospekt 5363277",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5363277-fDE-h162609?page=20&tid=mw531eas-36ybx-6aede70f2d0a8#page/20",
+      "retailer": "Kaufland",
+      "retailer_key": "kaufland",
+      "retailer_category": "Supermarkt",
+      "scraped_at": "2026-11-06T15:41:19.544541"
+    },
+    {
+      "id": "kaufland_5363277",
+      "title": "Prospekt 5363277",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c7-d5363277-fDE-h162609?page=6&tid=mw531eas-36ybx-6aede70f2d0a8#page/6",
+      "retailer": "Kaufland",
+      "retailer_key": "kaufland",
+      "retailer_category": "Supermarkt",
+      "scraped_at": "2026-11-06T15:41:19.544552"
+    },
+    {
+      "id": "norma_5372496",
+      "title": "Prospekt 5372496",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372496-h103089?page=1&tid=mw531ec4-375g0-6aede70f8fcda#page/1",
+      "retailer": "NORMA",
+      "retailer_key": "norma",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:19.937461"
+    },
+    {
+      "id": "norma_5372514",
+      "title": "Prospekt 5372514",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372514-fDE-h103089?page=1&tid=mw531ec4-375gi-6aede70f8fcf1#page/1",
+      "retailer": "NORMA",
+      "retailer_key": "norma",
+      "retailer_category": "Discounter",
+      "scraped_at": "2026-11-06T15:41:19.937621"
     },
     {
       "id": "norma_5306583",
       "title": "Prospekt 5306583",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306583-h103089?page=1&tid=mvosxq9g-35ql3-6adee1a608e21#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306583-h103089?page=1&tid=mw531ec4-35ql3-6aede70f8fcf6#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468694"
+      "scraped_at": "2026-11-06T15:41:19.937667"
     },
     {
       "id": "norma_5306586",
       "title": "Prospekt 5306586",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=1&tid=mvosxq9g-35ql6-6adee1a608e6b#page/1",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=1&tid=mw531ec4-35ql6-6aede70f8fcfa#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468727"
+      "scraped_at": "2026-11-06T15:41:19.937704"
     },
     {
-      "id": "norma_5298306",
-      "title": "Prospekt 5298306",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5298306-h103089?page=1&tid=mvosxq9g-35k76-6adee1a608e71#page/1",
+      "id": "norma_5372499",
+      "title": "Prospekt 5372499",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372499-h85443?page=1&tid=mw531ec4-375g3-6aede70f9b347#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468733"
+      "scraped_at": "2026-11-06T15:41:19.937745"
     },
     {
-      "id": "norma_5302587",
-      "title": "Prospekt 5302587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5302587-fDE-h103089?page=1&tid=mvosxq9g-35ni3-6adee1a608e74#page/1",
+      "id": "norma_5372499",
+      "title": "Prospekt 5372499",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372499-h103461?page=1&tid=mw531ec4-375g3-6aede70f9c479#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468738"
+      "scraped_at": "2026-11-06T15:41:19.937779"
     },
     {
-      "id": "norma_5306577",
-      "title": "Prospekt 5306577",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306577-h85443?page=1&tid=mvosxq9g-35qkx-6adee1a6160e7#page/1",
+      "id": "norma_5372499",
+      "title": "Prospekt 5372499",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372499-h103625?page=1&tid=mw531ec4-375g3-6aede70f9d172#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468742"
+      "scraped_at": "2026-11-06T15:41:19.937885"
     },
     {
-      "id": "norma_5306580",
-      "title": "Prospekt 5306580",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306580-h103461?page=1&tid=mvosxq9g-35ql0-6adee1a618292#page/1",
+      "id": "norma_5372499",
+      "title": "Prospekt 5372499",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372499-h86955?page=1&tid=mw531ec4-375g3-6aede70f9e124#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468747"
+      "scraped_at": "2026-11-06T15:41:19.937920"
     },
     {
-      "id": "norma_5306580",
-      "title": "Prospekt 5306580",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306580-h103625?page=1&tid=mvosxq9g-35ql0-6adee1a61a600#page/1",
+      "id": "norma_5372499",
+      "title": "Prospekt 5372499",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372499-h230275?page=1&tid=mw531ec4-375g3-6aede70f9ef3c#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468750"
+      "scraped_at": "2026-11-06T15:41:19.937953"
     },
     {
-      "id": "norma_5306580",
-      "title": "Prospekt 5306580",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306580-h86955?page=1&tid=mvosxq9g-35ql0-6adee1a61d10b#page/1",
+      "id": "norma_5372499",
+      "title": "Prospekt 5372499",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372499-h86167?page=1&tid=mw531ec4-375g3-6aede70f9fd6f#page/1",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468754"
+      "scraped_at": "2026-11-06T15:41:19.937984"
     },
     {
-      "id": "norma_5306580",
-      "title": "Prospekt 5306580",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306580-h230275?page=1&tid=mvosxq9g-35ql0-6adee1a61f0c3#page/1",
+      "id": "norma_5372496",
+      "title": "Prospekt 5372496",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372496-h103089?page=2&tid=mw531ec4-375g0-6aede70f8fcda#page/2",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468757"
+      "scraped_at": "2026-11-06T15:41:19.938017"
     },
     {
-      "id": "norma_5306580",
-      "title": "Prospekt 5306580",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306580-h86167?page=1&tid=mvosxq9g-35ql0-6adee1a6221c4#page/1",
+      "id": "norma_5372514",
+      "title": "Prospekt 5372514",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372514-fDE-h103089?page=11&tid=mw531ec4-375gi-6aede70f8fcf1#page/11",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468760"
+      "scraped_at": "2026-11-06T15:41:19.938047"
     },
     {
-      "id": "norma_5306586",
-      "title": "Prospekt 5306586",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=11&tid=mvosxq9g-35ql6-6adee1a608e6b#page/11",
+      "id": "norma_5372514",
+      "title": "Prospekt 5372514",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5372514-fDE-h103089?page=12&tid=mw531ec4-375gi-6aede70f8fcf1#page/12",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468764"
-    },
-    {
-      "id": "norma_5306586",
-      "title": "Prospekt 5306586",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=13&tid=mvosxq9g-35ql6-6adee1a608e6b#page/13",
-      "retailer": "NORMA",
-      "retailer_key": "norma",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468767"
+      "scraped_at": "2026-11-06T15:41:19.938077"
     },
     {
       "id": "norma_5306586",
       "title": "Prospekt 5306586",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=7&tid=mvosxq9g-35ql6-6adee1a608e6b#page/7",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=11&tid=mw531ec4-35ql6-6aede70f8fcfa#page/11",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468770"
+      "scraped_at": "2026-11-06T15:41:19.938115"
     },
     {
-      "id": "norma_5298306",
-      "title": "Prospekt 5298306",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5298306-h103089?page=2&tid=mvosxq9g-35k76-6adee1a608e71#page/2",
+      "id": "norma_5306586",
+      "title": "Prospekt 5306586",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=13&tid=mw531ec4-35ql6-6aede70f8fcfa#page/13",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468774"
+      "scraped_at": "2026-11-06T15:41:19.938147"
     },
     {
-      "id": "norma_5302587",
-      "title": "Prospekt 5302587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5302587-fDE-h103089?page=11&tid=mvosxq9g-35ni3-6adee1a608e74#page/11",
+      "id": "norma_5306586",
+      "title": "Prospekt 5306586",
+      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5306586-fDE-h103089?page=7&tid=mw531ec4-35ql6-6aede70f8fcfa#page/7",
       "retailer": "NORMA",
       "retailer_key": "norma",
       "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468777"
-    },
-    {
-      "id": "norma_5302587",
-      "title": "Prospekt 5302587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5302587-fDE-h103089?page=5&tid=mvosxq9g-35ni3-6adee1a608e74#page/5",
-      "retailer": "NORMA",
-      "retailer_key": "norma",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468780"
-    },
-    {
-      "id": "norma_5302587",
-      "title": "Prospekt 5302587",
-      "url": "https://www.weekli.de/prospekt/a2-b1-c9-d5302587-fDE-h103089?page=12&tid=mvosxq9g-35ni3-6adee1a608e74#page/12",
-      "retailer": "NORMA",
-      "retailer_key": "norma",
-      "retailer_category": "Discounter",
-      "scraped_at": "2026-10-26T06:14:16.468783"
+      "scraped_at": "2026-11-06T15:41:19.938286"
     }
   ],
   "by_category": {
@@ -931,34 +1022,18 @@
       {
         "name": "Butter",
         "category": "Butter, Margarine & Streichfette",
-        "price": 1.11,
+        "price": 0.99,
         "currency": "EUR",
-        "retailer": "Kaufland",
-        "retailer_key": "kaufland",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "oder Die Streichzarte mildgesäuert, Die Streichzarte auch gesalzen, gekühlt je 250-g-Packg.",
+        "retailer": "Netto Marken-Discount",
+        "retailer_key": "netto-marken-discount",
+        "retailer_category": "Discounter",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "oder Streichzart gekühlt 250 g",
         "source_url": "https://www.marktguru.de/angebote?q=Butter",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
-        "brand": "Weihenstephan"
-      },
-      {
-        "name": "Reine Buttermilch",
-        "category": "Butter, Margarine & Streichfette",
-        "price": 0.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "je 500-g-Fl. zzgl. 0.25 Pfand",
-        "source_url": "https://www.marktguru.de/angebote?q=Reine Buttermilch",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Müller"
+        "brand": "Landliebe"
       },
       {
         "name": "Reine Buttermilch",
@@ -977,49 +1052,49 @@
         "brand": "Müller"
       },
       {
+        "name": "Feines Butter-Schmalz",
+        "category": "Butter, Margarine & Streichfette",
+        "price": 3.33,
+        "currency": "EUR",
+        "retailer": "REWE",
+        "retailer_key": "rewe",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "je 250-g-Becher",
+        "source_url": "https://www.marktguru.de/angebote?q=Feines Butter-Schmalz",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Meggle"
+      },
+      {
         "name": "Feine Butter",
         "category": "Butter, Margarine & Streichfette",
-        "price": 1.39,
+        "price": 1.49,
         "currency": "EUR",
-        "retailer": "PENNY",
-        "retailer_key": "penny",
+        "retailer": "Lidl",
+        "retailer_key": "lidl",
         "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "250 g",
+        "valid_from": "2026-11-08T00:00:00",
+        "valid_to": "2026-11-14T23:59:59",
+        "description": "Streichzart Streichzart in versch. Sorten. Gekühlt. Je 250 g",
         "source_url": "https://www.marktguru.de/angebote?q=Feine Butter",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
         "brand": "Meggle"
       },
       {
-        "name": "Original Irisches Butterschmalz",
+        "name": "Extra Butter XXL",
         "category": "Butter, Margarine & Streichfette",
-        "price": 3.49,
+        "price": 1.99,
         "currency": "EUR",
-        "retailer": "PENNY",
-        "retailer_key": "penny",
+        "retailer": "Kaufland",
+        "retailer_key": "kaufland",
         "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "je 250 g",
-        "source_url": "https://www.marktguru.de/angebote?q=Original Irisches Butterschmalz",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Kerrygold"
-      },
-      {
-        "name": "Original Irische Butter",
-        "category": "Butter, Margarine & Streichfette",
-        "price": 1.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "oder Extra versch. Sorten, je 250-g-Pckg./Becher",
-        "source_url": "https://www.marktguru.de/angebote?q=Original Irische Butter",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "aus irischer Butter und Rapsöl, ungesalzen, gekühlt je 400-g-Becher",
+        "source_url": "https://www.marktguru.de/angebote?q=Extra Butter XXL",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
         "brand": "Kerrygold"
@@ -1027,71 +1102,39 @@
     ],
     "Milch & Milchprodukte": [
       {
-        "name": "Haltbare Milch",
+        "name": "Die Frische Milch",
         "category": "Milch & Milchprodukte",
-        "price": 0.85,
+        "price": 0.99,
         "currency": "EUR",
-        "retailer": "Kaufland",
-        "retailer_key": "kaufland",
+        "retailer": "REWE",
+        "retailer_key": "rewe",
         "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "1,5% oder 3,5% Fett je 1-l-Packg.",
-        "source_url": "https://www.marktguru.de/angebote?q=Haltbare Milch",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "1,8/3,8% Fett, je 1-l-Pckg.",
+        "source_url": "https://www.marktguru.de/angebote?q=Die Frische Milch",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
         "brand": "Bärenmarke"
       },
       {
-        "name": "Haltbare Protein Milch",
+        "name": "Milchbrötchen",
         "category": "Milch & Milchprodukte",
-        "price": 1.49,
+        "price": 1.69,
         "currency": "EUR",
-        "retailer": "PENNY",
-        "retailer_key": "penny",
+        "retailer": "REWE",
+        "retailer_key": "rewe",
         "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "0,1% Fett, je 1 l",
-        "source_url": "https://www.marktguru.de/angebote?q=Haltbare Protein Milch",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "je 480-g-Pckg.",
+        "source_url": "https://www.marktguru.de/angebote?q=Milchbrötchen",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
-        "brand": "Schwarzwaldmilch"
+        "brand": "ja!"
       }
     ],
     "Teigwaren & Reis": [
-      {
-        "name": "Pasta La Collezione",
-        "category": "Teigwaren & Reis",
-        "price": 1.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "HINWEIS: MIT APP 0,10 € REWE BONUS oder Al Bronzo versch. Ausformungen, je 500-g-Btl.",
-        "source_url": "https://www.marktguru.de/angebote?q=Pasta La Collezione",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Barilla"
-      },
-      {
-        "name": "Pasta Spezialitäten Collezione",
-        "category": "Teigwaren & Reis",
-        "price": 1.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "HINWEIS: MIT APP 0,10 € REWE BONUS oder Al Bronzo versch. Ausformungen, je 500-g-Btl.",
-        "source_url": "https://www.marktguru.de/angebote?q=Pasta Spezialitäten Collezione",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Barilla"
-      },
       {
         "name": "Pasta",
         "category": "Teigwaren & Reis",
@@ -1111,14 +1154,62 @@
       {
         "name": "Pasta",
         "category": "Teigwaren & Reis",
-        "price": 1.29,
+        "price": 4,
+        "currency": "EUR",
+        "retailer": "Netto Marken-Discount",
+        "retailer_key": "netto-marken-discount",
+        "retailer_category": "Discounter",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "5 x 500 g versch. Ausformungen",
+        "source_url": "https://www.marktguru.de/angebote?q=Pasta",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Barilla"
+      },
+      {
+        "name": "Pasta Classic",
+        "category": "Teigwaren & Reis",
+        "price": 1,
+        "currency": "EUR",
+        "retailer": "Kaufland",
+        "retailer_key": "kaufland",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "aus Hartweizengrieß, ohne Ei, versch. Sorten je 500-g-Packg.",
+        "source_url": "https://www.marktguru.de/angebote?q=Pasta Classic",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Barilla"
+      },
+      {
+        "name": "Nudeln",
+        "category": "Teigwaren & Reis",
+        "price": 1.01,
+        "currency": "EUR",
+        "retailer": "Thomas Philipps",
+        "retailer_key": "thomas-philipps",
+        "retailer_category": "Discounter",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "versch. Sorten 500g",
+        "source_url": "https://www.marktguru.de/angebote?q=Nudeln",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Barilla"
+      },
+      {
+        "name": "Pasta",
+        "category": "Teigwaren & Reis",
+        "price": 1.89,
         "currency": "EUR",
         "retailer": "Lidl",
         "retailer_key": "lidl",
         "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-28T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "400/500 g",
+        "valid_from": "2026-11-08T00:00:00",
+        "valid_to": "2026-11-14T23:59:59",
+        "description": "Versch. Sorten. Je 1 kg",
         "source_url": "https://www.marktguru.de/angebote?q=Pasta",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
@@ -1127,153 +1218,23 @@
     ]
   },
   "by_week": {
-    "Woche 43 (25.10.-28.10.2026)": [
+    "Woche 44 (01.11.-07.11.2026)": [
       {
         "name": "Butter",
         "category": "Butter, Margarine & Streichfette",
-        "price": 1.11,
+        "price": 0.99,
         "currency": "EUR",
-        "retailer": "Kaufland",
-        "retailer_key": "kaufland",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "oder Die Streichzarte mildgesäuert, Die Streichzarte auch gesalzen, gekühlt je 250-g-Packg.",
+        "retailer": "Netto Marken-Discount",
+        "retailer_key": "netto-marken-discount",
+        "retailer_category": "Discounter",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "oder Streichzart gekühlt 250 g",
         "source_url": "https://www.marktguru.de/angebote?q=Butter",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
-        "brand": "Weihenstephan"
+        "brand": "Landliebe"
       },
-      {
-        "name": "Reine Buttermilch",
-        "category": "Butter, Margarine & Streichfette",
-        "price": 0.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "je 500-g-Fl. zzgl. 0.25 Pfand",
-        "source_url": "https://www.marktguru.de/angebote?q=Reine Buttermilch",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Müller"
-      },
-      {
-        "name": "Feine Butter",
-        "category": "Butter, Margarine & Streichfette",
-        "price": 1.39,
-        "currency": "EUR",
-        "retailer": "PENNY",
-        "retailer_key": "penny",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "250 g",
-        "source_url": "https://www.marktguru.de/angebote?q=Feine Butter",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Meggle"
-      },
-      {
-        "name": "Original Irisches Butterschmalz",
-        "category": "Butter, Margarine & Streichfette",
-        "price": 3.49,
-        "currency": "EUR",
-        "retailer": "PENNY",
-        "retailer_key": "penny",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "je 250 g",
-        "source_url": "https://www.marktguru.de/angebote?q=Original Irisches Butterschmalz",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Kerrygold"
-      },
-      {
-        "name": "Original Irische Butter",
-        "category": "Butter, Margarine & Streichfette",
-        "price": 1.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "oder Extra versch. Sorten, je 250-g-Pckg./Becher",
-        "source_url": "https://www.marktguru.de/angebote?q=Original Irische Butter",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Kerrygold"
-      },
-      {
-        "name": "Haltbare Milch",
-        "category": "Milch & Milchprodukte",
-        "price": 0.85,
-        "currency": "EUR",
-        "retailer": "Kaufland",
-        "retailer_key": "kaufland",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "1,5% oder 3,5% Fett je 1-l-Packg.",
-        "source_url": "https://www.marktguru.de/angebote?q=Haltbare Milch",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Bärenmarke"
-      },
-      {
-        "name": "Haltbare Protein Milch",
-        "category": "Milch & Milchprodukte",
-        "price": 1.49,
-        "currency": "EUR",
-        "retailer": "PENNY",
-        "retailer_key": "penny",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "0,1% Fett, je 1 l",
-        "source_url": "https://www.marktguru.de/angebote?q=Haltbare Protein Milch",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Schwarzwaldmilch"
-      },
-      {
-        "name": "Pasta La Collezione",
-        "category": "Teigwaren & Reis",
-        "price": 1.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "HINWEIS: MIT APP 0,10 € REWE BONUS oder Al Bronzo versch. Ausformungen, je 500-g-Btl.",
-        "source_url": "https://www.marktguru.de/angebote?q=Pasta La Collezione",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Barilla"
-      },
-      {
-        "name": "Pasta Spezialitäten Collezione",
-        "category": "Teigwaren & Reis",
-        "price": 1.59,
-        "currency": "EUR",
-        "retailer": "REWE",
-        "retailer_key": "rewe",
-        "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-25T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "HINWEIS: MIT APP 0,10 € REWE BONUS oder Al Bronzo versch. Ausformungen, je 500-g-Btl.",
-        "source_url": "https://www.marktguru.de/angebote?q=Pasta Spezialitäten Collezione",
-        "source_note": "marktguru.de (strukturierte Daten)",
-        "manual": false,
-        "brand": "Barilla"
-      }
-    ],
-    "Woche 44 (01.11.-07.11.2026)": [
       {
         "name": "Reine Buttermilch",
         "category": "Butter, Margarine & Streichfette",
@@ -1291,6 +1252,70 @@
         "brand": "Müller"
       },
       {
+        "name": "Feines Butter-Schmalz",
+        "category": "Butter, Margarine & Streichfette",
+        "price": 3.33,
+        "currency": "EUR",
+        "retailer": "REWE",
+        "retailer_key": "rewe",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "je 250-g-Becher",
+        "source_url": "https://www.marktguru.de/angebote?q=Feines Butter-Schmalz",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Meggle"
+      },
+      {
+        "name": "Extra Butter XXL",
+        "category": "Butter, Margarine & Streichfette",
+        "price": 1.99,
+        "currency": "EUR",
+        "retailer": "Kaufland",
+        "retailer_key": "kaufland",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "aus irischer Butter und Rapsöl, ungesalzen, gekühlt je 400-g-Becher",
+        "source_url": "https://www.marktguru.de/angebote?q=Extra Butter XXL",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Kerrygold"
+      },
+      {
+        "name": "Die Frische Milch",
+        "category": "Milch & Milchprodukte",
+        "price": 0.99,
+        "currency": "EUR",
+        "retailer": "REWE",
+        "retailer_key": "rewe",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "1,8/3,8% Fett, je 1-l-Pckg.",
+        "source_url": "https://www.marktguru.de/angebote?q=Die Frische Milch",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Bärenmarke"
+      },
+      {
+        "name": "Milchbrötchen",
+        "category": "Milch & Milchprodukte",
+        "price": 1.69,
+        "currency": "EUR",
+        "retailer": "REWE",
+        "retailer_key": "rewe",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "je 480-g-Pckg.",
+        "source_url": "https://www.marktguru.de/angebote?q=Milchbrötchen",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "ja!"
+      },
+      {
         "name": "Pasta",
         "category": "Teigwaren & Reis",
         "price": 0.99,
@@ -1305,20 +1330,84 @@
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
         "brand": "Barilla"
-      }
-    ],
-    "Woche 44 (28.10.-28.10.2026)": [
+      },
       {
         "name": "Pasta",
         "category": "Teigwaren & Reis",
-        "price": 1.29,
+        "price": 4,
+        "currency": "EUR",
+        "retailer": "Netto Marken-Discount",
+        "retailer_key": "netto-marken-discount",
+        "retailer_category": "Discounter",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "5 x 500 g versch. Ausformungen",
+        "source_url": "https://www.marktguru.de/angebote?q=Pasta",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Barilla"
+      },
+      {
+        "name": "Pasta Classic",
+        "category": "Teigwaren & Reis",
+        "price": 1,
+        "currency": "EUR",
+        "retailer": "Kaufland",
+        "retailer_key": "kaufland",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "aus Hartweizengrieß, ohne Ei, versch. Sorten je 500-g-Packg.",
+        "source_url": "https://www.marktguru.de/angebote?q=Pasta Classic",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Barilla"
+      },
+      {
+        "name": "Nudeln",
+        "category": "Teigwaren & Reis",
+        "price": 1.01,
+        "currency": "EUR",
+        "retailer": "Thomas Philipps",
+        "retailer_key": "thomas-philipps",
+        "retailer_category": "Discounter",
+        "valid_from": "2026-11-01T00:00:00",
+        "valid_to": "2026-11-07T23:59:59",
+        "description": "versch. Sorten 500g",
+        "source_url": "https://www.marktguru.de/angebote?q=Nudeln",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Barilla"
+      }
+    ],
+    "Woche 45 (08.11.-14.11.2026)": [
+      {
+        "name": "Feine Butter",
+        "category": "Butter, Margarine & Streichfette",
+        "price": 1.49,
         "currency": "EUR",
         "retailer": "Lidl",
         "retailer_key": "lidl",
         "retailer_category": "Supermarkt",
-        "valid_from": "2026-10-28T00:00:00",
-        "valid_to": "2026-10-31T23:59:59",
-        "description": "400/500 g",
+        "valid_from": "2026-11-08T00:00:00",
+        "valid_to": "2026-11-14T23:59:59",
+        "description": "Streichzart Streichzart in versch. Sorten. Gekühlt. Je 250 g",
+        "source_url": "https://www.marktguru.de/angebote?q=Feine Butter",
+        "source_note": "marktguru.de (strukturierte Daten)",
+        "manual": false,
+        "brand": "Meggle"
+      },
+      {
+        "name": "Pasta",
+        "category": "Teigwaren & Reis",
+        "price": 1.89,
+        "currency": "EUR",
+        "retailer": "Lidl",
+        "retailer_key": "lidl",
+        "retailer_category": "Supermarkt",
+        "valid_from": "2026-11-08T00:00:00",
+        "valid_to": "2026-11-14T23:59:59",
+        "description": "Versch. Sorten. Je 1 kg",
         "source_url": "https://www.marktguru.de/angebote?q=Pasta",
         "source_note": "marktguru.de (strukturierte Daten)",
         "manual": false,
@@ -1330,34 +1419,18 @@
     {
       "name": "Butter",
       "category": "Butter, Margarine & Streichfette",
-      "price": 1.11,
+      "price": 0.99,
       "currency": "EUR",
-      "retailer": "Kaufland",
-      "retailer_key": "kaufland",
-      "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "oder Die Streichzarte mildgesäuert, Die Streichzarte auch gesalzen, gekühlt je 250-g-Packg.",
+      "retailer": "Netto Marken-Discount",
+      "retailer_key": "netto-marken-discount",
+      "retailer_category": "Discounter",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "oder Streichzart gekühlt 250 g",
       "source_url": "https://www.marktguru.de/angebote?q=Butter",
       "source_note": "marktguru.de (strukturierte Daten)",
       "manual": false,
-      "brand": "Weihenstephan"
-    },
-    {
-      "name": "Reine Buttermilch",
-      "category": "Butter, Margarine & Streichfette",
-      "price": 0.59,
-      "currency": "EUR",
-      "retailer": "REWE",
-      "retailer_key": "rewe",
-      "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "je 500-g-Fl. zzgl. 0.25 Pfand",
-      "source_url": "https://www.marktguru.de/angebote?q=Reine Buttermilch",
-      "source_note": "marktguru.de (strukturierte Daten)",
-      "manual": false,
-      "brand": "Müller"
+      "brand": "Landliebe"
     },
     {
       "name": "Reine Buttermilch",
@@ -1376,116 +1449,84 @@
       "brand": "Müller"
     },
     {
+      "name": "Feines Butter-Schmalz",
+      "category": "Butter, Margarine & Streichfette",
+      "price": 3.33,
+      "currency": "EUR",
+      "retailer": "REWE",
+      "retailer_key": "rewe",
+      "retailer_category": "Supermarkt",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "je 250-g-Becher",
+      "source_url": "https://www.marktguru.de/angebote?q=Feines Butter-Schmalz",
+      "source_note": "marktguru.de (strukturierte Daten)",
+      "manual": false,
+      "brand": "Meggle"
+    },
+    {
       "name": "Feine Butter",
       "category": "Butter, Margarine & Streichfette",
-      "price": 1.39,
+      "price": 1.49,
       "currency": "EUR",
-      "retailer": "PENNY",
-      "retailer_key": "penny",
+      "retailer": "Lidl",
+      "retailer_key": "lidl",
       "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "250 g",
+      "valid_from": "2026-11-08T00:00:00",
+      "valid_to": "2026-11-14T23:59:59",
+      "description": "Streichzart Streichzart in versch. Sorten. Gekühlt. Je 250 g",
       "source_url": "https://www.marktguru.de/angebote?q=Feine Butter",
       "source_note": "marktguru.de (strukturierte Daten)",
       "manual": false,
       "brand": "Meggle"
     },
     {
-      "name": "Original Irisches Butterschmalz",
+      "name": "Extra Butter XXL",
       "category": "Butter, Margarine & Streichfette",
-      "price": 3.49,
-      "currency": "EUR",
-      "retailer": "PENNY",
-      "retailer_key": "penny",
-      "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "je 250 g",
-      "source_url": "https://www.marktguru.de/angebote?q=Original Irisches Butterschmalz",
-      "source_note": "marktguru.de (strukturierte Daten)",
-      "manual": false,
-      "brand": "Kerrygold"
-    },
-    {
-      "name": "Original Irische Butter",
-      "category": "Butter, Margarine & Streichfette",
-      "price": 1.59,
-      "currency": "EUR",
-      "retailer": "REWE",
-      "retailer_key": "rewe",
-      "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "oder Extra versch. Sorten, je 250-g-Pckg./Becher",
-      "source_url": "https://www.marktguru.de/angebote?q=Original Irische Butter",
-      "source_note": "marktguru.de (strukturierte Daten)",
-      "manual": false,
-      "brand": "Kerrygold"
-    },
-    {
-      "name": "Haltbare Milch",
-      "category": "Milch & Milchprodukte",
-      "price": 0.85,
+      "price": 1.99,
       "currency": "EUR",
       "retailer": "Kaufland",
       "retailer_key": "kaufland",
       "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "1,5% oder 3,5% Fett je 1-l-Packg.",
-      "source_url": "https://www.marktguru.de/angebote?q=Haltbare Milch",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "aus irischer Butter und Rapsöl, ungesalzen, gekühlt je 400-g-Becher",
+      "source_url": "https://www.marktguru.de/angebote?q=Extra Butter XXL",
+      "source_note": "marktguru.de (strukturierte Daten)",
+      "manual": false,
+      "brand": "Kerrygold"
+    },
+    {
+      "name": "Die Frische Milch",
+      "category": "Milch & Milchprodukte",
+      "price": 0.99,
+      "currency": "EUR",
+      "retailer": "REWE",
+      "retailer_key": "rewe",
+      "retailer_category": "Supermarkt",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "1,8/3,8% Fett, je 1-l-Pckg.",
+      "source_url": "https://www.marktguru.de/angebote?q=Die Frische Milch",
       "source_note": "marktguru.de (strukturierte Daten)",
       "manual": false,
       "brand": "Bärenmarke"
     },
     {
-      "name": "Haltbare Protein Milch",
+      "name": "Milchbrötchen",
       "category": "Milch & Milchprodukte",
-      "price": 1.49,
-      "currency": "EUR",
-      "retailer": "PENNY",
-      "retailer_key": "penny",
-      "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "0,1% Fett, je 1 l",
-      "source_url": "https://www.marktguru.de/angebote?q=Haltbare Protein Milch",
-      "source_note": "marktguru.de (strukturierte Daten)",
-      "manual": false,
-      "brand": "Schwarzwaldmilch"
-    },
-    {
-      "name": "Pasta La Collezione",
-      "category": "Teigwaren & Reis",
-      "price": 1.59,
+      "price": 1.69,
       "currency": "EUR",
       "retailer": "REWE",
       "retailer_key": "rewe",
       "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "HINWEIS: MIT APP 0,10 € REWE BONUS oder Al Bronzo versch. Ausformungen, je 500-g-Btl.",
-      "source_url": "https://www.marktguru.de/angebote?q=Pasta La Collezione",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "je 480-g-Pckg.",
+      "source_url": "https://www.marktguru.de/angebote?q=Milchbrötchen",
       "source_note": "marktguru.de (strukturierte Daten)",
       "manual": false,
-      "brand": "Barilla"
-    },
-    {
-      "name": "Pasta Spezialitäten Collezione",
-      "category": "Teigwaren & Reis",
-      "price": 1.59,
-      "currency": "EUR",
-      "retailer": "REWE",
-      "retailer_key": "rewe",
-      "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-25T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "HINWEIS: MIT APP 0,10 € REWE BONUS oder Al Bronzo versch. Ausformungen, je 500-g-Btl.",
-      "source_url": "https://www.marktguru.de/angebote?q=Pasta Spezialitäten Collezione",
-      "source_note": "marktguru.de (strukturierte Daten)",
-      "manual": false,
-      "brand": "Barilla"
+      "brand": "ja!"
     },
     {
       "name": "Pasta",
@@ -1506,14 +1547,62 @@
     {
       "name": "Pasta",
       "category": "Teigwaren & Reis",
-      "price": 1.29,
+      "price": 4,
+      "currency": "EUR",
+      "retailer": "Netto Marken-Discount",
+      "retailer_key": "netto-marken-discount",
+      "retailer_category": "Discounter",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "5 x 500 g versch. Ausformungen",
+      "source_url": "https://www.marktguru.de/angebote?q=Pasta",
+      "source_note": "marktguru.de (strukturierte Daten)",
+      "manual": false,
+      "brand": "Barilla"
+    },
+    {
+      "name": "Pasta Classic",
+      "category": "Teigwaren & Reis",
+      "price": 1,
+      "currency": "EUR",
+      "retailer": "Kaufland",
+      "retailer_key": "kaufland",
+      "retailer_category": "Supermarkt",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "aus Hartweizengrieß, ohne Ei, versch. Sorten je 500-g-Packg.",
+      "source_url": "https://www.marktguru.de/angebote?q=Pasta Classic",
+      "source_note": "marktguru.de (strukturierte Daten)",
+      "manual": false,
+      "brand": "Barilla"
+    },
+    {
+      "name": "Nudeln",
+      "category": "Teigwaren & Reis",
+      "price": 1.01,
+      "currency": "EUR",
+      "retailer": "Thomas Philipps",
+      "retailer_key": "thomas-philipps",
+      "retailer_category": "Discounter",
+      "valid_from": "2026-11-01T00:00:00",
+      "valid_to": "2026-11-07T23:59:59",
+      "description": "versch. Sorten 500g",
+      "source_url": "https://www.marktguru.de/angebote?q=Nudeln",
+      "source_note": "marktguru.de (strukturierte Daten)",
+      "manual": false,
+      "brand": "Barilla"
+    },
+    {
+      "name": "Pasta",
+      "category": "Teigwaren & Reis",
+      "price": 1.89,
       "currency": "EUR",
       "retailer": "Lidl",
       "retailer_key": "lidl",
       "retailer_category": "Supermarkt",
-      "valid_from": "2026-10-28T00:00:00",
-      "valid_to": "2026-10-31T23:59:59",
-      "description": "400/500 g",
+      "valid_from": "2026-11-08T00:00:00",
+      "valid_to": "2026-11-14T23:59:59",
+      "description": "Versch. Sorten. Je 1 kg",
       "source_url": "https://www.marktguru.de/angebote?q=Pasta",
       "source_note": "marktguru.de (strukturierte Daten)",
       "manual": false,
