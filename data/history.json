@@ -91799,6 +91799,114 @@
       "station_key": "ARAL|48.546207|12.181083",
       "fuel": "Super E5",
       "price": 1.999
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Diesel",
+      "price": 2.229
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Diesel",
+      "price": 2.229
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Diesel",
+      "price": 2.229
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Diesel",
+      "price": 2.229
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.546949|12.112422",
+      "fuel": "Diesel",
+      "price": 2.229
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ARAL|48.546207|12.181083",
+      "fuel": "Diesel",
+      "price": 2.239
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Super E10",
+      "price": 1.919
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Super E10",
+      "price": 1.919
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Super E10",
+      "price": 1.929
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.546949|12.112422",
+      "fuel": "Super E10",
+      "price": 1.929
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ARAL|48.546207|12.181083",
+      "fuel": "Super E10",
+      "price": 1.939
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Super E10",
+      "price": 2.009
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Super E5",
+      "price": 1.979
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Super E5",
+      "price": 1.979
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Super E5",
+      "price": 1.979
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ESSO|48.546949|12.112422",
+      "fuel": "Super E5",
+      "price": 1.979
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Super E5",
+      "price": 1.989
+    },
+    {
+      "timestamp": "2026-11-08T21:50:32.894308+00:00",
+      "station_key": "ARAL|48.546207|12.181083",
+      "fuel": "Super E5",
+      "price": 1.999
     }
   ]
 }
