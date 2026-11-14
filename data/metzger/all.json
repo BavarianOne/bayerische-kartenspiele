@@ -3089,6 +3089,48 @@
       "angebote": [
         {
           "typ": "Wochenangebote",
+          "gueltig": "16.11.2026 - 21.11.2026",
+          "produkte": [
+            {
+              "name": "Rollbraten durchwachsen",
+              "preis": "1,08 €/100g",
+              "desc": "Frisch vom Tristlhof und aus eigener Tierhaltung"
+            },
+            {
+              "name": "Pfannengerichte vom Schwein",
+              "preis": "1,29 €/100g",
+              "desc": "versch. Sorten, fix und fertig gewürzt | Frisch vom Tristlhof und aus eigener Tierhaltung"
+            },
+            {
+              "name": "Wollwürste oder Bratwürste",
+              "preis": "1,19 €/100g",
+              "desc": "frisch gemacht, echt gut | Frisch aus „Stadler's Wurstküche“"
+            },
+            {
+              "name": "Kochsalami, klein oder groß",
+              "preis": "1,29 €/100g",
+              "desc": "frisch aus der Räucherkammer | Frisch aus „Stadler's Wurstküche“"
+            },
+            {
+              "name": "Hausgemachter Nudelsalat",
+              "preis": "1,09 €/100g",
+              "desc": "Spezialitäten"
+            },
+            {
+              "name": "🥩 Hackfleischtag (Montag)",
+              "preis": "4,98 €/500g",
+              "desc": "mageres Schwein und Rind"
+            },
+            {
+              "name": "🥩 Haxentag (Samstag)",
+              "preis": "0,79 €/100g",
+              "desc": "frisch und kross"
+            }
+          ],
+          "scraped_at": "2026-11-14T12:30:00.000000"
+        },
+        {
+          "typ": "Wochenangebote",
           "gueltig": "09.11.2026 - 14.11.2026",
           "produkte": [
             {

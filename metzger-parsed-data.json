@@ -315,7 +315,7 @@
       "city": "📍 Ergolding",
       "items": [
         {
-          "name": "Ochsenfetz’n (100 g)",
+          "name": "Ochsenfetz'n (100 g)",
           "preis": "1,99 €",
           "desc": "",
           "link": "",
@@ -887,6 +887,63 @@
           "name": "Cabanossi (100g)",
           "preis": "1,69 €",
           "desc": "",
+          "link": "",
+          "link_text": ""
+        }
+      ]
+    }
+  ],
+  "Woche bis 21.11.2026": [
+    {
+      "metzger": "Metzgerei vom Tristlhof (Andreas Stadler)",
+      "city": "📍 Frontenhausen / Landshut / Ergolding",
+      "items": [
+        {
+          "name": "Rollbraten durchwachsen",
+          "preis": "1,08 € / 100 g",
+          "desc": "Frisch vom Tristlhof und aus eigener Tierhaltung",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Pfannengerichte vom Schwein",
+          "preis": "1,29 € / 100 g",
+          "desc": "versch. Sorten, fix und fertig gewürzt | Frisch vom Tristlhof und aus eigener Tierhaltung",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Wollwürste oder Bratwürste",
+          "preis": "1,19 € / 100 g",
+          "desc": "frisch gemacht, echt gut | Frisch aus „Stadler's Wurstküche“",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Kochsalami, klein oder groß",
+          "preis": "1,29 € / 100 g",
+          "desc": "frisch aus der Räucherkammer | Frisch aus „Stadler's Wurstküche“",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "Hausgemachter Nudelsalat",
+          "preis": "1,09 € / 100 g",
+          "desc": "Spezialitäten",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "🥩 Hackfleischtag (Montag): mageres Schwein und Rind",
+          "preis": "4,98 € / 500 g",
+          "desc": "Aktionstage",
+          "link": "",
+          "link_text": ""
+        },
+        {
+          "name": "🥩 Haxentag (Samstag): frisch und kross",
+          "preis": "0,79 € / 100 g",
+          "desc": "Aktionstage",
           "link": "",
           "link_text": ""
         }
