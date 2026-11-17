@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interaktive Morse-Baum-Visualisierung</title>
+<title>Morse-Baum – Interaktiver Entscheidungsbaum</title>
 <style>
 :root {
---bg: #0d0d0d;
---bg-elevated: #161616;
+--bg: #0a0a0f;
+--bg-elevated: #12121a;
 --fg: #e8e8e8;
 --fg-muted: #888;
 --accent: #ffd700;
 --accent-dim: #b89600;
+--node-bg: #1a1a2e;
+--node-border: #333;
+--node-active-bg: #ffd700;
+--node-active-fg: #0a0a0f;
+--node-complete-bg: #1a4a1a;
+--node-complete-border: #4ade80;
 --path-active: #ffd700;
---path-inactive: #333;
---node-fill: #1a1a1a;
---node-stroke: #444;
---node-active-fill: #ffd700;
---node-active-stroke: #fff;
---input-bg: #1a1a1a;
+--path-inactive: #2a2a3a;
+--input-bg: #1a1a2e;
 --input-border: #333;
 --input-focus: #ffd700;
---success: #4ade80;
---error: #f87171;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,8 +35,8 @@ min-height: 100vh;
 display: flex;
 flex-direction: column;
 align-items: center;
-padding: 2rem 1rem;
-overflow-x: hidden;
+padding: 1.5rem 1rem;
+overflow-x: auto;
 }
 
 body::before {
@@ -44,87 +44,108 @@ content: '';
 position: fixed;
 inset: 0;
 background:
-radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,215,0,0.03) 0%, transparent 70%),
-radial-gradient(circle at 20% 80%, rgba(255,215,0,0.02) 0%, transparent 50%),
-radial-gradient(circle at 80% 20%, rgba(255,215,0,0.02) 0%, transparent 50%);
+radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,215,0,0.04) 0%, transparent 70%);
 pointer-events: none;
 z-index: -1;
 }
 
+header {
+text-align: center;
+margin-bottom: 1.5rem;
+padding: 0 1rem;
+}
+
 h1 {
-font-size: clamp(1.5rem, 4vw, 2.5rem);
+font-size: clamp(1.3rem, 3.5vw, 2rem);
 font-weight: 600;
-letter-spacing: 0.15em;
+letter-spacing: 0.1em;
 text-transform: uppercase;
 color: var(--accent);
-margin-bottom: 0.5rem;
-text-align: center;
+margin-bottom: 0.25rem;
 }
 
 .subtitle {
 color: var(--fg-muted);
-font-size: 0.875rem;
-margin-bottom: 2rem;
-text-align: center;
-max-width: 600px;
+font-size: 0.8rem;
+text-transform: uppercase;
+letter-spacing: 0.15em;
 }
 
-.container {
+main {
 width: 100%;
-max-width: 1200px;
+max-width: 1400px;
 display: flex;
 flex-direction: column;
-gap: 2rem;
+gap: 1.5rem;
 }
 
 .input-section {
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
-border-radius: 12px;
-padding: 1.5rem;
-transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.input-section:focus-within {
-border-color: var(--input-focus);
-box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
-}
-
-.input-label {
-display: block;
-font-size: 0.75rem;
-text-transform: uppercase;
-letter-spacing: 0.1em;
-color: var(--fg-muted);
-margin-bottom: 0.75rem;
+border-radius: 10px;
+padding: 1.25rem;
 }
 
 .input-row {
 display: flex;
 gap: 1rem;
 flex-wrap: wrap;
-align-items: flex-end;
+align-items: center;
 }
 
-.input-wrapper {
-flex: 1;
-min-width: 280px;
-position: relative;
+.input-label {
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 0.1em;
+color: var(--fg-muted);
+margin-right: auto;
+white-space: nowrap;
+}
+
+.mode-toggle {
+display: flex;
+gap: 0.25rem;
+background: var(--input-bg);
+border: 1px solid var(--input-border);
+border-radius: 6px;
+padding: 0.2rem;
+}
+
+.mode-btn {
+background: transparent;
+border: none;
+color: var(--fg-muted);
+font-family: inherit;
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 0.05em;
+padding: 0.4rem 0.8rem;
+border-radius: 4px;
+cursor: pointer;
+transition: all 0.15s;
+white-space: nowrap;
+}
+
+.mode-btn.active {
+background: var(--accent);
+color: var(--bg);
+font-weight: 600;
 }
 
 #input {
-width: 100%;
+flex: 1;
+min-width: 250px;
 background: var(--input-bg);
 border: 1px solid var(--input-border);
-border-radius: 8px;
-padding: 1rem 1.25rem;
+border-radius: 6px;
+padding: 0.75rem 1rem;
 font-family: inherit;
-font-size: 1.125rem;
+font-size: 1rem;
 color: var(--fg);
 line-height: 1.5;
-min-height: 80px;
+min-height: 50px;
 resize: vertical;
-transition: border-color 0.2s, box-shadow 0.2s;
+transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 #input:focus {
@@ -135,46 +156,25 @@ box-shadow: 0 0 0 2px rgba(255,215,0,0.2);
 
 #input::placeholder { color: var(--fg-muted); opacity: 0.6; }
 
-.mode-toggle {
-display: flex;
-gap: 0.5rem;
-background: var(--input-bg);
-border: 1px solid var(--input-border);
-border-radius: 8px;
-padding: 0.25rem;
-}
-
-.mode-btn {
-background: transparent;
-border: none;
-color: var(--fg-muted);
-font-family: inherit;
-font-size: 0.8rem;
-text-transform: uppercase;
-letter-spacing: 0.05em;
-padding: 0.5rem 1rem;
-border-radius: 6px;
-cursor: pointer;
-transition: all 0.2s;
-}
-
-.mode-btn.active {
-background: var(--accent);
-color: var(--bg);
-font-weight: 600;
-}
-
-.mode-btn:not(.active):hover { color: var(--fg); }
-
 .tree-section {
 position: relative;
+background: var(--bg-elevated);
+border: 1px solid var(--input-border);
+border-radius: 10px;
+padding: 1.5rem;
+overflow-x: auto;
 }
 
-.tree-canvas {
+.tree-wrapper {
+position: relative;
+min-height: 500px;
+}
+
+#treeSvg {
 width: 100%;
 height: auto;
-max-height: 70vh;
 display: block;
+min-width: 1200px;
 }
 
 .legend {
@@ -183,467 +183,454 @@ gap: 1.5rem;
 justify-content: center;
 flex-wrap: wrap;
 margin-top: 1rem;
-font-size: 0.75rem;
+padding-top: 1rem;
+border-top: 1px solid var(--input-border);
+font-size: 0.7rem;
 color: var(--fg-muted);
 }
 
 .legend-item {
 display: flex;
 align-items: center;
-gap: 0.5rem;
+gap: 0.4rem;
 }
 
-.legend-dot {
-width: 10px;
-height: 10px;
+.legend-node {
+width: 12px;
+height: 12px;
 border-radius: 50%;
+border: 2px solid;
 }
 
-.legend-dot.active { background: var(--path-active); box-shadow: 0 0 8px var(--path-active); }
-.legend-dot.inactive { background: var(--path-inactive); }
-.legend-dot.node-active { background: var(--node-active-fill); border: 2px solid var(--node-active-stroke); }
-.legend-dot.node-inactive { background: var(--node-fill); border: 2px solid var(--node-stroke); }
+.legend-node.inactive { background: var(--node-bg); border-color: var(--node-border); }
+.legend-node.active { background: var(--node-active-bg); border-color: var(--node-active-bg); }
+.legend-node.complete { background: var(--node-complete-bg); border-color: var(--node-complete-border); }
 
-.current-char {
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 1rem;
-margin-top: 1rem;
-padding: 1rem;
+.legend-path {
+width: 24px;
+height: 3px;
+border-radius: 2px;
+}
+
+.legend-path.active { background: var(--path-active); box-shadow: 0 0 6px var(--path-active); }
+.legend-path.inactive { background: var(--path-inactive); }
+
+.output-section {
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
-border-radius: 12px;
+border-radius: 10px;
+padding: 1.25rem;
 }
 
-.current-char-label {
-font-size: 0.75rem;
+.output-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 1rem;
+}
+
+.output-item {
+display: flex;
+flex-direction: column;
+gap: 0.25rem;
+}
+
+.output-label {
+font-size: 0.65rem;
 text-transform: uppercase;
 letter-spacing: 0.1em;
 color: var(--fg-muted);
 }
 
-.current-char-value {
-font-size: clamp(2rem, 6vw, 4rem);
-font-weight: 700;
+.output-value {
+font-size: 1.25rem;
+font-weight: 600;
 color: var(--accent);
 font-family: inherit;
 letter-spacing: 0.05em;
-min-width: 80px;
-text-align: center;
-transition: transform 0.15s, color 0.15s;
+word-break: break-all;
 }
 
-.current-char-value.found { color: var(--success); transform: scale(1.1); }
-.current-char-value.invalid { color: var(--error); }
-
-.current-char-morse {
-font-family: inherit;
+.output-value.morse {
 font-size: 1.5rem;
+letter-spacing: 0.3em;
 color: var(--fg);
-letter-spacing: 0.2em;
-min-height: 2.5rem;
-display: flex;
-align-items: center;
-justify-content: center;
 }
 
-.path-display {
-margin-top: 1rem;
-padding: 1rem;
-background: var(--bg-elevated);
-border: 1px solid var(--input-border);
-border-radius: 12px;
-font-size: 0.875rem;
-}
-
-.path-display-label {
+.help-text {
 font-size: 0.7rem;
-text-transform: uppercase;
-letter-spacing: 0.1em;
 color: var(--fg-muted);
-margin-bottom: 0.5rem;
+text-align: center;
+margin-top: 0.5rem;
+line-height: 1.6;
 }
 
-.path-steps {
-display: flex;
-flex-wrap: wrap;
-gap: 0.5rem;
-align-items: center;
-font-family: inherit;
-}
-
-.path-step {
-padding: 0.25rem 0.75rem;
+.help-text kbd {
 background: var(--input-bg);
 border: 1px solid var(--input-border);
-border-radius: 6px;
-font-size: 0.875rem;
-color: var(--fg-muted);
-transition: all 0.2s;
-}
-
-.path-step.active {
-background: rgba(255,215,0,0.15);
-border-color: var(--accent);
+border-radius: 4px;
+padding: 0.1rem 0.4rem;
+font-family: inherit;
+font-size: 0.65rem;
 color: var(--accent);
-font-weight: 600;
-}
-
-.path-step.letter {
-background: rgba(74,222,128,0.15);
-border-color: var(--success);
-color: var(--success);
-font-weight: 700;
+margin: 0 0.15rem;
 }
 
 @media (max-width: 768px) {
 .input-row { flex-direction: column; align-items: stretch; }
-.mode-toggle { justify-content: center; }
-.tree-canvas { max-height: 60vh; }
+.input-label { margin-right: 0; margin-bottom: 0.5rem; }
+.mode-toggle { justify-content: center; width: 100%; }
+.tree-section { padding: 1rem; }
+#treeSvg { min-width: 100%; }
 }
 </style>
 </head>
 <body>
-<h1>Morse Baum</h1>
-<p class="subtitle">Interaktive Visualisierung des internationalen Morse-Code-Entscheidungsbaums — Punkt = links, Strich = rechts</p>
+<header>
+<h1>Morse-Baum</h1>
+<p class="subtitle">Internationaler Morse-Code als Binärbaum — Punkt = links, Strich = rechts</p>
+</header>
 
-<div class="container">
-<section class="input-section">
-<div class="input-label">Eingabe</div>
+<main>
+<section class="input-section" aria-label="Eingabe">
 <div class="input-row">
-<div class="input-wrapper">
-<textarea id="input" placeholder="Text eingeben (A–Z, 0–9) oder Morse-Code (· – / Leerzeichen)…" spellcheck="false" aria-label="Eingabe für Morse-Text oder Morse-Code"></textarea>
+<span class="input-label">Modus</span>
+<div class="mode-toggle" role="radiogroup" aria-label="Eingabemodus">
+<button class="mode-btn active" data-mode="text" role="radio" aria-checked="true">Text → Baum</button>
+<button class="mode-btn" data-mode="morse" role="radio" aria-checked="false">Morse → Text</button>
 </div>
-<div class="mode-toggle">
-<button class="mode-btn active" data-mode="text" aria-pressed="true">Text → Morse</button>
-<button class="mode-btn" data-mode="morse" aria-pressed="false">Morse → Text</button>
+<span class="input-label" style="margin-left:auto; margin-right:0;">Eingabe</span>
 </div>
+<div class="input-row" style="margin-top:0.75rem;">
+<textarea id="input" placeholder="Text eingeben (A–Z, 0–9, ÄÖÜßCH) oder Morse (· – / Leer)…" spellcheck="false" aria-label="Eingabe für Morse-Text oder Morse-Code" rows="2"></textarea>
 </div>
 </section>
 
 <section class="tree-section" aria-label="Morse-Baum-Visualisierung">
-<canvas class="tree-canvas" id="canvas" aria-hidden="true"></canvas>
+<div class="tree-wrapper" id="treeWrapper">
+<svg id="treeSvg" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Morse-Code-Binärbaum"></svg>
+</div>
 <div class="legend">
-<div class="legend-item"><span class="legend-dot node-active"></span> Aktiver Knoten</div>
-<div class="legend-item"><span class="legend-dot node-inactive"></span> Inaktiver Knoten</div>
-<div class="legend-item"><span class="legend-dot active"></span> Aktiver Pfad</div>
-<div class="legend-item"><span class="legend-dot inactive"></span> Inaktiver Pfad</div>
+<div class="legend-item"><span class="legend-node inactive"></span> Knoten</div>
+<div class="legend-item"><span class="legend-node active"></span> Aktiver Pfad</div>
+<div class="legend-item"><span class="legend-node complete"></span> Erreichter Buchstabe</div>
+<div class="legend-item"><span class="legend-path inactive"></span> Inaktiver Pfad</div>
+<div class="legend-item"><span class="legend-path active"></span> Aktiver Pfad</div>
 </div>
 </section>
 
-<div class="current-char">
-<div>
-<div class="current-char-label">Aktueller Buchstabe</div>
-<div class="current-char-value" id="currentChar">—</div>
+<section class="output-section" aria-label="Ergebnis">
+<div class="output-grid">
+<div class="output-item">
+<span class="output-label">Aktueller Knoten</span>
+<span class="output-value" id="currentNode">START</span>
 </div>
-<div class="current-char-morse" id="currentMorse" aria-live="polite"></div>
+<div class="output-item">
+<span class="output-label">Aktueller Pfad</span>
+<span class="output-value morse" id="currentPath">—</span>
 </div>
-
-<div class="path-display">
-<div class="path-display-label">Navigationspfad</div>
-<div class="path-steps" id="pathSteps" aria-live="polite"></div>
+<div class="output-item">
+<span class="output-label">Ergebnis</span>
+<span class="output-value" id="outputText">—</span>
 </div>
 </div>
+<p class="help-text">
+<kbd>.</kbd> / <kbd>-</kbd> = Punkt/Strich · <kbd>Space</kbd> = Buchstabe bestätigen · <kbd>Backspace</kbd> = zurück · <kbd>Esc</kbd> = zurücksetzen
+</p>
+</section>
+</main>
 
 <script>
 // ============================================
-// MORSE TREE DATA STRUCTURE
+// MORSE TREE DATA — Complete ITU tree up to 6 elements
 // ============================================
-const MORSE_TREE = {
-'': { left: null, right: null, char: 'START' },
-'.': { char: 'E' },
-'-': { char: 'T' },
-'..': { char: 'I' },
-'.-': { char: 'A' },
-'-.': { char: 'N' },
-'--': { char: 'M' },
-'...': { char: 'S' },
-'..-': { char: 'U' },
-'.-.': { char: 'R' },
-'.--': { char: 'W' },
-'-..': { char: 'D' },
-'-.-': { char: 'K' },
-'--.': { char: 'G' },
-'---': { char: 'O' },
-'....': { char: 'H' },
-'...-': { char: 'V' },
-'..-.': { char: 'F' },
-'..--': { char: 'É' },
-'.-..': { char: 'L' },
-'.-.-': { char: 'Ä' },
-'.--.': { char: 'P' },
-'.---': { char: 'J' },
-'-...': { char: 'B' },
-'-..-': { char: 'X' },
-'-.-.': { char: 'C' },
-'-.--': { char: 'Y' },
-'--..': { char: 'Z' },
-'--.-': { char: 'Q' },
-'---.': { char: 'Ö' },
-'----': { char: 'CH' },
-'.....': { char: '5' },
-'....-': { char: '4' },
-'...-.': { char: 'Ü' },
-'...--': { char: '3' },
-'..-..': { char: 'ß' },
-'..-.-': { char: 'È' },
-'..--.': { char: '2' },
-'..---': { char: '1' },
-'.-...': { char: '&' },
-'.-.-.': { char: '+' },
-'.--..': { char: '6' },
-'.--.-': { char: '7' },
-'.---.': { char: '8' },
-'.----': { char: '9' },
-'-....': { char: '6' },
-'-...-': { char: '=' },
-'-..-.': { char: '/' },
-'-..--': { char: '7' },
-'-.-..': { char: '8' },
-'-.-.-': { char: '9' },
-'--...': { char: ':' },
-'--..-': { char: '?' },
-'--.-.': { char: '0' },
-'---..': { char: '\'' },
-'---.-': { char: '@' },
-'----.': { char: '0' }
+const TREE_DATA = {
+'': { char: 'START', left: '.', right: '-' },
+
+// Level 1
+'.': { char: 'E', code: '.', left: '..', right: '.-' },
+'-': { char: 'T', code: '-', left: '-.', right: '--' },
+
+// Level 2
+'..': { char: 'I', code: '..', left: '...', right: '..-' },
+'.-': { char: 'A', code: '.-', left: '.-.', right: '.--' },
+'-.': { char: 'N', code: '-.', left: '-..', right: '-.-' },
+'--': { char: 'M', code: '--', left: '--.', right: '---' },
+
+// Level 3
+'...': { char: 'S', code: '...', left: '....', right: '...-' },
+'..-': { char: 'U', code: '..-', left: '..-.', right: '..--' },
+'.-.': { char: 'R', code: '.-.', left: '.-..', right: '.-.-' },
+'.--': { char: 'W', code: '.--', left: '.--.', right: '.---' },
+'-..': { char: 'D', code: '-..', left: '-...', right: '-..-' },
+'-.-': { char: 'K', code: '-.-', left: '-.-.', right: '-.--' },
+'--.': { char: 'G', code: '--.', left: '--..', right: '--.-' },
+'---': { char: 'O', code: '---', left: '---.', right: '----' },
+
+// Level 4 (letters)
+'....': { char: 'H', code: '....', left: '.....', right: '....-' },
+'...-': { char: 'V', code: '...-', left: '...-.', right: '...--' },
+'..-.': { char: 'F', code: '..-.', left: '..-..', right: '..-.-' },
+'..--': { char: 'É', code: '..--', left: '..--.', right: '..---' },
+'.-..': { char: 'L', code: '.-..', left: '.-...', right: '.-.-.' },
+'.-.-': { char: 'Ä', code: '.-.-', left: '.-.-.', right: '.-.--' },
+'.--.': { char: 'P', code: '.--.', left: '.--..', right: '.--.-' },
+'.---': { char: 'J', code: '.---', left: '.---.', right: '.----' },
+'-...': { char: 'B', code: '-...', left: '-....', right: '-...-' },
+'-..-': { char: 'X', code: '-..-', left: '-..-.', right: '-..--' },
+'-.-.': { char: 'C', code: '-.-.', left: '-.-..', right: '-.-.-' },
+'-.--': { char: 'Y', code: '-.--', left: '-.--.', right: '-.---' },
+'--..': { char: 'Z', code: '--..', left: '--...', right: '--..-' },
+'--.-': { char: 'Q', code: '--.-', left: '--.-.', right: '--.--' },
+'---.': { char: 'Ö', code: '---.', left: '---..', right: '---.-' },
+'----': { char: 'CH', code: '----', left: '----.', right: '-----' },
+
+// Level 5 (digits + some punctuation)
+'.....': { char: '5', code: '.....' },
+'....-': { char: '4', code: '....-' },
+'...-.': { char: 'Ü', code: '...-.' },
+'...--': { char: '3', code: '...--' },
+'..-..': { char: 'ß', code: '..-..' },
+'..-.-': { char: 'È', code: '..-.-' },
+'..--.': { char: '2', code: '..--.' },
+'..---': { char: '1', code: '..---' },
+'.-...': { char: '&', code: '.-...' },
+'.-.-.': { char: '+', code: '.-.-.' },
+'.--..': { char: '6', code: '.--..' },
+'.--.-': { char: '7', code: '.--.-' },
+'.---.': { char: '8', code: '.---.' },
+'.----': { char: '9', code: '.----' },
+'-....': { char: '6', code: '-....' },
+'-...-': { char: '=', code: '-...-' },
+'-..-.': { char: '/', code: '-..-.' },
+'-..--': { char: '7', code: '-..--' },
+'-.-..': { char: '8', code: '-.-..' },
+'-.-.-': { char: '9', code: '-.-.-' },
+'--...': { char: ':', code: '--...' },
+'--..-': { char: '?', code: '--..-' },
+'--.-.': { char: '0', code: '--.-.' },
+'---..': { char: '\'', code: '---..' },
+'---.-': { char: '@', code: '---.-' },
+'----.': { char: '0', code: '----.' },
+'-----': { char: '0', code: '-----' },
+
+// Level 6 (punctuation)
+'......': { char: ' ', code: '......' },
 };
 
-// Flatten for lookup
-const MORSE_TO_CHAR = {};
-const CHAR_TO_MORSE = {};
-Object.entries(MORSE_TREE).forEach(([code, node]) => {
+// Lookup maps
+const CODE_TO_CHAR = {};
+const CHAR_TO_CODE = {};
+Object.entries(TREE_DATA).forEach(([code, node]) => {
 if (node.char && node.char !== 'START') {
-MORSE_TO_CHAR[code] = node.char;
-CHAR_TO_MORSE[node.char] = code;
+CODE_TO_CHAR[code] = node.char;
+CHAR_TO_CODE[node.char] = code;
 }
 });
 
 // Special mappings
-CHAR_TO_MORSE[' '] = '/';
-CHAR_TO_MORSE['Ä'] = '.-.-';
-CHAR_TO_MORSE['Ö'] = '---.';
-CHAR_TO_MORSE['Ü'] = '...-.';
-CHAR_TO_MORSE['CH'] = '----';
-CHAR_TO_MORSE['ß'] = '..-..';
-CHAR_TO_MORSE['É'] = '..--';
-CHAR_TO_MORSE['È'] = '..-.-';
+CHAR_TO_CODE[' '] = '/';
+CHAR_TO_CODE['Ä'] = '.-.-';
+CHAR_TO_CODE['Ö'] = '---.';
+CHAR_TO_CODE['Ü'] = '...-.';
+CHAR_TO_CODE['CH'] = '----';
+CHAR_TO_CODE['ß'] = '..-..';
+CHAR_TO_CODE['É'] = '..--';
+CHAR_TO_CODE['È'] = '..-.-';
 
 // ============================================
-// STATE
+// TREE LAYOUT COMPUTATION
 // ============================================
-const state = {
-mode: 'text', // 'text' or 'morse'
-input: '',
-currentMorsePath: '', // accumulated . and - for current character
-currentChar: null,
-pathHistory: [], // array of { morse, char, complete }
-animationFrame: null
-};
-
-// ============================================
-// DOM ELEMENTS
-// ============================================
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const inputEl = document.getElementById('input');
-const currentCharEl = document.getElementById('currentChar');
-const currentMorseEl = document.getElementById('currentMorse');
-const pathStepsEl = document.getElementById('pathSteps');
-const modeBtns = document.querySelectorAll('.mode-btn');
-
-// ============================================
-// CANVAS SETUP & RENDERING
-// ============================================
-let dpr = window.devicePixelRatio || 1;
-let treeLayout = null;
-
-function resizeCanvas() {
-const rect = canvas.parentElement.getBoundingClientRect();
-dpr = window.devicePixelRatio || 1;
-canvas.width = Math.min(rect.width, 1100) * dpr;
-canvas.height = Math.max(600, Math.min(700, window.innerHeight * 0.65)) * dpr;
-canvas.style.width = (canvas.width / dpr) + 'px';
-canvas.style.height = (canvas.height / dpr) + 'px';
-computeTreeLayout();
-drawTree();
-}
-
-function computeTreeLayout() {
-const w = canvas.width / dpr;
-const h = canvas.height / dpr;
-const paddingX = 60;
-const paddingY = 60;
-const usableW = w - paddingX * 2;
-const usableH = h - paddingY * 2;
-
-// Find max depth
+function computeLayout() {
 let maxDepth = 0;
-Object.keys(MORSE_TREE).forEach(code => {
+Object.keys(TREE_DATA).forEach(code => {
 if (code.length > maxDepth) maxDepth = code.length;
 });
 
-const levelHeight = usableH / (maxDepth + 1);
-const maxNodesAtBottom = Math.pow(2, maxDepth);
-const nodeSpacing = usableW / (maxNodesAtBottom + 1);
+const width = 1400;
+const height = 600;
+const paddingTop = 60;
+const paddingBottom = 40;
+const paddingSide = 80;
+const usableHeight = height - paddingTop - paddingBottom;
+const levelHeight = usableHeight / (maxDepth + 1);
 
-treeLayout = {};
+const layout = {};
 
-// Position root
-treeLayout[''] = { x: w / 2, y: paddingY + levelHeight * 0.5, depth: 0 };
+layout[''] = {
+x: width / 2,
+y: paddingTop + levelHeight * 0.5,
+depth: 0,
+code: '',
+char: 'START'
+};
 
-// Position all nodes
-Object.keys(MORSE_TREE).sort((a, b) => a.length - b.length).forEach(code => {
-if (code === '') return;
+for (let depth = 1; depth <= maxDepth; depth++) {
+const nodesAtDepth = Object.keys(TREE_DATA).filter(c => c.length === depth);
+nodesAtDepth.forEach(code => {
 const parentCode = code.slice(0, -1);
-const parent = treeLayout[parentCode];
+const parent = layout[parentCode];
 if (!parent) return;
-const depth = code.length;
+
 const isLeft = code.endsWith('.');
-const offset = (usableW / Math.pow(2, depth)) * (isLeft ? -0.5 : 0.5);
-treeLayout[code] = {
-x: parent.x + offset,
-y: paddingY + levelHeight * (depth - 0.5),
+const maxNodesAtDepth = Math.pow(2, depth);
+const spacing = (width - paddingSide * 2) / (maxNodesAtDepth + 1);
+const index = parseInt(code.replace(/\./g, '0').replace(/-/g, '1'), 2) + 1;
+
+layout[code] = {
+x: paddingSide + index * spacing,
+y: paddingTop + levelHeight * (depth - 0.5),
 depth,
+code,
+char: TREE_DATA[code]?.char || '',
 parent: parentCode,
 isLeft
 };
 });
 }
 
-function drawTree() {
-const w = canvas.width / dpr;
-const h = canvas.height / dpr;
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-ctx.save();
-ctx.scale(dpr, dpr);
+return { layout, width, height, maxDepth, levelHeight };
+}
 
-// Draw connections first (behind nodes)
-drawConnections();
+const { layout, width, height, maxDepth, levelHeight } = computeLayout();
+
+// ============================================
+// SVG RENDERING
+// ============================================
+const svg = document.getElementById('treeSvg');
+const treeWrapper = document.getElementById('treeWrapper');
+
+function renderTree(activePath = '', completedPaths = new Set()) {
+let html = '';
+
+// Draw edges first (behind nodes)
+Object.entries(layout).forEach(([code, node]) => {
+if (code === '') return;
+const parent = layout[node.parent];
+if (!parent) return;
+
+const isActive = activePath.startsWith(code) && code !== '';
+const isCompleted = completedPaths.has(code);
+
+html += `
+<line
+x1="${parent.x}" y1="${parent.y}"
+x2="${node.x}" y2="${node.y}"
+stroke="${isActive ? '#ffd700' : (isCompleted ? '#4ade80' : '#2a2a3a')}"
+stroke-width="${isActive ? 3 : (isCompleted ? 2.5 : 1.5)}"
+stroke-linecap="round"
+${isActive ? 'filter="url(#glow)"' : ''}
+/>
+`;
+});
 
 // Draw nodes
-drawNodes();
+Object.entries(layout).forEach(([code, node]) => {
+const isActive = code === activePath && code !== '';
+const isCompleted = completedPaths.has(code);
+const isOnPath = activePath.startsWith(code) && code !== '';
+const hasChar = node.char && node.char !== 'START';
 
-// Draw active path highlight
-drawActivePath();
+const radius = Math.max(16, 22 - node.depth * 1.5);
+let fill, stroke, strokeWidth, textColor, fontWeight;
 
-ctx.restore();
-}
-
-function drawConnections() {
-ctx.lineWidth = 1.5;
-ctx.strokeStyle = var('--path-inactive') || '#333';
-
-Object.entries(treeLayout).forEach(([code, node]) => {
-if (code === '') return;
-const parent = treeLayout[node.parent];
-if (!parent) return;
-
-const isActive = state.currentMorsePath.startsWith(code) ||
-(state.pathHistory.some(p => p.morse === code && p.complete));
-
-ctx.beginPath();
-ctx.moveTo(parent.x, parent.y);
-ctx.lineTo(node.x, node.y);
-ctx.strokeStyle = isActive ? '#ffd700' : '#333';
-ctx.lineWidth = isActive ? 3 : 1.5;
 if (isActive) {
-ctx.shadowColor = '#ffd700';
-ctx.shadowBlur = 8;
+fill = '#ffd700';
+stroke = '#fff';
+strokeWidth = 3;
+textColor = '#0a0a0f';
+fontWeight = '700';
+} else if (isCompleted) {
+fill = '#1a4a1a';
+stroke = '#4ade80';
+strokeWidth = 2.5;
+textColor = '#4ade80';
+fontWeight = '700';
+} else if (isOnPath) {
+fill = '#2a2a1a';
+stroke = '#ffd700';
+strokeWidth = 2;
+textColor = '#ffd700';
+fontWeight = '600';
 } else {
-ctx.shadowBlur = 0;
+fill = '#1a1a2e';
+stroke = '#333';
+strokeWidth = 1.5;
+textColor = hasChar ? '#ccc' : '#555';
+fontWeight = hasChar ? '500' : '400';
 }
-ctx.stroke();
-ctx.shadowBlur = 0;
-});
-}
 
-function drawNodes() {
-const radius = 18;
-const fontSize = 11;
+const fontSize = Math.max(9, 13 - node.depth);
 
-Object.entries(treeLayout).forEach(([code, node]) => {
-const isActiveNode = code === state.currentMorsePath && code !== '';
-const isCompletedNode = state.pathHistory.some(p => p.morse === code && p.complete);
-const isCurrentPathNode = state.currentMorsePath.startsWith(code) && code !== '';
-
-ctx.beginPath();
-ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
-
-if (isActiveNode) {
-ctx.fillStyle = '#ffd700';
-ctx.strokeStyle = '#fff';
-ctx.lineWidth = 3;
-ctx.shadowColor = '#ffd700';
-ctx.shadowBlur = 15;
-} else if (isCompletedNode) {
-ctx.fillStyle = '#1a5c1a';
-ctx.strokeStyle = '#4ade80';
-ctx.lineWidth = 2.5;
-ctx.shadowColor = '#4ade80';
-ctx.shadowBlur = 10;
-} else if (isCurrentPathNode) {
-ctx.fillStyle = '#2a2a1a';
-ctx.strokeStyle = '#ffd700';
-ctx.lineWidth = 2;
-ctx.shadowColor = '#ffd700';
-ctx.shadowBlur = 6;
-} else {
-ctx.fillStyle = '#1a1a1a';
-ctx.strokeStyle = '#444';
-ctx.lineWidth = 1.5;
-ctx.shadowBlur = 0;
-}
-ctx.fill();
-ctx.stroke();
-ctx.shadowBlur = 0;
-
-// Label
-const label = MORSE_TREE[code]?.char || (code === '' ? '●' : '');
-ctx.font = `${fontSize}px 'IBM Plex Mono', monospace`;
-ctx.textAlign = 'center';
-ctx.textBaseline = 'middle';
-ctx.fillStyle = isActiveNode ? '#0d0d0d' : (isCompletedNode ? '#4ade80' : (isCurrentPathNode ? '#ffd700' : '#ccc'));
-ctx.fillText(label, node.x, node.y + (isActiveNode ? 0.5 : 0));
+html += `
+<g class="tree-node" data-code="${code}">
+<circle
+cx="${node.x}" cy="${node.y}"
+r="${radius}"
+fill="${fill}"
+stroke="${stroke}"
+stroke-width="${strokeWidth}"
+${isActive ? 'filter="url(#pulse)"' : ''}
+/>
+${hasChar ? `
+<text
+x="${node.x}" y="${node.y + fontSize * 0.35}"
+text-anchor="middle"
+dominant-baseline="central"
+font-size="${fontSize}"
+font-weight="${fontWeight}"
+fill="${textColor}"
+font-family="'IBM Plex Mono', monospace"
+pointer-events="none"
+>${node.char}</text>
+` : ''}
+</g>
+`;
 });
 
-// Draw root label
-const root = treeLayout[''];
-ctx.font = '10px monospace';
-ctx.fillStyle = '#888';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'top';
-ctx.fillText('START', root.x, root.y + 22);
+// Add filter definitions
+const defs = `
+<defs>
+<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+<feGaussianBlur stdDeviation="3" result="blur"/>
+<feMerge>
+<feMergeNode in="blur"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+</filter>
+<filter id="pulse" x="-50%" y="-50%" width="200%" height="200%">
+<feGaussianBlur stdDeviation="4" result="blur"/>
+<feMerge>
+<feMergeNode in="blur"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+<animate attributeName="stdDeviation" values="2;6;2" dur="1.5s" repeatCount="indefinite"/>
+</filter>
+</defs>
+`;
+
+svg.innerHTML = defs + html;
 }
 
-function drawActivePath() {
-// Additional visual feedback for the current traversal path
-if (!state.currentMorsePath) return;
+// ============================================
+// STATE
+// ============================================
+const state = {
+mode: 'text',
+input: '',
+currentPath: '',
+completedPaths: new Set(),
+outputChars: [],
+lastKeyTime: 0
+};
 
-const steps = state.currentMorsePath.split('').reduce((acc, step, i) => {
-acc.push(state.currentMorsePath.slice(0, i + 1));
-return acc;
-}, []);
-
-steps.forEach((code, i) => {
-const node = treeLayout[code];
-if (!node) return;
-const parentCode = code.slice(0, -1);
-const parent = treeLayout[parentCode];
-if (!parent) return;
-
-// Draw animated pulse on active edge
-const progress = (Date.now() / 300) % 1;
-const px = parent.x + (node.x - parent.x) * progress;
-const py = parent.y + (node.y - parent.y) * progress;
-
-ctx.beginPath();
-ctx.arc(px, py, 6, 0, Math.PI * 2);
-ctx.fillStyle = `rgba(255, 215, 0, ${0.6 - progress * 0.4})`;
-ctx.fill();
-});
-}
+// ============================================
+// DOM
+// ============================================
+const inputEl = document.getElementById('input');
+const currentNodeEl = document.getElementById('currentNode');
+const currentPathEl = document.getElementById('currentPath');
+const outputTextEl = document.getElementById('outputText');
+const modeBtns = document.querySelectorAll('.mode-btn');
 
 // ============================================
 // INPUT PROCESSING
@@ -658,14 +645,14 @@ processTextMode(raw);
 processMorseMode(raw);
 }
 
-updateUI();
-drawTree();
+updateDisplay();
+renderTree(state.currentPath, state.completedPaths);
 }
 
 function processTextMode(text) {
-state.pathHistory = [];
-state.currentMorsePath = '';
-state.currentChar = null;
+state.completedPaths.clear();
+state.currentPath = '';
+state.outputChars = [];
 
 const chars = text.toUpperCase().split('');
 let currentMorseForChar = '';
@@ -676,162 +663,235 @@ if (currentMorseForChar) {
 commitChar(currentMorseForChar);
 currentMorseForChar = '';
 }
-state.pathHistory.push({ morse: '/', char: ' ', complete: true });
+state.outputChars.push(' ');
+state.completedPaths.add('/');
 return;
 }
 
-const morse = CHAR_TO_MORSE[char];
+const morse = CHAR_TO_CODE[char];
 if (!morse) {
-state.pathHistory.push({ morse: '', char: char, complete: false, invalid: true });
+state.outputChars.push('?');
 return;
 }
 
-// Simulate step-by-step for this character
 morse.split('').forEach((symbol, i) => {
 currentMorseForChar += symbol;
 const isLast = i === morse.length - 1;
-state.pathHistory.push({
-morse: currentMorseForChar,
-char: isLast ? char : null,
-complete: isLast
-});
+if (isLast) {
+commitChar(currentMorseForChar);
+currentMorseForChar = '';
+}
 });
 
-currentMorseForChar = '';
 });
 
 if (currentMorseForChar) {
 commitChar(currentMorseForChar);
 }
 
-// Set current traversal to last incomplete or last char
-const lastIncomplete = [...state.pathHistory].reverse().find(p => !p.complete && p.morse);
-if (lastIncomplete) {
-state.currentMorsePath = lastIncomplete.morse;
-state.currentChar = MORSE_TO_CHAR[state.currentMorsePath] || null;
-} else if (state.pathHistory.length > 0) {
-const last = state.pathHistory[state.pathHistory.length - 1];
-if (last.complete && last.morse && last.morse !== '/') {
-state.currentMorsePath = last.morse;
-state.currentChar = last.char;
+const lastIncompleteIdx = state.outputChars.findLastIndex(c => c === '?');
+if (lastIncompleteIdx >= 0) {
+let morseAccum = '';
+for (let i = 0; i < text.length; i++) {
+const ch = text[i].toUpperCase();
+if (ch === ' ') { morseAccum = ''; continue; }
+const m = CHAR_TO_CODE[ch];
+if (m) {
+morseAccum += m;
+if (i === lastIncompleteIdx) {
+state.currentPath = morseAccum;
+break;
+}
+morseAccum = '';
+}
+}
+} else if (state.outputChars.length > 0) {
+const lastChar = state.outputChars[state.outputChars.length - 1];
+if (lastChar !== ' ' && lastChar !== '?' && CHAR_TO_CODE[lastChar]) {
+state.currentPath = CHAR_TO_CODE[lastChar];
 }
 }
 }
 
 function processMorseMode(morseInput) {
-state.pathHistory = [];
-state.currentMorsePath = '';
-state.currentChar = null;
+state.completedPaths.clear();
+state.currentPath = '';
+state.outputChars = [];
 
 let currentMorseForChar = '';
 const tokens = morseInput.split(/(\s+)/).filter(t => t.length > 0);
 
 tokens.forEach((token, tokenIndex) => {
-if (token.trim() === '' || token === ' ' || token === '/') {
+const cleanToken = token.trim();
+if (cleanToken === '' || cleanToken === '/' || cleanToken === ' ') {
 if (currentMorseForChar) {
 commitChar(currentMorseForChar);
 currentMorseForChar = '';
 }
-state.pathHistory.push({ morse: '/', char: ' ', complete: true });
+state.outputChars.push(' ');
+state.completedPaths.add('/');
 return;
 }
 
-// Only process dots and dashes
-const cleanToken = token.replace(/[^.\-]/g, '');
-cleanToken.split('').forEach((symbol, i) => {
+const morseOnly = cleanToken.replace(/[^.\-]/g, '');
+morseOnly.split('').forEach((symbol, i) => {
 if (symbol !== '.' && symbol !== '-') return;
 currentMorseForChar += symbol;
-const isLast = i === cleanToken.length - 1;
-state.pathHistory.push({
-morse: currentMorseForChar,
-char: isLast ? (MORSE_TO_CHAR[currentMorseForChar] || '?') : null,
-complete: isLast
-});
-});
-
-if (currentMorseForChar && !MORSE_TO_CHAR[currentMorseForChar]) {
-state.pathHistory.push({
-morse: currentMorseForChar,
-char: '?',
-complete: true,
-invalid: true
-});
-}
-
+const isLast = i === morseOnly.length - 1;
+if (isLast) {
+commitChar(currentMorseForChar);
 currentMorseForChar = '';
+}
+});
 });
 
 if (currentMorseForChar) {
 commitChar(currentMorseForChar);
 }
 
-// Current traversal
-const lastIncomplete = [...state.pathHistory].reverse().find(p => !p.complete && p.morse);
-if (lastIncomplete) {
-state.currentMorsePath = lastIncomplete.morse;
-state.currentChar = MORSE_TO_CHAR[state.currentMorsePath] || null;
-} else if (state.pathHistory.length > 0) {
-const last = state.pathHistory[state.pathHistory.length - 1];
-if (last.complete && last.morse && last.morse !== '/') {
-state.currentMorsePath = last.morse;
-state.currentChar = last.char;
+const lastIncompleteIdx = state.outputChars.findLastIndex(c => c === '?');
+if (lastIncompleteIdx >= 0) {
+let morseAccum = '';
+tokens.forEach((token, ti) => {
+const clean = token.trim().replace(/[^.\-]/g, '');
+if (ti <= lastIncompleteIdx) {
+morseAccum += clean;
+}
+});
+state.currentPath = morseAccum;
+} else if (state.outputChars.length > 0) {
+const lastChar = state.outputChars[state.outputChars.length - 1];
+if (lastChar !== ' ' && lastChar !== '?' && CHAR_TO_CODE[lastChar]) {
+state.currentPath = CHAR_TO_CODE[lastChar];
 }
 }
 }
 
 function commitChar(morse) {
-const char = MORSE_TO_CHAR[morse];
+const char = CODE_TO_CHAR[morse];
 if (char) {
-state.pathHistory.push({ morse, char, complete: true });
+state.outputChars.push(char);
+state.completedPaths.add(morse);
 } else {
-state.pathHistory.push({ morse, char: '?', complete: true, invalid: true });
+state.outputChars.push('?');
+state.completedPaths.add(morse);
 }
 }
 
 // ============================================
-// UI UPDATE
+// DISPLAY UPDATE
 // ============================================
-function updateUI() {
-// Current character display
-if (state.currentChar) {
-currentCharEl.textContent = state.currentChar;
-currentCharEl.className = 'current-char-value found';
-} else if (state.currentMorsePath) {
-currentCharEl.textContent = '?';
-currentCharEl.className = 'current-char-value invalid';
+function updateDisplay() {
+let currentNode = 'START';
+let currentPathDisplay = '—';
+
+if (state.currentPath) {
+const node = TREE_DATA[state.currentPath];
+if (node?.char) {
+currentNode = node.char;
 } else {
-currentCharEl.textContent = '—';
-currentCharEl.className = 'current-char-value';
+currentNode = '?';
+}
+currentPathDisplay = state.currentPath.replace(/\./g, '·').replace(/-/g, '–');
 }
 
-// Current morse display
-if (state.currentMorsePath) {
-currentMorseEl.textContent = state.currentMorsePath.replace(/\./g, '·').replace(/-/g, '–');
-} else {
-currentMorseEl.textContent = '';
+currentNodeEl.textContent = currentNode;
+currentPathEl.textContent = currentPathDisplay;
+outputTextEl.textContent = state.outputChars.join('') || '—';
 }
 
-// Path steps
-pathStepsEl.innerHTML = '';
-state.pathHistory.forEach((step, i) => {
-const el = document.createElement('span');
-el.className = 'path-step';
+// ============================================
+// KEYBOARD HANDLING (for morse mode direct input)
+// ============================================
+document.addEventListener('keydown', (e) => {
+if (state.mode !== 'morse') return;
+if (e.target === inputEl) return;
 
-if (step.morse === '/') {
-el.textContent = '␣';
-el.classList.add('letter');
-} else if (step.complete) {
-el.textContent = step.invalid ? `? (${step.morse.replace(/\./g, '·').replace(/-/g, '–')})` : step.char;
-el.classList.add('letter');
-if (step.invalid) el.style.borderColor = '#f87171';
-} else {
-el.textContent = step.morse.replace(/\./g, '·').replace(/-/g, '–');
-if (step.morse === state.currentMorsePath) {
-el.classList.add('active');
+const now = Date.now();
+state.lastKeyTime = now;
+
+if (e.key === '.' || e.key === '>') {
+e.preventDefault();
+appendMorse('.');
+} else if (e.key === '-' || e.key === '_' || e.key === '–') {
+e.preventDefault();
+appendMorse('-');
+} else if (e.key === ' ' || e.key === 'Space') {
+e.preventDefault();
+commitCurrentMorse();
+} else if (e.key === 'Backspace') {
+e.preventDefault();
+backspaceMorse();
+} else if (e.key === 'Escape') {
+e.preventDefault();
+resetMorse();
 }
-}
-pathStepsEl.appendChild(el);
 });
+
+function appendMorse(symbol) {
+state.currentPath += symbol;
+const node = TREE_DATA[state.currentPath];
+if (node?.char) {
+currentNodeEl.textContent = node.char;
+} else {
+currentNodeEl.textContent = '?';
+}
+currentPathEl.textContent = state.currentPath.replace(/\./g, '·').replace(/-/g, '–');
+renderTree(state.currentPath, state.completedPaths);
+}
+
+function commitCurrentMorse() {
+if (!state.currentPath) {
+state.outputChars.push(' ');
+outputTextEl.textContent = state.outputChars.join('');
+return;
+}
+const char = CODE_TO_CHAR[state.currentPath];
+state.outputChars.push(char || '?');
+state.completedPaths.add(state.currentPath);
+state.currentPath = '';
+currentNodeEl.textContent = 'START';
+currentPathEl.textContent = '—';
+outputTextEl.textContent = state.outputChars.join('');
+inputEl.value = state.outputChars.join('');
+renderTree('', state.completedPaths);
+}
+
+function backspaceMorse() {
+if (state.currentPath) {
+state.currentPath = state.currentPath.slice(0, -1);
+const node = TREE_DATA[state.currentPath];
+if (node?.char) {
+currentNodeEl.textContent = node.char;
+} else if (state.currentPath) {
+currentNodeEl.textContent = '?';
+} else {
+currentNodeEl.textContent = 'START';
+}
+currentPathEl.textContent = state.currentPath.replace(/\./g, '·').replace(/-/g, '–') || '—';
+renderTree(state.currentPath, state.completedPaths);
+} else if (state.outputChars.length > 0) {
+const last = state.outputChars.pop();
+if (last !== ' ') {
+const morse = CHAR_TO_CODE[last];
+if (morse) state.completedPaths.delete(morse);
+} else {
+state.completedPaths.delete('/');
+}
+outputTextEl.textContent = state.outputChars.join('') || '—';
+renderTree('', state.completedPaths);
+}
+}
+
+function resetMorse() {
+state.currentPath = '';
+state.completedPaths.clear();
+state.outputChars = [];
+currentNodeEl.textContent = 'START';
+currentPathEl.textContent = '—';
+outputTextEl.textContent = '—';
+inputEl.value = '';
+renderTree('', new Set());
 }
 
 // ============================================
@@ -843,38 +903,40 @@ modeBtns.forEach(btn => {
 btn.addEventListener('click', () => {
 modeBtns.forEach(b => {
 b.classList.remove('active');
-b.setAttribute('aria-pressed', 'false');
+b.setAttribute('aria-checked', 'false');
 });
 btn.classList.add('active');
-btn.setAttribute('aria-pressed', 'true');
+btn.setAttribute('aria-checked', 'true');
 state.mode = btn.dataset.mode;
 inputEl.placeholder = state.mode === 'text'
-? 'Text eingeben (A–Z, 0–9)…'
-: 'Morse-Code eingeben (· – / Leerzeichen)…';
+? 'Text eingeben (A–Z, 0–9, ÄÖÜßCH)…'
+: 'Morse eingeben (· – / Leer) oder Tasten . - Space Backspace';
 processInput();
 });
 });
 
-window.addEventListener('resize', () => {
-clearTimeout(state.resizeTimer);
-state.resizeTimer = setTimeout(resizeCanvas, 100);
-});
+// Touch support for tree navigation
+let touchStartX = 0;
+treeWrapper.addEventListener('touchstart', (e) => {
+touchStartX = e.touches[0].clientX;
+}, { passive: true });
 
-// Animation loop for pulsing path
-function animate() {
-if (state.currentMorsePath) {
-drawTree();
+treeWrapper.addEventListener('touchend', (e) => {
+if (state.mode !== 'morse') return;
+const touchEndX = e.changedTouches[0].clientX;
+const diff = touchEndX - touchStartX;
+if (Math.abs(diff) > 30) {
+if (diff > 0) appendMorse('-');
+else appendMorse('.');
 }
-state.animationFrame = requestAnimationFrame(animate);
-}
+}, { passive: true });
 
 // ============================================
 // INIT
 // ============================================
-resizeCanvas();
-animate();
+renderTree('', new Set());
+updateDisplay();
 
-// Handle initial input if any
 if (inputEl.value) processInput();
 </script>
 </body>
