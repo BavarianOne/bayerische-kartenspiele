@@ -11,6 +11,13 @@ on:
       - 'data/metzger/all.json'
       - 'sw-metzger.js'
       - 'metzger-manifest.json'
+      - 'index.html'
+      - 'morse-tree.html'
+      - '*.html'
+      - '*.js'
+      - '*.css'
+      - 'manifest.json'
+      - 'sw.js'
   workflow_dispatch:
 
 permissions:
