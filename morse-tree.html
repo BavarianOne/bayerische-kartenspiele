@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Morse-Baum – Interaktiver Entscheidungsbaum</title>
 <style>
 :root {
@@ -36,7 +36,7 @@ min-height: 100vh;
 display: flex;
 flex-direction: column;
 align-items: center;
-padding: 1rem;
+padding: 0.5rem;
 overflow-x: auto;
 }
 
@@ -51,22 +51,22 @@ z-index: -1;
 
 header {
 text-align: center;
-margin-bottom: 1rem;
-padding: 0 1rem;
+margin-bottom: 0.5rem;
+padding: 0 0.5rem;
 }
 
 h1 {
-font-size: clamp(1.3rem, 3.5vw, 2rem);
+font-size: clamp(1.1rem, 3.5vw, 1.6rem);
 font-weight: 600;
 letter-spacing: 0.1em;
 text-transform: uppercase;
 color: var(--accent);
-margin-bottom: 0.25rem;
+margin-bottom: 0.15rem;
 }
 
 .subtitle {
 color: var(--fg-muted);
-font-size: 0.8rem;
+font-size: 0.65rem;
 text-transform: uppercase;
 letter-spacing: 0.15em;
 }
@@ -76,25 +76,25 @@ width: 100%;
 max-width: 1800px;
 display: flex;
 flex-direction: column;
-gap: 1rem;
+gap: 0.5rem;
 }
 
 .input-section {
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
-border-radius: 10px;
-padding: 1rem;
+border-radius: 8px;
+padding: 0.75rem;
 }
 
 .input-row {
 display: flex;
-gap: 1rem;
+gap: 0.5rem;
 flex-wrap: wrap;
 align-items: center;
 }
 
 .input-label {
-font-size: 0.7rem;
+font-size: 0.6rem;
 text-transform: uppercase;
 letter-spacing: 0.1em;
 color: var(--fg-muted);
@@ -104,11 +104,11 @@ white-space: nowrap;
 
 .mode-toggle {
 display: flex;
-gap: 0.25rem;
+gap: 0.15rem;
 background: var(--input-bg);
 border: 1px solid var(--input-border);
-border-radius: 6px;
-padding: 0.2rem;
+border-radius: 4px;
+padding: 0.15rem;
 }
 
 .mode-btn {
@@ -116,11 +116,11 @@ background: transparent;
 border: none;
 color: var(--fg-muted);
 font-family: inherit;
-font-size: 0.7rem;
+font-size: 0.6rem;
 text-transform: uppercase;
 letter-spacing: 0.05em;
-padding: 0.4rem 0.8rem;
-border-radius: 4px;
+padding: 0.3rem 0.6rem;
+border-radius: 3px;
 cursor: pointer;
 transition: all 0.15s;
 white-space: nowrap;
@@ -134,16 +134,16 @@ font-weight: 600;
 
 #input {
 flex: 1;
-min-width: 250px;
+min-width: 0;
 background: var(--input-bg);
 border: 1px solid var(--input-border);
-border-radius: 6px;
-padding: 0.75rem 1rem;
+border-radius: 4px;
+padding: 0.5rem 0.75rem;
 font-family: inherit;
-font-size: 1rem;
+font-size: 0.9rem;
 color: var(--fg);
-line-height: 1.5;
-min-height: 50px;
+line-height: 1.4;
+min-height: 40px;
 resize: vertical;
 transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -159,51 +159,51 @@ box-shadow: 0 0 0 2px rgba(255,215,0,0.2);
 /* Info panel ABOVE tree */
 .info-panel {
 display: flex;
-gap: 1rem;
+gap: 0.5rem;
 flex-wrap: wrap;
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
-border-radius: 10px;
-padding: 1rem;
+border-radius: 8px;
+padding: 0.6rem;
 }
 
 .info-panel-item {
 flex: 1;
-min-width: 200px;
+min-width: 140px;
 background: var(--panel-bg);
 border: 1px solid var(--input-border);
-border-radius: 8px;
-padding: 0.75rem 1rem;
+border-radius: 6px;
+padding: 0.5rem 0.75rem;
 display: flex;
 flex-direction: column;
-gap: 0.5rem;
+gap: 0.3rem;
 }
 
 .info-panel-label {
-font-size: 0.6rem;
+font-size: 0.5rem;
 text-transform: uppercase;
 letter-spacing: 0.1em;
 color: var(--fg-muted);
 }
 
 .info-panel-value {
-font-size: 1.5rem;
+font-size: 1.2rem;
 font-weight: 700;
 color: var(--accent);
 font-family: inherit;
 letter-spacing: 0.05em;
-line-height: 1.2;
+line-height: 1.1;
 word-break: break-all;
 }
 
 .info-panel-value.morse {
-font-size: 1.25rem;
-letter-spacing: 0.3em;
+font-size: 1rem;
+letter-spacing: 0.25em;
 color: var(--fg);
 }
 
 .info-panel-value.text {
-font-size: 1.1rem;
+font-size: 0.9rem;
 font-weight: 500;
 color: var(--fg);
 }
@@ -212,33 +212,33 @@ color: var(--fg);
 position: relative;
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
-border-radius: 10px;
-padding: 1rem;
+border-radius: 8px;
+padding: 0.75rem;
 display: flex;
 flex-direction: column;
-min-height: 650px;
+min-height: 0; /* allow shrinking */
 }
 
 .tree-toolbar {
 display: flex;
-gap: 0.5rem;
-margin-bottom: 0.75rem;
+gap: 0.35rem;
+margin-bottom: 0.5rem;
 flex-wrap: wrap;
 }
 
 .toolbar-btn {
 background: var(--input-bg);
 border: 1px solid var(--input-border);
-border-radius: 6px;
-padding: 0.4rem 0.75rem;
+border-radius: 4px;
+padding: 0.3rem 0.5rem;
 font-family: inherit;
-font-size: 0.7rem;
+font-size: 0.6rem;
 color: var(--fg);
 cursor: pointer;
 transition: all 0.15s;
 display: flex;
 align-items: center;
-gap: 0.35rem;
+gap: 0.25rem;
 }
 
 .toolbar-btn:hover {
@@ -254,7 +254,7 @@ cursor: not-allowed;
 
 .zoom-display {
 margin-left: auto;
-font-size: 0.75rem;
+font-size: 0.65rem;
 color: var(--fg-muted);
 font-variant-numeric: tabular-nums;
 }
@@ -264,7 +264,8 @@ position: relative;
 flex: 1;
 overflow: hidden;
 background: var(--bg);
-border-radius: 6px;
+border-radius: 4px;
+min-height: 300px;
 }
 
 #treeSvg {
@@ -276,25 +277,25 @@ touch-action: none;
 
 .legend {
 display: flex;
-gap: 1rem;
+gap: 0.75rem;
 justify-content: center;
 flex-wrap: wrap;
-margin-top: 0.75rem;
-padding-top: 0.75rem;
+margin-top: 0.5rem;
+padding-top: 0.5rem;
 border-top: 1px solid var(--input-border);
-font-size: 0.65rem;
+font-size: 0.55rem;
 color: var(--fg-muted);
 }
 
 .legend-item {
 display: flex;
 align-items: center;
-gap: 0.35rem;
+gap: 0.25rem;
 }
 
 .legend-node {
-width: 10px;
-height: 10px;
+width: 8px;
+height: 8px;
 border-radius: 50%;
 border: 2px solid;
 }
@@ -304,7 +305,7 @@ border: 2px solid;
 .legend-node.complete { background: var(--node-complete-bg); border-color: var(--node-complete-border); }
 
 .legend-path {
-width: 20px;
+width: 16px;
 height: 2px;
 border-radius: 2px;
 }
@@ -316,8 +317,8 @@ border-radius: 2px;
 .char-breakdown-panel {
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
-border-radius: 10px;
-padding: 1rem;
+border-radius: 8px;
+padding: 0.75rem;
 display: none; /* shown in text mode */
 }
 
@@ -326,37 +327,37 @@ display: block;
 }
 
 .panel-title {
-font-size: 0.65rem;
+font-size: 0.55rem;
 text-transform: uppercase;
 letter-spacing: 0.1em;
 color: var(--fg-muted);
-margin-bottom: 0.75rem;
+margin-bottom: 0.5rem;
 display: flex;
 align-items: center;
-gap: 0.5rem;
+gap: 0.4rem;
 }
 
 .panel-title::before {
 content: '';
-width: 8px;
-height: 8px;
+width: 6px;
+height: 6px;
 background: var(--accent);
 border-radius: 2px;
 }
 
 .char-list {
-max-height: 250px;
+max-height: 180px;
 overflow-y: auto;
 }
 
 .char-item {
 display: grid;
-grid-template-columns: 35px 1fr auto;
-gap: 0.75rem;
+grid-template-columns: 28px 1fr auto;
+gap: 0.5rem;
 align-items: center;
-padding: 0.4rem 0.5rem;
-margin: 0.2rem 0;
-border-radius: 6px;
+padding: 0.3rem 0.4rem;
+margin: 0.15rem 0;
+border-radius: 4px;
 background: var(--input-bg);
 border: 1px solid transparent;
 transition: all 0.15s;
@@ -370,18 +371,18 @@ background: rgba(74, 222, 128, 0.08);
 .char-item.current {
 border-color: var(--accent);
 background: rgba(255, 215, 0, 0.1);
-box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+box-shadow: 0 0 8px rgba(255, 215, 0, 0.15);
 }
 
 .char-index {
-font-size: 0.65rem;
+font-size: 0.55rem;
 color: var(--fg-muted);
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
 
 .char-symbol {
-font-size: 1.3rem;
+font-size: 1.1rem;
 font-weight: 700;
 color: var(--accent);
 text-align: center;
@@ -391,8 +392,8 @@ text-align: center;
 
 .char-morse {
 font-family: inherit;
-font-size: 0.9rem;
-letter-spacing: 0.25em;
+font-size: 0.8rem;
+letter-spacing: 0.2em;
 color: var(--fg);
 direction: ltr;
 }
@@ -400,52 +401,85 @@ direction: ltr;
 .char-morse.invalid { color: #f87171; }
 
 .output-text {
-font-size: 1rem;
-line-height: 1.5;
+font-size: 0.85rem;
+line-height: 1.4;
 word-break: break-word;
 color: var(--fg);
-min-height: 50px;
-padding: 0.5rem;
+min-height: 40px;
+padding: 0.4rem;
 background: var(--input-bg);
-border-radius: 6px;
+border-radius: 4px;
 border: 1px solid var(--input-border);
-margin-top: 0.75rem;
+margin-top: 0.5rem;
 }
 
 .help-text {
-font-size: 0.65rem;
+font-size: 0.55rem;
 color: var(--fg-muted);
 text-align: center;
-margin-top: 0.5rem;
-line-height: 1.6;
+margin-top: 0.4rem;
+line-height: 1.5;
 }
 
 .help-text kbd {
 background: var(--input-bg);
 border: 1px solid var(--input-border);
-border-radius: 4px;
-padding: 0.1rem 0.4rem;
+border-radius: 3px;
+padding: 0.1rem 0.3rem;
 font-family: inherit;
-font-size: 0.6rem;
+font-size: 0.5rem;
 color: var(--accent);
-margin: 0 0.15rem;
+margin: 0 0.1rem;
 }
 
 /* Scrollbar styling */
-.char-list::-webkit-scrollbar { width: 6px; }
+.char-list::-webkit-scrollbar { width: 4px; }
 .char-list::-webkit-scrollbar-track { background: var(--bg); }
-.char-list::-webkit-scrollbar-thumb { background: var(--input-border); border-radius: 3px; }
+.char-list::-webkit-scrollbar-thumb { background: var(--input-border); border-radius: 2px; }
 .char-list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 @media (max-width: 768px) {
-.input-row { flex-direction: column; align-items: stretch; }
-.input-label { margin-right: 0; margin-bottom: 0.5rem; }
+.input-row { flex-direction: column; align-items: stretch; gap: 0.4rem; }
+.input-label { margin-right: 0; margin-bottom: 0.2rem; }
 .mode-toggle { justify-content: center; width: 100%; }
-.tree-section { min-height: 500px; }
-#treeSvg { min-width: 100%; }
-.info-panel { flex-direction: column; }
-.info-panel-item { min-width: 0; }
-.char-item { grid-template-columns: 30px 1fr auto; }
+#input { min-height: 36px; font-size: 0.85rem; padding: 0.4rem 0.6rem; }
+.info-panel { flex-direction: column; gap: 0.35rem; padding: 0.5rem; }
+.info-panel-item { min-width: 0; padding: 0.4rem 0.6rem; }
+.info-panel-value { font-size: 1rem; }
+.info-panel-value.morse { font-size: 0.9rem; }
+.info-panel-value.text { font-size: 0.8rem; }
+.tree-section { padding: 0.5rem; }
+.tree-toolbar { gap: 0.25rem; margin-bottom: 0.4rem; }
+.toolbar-btn { padding: 0.25rem 0.4rem; font-size: 0.55rem; }
+.zoom-display { font-size: 0.6rem; }
+.tree-wrapper { min-height: 250px; }
+.legend { gap: 0.5rem; font-size: 0.5rem; }
+.legend-node { width: 7px; height: 7px; }
+.legend-path { width: 14px; }
+.char-breakdown-panel { padding: 0.5rem; }
+.panel-title { font-size: 0.5rem; margin-bottom: 0.35rem; }
+.char-list { max-height: 150px; }
+.char-item { grid-template-columns: 24px 1fr auto; gap: 0.4rem; padding: 0.25rem 0.35rem; }
+.char-index { font-size: 0.5rem; }
+.char-symbol { font-size: 0.95rem; }
+.char-morse { font-size: 0.7rem; letter-spacing: 0.15em; }
+.output-text { font-size: 0.75rem; min-height: 36px; padding: 0.35rem; }
+.help-text { font-size: 0.5rem; }
+header { margin-bottom: 0.35rem; }
+h1 { font-size: clamp(1rem, 4vw, 1.4rem); }
+main { gap: 0.35rem; }
+}
+
+@media (max-width: 480px) {
+body { padding: 0.35rem; }
+.input-section { padding: 0.5rem; }
+.info-panel { padding: 0.4rem; }
+.info-panel-item { padding: 0.35rem 0.5rem; }
+.info-panel-value { font-size: 0.9rem; }
+.tree-section { padding: 0.4rem; }
+.tree-wrapper { min-height: 220px; }
+.char-breakdown-panel { padding: 0.4rem; }
+.char-list { max-height: 120px; }
 }
 </style>
 </head>
@@ -465,8 +499,8 @@ margin: 0 0.15rem;
 </div>
 <span class="input-label" style="margin-left:auto; margin-right:0;">Eingabe</span>
 </div>
-<div class="input-row" style="margin-top:0.75rem;">
-<textarea id="input" placeholder="Text eingeben (A–Z, 0–9, ÄÖÜßCH) oder Morse (· – / Leer)…" spellcheck="false" aria-label="Eingabe für Morse-Text oder Morse-Code" rows="2"></textarea>
+<div class="input-row" style="margin-top:0.5rem;">
+<textarea id="input" placeholder="Text eingeben (A–Z, 0–9, ÄÖÜßCH) oder Morse (· – / Leer)…" spellcheck="false" aria-label="Eingabe für Morse-Text oder Morse-Code" rows="1"></textarea>
 </div>
 </section>
 
@@ -493,19 +527,19 @@ margin: 0 0.15rem;
 <section class="tree-section" aria-label="Morse-Baum-Visualisierung">
 <div class="tree-toolbar">
 <button class="toolbar-btn" id="zoomIn" aria-label="Vergrößern" title="Vergrößern (+)">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
 <span>+</span>
 </button>
 <button class="toolbar-btn" id="zoomOut" aria-label="Verkleinern" title="Verkleinern (-)">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
 <span>−</span>
 </button>
 <button class="toolbar-btn" id="zoomReset" aria-label="Zurücksetzen" title="Zoom zurücksetzen (0)">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
 <span>100%</span>
 </button>
 <button class="toolbar-btn" id="fitTree" aria-label="Baum anpassen" title="Gesamten Baum anzeigen">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
 <span>Anpassen</span>
 </button>
 <span class="zoom-display" id="zoomDisplay">100%</span>
@@ -633,7 +667,7 @@ CHAR_TO_CODE['É'] = '..--';
 CHAR_TO_CODE['È'] = '..-.-';
 
 // ============================================
-// TREE LAYOUT COMPUTATION
+// TREE LAYOUT COMPUTATION - tighter layout
 // ============================================
 function computeLayout() {
 let maxDepth = 0;
@@ -641,13 +675,14 @@ Object.keys(TREE_DATA).forEach(code => {
 if (code.length > maxDepth) maxDepth = code.length;
 });
 
-const width = 2000;
-const height = 900;
-const paddingTop = 80;
-const paddingBottom = 60;
-const paddingSide = 100;
+// Tighter dimensions - less empty space
+const width = 1800;
+const height = 750;
+const paddingTop = 60;
+const paddingBottom = 40;
+const paddingSide = 60;
 const usableHeight = height - paddingTop - paddingBottom;
-const levelHeight = usableHeight / (maxDepth + 1);
+const levelHeight = usableHeight / (maxDepth + 0.5); // slightly tighter
 
 const layout = {};
 
@@ -727,7 +762,7 @@ applyTransform();
 
 function fitTree() {
 const wrapperRect = treeWrapper.getBoundingClientRect();
-const padding = 40;
+const padding = 30;
 const scaleX = (wrapperRect.width - padding * 2) / width;
 const scaleY = (wrapperRect.height - padding * 2) / height;
 const scale = Math.min(scaleX, scaleY, 2);
@@ -867,7 +902,7 @@ const isCompleted = completedPaths.has(code);
 const isOnPath = activePath.startsWith(code) && code !== '';
 const hasChar = node.char && node.char !== 'START';
 
-const radius = Math.max(20, 28 - node.depth * 2);
+const radius = Math.max(18, 26 - node.depth * 2);
 let fill, stroke, strokeWidth, textColor, fontWeight;
 
 if (isActive) {
@@ -896,7 +931,7 @@ textColor = hasChar ? '#ddd' : '#666';
 fontWeight = hasChar ? '500' : '400';
 }
 
-const fontSize = Math.max(12, 16 - node.depth);
+const fontSize = Math.max(11, 15 - node.depth);
 
 html += `
 <g class="tree-node" data-code="${code}">
@@ -933,11 +968,11 @@ if (!parent) return;
 const midX = (parent.x + node.x) / 2;
 const midY = (parent.y + node.y) / 2;
 const symbol = node.isLeft ? '·' : '–';
-const fontSize = 10;
+const fontSize = 9;
 
 html += `
 <text
-x="${midX}" y="${midY - 4}"
+x="${midX}" y="${midY - 3}"
 text-anchor="middle"
 dominant-baseline="central"
 font-size="${fontSize}"
@@ -1345,7 +1380,7 @@ processInput();
 });
 });
 
-// Auto-fit on load/resize - disabled, default is 100%
+// Default 100% zoom on load, no auto-fit
 window.addEventListener('load', () => {
 setTimeout(resetZoom, 100);
 });
