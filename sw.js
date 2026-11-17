@@ -38,6 +38,7 @@ const HTML_PAGES = [
     './maze3d.html',
     './memory.html',
     './monster-schnapp.html',
+    './morse-tree.html',
     './muehle.html',
     './neon-velocity-chrono-run-3d.html',
     './neon-velocity-chrono-run.html',

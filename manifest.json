@@ -29,14 +29,14 @@
       "name": "Kartenspiele",
       "short_name": "Karten",
       "description": "Schafkopf, Watten, Mau Mau, Skat",
-      "url": "./index.html#kartenspiele",
+      "url": "./index.html#card",
       "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Kinderspiele",
       "short_name": "Kinder",
       "description": "Mathe, Memory, Malen, Lernspiele",
-      "url": "./index.html#kinderspiele",
+      "url": "./index.html#education",
       "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
     },
     {
@@ -51,6 +51,20 @@
       "short_name": "Metzger",
       "description": "Wöchentliche Angebote bayerischer Metzgereien",
       "url": "./metzger-angebote.html",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Supermarkt-Angebote",
+      "short_name": "Einkaufen",
+      "description": "Lebensmittel-Angebote aller Supermärkte",
+      "url": "./lebensmittel-angebote.html",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Morse-Baum",
+      "short_name": "Morse",
+      "description": "Interaktiver Morse-Code Entscheidungsbaum",
+      "url": "./morse-tree.html",
       "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
     }
   ],

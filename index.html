@@ -1896,13 +1896,29 @@
         createFloatingShapes();
         setupPWA();
         checkInstallBanner();
+        handleFragmentNavigation();
       });
+
+      // Handle fragment navigation from PWA shortcuts (e.g., #card, #education)
+      function handleFragmentNavigation() {
+        const hash = window.location.hash.slice(1);
+        if (hash) {
+          const target = document.getElementById(hash);
+          if (target) {
+            setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+          }
+        }
+      }
+
+      // Also handle hash changes
+      window.addEventListener("hashchange", handleFragmentNavigation);
 
       // Render all categories
       function renderCategories() {
         GAME_CATEGORIES.forEach((category, catIndex) => {
           const section = document.createElement("section");
           section.className = "category-section";
+          section.id = category.id; // for fragment navigation from PWA shortcuts
           section.style.setProperty("--cat-color-start", category.colorStart);
           section.style.setProperty("--cat-color-end", category.colorEnd);
           section.setAttribute("aria-labelledby", `cat-${category.id}-title`);
