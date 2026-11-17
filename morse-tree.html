@@ -524,6 +524,13 @@ body { padding: 0.35rem; }
 </div>
 </div>
 
+<!-- Char breakdown panel ABOVE tree (text mode only) -->
+<div class="char-breakdown-panel" id="charBreakdownPanel" aria-label="Zeichen-Übersicht">
+<div class="panel-title">Zeichen-Übersicht (jedes Zeichen mit Morse-Code)</div>
+<div class="char-list" id="charList"></div>
+<div class="output-text" id="outputTextFull">—</div>
+</div>
+
 <section class="tree-section" aria-label="Morse-Baum-Visualisierung">
 <div class="tree-toolbar">
 <button class="toolbar-btn" id="zoomIn" aria-label="Vergrößern" title="Vergrößern (+)">
@@ -555,13 +562,6 @@ body { padding: 0.35rem; }
 <div class="legend-item"><span class="legend-path active"></span> Aktiver Pfad</div>
 </div>
 </section>
-
-<!-- Char breakdown panel BELOW tree -->
-<div class="char-breakdown-panel" id="charBreakdownPanel" aria-label="Zeichen-Übersicht">
-<div class="panel-title">Zeichen-Übersicht (jedes Zeichen mit Morse-Code)</div>
-<div class="char-list" id="charList"></div>
-<div class="output-text" id="outputTextFull">—</div>
-</div>
 
 <p class="help-text">
 <kbd>.</kbd> / <kbd>-</kbd> = Punkt/Strich · <kbd>Space</kbd> = Buchstabe bestätigen · <kbd>Backspace</kbd> = zurück · <kbd>Esc</kbd> = zurücksetzen
@@ -968,18 +968,18 @@ if (!parent) return;
 const midX = (parent.x + node.x) / 2;
 const midY = (parent.y + node.y) / 2;
 const symbol = node.isLeft ? '·' : '–';
-const fontSize = 9;
+const fontSize = 14;
 
 html += `
 <text
-x="${midX}" y="${midY - 3}"
+x="${midX}" y="${midY - 4}"
 text-anchor="middle"
 dominant-baseline="central"
 font-size="${fontSize}"
-fill="#555"
+fill="#666"
 font-family="'IBM Plex Mono', monospace"
 pointer-events="none"
-font-weight="600"
+font-weight="700"
 >${symbol}</text>
 `;
 });
