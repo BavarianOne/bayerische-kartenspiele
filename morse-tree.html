@@ -23,6 +23,7 @@
 --input-bg: #1a1a2e;
 --input-border: #333;
 --input-focus: #ffd700;
+--panel-bg: #16161f;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,7 +36,7 @@ min-height: 100vh;
 display: flex;
 flex-direction: column;
 align-items: center;
-padding: 1.5rem 1rem;
+padding: 1rem;
 overflow-x: auto;
 }
 
@@ -43,15 +44,14 @@ body::before {
 content: '';
 position: fixed;
 inset: 0;
-background:
-radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,215,0,0.04) 0%, transparent 70%);
+background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,215,0,0.04) 0%, transparent 70%);
 pointer-events: none;
 z-index: -1;
 }
 
 header {
 text-align: center;
-margin-bottom: 1.5rem;
+margin-bottom: 1rem;
 padding: 0 1rem;
 }
 
@@ -73,17 +73,23 @@ letter-spacing: 0.15em;
 
 main {
 width: 100%;
-max-width: 1400px;
-display: flex;
-flex-direction: column;
-gap: 1.5rem;
+max-width: 1800px;
+display: grid;
+grid-template-columns: 1fr 420px;
+gap: 1rem;
+align-items: start;
+}
+
+@media (max-width: 1200px) {
+main { grid-template-columns: 1fr; }
 }
 
 .input-section {
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
 border-radius: 10px;
-padding: 1.25rem;
+padding: 1rem;
+grid-column: 1 / -1;
 }
 
 .input-row {
@@ -161,43 +167,88 @@ position: relative;
 background: var(--bg-elevated);
 border: 1px solid var(--input-border);
 border-radius: 10px;
-padding: 1.5rem;
-overflow-x: auto;
+padding: 1rem;
+display: flex;
+flex-direction: column;
+min-height: 700px;
+}
+
+.tree-toolbar {
+display: flex;
+gap: 0.5rem;
+margin-bottom: 0.75rem;
+flex-wrap: wrap;
+}
+
+.toolbar-btn {
+background: var(--input-bg);
+border: 1px solid var(--input-border);
+border-radius: 6px;
+padding: 0.4rem 0.75rem;
+font-family: inherit;
+font-size: 0.7rem;
+color: var(--fg);
+cursor: pointer;
+transition: all 0.15s;
+display: flex;
+align-items: center;
+gap: 0.35rem;
+}
+
+.toolbar-btn:hover {
+background: var(--accent);
+color: var(--bg);
+border-color: var(--accent);
+}
+
+.toolbar-btn:disabled {
+opacity: 0.4;
+cursor: not-allowed;
+}
+
+.zoom-display {
+margin-left: auto;
+font-size: 0.75rem;
+color: var(--fg-muted);
+font-variant-numeric: tabular-nums;
 }
 
 .tree-wrapper {
 position: relative;
-min-height: 500px;
+flex: 1;
+overflow: hidden;
+background: var(--bg);
+border-radius: 6px;
 }
 
 #treeSvg {
 width: 100%;
-height: auto;
+height: 100%;
 display: block;
-min-width: 1200px;
+touch-action: none;
 }
 
 .legend {
 display: flex;
-gap: 1.5rem;
+gap: 1rem;
 justify-content: center;
 flex-wrap: wrap;
-margin-top: 1rem;
-padding-top: 1rem;
+margin-top: 0.75rem;
+padding-top: 0.75rem;
 border-top: 1px solid var(--input-border);
-font-size: 0.7rem;
+font-size: 0.65rem;
 color: var(--fg-muted);
 }
 
 .legend-item {
 display: flex;
 align-items: center;
-gap: 0.4rem;
+gap: 0.35rem;
 }
 
 .legend-node {
-width: 12px;
-height: 12px;
+width: 10px;
+height: 10px;
 border-radius: 50%;
 border: 2px solid;
 }
@@ -207,57 +258,162 @@ border: 2px solid;
 .legend-node.complete { background: var(--node-complete-bg); border-color: var(--node-complete-border); }
 
 .legend-path {
-width: 24px;
-height: 3px;
+width: 20px;
+height: 2px;
 border-radius: 2px;
 }
 
-.legend-path.active { background: var(--path-active); box-shadow: 0 0 6px var(--path-active); }
+.legend-path.active { background: var(--path-active); box-shadow: 0 0 4px var(--path-active); }
 .legend-path.inactive { background: var(--path-inactive); }
 
-.output-section {
-background: var(--bg-elevated);
-border: 1px solid var(--input-border);
-border-radius: 10px;
-padding: 1.25rem;
-}
-
-.output-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-gap: 1rem;
-}
-
-.output-item {
+/* Right panel */
+.side-panel {
 display: flex;
 flex-direction: column;
-gap: 0.25rem;
+gap: 1rem;
+position: sticky;
+top: 1rem;
+max-height: calc(100vh - 2rem);
+overflow-y: auto;
 }
 
-.output-label {
+.panel {
+background: var(--panel-bg);
+border: 1px solid var(--input-border);
+border-radius: 10px;
+padding: 1rem;
+}
+
+.panel-title {
 font-size: 0.65rem;
 text-transform: uppercase;
 letter-spacing: 0.1em;
 color: var(--fg-muted);
+margin-bottom: 0.75rem;
+display: flex;
+align-items: center;
+gap: 0.5rem;
 }
 
-.output-value {
-font-size: 1.25rem;
-font-weight: 600;
+.panel-title::before {
+content: '';
+width: 8px;
+height: 8px;
+background: var(--accent);
+border-radius: 2px;
+}
+
+/* Current character display */
+.current-display {
+display: flex;
+flex-direction: column;
+gap: 0.75rem;
+}
+
+.current-row {
+display: flex;
+align-items: baseline;
+gap: 0.75rem;
+flex-wrap: wrap;
+}
+
+.current-label {
+font-size: 0.65rem;
+text-transform: uppercase;
+letter-spacing: 0.1em;
+color: var(--fg-muted);
+white-space: nowrap;
+min-width: 90px;
+}
+
+.current-value {
+font-size: 2.5rem;
+font-weight: 700;
 color: var(--accent);
 font-family: inherit;
 letter-spacing: 0.05em;
-word-break: break-all;
+line-height: 1;
 }
 
-.output-value.morse {
-font-size: 1.5rem;
-letter-spacing: 0.3em;
+.current-value.morse {
+font-size: 1.75rem;
+letter-spacing: 0.4em;
 color: var(--fg);
 }
 
-.help-text {
+.current-value.small { font-size: 1.25rem; }
+
+/* Character breakdown list */
+.char-list {
+max-height: 300px;
+overflow-y: auto;
+}
+
+.char-item {
+display: grid;
+grid-template-columns: 40px 1fr auto;
+gap: 0.75rem;
+align-items: center;
+padding: 0.5rem 0.6rem;
+margin: 0.25rem 0;
+border-radius: 6px;
+background: var(--input-bg);
+border: 1px solid transparent;
+transition: all 0.15s;
+}
+
+.char-item.complete {
+border-color: #4ade80;
+background: rgba(74, 222, 128, 0.08);
+}
+
+.char-item.current {
+border-color: var(--accent);
+background: rgba(255, 215, 0, 0.1);
+box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+}
+
+.char-index {
 font-size: 0.7rem;
+color: var(--fg-muted);
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+
+.char-symbol {
+font-size: 1.5rem;
+font-weight: 700;
+color: var(--accent);
+text-align: center;
+}
+
+.char-symbol.space { color: var(--fg-muted); }
+
+.char-morse {
+font-family: inherit;
+font-size: 1rem;
+letter-spacing: 0.25em;
+color: var(--fg);
+direction: ltr;
+}
+
+.char-morse.invalid { color: #f87171; }
+
+/* Output text */
+.output-text {
+font-size: 1.1rem;
+line-height: 1.6;
+word-break: break-word;
+color: var(--fg);
+min-height: 60px;
+padding: 0.5rem;
+background: var(--input-bg);
+border-radius: 6px;
+border: 1px solid var(--input-border);
+}
+
+.help-text {
+font-size: 0.65rem;
 color: var(--fg-muted);
 text-align: center;
 margin-top: 0.5rem;
@@ -270,17 +426,27 @@ border: 1px solid var(--input-border);
 border-radius: 4px;
 padding: 0.1rem 0.4rem;
 font-family: inherit;
-font-size: 0.65rem;
+font-size: 0.6rem;
 color: var(--accent);
 margin: 0 0.15rem;
 }
+
+/* Scrollbar styling */
+.char-list::-webkit-scrollbar { width: 6px; }
+.char-list::-webkit-scrollbar-track { background: var(--bg); }
+.char-list::-webkit-scrollbar-thumb { background: var(--input-border); border-radius: 3px; }
+.char-list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 @media (max-width: 768px) {
 .input-row { flex-direction: column; align-items: stretch; }
 .input-label { margin-right: 0; margin-bottom: 0.5rem; }
 .mode-toggle { justify-content: center; width: 100%; }
-.tree-section { padding: 1rem; }
+.tree-section { min-height: 500px; }
 #treeSvg { min-width: 100%; }
+main { grid-template-columns: 1fr; }
+.side-panel { position: static; max-height: none; }
+.char-item { grid-template-columns: 30px 1fr auto; }
+.current-value { font-size: 2rem; }
 }
 </style>
 </head>
@@ -306,8 +472,27 @@ margin: 0 0.15rem;
 </section>
 
 <section class="tree-section" aria-label="Morse-Baum-Visualisierung">
+<div class="tree-toolbar">
+<button class="toolbar-btn" id="zoomIn" aria-label="Vergrößern" title="Vergrößern (+)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+<span>+</span>
+</button>
+<button class="toolbar-btn" id="zoomOut" aria-label="Verkleinern" title="Verkleinern (-)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+<span>−</span>
+</button>
+<button class="toolbar-btn" id="zoomReset" aria-label="Zurücksetzen" title="Zoom zurücksetzen (0)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+<span>100%</span>
+</button>
+<button class="toolbar-btn" id="fitTree" aria-label="Baum anpassen" title="Gesamten Baum anzeigen">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+<span>Anpassen</span>
+</button>
+<span class="zoom-display" id="zoomDisplay">100%</span>
+</div>
 <div class="tree-wrapper" id="treeWrapper">
-<svg id="treeSvg" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Morse-Code-Binärbaum"></svg>
+<svg id="treeSvg" viewBox="0 0 2000 900" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Morse-Code-Binärbaum"></svg>
 </div>
 <div class="legend">
 <div class="legend-item"><span class="legend-node inactive"></span> Knoten</div>
@@ -318,25 +503,39 @@ margin: 0 0.15rem;
 </div>
 </section>
 
-<section class="output-section" aria-label="Ergebnis">
-<div class="output-grid">
-<div class="output-item">
-<span class="output-label">Aktueller Knoten</span>
-<span class="output-value" id="currentNode">START</span>
+<aside class="side-panel" aria-label="Details">
+<div class="panel">
+<div class="panel-title">Aktueller Knoten</div>
+<div class="current-display">
+<div class="current-row">
+<span class="current-label">Buchstabe</span>
+<span class="current-value" id="currentNode">START</span>
 </div>
-<div class="output-item">
-<span class="output-label">Aktueller Pfad</span>
-<span class="output-value morse" id="currentPath">—</span>
+<div class="current-row">
+<span class="current-label">Pfad</span>
+<span class="current-value morse" id="currentPath">—</span>
 </div>
-<div class="output-item">
-<span class="output-label">Ergebnis</span>
-<span class="output-value" id="outputText">—</span>
+<div class="current-row">
+<span class="current-label">Morse</span>
+<span class="current-value morse small" id="currentMorseCode">—</span>
 </div>
 </div>
+</div>
+
+<div class="panel" style="display:none;" id="textModePanel">
+<div class="panel-title">Zeichen-Übersicht</div>
+<div class="char-list" id="charList"></div>
+</div>
+
+<div class="panel">
+<div class="panel-title">Ergebnis</div>
+<div class="output-text" id="outputText">—</div>
+</div>
+
 <p class="help-text">
 <kbd>.</kbd> / <kbd>-</kbd> = Punkt/Strich · <kbd>Space</kbd> = Buchstabe bestätigen · <kbd>Backspace</kbd> = zurück · <kbd>Esc</kbd> = zurücksetzen
 </p>
-</section>
+</aside>
 </main>
 
 <script>
@@ -446,11 +645,11 @@ Object.keys(TREE_DATA).forEach(code => {
 if (code.length > maxDepth) maxDepth = code.length;
 });
 
-const width = 1400;
-const height = 600;
-const paddingTop = 60;
-const paddingBottom = 40;
-const paddingSide = 80;
+const width = 2000;
+const height = 900;
+const paddingTop = 80;
+const paddingBottom = 60;
+const paddingSide = 100;
 const usableHeight = height - paddingTop - paddingBottom;
 const levelHeight = usableHeight / (maxDepth + 1);
 
@@ -494,12 +693,154 @@ return { layout, width, height, maxDepth, levelHeight };
 const { layout, width, height, maxDepth, levelHeight } = computeLayout();
 
 // ============================================
-// SVG RENDERING
+// ZOOM / PAN STATE
 // ============================================
 const svg = document.getElementById('treeSvg');
 const treeWrapper = document.getElementById('treeWrapper');
+const zoomDisplay = document.getElementById('zoomDisplay');
 
-function renderTree(activePath = '', completedPaths = new Set()) {
+let transform = { x: 0, y: 0, scale: 1 };
+let isPanning = false;
+let panStart = { x: 0, y: 0 };
+let transformStart = { x: 0, y: 0 };
+
+function applyTransform() {
+svg.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
+svg.style.transformOrigin = '0 0';
+zoomDisplay.textContent = Math.round(transform.scale * 100) + '%';
+}
+
+function zoomAtPoint(factor, clientX, clientY) {
+const rect = treeWrapper.getBoundingClientRect();
+const localX = clientX - rect.left;
+const localY = clientY - rect.top;
+
+const newScale = Math.min(Math.max(transform.scale * factor, 0.15), 5);
+const scaleRatio = newScale / transform.scale;
+
+transform.x = localX - (localX - transform.x) * scaleRatio;
+transform.y = localY - (localY - transform.y) * scaleRatio;
+transform.scale = newScale;
+applyTransform();
+}
+
+function resetZoom() {
+transform = { x: 0, y: 0, scale: 1 };
+applyTransform();
+}
+
+function fitTree() {
+const wrapperRect = treeWrapper.getBoundingClientRect();
+const padding = 40;
+const scaleX = (wrapperRect.width - padding * 2) / width;
+const scaleY = (wrapperRect.height - padding * 2) / height;
+const scale = Math.min(scaleX, scaleY, 2);
+
+transform.scale = scale;
+transform.x = (wrapperRect.width - width * scale) / 2;
+transform.y = (wrapperRect.height - height * scale) / 2;
+applyTransform();
+}
+
+// Zoom buttons
+document.getElementById('zoomIn').addEventListener('click', () => {
+const rect = treeWrapper.getBoundingClientRect();
+zoomAtPoint(1.3, rect.left + rect.width / 2, rect.top + rect.height / 2);
+});
+document.getElementById('zoomOut').addEventListener('click', () => {
+const rect = treeWrapper.getBoundingClientRect();
+zoomAtPoint(1/1.3, rect.left + rect.width / 2, rect.top + rect.height / 2);
+});
+document.getElementById('zoomReset').addEventListener('click', resetZoom);
+document.getElementById('fitTree').addEventListener('click', fitTree);
+
+// Wheel zoom
+treeWrapper.addEventListener('wheel', (e) => {
+e.preventDefault();
+const factor = e.deltaY > 0 ? 1/1.15 : 1.15;
+zoomAtPoint(factor, e.clientX, e.clientY);
+}, { passive: false });
+
+// Pan with mouse
+treeWrapper.addEventListener('mousedown', (e) => {
+if (e.button !== 0) return;
+if (e.target.closest('.toolbar-btn')) return;
+isPanning = true;
+panStart = { x: e.clientX, y: e.clientY };
+transformStart = { x: transform.x, y: transform.y };
+treeWrapper.style.cursor = 'grabbing';
+e.preventDefault();
+});
+
+window.addEventListener('mousemove', (e) => {
+if (!isPanning) return;
+transform.x = transformStart.x + (e.clientX - panStart.x);
+transform.y = transformStart.y + (e.clientY - panStart.y);
+applyTransform();
+});
+
+window.addEventListener('mouseup', () => {
+if (isPanning) {
+isPanning = false;
+treeWrapper.style.cursor = 'grab';
+}
+});
+
+treeWrapper.style.cursor = 'grab';
+
+// Touch pan/zoom
+let touchStartDist = 0;
+let touchStartScale = 1;
+let touchCenter = { x: 0, y: 0 };
+
+treeWrapper.addEventListener('touchstart', (e) => {
+if (e.touches.length === 1) {
+isPanning = true;
+panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+transformStart = { x: transform.x, y: transform.y };
+} else if (e.touches.length === 2) {
+isPanning = false;
+const dx = e.touches[0].clientX - e.touches[1].clientX;
+const dy = e.touches[0].clientY - e.touches[1].clientY;
+touchStartDist = Math.hypot(dx, dy);
+touchStartScale = transform.scale;
+touchCenter = {
+x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+};
+}
+}, { passive: true });
+
+treeWrapper.addEventListener('touchmove', (e) => {
+if (e.touches.length === 1 && isPanning) {
+transform.x = transformStart.x + (e.touches[0].clientX - panStart.x);
+transform.y = transformStart.y + (e.touches[0].clientY - panStart.y);
+applyTransform();
+} else if (e.touches.length === 2) {
+const dx = e.touches[0].clientX - e.touches[1].clientX;
+const dy = e.touches[0].clientY - e.touches[1].clientY;
+const dist = Math.hypot(dx, dy);
+if (touchStartDist > 0) {
+const factor = dist / touchStartDist;
+transform.scale = Math.min(Math.max(touchStartScale * factor, 0.15), 5);
+const rect = treeWrapper.getBoundingClientRect();
+const localX = touchCenter.x - rect.left;
+const localY = touchCenter.y - rect.top;
+transform.x = localX - (localX - transformStart.x) * (transform.scale / touchStartScale);
+transform.y = localY - (localY - transformStart.y) * (transform.scale / touchStartScale);
+applyTransform();
+}
+}
+}, { passive: false });
+
+treeWrapper.addEventListener('touchend', () => {
+isPanning = false;
+}, { passive: true });
+
+// ============================================
+// SVG RENDERING
+// ============================================
+function renderTree(activePath = '', completedPaths = new Set(), charDetails = []) {
 let html = '';
 
 // Draw edges first (behind nodes)
@@ -516,7 +857,7 @@ html += `
 x1="${parent.x}" y1="${parent.y}"
 x2="${node.x}" y2="${node.y}"
 stroke="${isActive ? '#ffd700' : (isCompleted ? '#4ade80' : '#2a2a3a')}"
-stroke-width="${isActive ? 3 : (isCompleted ? 2.5 : 1.5)}"
+stroke-width="${isActive ? 4 : (isCompleted ? 3 : 2)}"
 stroke-linecap="round"
 ${isActive ? 'filter="url(#glow)"' : ''}
 />
@@ -530,36 +871,36 @@ const isCompleted = completedPaths.has(code);
 const isOnPath = activePath.startsWith(code) && code !== '';
 const hasChar = node.char && node.char !== 'START';
 
-const radius = Math.max(16, 22 - node.depth * 1.5);
+const radius = Math.max(20, 28 - node.depth * 2);
 let fill, stroke, strokeWidth, textColor, fontWeight;
 
 if (isActive) {
 fill = '#ffd700';
 stroke = '#fff';
-strokeWidth = 3;
+strokeWidth = 4;
 textColor = '#0a0a0f';
 fontWeight = '700';
 } else if (isCompleted) {
 fill = '#1a4a1a';
 stroke = '#4ade80';
-strokeWidth = 2.5;
+strokeWidth = 3.5;
 textColor = '#4ade80';
 fontWeight = '700';
 } else if (isOnPath) {
 fill = '#2a2a1a';
 stroke = '#ffd700';
-strokeWidth = 2;
+strokeWidth = 3;
 textColor = '#ffd700';
 fontWeight = '600';
 } else {
 fill = '#1a1a2e';
 stroke = '#333';
-strokeWidth = 1.5;
-textColor = hasChar ? '#ccc' : '#555';
+strokeWidth = 2;
+textColor = hasChar ? '#ddd' : '#666';
 fontWeight = hasChar ? '500' : '400';
 }
 
-const fontSize = Math.max(9, 13 - node.depth);
+const fontSize = Math.max(12, 16 - node.depth);
 
 html += `
 <g class="tree-node" data-code="${code}">
@@ -587,23 +928,48 @@ pointer-events="none"
 `;
 });
 
+// Add Morse code labels on edges (small dots/dashes)
+Object.entries(layout).forEach(([code, node]) => {
+if (code === '') return;
+const parent = layout[node.parent];
+if (!parent) return;
+
+const midX = (parent.x + node.x) / 2;
+const midY = (parent.y + node.y) / 2;
+const symbol = node.isLeft ? '·' : '–';
+const fontSize = 10;
+
+html += `
+<text
+x="${midX}" y="${midY - 4}"
+text-anchor="middle"
+dominant-baseline="central"
+font-size="${fontSize}"
+fill="#555"
+font-family="'IBM Plex Mono', monospace"
+pointer-events="none"
+font-weight="600"
+>${symbol}</text>
+`;
+});
+
 // Add filter definitions
 const defs = `
 <defs>
 <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-<feGaussianBlur stdDeviation="3" result="blur"/>
+<feGaussianBlur stdDeviation="4" result="blur"/>
 <feMerge>
 <feMergeNode in="blur"/>
 <feMergeNode in="SourceGraphic"/>
 </feMerge>
 </filter>
 <filter id="pulse" x="-50%" y="-50%" width="200%" height="200%">
-<feGaussianBlur stdDeviation="4" result="blur"/>
+<feGaussianBlur stdDeviation="5" result="blur"/>
 <feMerge>
 <feMergeNode in="blur"/>
 <feMergeNode in="SourceGraphic"/>
 </feMerge>
-<animate attributeName="stdDeviation" values="2;6;2" dur="1.5s" repeatCount="indefinite"/>
+<animate attributeName="stdDeviation" values="3;8;3" dur="1.5s" repeatCount="indefinite"/>
 </filter>
 </defs>
 `;
@@ -620,6 +986,7 @@ input: '',
 currentPath: '',
 completedPaths: new Set(),
 outputChars: [],
+charDetails: [], // array of { char, morse, index, complete }
 lastKeyTime: 0
 };
 
@@ -629,7 +996,10 @@ lastKeyTime: 0
 const inputEl = document.getElementById('input');
 const currentNodeEl = document.getElementById('currentNode');
 const currentPathEl = document.getElementById('currentPath');
+const currentMorseCodeEl = document.getElementById('currentMorseCode');
 const outputTextEl = document.getElementById('outputText');
+const charListEl = document.getElementById('charList');
+const textModePanel = document.getElementById('textModePanel');
 const modeBtns = document.querySelectorAll('.mode-btn');
 
 // ============================================
@@ -646,31 +1016,37 @@ processMorseMode(raw);
 }
 
 updateDisplay();
-renderTree(state.currentPath, state.completedPaths);
+renderTree(state.currentPath, state.completedPaths, state.charDetails);
 }
 
 function processTextMode(text) {
 state.completedPaths.clear();
 state.currentPath = '';
 state.outputChars = [];
+state.charDetails = [];
 
 const chars = text.toUpperCase().split('');
 let currentMorseForChar = '';
+let charIndex = 0;
 
-chars.forEach((char, charIndex) => {
+chars.forEach((char, charPos) => {
 if (char === ' ') {
 if (currentMorseForChar) {
-commitChar(currentMorseForChar);
+commitChar(currentMorseForChar, charIndex);
 currentMorseForChar = '';
+charIndex++;
 }
 state.outputChars.push(' ');
-state.completedPaths.add('/');
+state.charDetails.push({ char: '␣', morse: '/', index: charIndex, complete: true, isSpace: true });
+charIndex++;
 return;
 }
 
 const morse = CHAR_TO_CODE[char];
 if (!morse) {
 state.outputChars.push('?');
+state.charDetails.push({ char: char, morse: '?', index: charIndex, complete: false, invalid: true });
+charIndex++;
 return;
 }
 
@@ -678,15 +1054,16 @@ morse.split('').forEach((symbol, i) => {
 currentMorseForChar += symbol;
 const isLast = i === morse.length - 1;
 if (isLast) {
-commitChar(currentMorseForChar);
+commitChar(currentMorseForChar, charIndex);
 currentMorseForChar = '';
+charIndex++;
 }
 });
 
 });
 
 if (currentMorseForChar) {
-commitChar(currentMorseForChar);
+commitChar(currentMorseForChar, charIndex);
 }
 
 const lastIncompleteIdx = state.outputChars.findLastIndex(c => c === '?');
@@ -717,19 +1094,23 @@ function processMorseMode(morseInput) {
 state.completedPaths.clear();
 state.currentPath = '';
 state.outputChars = [];
+state.charDetails = [];
 
 let currentMorseForChar = '';
 const tokens = morseInput.split(/(\s+)/).filter(t => t.length > 0);
+let charIndex = 0;
 
 tokens.forEach((token, tokenIndex) => {
 const cleanToken = token.trim();
 if (cleanToken === '' || cleanToken === '/' || cleanToken === ' ') {
 if (currentMorseForChar) {
-commitChar(currentMorseForChar);
+commitChar(currentMorseForChar, charIndex);
 currentMorseForChar = '';
+charIndex++;
 }
 state.outputChars.push(' ');
-state.completedPaths.add('/');
+state.charDetails.push({ char: '␣', morse: '/', index: charIndex, complete: true, isSpace: true });
+charIndex++;
 return;
 }
 
@@ -739,14 +1120,15 @@ if (symbol !== '.' && symbol !== '-') return;
 currentMorseForChar += symbol;
 const isLast = i === morseOnly.length - 1;
 if (isLast) {
-commitChar(currentMorseForChar);
+commitChar(currentMorseForChar, charIndex);
 currentMorseForChar = '';
+charIndex++;
 }
 });
 });
 
 if (currentMorseForChar) {
-commitChar(currentMorseForChar);
+commitChar(currentMorseForChar, charIndex);
 }
 
 const lastIncompleteIdx = state.outputChars.findLastIndex(c => c === '?');
@@ -767,14 +1149,16 @@ state.currentPath = CHAR_TO_CODE[lastChar];
 }
 }
 
-function commitChar(morse) {
+function commitChar(morse, index) {
 const char = CODE_TO_CHAR[morse];
 if (char) {
 state.outputChars.push(char);
 state.completedPaths.add(morse);
+state.charDetails.push({ char, morse, index, complete: true });
 } else {
 state.outputChars.push('?');
 state.completedPaths.add(morse);
+state.charDetails.push({ char: '?', morse, index, complete: true, invalid: true });
 }
 }
 
@@ -784,6 +1168,7 @@ state.completedPaths.add(morse);
 function updateDisplay() {
 let currentNode = 'START';
 let currentPathDisplay = '—';
+let currentMorseDisplay = '—';
 
 if (state.currentPath) {
 const node = TREE_DATA[state.currentPath];
@@ -793,11 +1178,40 @@ currentNode = node.char;
 currentNode = '?';
 }
 currentPathDisplay = state.currentPath.replace(/\./g, '·').replace(/-/g, '–');
+currentMorseDisplay = state.currentPath.replace(/\./g, '·').replace(/-/g, '–');
 }
 
 currentNodeEl.textContent = currentNode;
 currentPathEl.textContent = currentPathDisplay;
+currentMorseCodeEl.textContent = currentMorseDisplay;
 outputTextEl.textContent = state.outputChars.join('') || '—';
+
+// Show/hide char list panel
+textModePanel.style.display = state.mode === 'text' ? 'block' : 'none';
+
+// Render char list
+charListEl.innerHTML = '';
+state.charDetails.forEach((detail, i) => {
+const div = document.createElement('div');
+div.className = 'char-item';
+if (detail.complete) div.classList.add('complete');
+if (state.currentPath && detail.morse !== '/' && state.currentPath.startsWith(detail.morse) && !detail.isSpace) {
+div.classList.add('current');
+}
+
+div.innerHTML = `
+<span class="char-index">${detail.index + 1}</span>
+<span class="char-symbol${detail.isSpace ? ' space' : ''}">${detail.char === '␣' ? '␣' : detail.char}</span>
+<span class="char-morse${detail.invalid ? ' invalid' : ''}">${detail.morse.replace(/\./g, '·').replace(/-/g, '–')}</span>
+`;
+charListEl.appendChild(div);
+});
+
+// Scroll current item into view
+const currentItem = charListEl.querySelector('.char-item.current');
+if (currentItem) {
+currentItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 }
 
 // ============================================
@@ -837,24 +1251,31 @@ currentNodeEl.textContent = node.char;
 currentNodeEl.textContent = '?';
 }
 currentPathEl.textContent = state.currentPath.replace(/\./g, '·').replace(/-/g, '–');
-renderTree(state.currentPath, state.completedPaths);
+currentMorseCodeEl.textContent = state.currentPath.replace(/\./g, '·').replace(/-/g, '–');
+renderTree(state.currentPath, state.completedPaths, state.charDetails);
 }
 
 function commitCurrentMorse() {
 if (!state.currentPath) {
 state.outputChars.push(' ');
+state.charDetails.push({ char: '␣', morse: '/', index: state.charDetails.length, complete: true, isSpace: true });
 outputTextEl.textContent = state.outputChars.join('');
+updateDisplay();
+renderTree('', state.completedPaths, state.charDetails);
 return;
 }
 const char = CODE_TO_CHAR[state.currentPath];
 state.outputChars.push(char || '?');
 state.completedPaths.add(state.currentPath);
+state.charDetails.push({ char: char || '?', morse: state.currentPath, index: state.charDetails.length, complete: true, invalid: !char });
 state.currentPath = '';
 currentNodeEl.textContent = 'START';
 currentPathEl.textContent = '—';
+currentMorseCodeEl.textContent = '—';
 outputTextEl.textContent = state.outputChars.join('');
 inputEl.value = state.outputChars.join('');
-renderTree('', state.completedPaths);
+updateDisplay();
+renderTree('', state.completedPaths, state.charDetails);
 }
 
 function backspaceMorse() {
@@ -869,9 +1290,11 @@ currentNodeEl.textContent = '?';
 currentNodeEl.textContent = 'START';
 }
 currentPathEl.textContent = state.currentPath.replace(/\./g, '·').replace(/-/g, '–') || '—';
-renderTree(state.currentPath, state.completedPaths);
+currentMorseCodeEl.textContent = state.currentPath.replace(/\./g, '·').replace(/-/g, '–') || '—';
+renderTree(state.currentPath, state.completedPaths, state.charDetails);
 } else if (state.outputChars.length > 0) {
 const last = state.outputChars.pop();
+const lastDetail = state.charDetails.pop();
 if (last !== ' ') {
 const morse = CHAR_TO_CODE[last];
 if (morse) state.completedPaths.delete(morse);
@@ -879,7 +1302,8 @@ if (morse) state.completedPaths.delete(morse);
 state.completedPaths.delete('/');
 }
 outputTextEl.textContent = state.outputChars.join('') || '—';
-renderTree('', state.completedPaths);
+updateDisplay();
+renderTree('', state.completedPaths, state.charDetails);
 }
 }
 
@@ -887,11 +1311,14 @@ function resetMorse() {
 state.currentPath = '';
 state.completedPaths.clear();
 state.outputChars = [];
+state.charDetails = [];
 currentNodeEl.textContent = 'START';
 currentPathEl.textContent = '—';
+currentMorseCodeEl.textContent = '—';
 outputTextEl.textContent = '—';
 inputEl.value = '';
-renderTree('', new Set());
+updateDisplay();
+renderTree('', new Set(), []);
 }
 
 // ============================================
@@ -915,26 +1342,18 @@ processInput();
 });
 });
 
-// Touch support for tree navigation
-let touchStartX = 0;
-treeWrapper.addEventListener('touchstart', (e) => {
-touchStartX = e.touches[0].clientX;
-}, { passive: true });
-
-treeWrapper.addEventListener('touchend', (e) => {
-if (state.mode !== 'morse') return;
-const touchEndX = e.changedTouches[0].clientX;
-const diff = touchEndX - touchStartX;
-if (Math.abs(diff) > 30) {
-if (diff > 0) appendMorse('-');
-else appendMorse('.');
-}
-}, { passive: true });
+// Auto-fit on load/resize
+window.addEventListener('load', () => {
+setTimeout(fitTree, 100);
+});
+window.addEventListener('resize', () => {
+setTimeout(fitTree, 100);
+});
 
 // ============================================
 // INIT
 // ============================================
-renderTree('', new Set());
+renderTree('', new Set(), []);
 updateDisplay();
 
 if (inputEl.value) processInput();
