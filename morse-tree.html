@@ -1345,12 +1345,12 @@ processInput();
 });
 });
 
-// Auto-fit on load/resize
+// Auto-fit on load/resize - disabled, default is 100%
 window.addEventListener('load', () => {
-setTimeout(fitTree, 100);
+setTimeout(resetZoom, 100);
 });
 window.addEventListener('resize', () => {
-setTimeout(fitTree, 100);
+// keep current zoom on resize, don't auto-fit
 });
 
 // ============================================
