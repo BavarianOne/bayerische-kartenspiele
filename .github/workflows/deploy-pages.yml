@@ -3,9 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master]
-    paths:
-      - 'metzger-angebote.html'
-      - 'metzger-angebote-data.json'
 
 permissions:
   contents: read
