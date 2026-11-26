@@ -99197,6 +99197,78 @@
       "station_key": "Shell|48.55575|12.1376",
       "fuel": "Super E5",
       "price": 2.079
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Diesel",
+      "price": 2.069
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Diesel",
+      "price": 2.099
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Diesel",
+      "price": 2.189
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Diesel",
+      "price": 2.189
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Super E10",
+      "price": 1.769
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Super E10",
+      "price": 1.779
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Super E10",
+      "price": 1.839
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Super E10",
+      "price": 1.839
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "Shell|48.586643|12.189711",
+      "fuel": "Super E5",
+      "price": 1.829
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.556646|12.153395",
+      "fuel": "Super E5",
+      "price": 1.839
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.548382|12.147233",
+      "fuel": "Super E5",
+      "price": 1.899
+    },
+    {
+      "timestamp": "2026-11-26T23:33:32.874196+00:00",
+      "station_key": "ESSO|48.540893|12.141405",
+      "fuel": "Super E5",
+      "price": 1.899
     }
   ]
 }
