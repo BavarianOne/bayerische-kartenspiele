@@ -1,7 +1,11 @@
 name: Deploy to GitHub Pages
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'metzger-angebote.html'
+      - 'metzger-angebote-data.json'
 
 permissions:
   contents: read
